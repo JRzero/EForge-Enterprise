@@ -55,7 +55,7 @@ fi
 : "${EFORGE_TOKEN_SECRET:?EFORGE_TOKEN_SECRET is required}"
 : "${EFORGE_DB_PASSWORD:?EFORGE_DB_PASSWORD is required}"
 
-export EFORGE_DB_URL="${EFORGE_DB_URL:-jdbc:mysql://127.0.0.1:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=UTC}"
+export EFORGE_DB_URL="${EFORGE_DB_URL:-jdbc:mysql://127.0.0.1:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}"
 export EFORGE_DB_USERNAME="${EFORGE_DB_USERNAME:-eforge}"
 export EFORGE_REDIS_HOST="${EFORGE_REDIS_HOST:-127.0.0.1}"
 export EFORGE_REDIS_PORT="${EFORGE_REDIS_PORT:-6379}"
