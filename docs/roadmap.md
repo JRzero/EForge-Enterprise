@@ -26,9 +26,9 @@
 - [x] rename Maven coordinates/application identity
 - [ ] rename Java packages in controlled steps
 - [ ] remove Vue/static frontend assumptions
-- [ ] add data-scope parity tests
-- [ ] verify MySQL initialization
-- [ ] verify Redis-backed authentication
+- [x] add data-scope parity tests
+- [x] verify MySQL initialization
+- [x] verify Redis-backed authentication
 - [x] harden Swagger/Druid/CORS/secrets defaults
 
 ## Phase 2 — Typed API and EForge web shell
