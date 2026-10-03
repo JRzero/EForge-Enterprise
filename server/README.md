@@ -30,7 +30,7 @@ export EFORGE_DB_PASSWORD='local-database-password'
 EFORGE_SERVER_PORT=8080
 EFORGE_PROFILE=/tmp/eforge/uploadPath
 
-EFORGE_DB_URL=jdbc:mysql://localhost:3306/eforge_enterprise?...
+EFORGE_DB_URL=jdbc:mysql://localhost:3306/eforge_enterprise?useSSL=false&allowPublicKeyRetrieval=true&...
 EFORGE_DB_USERNAME=eforge
 EFORGE_DB_PASSWORD=...
 
@@ -61,3 +61,10 @@ Do not expose diagnostic endpoints publicly.
 ## Upstream compatibility
 
 Java packages remain under `com.ruoyi` during the current controlled migration step. Maven module identities already use EForge names. See `UPSTREAM.md` and the architecture ADRs before changing imported security/data-scope behavior.
+
+
+### MySQL authentication note
+
+The built-in localhost development URL uses `allowPublicKeyRetrieval=true` because MySQL 8 defaults to `caching_sha2_password` while local development commonly runs without TLS.
+
+For production, set an explicit `EFORGE_DB_URL` with trusted TLS and do not rely on the localhost development URL.
