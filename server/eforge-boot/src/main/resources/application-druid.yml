@@ -4,7 +4,7 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     druid:
       master:
-        url: ${EFORGE_DB_URL:jdbc:mysql://localhost:3306/eforge_enterprise?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8}
+        url: ${EFORGE_DB_URL:jdbc:mysql://localhost:3306/eforge_enterprise?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8}
         username: ${EFORGE_DB_USERNAME:eforge}
         # Required at runtime. Do not commit a database password.
         password: ${EFORGE_DB_PASSWORD}
