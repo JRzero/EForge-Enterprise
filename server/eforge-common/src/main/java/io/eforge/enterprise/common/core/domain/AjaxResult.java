@@ -1,9 +1,9 @@
-package com.ruoyi.common.core.domain;
+package io.eforge.enterprise.common.core.domain;
 
 import java.util.HashMap;
 import java.util.Objects;
-import com.ruoyi.common.constant.HttpStatus;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.constant.HttpStatus;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 操作消息提醒

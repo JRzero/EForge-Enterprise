@@ -1,4 +1,4 @@
-package com.ruoyi.common.core.domain;
+package io.eforge.enterprise.common.core.domain;
 
 import java.util.ArrayList;
 import java.util.List;

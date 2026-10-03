@@ -1,4 +1,4 @@
-package com.ruoyi.common.constant;
+package io.eforge.enterprise.common.constant;
 
 /**
  * 任务调度通用常量

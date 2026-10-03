@@ -1,4 +1,4 @@
-package com.ruoyi.common.constant;
+package io.eforge.enterprise.common.constant;
 
 import java.util.Locale;
 import io.jsonwebtoken.Claims;
@@ -158,18 +158,18 @@ public class Constants
     /**
      * 自动识别json对象白名单配置（仅允许解析的包名，范围越小越安全）
      */
-    public static final String[] JSON_WHITELIST_STR = { "com.ruoyi" };
+    public static final String[] JSON_WHITELIST_STR = { "io.eforge.enterprise" };
 
     /**
      * 定时任务白名单配置（仅允许访问的包名，如其他需要可以自行添加）
      */
-    public static final String[] JOB_WHITELIST_STR = { "com.ruoyi.quartz.task" };
+    public static final String[] JOB_WHITELIST_STR = { "io.eforge.enterprise.quartz.task" };
 
     /**
      * 定时任务违规的字符
      */
     public static final String[] JOB_ERROR_STR = { "java.net.URL", "javax.naming.InitialContext", "org.yaml.snakeyaml",
-            "org.springframework", "org.apache", "com.ruoyi.common.utils.file", "com.ruoyi.common.config", "com.ruoyi.generator" };
+            "org.springframework", "org.apache", "io.eforge.enterprise.common.utils.file", "io.eforge.enterprise.common.config", "io.eforge.enterprise.generator" };
 
     /**
      * 部门相关常量

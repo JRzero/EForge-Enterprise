@@ -1,7 +1,7 @@
-package com.ruoyi.common.core.domain;
+package io.eforge.enterprise.common.core.domain;
 
 import java.io.Serializable;
-import com.ruoyi.common.constant.HttpStatus;
+import io.eforge.enterprise.common.constant.HttpStatus;
 
 /**
  * 响应信息主体
