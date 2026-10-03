@@ -2,55 +2,101 @@
 
 ## Purpose
 
-Define the stable boundary between backend menu/permission assignment and the EForge frontend route registry.
+Define the stable boundary between backend menu assignment and the EForge frontend route registry.
 
 ## Principle
 
-The database controls **grants and navigation metadata**.
+Navigation structure and route implementation are related but are not the same model.
 
-The React application controls **component implementation**.
+- Backend owns navigation grants, hierarchy, order, labels/icons, status, and external-link metadata.
+- Frontend owns application routes, URLs, React components, and route-level UX access metadata.
+- A backend navigation **ROUTE** node links to a frontend route through a stable `routeId`.
 
-They are connected by `routeId`.
+## Navigation node model
 
-## Response shape
+A navigation tree contains three node types:
 
-Recommended endpoint:
-
-```http
-GET /api/app/navigation
+```text
+GROUP     visual/navigation grouping; no React route required
+ROUTE     links to a registered EForge route
+EXTERNAL  opens an explicit external URL
 ```
 
-Response:
+Recommended response model:
+
+```ts
+type NavigationNode =
+  | {
+      key: string;
+      type: 'GROUP';
+      label: string;
+      order: number;
+      icon?: string;
+      children: NavigationNode[];
+    }
+  | {
+      key: string;
+      type: 'ROUTE';
+      routeId: string;
+      label: string;
+      order: number;
+      icon?: string;
+      children: NavigationNode[];
+    }
+  | {
+      key: string;
+      type: 'EXTERNAL';
+      label: string;
+      order: number;
+      icon?: string;
+      externalUrl: string;
+      children: [];
+    };
+```
+
+## Runtime source
+
+The canonical post-login API is:
+
+```http
+GET /api/v1/app/bootstrap
+```
+
+Navigation is returned as part of the same authorization snapshot as user, roles, and permissions.
+
+Example:
 
 ```json
 {
-  "data": {
-    "items": [
-      {
-        "routeId": "system",
-        "parentRouteId": null,
-        "label": "System",
-        "order": 10,
-        "visible": true,
-        "icon": "settings",
-        "externalUrl": null
-      },
-      {
-        "routeId": "system-users",
-        "parentRouteId": "system",
-        "label": "Users",
-        "order": 10,
-        "visible": true,
-        "permission": "system:user:list",
-        "icon": "users",
-        "externalUrl": null
-      }
-    ]
-  }
+  "user": {
+    "id": "1",
+    "username": "admin",
+    "displayName": "Administrator"
+  },
+  "roles": ["admin"],
+  "permissions": ["system:user:list"],
+  "navigation": [
+    {
+      "key": "system",
+      "type": "GROUP",
+      "label": "System",
+      "order": 10,
+      "children": [
+        {
+          "key": "system-users",
+          "type": "ROUTE",
+          "routeId": "system-users",
+          "label": "Users",
+          "order": 10,
+          "children": []
+        }
+      ]
+    }
+  ]
 }
 ```
 
-## Frontend registry
+## Frontend route registry
 
 ```ts
 const routes = defineAppRoutes([
@@ -64,89 +110,122 @@ const routes = defineAppRoutes([
 ]);
 ```
 
-The application intersects:
+The application resolves only ROUTE nodes:
 
 ```text
+backend NavigationNode(type=ROUTE)
+        ↓ routeId
 frontend route registry
-        ∩
-backend navigation grants
         ↓
-visible application navigation
+React page
 ```
 
-## Authentication bootstrap
+GROUP nodes do not require fake routes or placeholder React components.
 
-Recommended bootstrap sequence:
+## Stable identifiers
 
-```text
-POST /login
-   ↓
-token
-   ↓
-GET /api/app/session
-   ├─ user
-   ├─ roles
-   └─ permissions
-   ↓
-GET /api/app/navigation
-   └─ navigation grants
-   ↓
-EForgeApplication
-```
+### Navigation key
 
-The existing RuoYi `getInfo` and `getRouters` endpoints may be kept temporarily for migration, but new frontend code targets the new contracts.
+`key` identifies a navigation node across environments and database reseeding.
 
-## Route ID requirements
+Requirements:
 
-A `routeId` must be:
-
-- globally unique
-- stable across frontend refactors
-- independent of Java class names
-- independent of React file paths
-- independent of display labels
-- lowercase kebab-case by convention
+- globally unique in the navigation tree
+- lowercase kebab-case
+- independent of numeric database IDs
+- independent of labels
+- stable across visual reordering
 
 Examples:
 
 ```text
-dashboard
+system
 system-users
-system-roles
-system-departments
+monitor
 monitor-operation-logs
-tools-generator
 ```
 
-## Security
+### Route ID
 
-Navigation responses may omit inaccessible items, but that omission is not a security control.
+`routeId` exists only on ROUTE nodes.
 
-Every protected backend endpoint still requires Spring Security authorization and, where relevant, data-scope enforcement.
+Requirements:
 
-## Failure modes
+- globally unique in the frontend route registry
+- stable across file moves/refactors
+- independent of Java class names
+- independent of React file paths
+- lowercase kebab-case
 
-If backend returns a `routeId` not registered in frontend:
+A navigation key and route ID may intentionally be the same for route leaves, but they are conceptually different identifiers.
 
-- do not execute arbitrary dynamic imports
-- ignore the unknown route for navigation rendering
-- emit a development/observability warning
-- expose a validation test that compares known route IDs with seeded navigation data
+## Database migration
 
-If frontend registers a route that backend never grants:
+Do not reuse the legacy `component` field for React.
 
-- route remains hidden
-- direct access may render 403 based on permissions
+Recommended schema additions:
+
+```text
+sys_menu
++ menu_key varchar(100) unique
++ route_id varchar(100) null
+```
+
+Mapping:
+
+- directory/menu-group rows use `menu_key`, `route_id = null`
+- React route rows use both `menu_key` and `route_id`
+- external rows use `menu_key` plus existing/new external URL metadata
+- `component` remains temporarily only for upstream compatibility
+
+## Permissions
+
+The bootstrap response already contains the current permission set.
+
+The frontend route registry declares its UX access requirement:
+
+```ts
+access: {permission: 'system:user:list'}
+```
+
+The runtime must not trust a database-provided component or executable access expression.
+
+Backend endpoint authorization remains authoritative.
+
+## Validation
+
+CI/integration tests must detect:
+
+- duplicate navigation keys
+- duplicate route IDs in seeded route rows
+- ROUTE nodes with unknown frontend route IDs
+- ROUTE nodes missing route IDs
+- EXTERNAL nodes missing URLs
+- invalid parent/tree cycles
+- seeded route permissions inconsistent with expected backend endpoints
+
+## Unknown route IDs
+
+If backend bootstrap returns an unregistered `routeId`:
+
+- never dynamically import arbitrary code
+- omit the node from rendered navigation
+- emit a diagnostic warning
+- fail the route-contract validation test for framework seed data
 
 ## External links
 
-External URLs are allowed only through explicit metadata:
+External URLs are explicit:
 
 ```json
 {
-  "routeId": "external-docs",
-  "externalUrl": "https://example.com/docs"
+  "key": "external-docs",
+  "type": "EXTERNAL",
+  "label": "Documentation",
+  "order": 100,
+  "externalUrl": "https://example.com/docs",
+  "children": []
 }
 ```
 
-Do not overload route paths or component fields with URLs.
+Do not overload application route paths or component fields with external URLs.
