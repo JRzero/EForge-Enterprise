@@ -1,4 +1,4 @@
-package com.ruoyi.common.filter;
+package io.eforge.enterprise.common.filter;
 
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 

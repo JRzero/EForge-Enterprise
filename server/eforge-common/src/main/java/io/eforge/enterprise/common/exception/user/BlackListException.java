@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception.user;
+package io.eforge.enterprise.common.exception.user;
 
 /**
  * 黑名单IP异常类

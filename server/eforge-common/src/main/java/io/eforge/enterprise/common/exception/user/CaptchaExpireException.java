@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception.user;
+package io.eforge.enterprise.common.exception.user;
 
 /**
  * 验证码失效异常类

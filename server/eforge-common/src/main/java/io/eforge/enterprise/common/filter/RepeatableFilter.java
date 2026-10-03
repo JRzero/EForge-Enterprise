@@ -1,4 +1,4 @@
-package com.ruoyi.common.filter;
+package io.eforge.enterprise.common.filter;
 
 import java.io.IOException;
 import jakarta.servlet.Filter;
@@ -9,7 +9,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * Repeatable 过滤器

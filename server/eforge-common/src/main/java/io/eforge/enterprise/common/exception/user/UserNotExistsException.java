@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception.user;
+package io.eforge.enterprise.common.exception.user;
 
 /**
  * 用户不存在异常类

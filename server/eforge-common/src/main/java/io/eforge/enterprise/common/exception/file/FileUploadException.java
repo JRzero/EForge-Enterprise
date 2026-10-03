@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception.file;
+package io.eforge.enterprise.common.exception.file;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;

@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception.user;
+package io.eforge.enterprise.common.exception.user;
 
 /**
  * 用户错误最大次数异常类
