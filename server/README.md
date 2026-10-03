@@ -60,7 +60,7 @@ Do not expose diagnostic endpoints publicly.
 
 ## Upstream compatibility
 
-Java packages remain under `com.ruoyi` during the current controlled migration step. Maven module identities already use EForge names. See `UPSTREAM.md` and the architecture ADRs before changing imported security/data-scope behavior.
+Java packages remain under `io.eforge.enterprise` during the current controlled migration step. Maven module identities already use EForge names. See `UPSTREAM.md` and the architecture ADRs before changing imported security/data-scope behavior.
 
 
 ### MySQL authentication note

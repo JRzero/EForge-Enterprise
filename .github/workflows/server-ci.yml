@@ -2,7 +2,7 @@ name: server-ci
 
 on:
   push:
-    branches: [main, 'feat/**', 'fix/**']
+    branches: [main, 'feat/**', 'fix/**', 'refactor/**']
     paths:
       - 'server/**'
       - 'sql/**'
