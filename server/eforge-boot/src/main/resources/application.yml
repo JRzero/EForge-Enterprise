@@ -85,8 +85,8 @@ springdoc:
   group-configs:
     - group: 'default'
       display-name: 'EForge Enterprise API'
-      paths-to-match: '/**'
-      packages-to-scan: io.eforge.enterprise.web.controller
+      paths-to-match: '/api/v1/**'
+      packages-to-scan: io.eforge.enterprise.web.api.v1
 
 eforge:
   cors:

@@ -24,8 +24,8 @@
 - [x] move backend under `server/`
 - [x] rename `ruoyi-admin` to `eforge-boot`
 - [x] rename Maven coordinates/application identity
-- [ ] rename Java packages in controlled steps
-- [ ] remove Vue/static frontend assumptions
+- [x] rename Java packages in controlled steps
+- [x] remove Vue/static frontend assumptions from the canonical API/navigation path
 - [x] add data-scope parity tests
 - [x] verify MySQL initialization
 - [x] verify Redis-backed authentication
@@ -36,8 +36,8 @@
 - [ ] establish reproducible EForge package consumption
 - [ ] initialize React application
 - [ ] consume pinned/versioned EForge packages
-- [ ] add `/api/v1/auth/login`
-- [ ] add `/api/v1/app/bootstrap`
+- [x] add `/api/v1/auth/login`
+- [x] add `/api/v1/app/bootstrap`
 - [ ] generate TypeScript client from OpenAPI
 - [ ] login/logout/session integration
 - [ ] route registry + backend navigation projection

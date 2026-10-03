@@ -2,6 +2,8 @@ package io.eforge.enterprise.framework.security.handle;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -28,6 +30,22 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, S
             throws IOException
     {
         int code = HttpStatus.UNAUTHORIZED;
+        if (request.getRequestURI().startsWith("/api/v1/"))
+        {
+            Map<String, Object> problem = new LinkedHashMap<>();
+            problem.put("type", "https://eforge.dev/problems/authentication-required");
+            problem.put("title", "Authentication required");
+            problem.put("status", code);
+            problem.put("detail", "Authentication is required to access this resource.");
+            problem.put("instance", request.getRequestURI());
+            problem.put("code", "AUTHENTICATION_REQUIRED");
+            response.setStatus(code);
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/problem+json");
+            response.getWriter().write(JSON.toJSONString(problem));
+            return;
+        }
+
         String msg = StringUtils.format("请求访问：{}，认证失败，无法访问系统资源", request.getRequestURI());
         ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.error(code, msg)));
     }

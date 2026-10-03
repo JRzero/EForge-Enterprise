@@ -19,7 +19,13 @@ public class SysMenu extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 菜单ID */
-    private Long menuId;
+    private Long menuId;    /** EForge stable navigation key. */
+    private String menuKey;
+
+    /** EForge stable frontend route id for canonical route nodes. */
+    private String routeId;
+
+
 
     /** 菜单名称 */
     private String menuName;
@@ -77,7 +83,29 @@ public class SysMenu extends BaseEntity
     public void setMenuId(Long menuId)
     {
         this.menuId = menuId;
+    }    @Size(min = 0, max = 100, message = "菜单标识长度不能超过100个字符")
+    public String getMenuKey()
+    {
+        return menuKey;
     }
+
+    public void setMenuKey(String menuKey)
+    {
+        this.menuKey = menuKey;
+    }
+
+    @Size(min = 0, max = 100, message = "路由标识长度不能超过100个字符")
+    public String getRouteId()
+    {
+        return routeId;
+    }
+
+    public void setRouteId(String routeId)
+    {
+        this.routeId = routeId;
+    }
+
+
 
     @NotBlank(message = "菜单名称不能为空")
     @Size(min = 0, max = 50, message = "菜单名称长度不能超过50个字符")
@@ -250,6 +278,8 @@ public class SysMenu extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("menuId", getMenuId())
+            .append("menuKey", getMenuKey())
+            .append("routeId", getRouteId())
             .append("menuName", getMenuName())
             .append("parentId", getParentId())
             .append("orderNum", getOrderNum())

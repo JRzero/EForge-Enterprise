@@ -29,6 +29,7 @@ mysql_root -e "SELECT 1" >/dev/null
 echo "Initializing MySQL schema..."
 mysql_root "$MYSQL_DATABASE" < "$ROOT/sql/upstream/ry_20260417.sql"
 mysql_root "$MYSQL_DATABASE" < "$ROOT/sql/upstream/quartz.sql"
+mysql_root "$MYSQL_DATABASE" < "$ROOT/sql/migrations/001_navigation_contract.sql"
 mysql_root "$MYSQL_DATABASE" -e   "UPDATE sys_config SET config_value='false' WHERE config_key='sys.account.captchaEnabled';"
 
 TABLE_COUNT="$(mysql_root -N -s -e   "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${MYSQL_DATABASE}';")"
@@ -129,6 +130,52 @@ user = payload.get('user') or {}
 assert user.get('userName') == 'admin', payload
 permissions = payload.get('permissions') or []
 assert permissions, payload
+PY
+
+echo "Validating canonical /api/v1 authentication contract..."
+BAD_LOGIN_STATUS="$(curl -sS -o /tmp/eforge-v1-bad-login.json -w '%{http_code}'   -H 'Content-Type: application/json'   -H 'User-Agent: EForge-Enterprise-CI'   -X POST "$BASE_URL/api/v1/auth/login"   --data '{"username":"admin","password":"wrong-password","code":"","uuid":""}')"
+[[ "$BAD_LOGIN_STATUS" == "401" ]]
+python3 - <<'PY'
+import json
+with open('/tmp/eforge-v1-bad-login.json', encoding='utf-8') as f:
+    payload = json.load(f)
+assert payload.get('status') == 401, payload
+assert payload.get('code') == 'AUTHENTICATION_FAILED', payload
+assert 'stackTrace' not in payload, payload
+PY
+
+V1_LOGIN_RESPONSE="$(curl -fsS   -H 'Content-Type: application/json'   -H 'User-Agent: EForge-Enterprise-CI'   -X POST "$BASE_URL/api/v1/auth/login"   --data '{"username":"admin","password":"admin123","code":"","uuid":""}')"
+printf '%s' "$V1_LOGIN_RESPONSE" >/tmp/eforge-v1-login.json
+
+V1_TOKEN="$(python3 - <<'PY'
+import json
+with open('/tmp/eforge-v1-login.json', encoding='utf-8') as f:
+    payload = json.load(f)
+assert payload.get('tokenType') == 'Bearer', payload
+token = payload.get('accessToken')
+assert isinstance(token, str) and token, payload
+print(token)
+PY
+)"
+
+BOOTSTRAP_RESPONSE="$(curl -fsS   -H "Authorization: Bearer $V1_TOKEN"   -H 'User-Agent: EForge-Enterprise-CI'   "$BASE_URL/api/v1/app/bootstrap")"
+printf '%s' "$BOOTSTRAP_RESPONSE" >/tmp/eforge-v1-bootstrap.json
+
+python3 - <<'PY'
+import json
+with open('/tmp/eforge-v1-bootstrap.json', encoding='utf-8') as f:
+    payload = json.load(f)
+user = payload.get('user') or {}
+assert user.get('username') == 'admin', payload
+assert str(user.get('id')) == '1', payload
+assert payload.get('roles'), payload
+assert payload.get('permissions'), payload
+navigation = payload.get('navigation') or []
+serialized = json.dumps(navigation)
+assert '"routeId": "system-users"' in serialized, payload
+assert '"component"' not in serialized, payload
+assert '"type": "GROUP"' in serialized, payload
+assert '"type": "ROUTE"' in serialized, payload
 PY
 
 SESSION_KEYS="$(redis_cli --scan --pattern 'login_tokens:*' | sed '/^$/d' | wc -l | tr -d ' ')"

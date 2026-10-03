@@ -66,6 +66,7 @@ public class SecurityConfig
                 permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
 
                 requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                     // Preserve upstream public uploaded-resource behavior.
                     .requestMatchers(HttpMethod.GET, "/profile/**").permitAll()
                     // OpenAPI/Swagger/Druid are authenticated whenever enabled.
