@@ -1,0 +1,89 @@
+name: migrate-server-java-package
+
+on:
+  push:
+    branches: ['feat/server-java-package']
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Move Java package tree and rewrite package references
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+
+          server = Path('server')
+
+          for source_root in list(server.glob('*/src/*/java')):
+              old = source_root / 'com' / 'ruoyi'
+              if not old.exists():
+                  continue
+              new = source_root / 'io' / 'eforge' / 'enterprise'
+              new.parent.mkdir(parents=True, exist_ok=True)
+              if new.exists():
+                  raise SystemExit(f'target package path already exists: {new}')
+              shutil.move(str(old), str(new))
+
+              com_dir = source_root / 'com'
+              try:
+                  com_dir.rmdir()
+              except OSError:
+                  pass
+
+          for path in server.rglob('*'):
+              if not path.is_file():
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              updated = text.replace('com.ruoyi', 'io.eforge.enterprise')
+              updated = updated.replace('com/ruoyi', 'io/eforge/enterprise')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+
+          upstream = server / 'UPSTREAM.md'
+          text = upstream.read_text(encoding='utf-8')
+          if 'Java package migration' not in text:
+              text += """
+
+          ## Java package migration
+
+          Java source packages and textual package references were migrated from:
+
+          - com.ruoyi
+          - to io.eforge.enterprise
+
+          This migration does not yet rename RuoYi-prefixed Java class names or ruoyi.* configuration keys. Those identity changes remain a separate step.
+          """
+              upstream.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Verify Java package migration
+        run: mvn -B -ntp -f server/pom.xml verify
+
+      - name: Commit verified package migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server
+          if git diff --cached --quiet; then
+            echo "No package migration changes to commit."
+          else
+            git commit -m "refactor: migrate Java packages to io.eforge.enterprise [skip ci]"
+            git push
+          fi
