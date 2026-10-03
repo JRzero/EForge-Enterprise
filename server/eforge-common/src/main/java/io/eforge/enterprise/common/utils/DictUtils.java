@@ -1,14 +1,14 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.alibaba.fastjson2.JSONArray;
-import com.ruoyi.common.constant.CacheConstants;
-import com.ruoyi.common.core.domain.entity.SysDictData;
-import com.ruoyi.common.core.redis.RedisCache;
-import com.ruoyi.common.utils.spring.SpringUtils;
+import io.eforge.enterprise.common.constant.CacheConstants;
+import io.eforge.enterprise.common.core.domain.entity.SysDictData;
+import io.eforge.enterprise.common.core.redis.RedisCache;
+import io.eforge.enterprise.common.utils.spring.SpringUtils;
 
 /**
  * 字典工具类

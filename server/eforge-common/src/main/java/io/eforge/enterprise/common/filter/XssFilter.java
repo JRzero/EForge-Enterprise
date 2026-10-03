@@ -1,4 +1,4 @@
-package com.ruoyi.common.filter;
+package io.eforge.enterprise.common.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,8 +11,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.enums.HttpMethod;
+import io.eforge.enterprise.common.utils.StringUtils;
+import io.eforge.enterprise.common.enums.HttpMethod;
 
 /**
  * 防止XSS攻击的过滤器

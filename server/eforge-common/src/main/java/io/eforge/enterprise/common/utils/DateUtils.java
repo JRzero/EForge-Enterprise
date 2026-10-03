@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import java.lang.management.ManagementFactory;
 import java.text.ParseException;

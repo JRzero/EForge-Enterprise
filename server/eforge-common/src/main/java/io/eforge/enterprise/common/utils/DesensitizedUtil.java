@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 /**
  * 脱敏工具类

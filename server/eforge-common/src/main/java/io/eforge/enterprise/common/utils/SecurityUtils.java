@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,11 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.PatternMatchUtils;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.constant.HttpStatus;
-import com.ruoyi.common.core.domain.entity.SysRole;
-import com.ruoyi.common.core.domain.model.LoginUser;
-import com.ruoyi.common.exception.ServiceException;
+import io.eforge.enterprise.common.constant.Constants;
+import io.eforge.enterprise.common.constant.HttpStatus;
+import io.eforge.enterprise.common.core.domain.entity.SysRole;
+import io.eforge.enterprise.common.core.domain.model.LoginUser;
+import io.eforge.enterprise.common.exception.ServiceException;
 
 /**
  * 安全服务工具类

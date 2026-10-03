@@ -1,4 +1,4 @@
-package com.ruoyi.common.filter;
+package io.eforge.enterprise.common.filter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.html.EscapeUtil;
+import io.eforge.enterprise.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.html.EscapeUtil;
 
 /**
  * XSS过滤处理

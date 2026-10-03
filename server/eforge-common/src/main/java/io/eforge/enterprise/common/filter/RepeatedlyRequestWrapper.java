@@ -1,4 +1,4 @@
-package com.ruoyi.common.filter;
+package io.eforge.enterprise.common.filter;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -9,8 +9,8 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
-import com.ruoyi.common.utils.http.HttpHelper;
-import com.ruoyi.common.constant.Constants;
+import io.eforge.enterprise.common.utils.http.HttpHelper;
+import io.eforge.enterprise.common.constant.Constants;
 
 /**
  * 构建可重复读取inputStream的request

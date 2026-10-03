@@ -1,9 +1,9 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import com.github.pagehelper.PageHelper;
-import com.ruoyi.common.core.page.PageDomain;
-import com.ruoyi.common.core.page.TableSupport;
-import com.ruoyi.common.utils.sql.SqlUtil;
+import io.eforge.enterprise.common.core.page.PageDomain;
+import io.eforge.enterprise.common.core.page.TableSupport;
+import io.eforge.enterprise.common.utils.sql.SqlUtil;
 
 /**
  * 分页工具类

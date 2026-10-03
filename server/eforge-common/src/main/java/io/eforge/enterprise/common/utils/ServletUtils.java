@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -14,8 +14,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.core.text.Convert;
+import io.eforge.enterprise.common.constant.Constants;
+import io.eforge.enterprise.common.core.text.Convert;
 
 /**
  * 客户端工具类
