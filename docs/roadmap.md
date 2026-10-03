@@ -18,12 +18,12 @@
 
 ## Phase 1 — Server foundation import
 
-- [ ] import pinned RuoYi Spring Boot 3 backend baseline
-- [ ] preserve upstream MIT license/notice
-- [ ] establish unchanged Maven green baseline
-- [ ] move backend under `server/`
-- [ ] rename `ruoyi-admin` to `eforge-boot`
-- [ ] rename Maven coordinates/application identity
+- [x] import pinned RuoYi Spring Boot 3 backend baseline
+- [x] preserve upstream MIT license/notice
+- [x] establish unchanged Maven green baseline
+- [x] move backend under `server/`
+- [x] rename `ruoyi-admin` to `eforge-boot`
+- [x] rename Maven coordinates/application identity
 - [ ] rename Java packages in controlled steps
 - [ ] remove Vue/static frontend assumptions
 - [ ] add data-scope parity tests
