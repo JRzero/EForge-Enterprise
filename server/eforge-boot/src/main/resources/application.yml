@@ -24,7 +24,7 @@ server:
 
 logging:
   level:
-    com.ruoyi: ${EFORGE_LOG_LEVEL:info}
+    io.eforge.enterprise: ${EFORGE_LOG_LEVEL:info}
     org.springframework: warn
 
 user:
@@ -65,7 +65,7 @@ token:
   expireTime: ${EFORGE_TOKEN_EXPIRE_MINUTES:30}
 
 mybatis:
-  typeAliasesPackage: com.ruoyi.**.domain
+  typeAliasesPackage: io.eforge.enterprise.**.domain
   mapperLocations: classpath*:mapper/**/*Mapper.xml
   configLocation: classpath:mybatis/mybatis-config.xml
 
@@ -86,7 +86,7 @@ springdoc:
     - group: 'default'
       display-name: 'EForge Enterprise API'
       paths-to-match: '/**'
-      packages-to-scan: com.ruoyi.web.controller
+      packages-to-scan: io.eforge.enterprise.web.controller
 
 eforge:
   cors:

@@ -22,4 +22,4 @@ After the green upstream baseline was established, Maven/module identities were 
 
 Maven groupId is now io.eforge.enterprise and the framework version starts at 0.1.0-SNAPSHOT.
 
-Java package names intentionally remain com.ruoyi at this stage and will be migrated separately.
+Java package names intentionally remain io.eforge.enterprise at this stage and will be migrated separately.
