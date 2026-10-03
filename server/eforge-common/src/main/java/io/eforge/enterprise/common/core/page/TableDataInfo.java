@@ -1,4 +1,4 @@
-package com.ruoyi.common.core.page;
+package io.eforge.enterprise.common.core.page;
 
 import java.io.Serializable;
 import java.util.List;

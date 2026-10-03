@@ -1,6 +1,6 @@
-package com.ruoyi.common.core.page;
+package io.eforge.enterprise.common.core.page;
 
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 分页数据

@@ -1,7 +1,7 @@
-package com.ruoyi.common.core.domain.model;
+package io.eforge.enterprise.common.core.domain.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.ruoyi.common.core.domain.entity.SysUser;
+import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;

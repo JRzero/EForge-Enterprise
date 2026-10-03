@@ -1,4 +1,4 @@
-package com.ruoyi.common.core.redis;
+package io.eforge.enterprise.common.core.redis;
 
 import java.util.Collection;
 import java.util.Iterator;

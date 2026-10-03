@@ -1,7 +1,7 @@
-package com.ruoyi.common.core.page;
+package io.eforge.enterprise.common.core.page;
 
-import com.ruoyi.common.core.text.Convert;
-import com.ruoyi.common.utils.ServletUtils;
+import io.eforge.enterprise.common.core.text.Convert;
+import io.eforge.enterprise.common.utils.ServletUtils;
 
 /**
  * 表格数据处理

@@ -1,8 +1,8 @@
-package com.ruoyi.common.core.text;
+package io.eforge.enterprise.common.core.text;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 字符集工具类

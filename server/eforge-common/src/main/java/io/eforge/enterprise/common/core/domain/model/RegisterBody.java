@@ -1,4 +1,4 @@
-package com.ruoyi.common.core.domain.model;
+package io.eforge.enterprise.common.core.domain.model;
 
 /**
  * 用户注册对象

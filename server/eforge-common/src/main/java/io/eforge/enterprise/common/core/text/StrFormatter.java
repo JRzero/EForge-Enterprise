@@ -1,6 +1,6 @@
-package com.ruoyi.common.core.text;
+package io.eforge.enterprise.common.core.text;
 
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 字符串格式化

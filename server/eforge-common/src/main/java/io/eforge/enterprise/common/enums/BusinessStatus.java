@@ -1,4 +1,4 @@
-package com.ruoyi.common.enums;
+package io.eforge.enterprise.common.enums;
 
 /**
  * 操作状态
