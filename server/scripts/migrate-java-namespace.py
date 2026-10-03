@@ -108,6 +108,8 @@ remaining_paths = []
 for path in ROOT.rglob("*"):
     if not path.is_file():
         continue
+    if path.resolve() == Path(__file__).resolve():
+        continue
     if any(part in SKIP_PARTS for part in path.parts):
         continue
 
