@@ -5,18 +5,20 @@ EForge Enterprise is a full-stack enterprise application framework built on:
 - **EForge** for the React frontend foundation.
 - **RuoYi-derived backend capabilities** for the enterprise server foundation.
 - **Spring Boot + MyBatis + Redis + MySQL** for backend infrastructure.
-- **OpenAPI** as the front/back contract boundary.
+- **OpenAPI** as the typed frontend/backend contract boundary.
 
 ## Current status
 
-Architecture design v0.1 is in progress. Implementation has not started yet.
+Architecture design v0.1 has completed its first architecture review. Server implementation has not started yet.
 
 Key documents:
 
 - [Architecture](ARCHITECTURE.md)
+- [Architecture review](docs/architecture-review-v0.1.md)
 - [Roadmap](docs/roadmap.md)
 - [Backend migration map](docs/backend-migration-map.md)
 - [API contract](contracts/api-contract.md)
+- [Application bootstrap contract](contracts/bootstrap-contract.md)
 - [Navigation contract](contracts/navigation-contract.md)
 - [Architecture decisions](docs/adr/)
 
@@ -33,11 +35,17 @@ Business Application
         ↓
 EForge frontend foundation
         ↓
-Integration contracts
+Generated OpenAPI client
         ↓
-RuoYi-derived Spring Boot backend
+EForge Enterprise /api/v1
+        ↓
+Spring Security + application services
+        ↓
+MyBatis / data scope
         ↓
 MySQL / Redis / Object Storage
 ```
+
+The server is intentionally a **modular monolith** for the initial framework.
 
 Read `AGENTS.md` before implementation work.
