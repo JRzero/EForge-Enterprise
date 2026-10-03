@@ -2,30 +2,50 @@
 
 ## Goals
 
-- make frontend contracts explicit
-- keep RuoYi compatibility details isolated
-- generate TypeScript types from OpenAPI
-- support consistent error and paging behavior
+- make the frontend/backend boundary explicit
+- generate TypeScript clients from OpenAPI
+- isolate RuoYi compatibility objects
+- use HTTP semantics for new APIs
+- provide predictable paging and error behavior
 
-## Application success response
+## Canonical API namespace
 
-Preferred long-term HTTP/API design uses HTTP status codes plus typed bodies.
+New framework APIs use:
 
-For migration compatibility, a server adapter may still translate legacy RuoYi `code/msg/data`.
+```text
+/api/v1/**
+```
 
-Frontend-facing conceptual type:
+Legacy RuoYi endpoints may remain temporarily during migration but are not the target contract for new React features.
 
-```ts
-interface ApiResult<T> {
-  data: T;
-  message?: string;
+## Resource responses
+
+New resource endpoints return concrete DTOs rather than a generic success envelope.
+
+Example:
+
+```http
+GET /api/v1/system/users/1
+200 OK
+Content-Type: application/json
+```
+
+```json
+{
+  "id": "1",
+  "username": "admin",
+  "displayName": "Administrator"
 }
 ```
 
+Create/update/delete endpoints should use standard HTTP statuses where practical.
+
 ## Page response
 
+Paged endpoints return:
+
 ```ts
-interface PageResult<T> {
+interface PageResponse<T> {
   items: T[];
   total: number;
   page: number;
@@ -33,7 +53,18 @@ interface PageResult<T> {
 }
 ```
 
-Legacy mapping:
+Example:
+
+```json
+{
+  "items": [],
+  "total": 0,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+During migration:
 
 ```text
 TableDataInfo.rows  → items
@@ -44,28 +75,77 @@ request.pageSize    → pageSize
 
 ## Error model
 
-Recommended normalized error fields:
+Use Spring `ProblemDetail` / RFC 7807 for canonical `/api/v1` errors.
+
+Example:
+
+```http
+400 Bad Request
+Content-Type: application/problem+json
+```
 
 ```json
 {
+  "type": "https://eforge.dev/problems/validation",
+  "title": "Validation failed",
+  "status": 400,
+  "detail": "One or more request fields are invalid.",
+  "instance": "/api/v1/system/users",
   "code": "VALIDATION_ERROR",
-  "message": "Request validation failed",
   "traceId": "..."
 }
 ```
 
-Do not expose stack traces or internal exception class names in production responses.
+Production responses must not expose stack traces, SQL, secrets, or internal exception class names.
+
+## Legacy compatibility
+
+RuoYi types are migration-only:
+
+```text
+AjaxResult
+TableDataInfo
+```
+
+Rules:
+
+- legacy controllers may continue returning them during Phase 1
+- new `/api/v1` controllers do not
+- React features target `/api/v1` when an equivalent endpoint exists
+- compatibility adapters are deleted after migration coverage is complete
 
 ## OpenAPI rules
 
-- every public controller endpoint must appear in OpenAPI unless intentionally internal
-- request and response DTOs should be concrete classes where generation quality benefits
+- `/api/v1` is the canonical OpenAPI surface
+- public request/response bodies use concrete DTO classes
 - generated TypeScript code lives under `web/generated/`
-- generated files are not manually edited
-- application adapters may wrap generated clients for pagination/auth/query convenience
+- generated files are never manually edited
+- application/query adapters may wrap generated clients
+- internal/operational endpoints must be explicitly separated from public app APIs
 
 ## Authentication
 
+Canonical application startup:
+
+```text
+POST /api/v1/auth/login
+        ↓
+token
+        ↓
+GET /api/v1/app/bootstrap
+        ↓
+user + roles + permissions + navigation
+```
+
 Generated clients do not own token persistence.
 
-EForge integration config supplies the authorization header/token through the shared HTTP/auth layer.
+The web integration layer supplies the authorization header from EForge auth state.
+
+## Contract compatibility
+
+Breaking changes to `/api/v1` require either:
+
+- an additive backward-compatible migration, or
+- a new versioned endpoint/namespace
+
+Do not silently change generated-client contracts.
