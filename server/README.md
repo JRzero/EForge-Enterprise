@@ -68,3 +68,41 @@ Java packages remain under `com.ruoyi` during the current controlled migration s
 The built-in localhost development URL uses `allowPublicKeyRetrieval=true` because MySQL 8 defaults to `caching_sha2_password` while local development commonly runs without TLS.
 
 For production, set an explicit `EFORGE_DB_URL` with trusted TLS and do not rely on the localhost development URL.
+
+
+## Runtime integration verification
+
+CI starts real MySQL 8.4 and Redis 7.4 service containers, imports the upstream schema, launches the packaged Spring Boot application, then verifies:
+
+- schema initialization
+- server startup
+- login with the seeded administrator account
+- authenticated `/getInfo`
+- Redis-backed `login_tokens:*` session creation
+
+The same verification script is:
+
+```bash
+bash server/scripts/verify-runtime-integration.sh
+```
+
+It expects MySQL and Redis to already be available and the server jar to have been packaged.
+
+## Data-scope parity
+
+`eforge-framework` contains security-sensitive parity tests for the imported data-scope engine.
+
+Current locked behaviors include:
+
+- all data
+- custom department mapping
+- multiple custom roles
+- current department
+- department and descendants
+- current user only
+- fail-closed behavior without a user alias
+- permission mismatch
+- disabled roles
+- mixed-role OR composition
+
+Do not redesign data scope until these tests protect the current semantics.
