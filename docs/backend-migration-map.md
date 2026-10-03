@@ -1,59 +1,72 @@
 # Backend Migration Map
 
-This document maps the RuoYi backend modules into EForge Enterprise.
+This document maps the RuoYi backend into EForge Enterprise.
 
-## Upstream baseline
+## Pinned upstream baseline
 
 - Repository: `yangzongzhuan/RuoYi-Vue`
 - Version: 3.9.2
-- Reference branch: `springboot3`
+- Branch: `springboot3`
+- Commit: `a51a838b71b446ea27256900efe7ed2faa2a02fd`
 - Java: 17
 - Spring Boot: 3.5.x
 
-Pin the exact upstream commit when Phase 1 import begins.
+The import must use the pinned commit, not a floating branch head.
 
 ## Module mapping
 
+The server remains a modular monolith.
+
 | RuoYi module | EForge Enterprise target | Initial action |
 | --- | --- | --- |
-| `ruoyi-admin` | `server/eforge-admin` | import and rename |
+| `ruoyi-admin` | `server/eforge-boot` | import as executable/web entry module |
 | `ruoyi-framework` | `server/eforge-framework` | import and rename |
 | `ruoyi-system` | `server/eforge-system` | import and rename |
 | `ruoyi-common` | `server/eforge-common` | import and rename |
-| `ruoyi-generator` | `server/eforge-generator` | import, then replace frontend templates |
-| `ruoyi-quartz` | `server/eforge-quartz` | import, keep optional |
+| `ruoyi-generator` | `server/eforge-generator` | import as optional module, later replace frontend templates |
+| `ruoyi-quartz` | `server/eforge-quartz` | import as optional module |
+
+Do not split user/role/dept/menu/dict into separate Maven modules in the framework baseline.
 
 ## Capability classification
 
-### Keep with minimal semantic change
+### Preserve first
 
-- Spring Security configuration
-- JWT/token parsing
-- Redis login state
+- Spring Security method authorization
+- JWT/Redis login-state semantics
 - user/role/dept/post persistence
 - permission evaluation
-- data scope
-- dictionary/configuration
+- dictionaries/configuration
 - operation/login logs
-- common validation utilities
-- PageHelper/MyBatis persistence foundations
-- Quartz scheduling
+- PageHelper/MyBatis foundations
+- Quartz behavior when the optional module is enabled
 
-### Keep but wrap behind new contracts
+### Preserve but treat as security-critical migration code
+
+- data-scope behavior
+- token/session implementation
+- authentication filters
+- security exception handling
+
+These require parity/integration tests before redesign.
+
+### Keep only behind compatibility boundaries
 
 - `AjaxResult`
 - `TableDataInfo`
-- login/getInfo transport
-- menu assignment responses
-- file upload/download responses
+- legacy `/login`
+- legacy `getInfo`
+- legacy `getRouters`
+- legacy upload/download response shapes
 
 ### Replace
 
-- `getRouters()` Vue Router payload contract
-- `RouterVo.component` dynamic component path semantics
+- Vue Router payload generation
+- `RouterVo.component` dynamic component-path semantics
 - Vue frontend generator templates
 - Vue frontend source
-- frontend branding links such as RuoYi website menu entries
+- framework branding and demo links
+- anonymous production exposure of Swagger/Druid operational consoles
 
 ## Package naming
 
@@ -63,10 +76,10 @@ Target root package:
 io.eforge.enterprise
 ```
 
-Recommended server packages:
+Recommended packages:
 
 ```text
-io.eforge.enterprise.admin
+io.eforge.enterprise.boot
 io.eforge.enterprise.framework
 io.eforge.enterprise.system
 io.eforge.enterprise.common
@@ -74,40 +87,54 @@ io.eforge.enterprise.generator
 io.eforge.enterprise.quartz
 ```
 
-Do not perform a blind global rename before the imported baseline compiles. Import first, establish a green baseline, then rename in controlled commits.
+Do not perform a blind global rename before the imported baseline compiles.
 
 ## Database strategy
 
-Phase 1 should preserve the RuoYi schema wherever possible to reduce migration risk.
+Preserve the RuoYi schema initially to reduce migration risk.
 
-Intentional schema change:
+Intentional menu additions:
 
 ```text
 sys_menu
-+ route_id varchar(100)
++ menu_key varchar(100) unique
++ route_id varchar(100) null
 ```
 
-During migration:
+Meaning:
 
-- `component` remains for upstream compatibility.
-- React code never depends on `component`.
-- new EForge navigation uses `route_id`.
-- existing `perms`, `visible`, `status`, `parent_id`, and `order_num` remain useful.
+- `menu_key` is a stable environment-independent navigation identity
+- `route_id` exists only for rows that map to a React route
+- `component` remains temporarily for upstream compatibility
+- new React code never consumes `component`
+- existing `perms`, `visible`, `status`, `parent_id`, and `order_num` remain useful
 
-Later, once Vue compatibility is no longer required, obsolete route/component fields can be reevaluated in a separate migration.
+Do not drop legacy columns in the first migration.
+
+## Security migration rules
+
+Before production readiness:
+
+- protect/disable Swagger UI in production
+- protect/disable Druid console in production
+- use explicit CORS origin configuration
+- externalize token/database/Redis secrets
+- add data-scope parity tests
+- prevent stack traces/internal exception details in API responses
 
 ## Import sequence
 
-1. Copy backend-only modules from the pinned upstream commit.
-2. Preserve upstream LICENSE.
-3. Verify unmodified backend Maven build.
-4. Move into `server/`.
-5. Rename Maven coordinates.
-6. Rename Java package/application identity.
-7. Add EForge-specific integration API.
-8. Add `route_id` migration.
-9. Replace `getRouters` with the EForge navigation contract.
-10. Harden OpenAPI.
-11. Only then modify generator output.
+1. Import backend-only modules from the pinned upstream commit.
+2. Copy upstream MIT license/attribution.
+3. Verify the unmodified Spring Boot 3 backend Maven build.
+4. Move modules under `server/`.
+5. Rename `ruoyi-admin` to `eforge-boot` and Maven coordinates.
+6. Rename Java package/application identity in controlled commits.
+7. Re-run compile/tests after each rename stage.
+8. Add typed `/api/v1` infrastructure.
+9. Add `menu_key` / `route_id` migration.
+10. Add `/api/v1/app/bootstrap`.
+11. Harden OpenAPI/security defaults.
+12. Only after server parity, modify generator output.
 
-Each step should leave the branch buildable.
+Every step must leave the branch buildable.
