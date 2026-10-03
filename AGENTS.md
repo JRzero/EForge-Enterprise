@@ -18,7 +18,7 @@ This repository is the full-stack enterprise framework built from EForge fronten
 12. Use `menu_key` as a stable navigation identity and `route_id` only for actual frontend routes.
 13. Keep RuoYi compatibility objects behind migration boundaries.
 14. Preserve RuoYi MIT attribution for derived backend source.
-15. Do not rewrite data-scope behavior during initial import; add parity tests first.
+15. Do not rewrite data-scope behavior without keeping `DataScopeAspectParityTest` green; any semantic change requires an explicit security review.
 16. Production defaults must not expose Swagger/Druid/monitoring consoles anonymously.
 17. Do not introduce multi-tenancy, microservices, workflow, MQ, or low-code infrastructure without demonstrated product requirements.
 18. Business/domain abstractions stay local until repeated use proves they belong in the framework.
@@ -48,6 +48,8 @@ Before completion of implementation changes:
 
 - backend Maven compile/tests pass
 - security-sensitive changes include targeted tests
+- data-scope changes keep all parity cases green
+- runtime integration verifies MySQL schema initialization, login, `/getInfo`, and Redis-backed session state
 - frontend lint/typecheck/test/build pass
 - relevant integration/E2E tests pass
 - seeded navigation-to-route contracts validate
