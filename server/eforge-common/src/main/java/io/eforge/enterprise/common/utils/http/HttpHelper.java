@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.http;
+package io.eforge.enterprise.common.utils.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;

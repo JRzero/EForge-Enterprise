@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.file;
+package io.eforge.enterprise.common.utils.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -9,9 +9,9 @@ import java.util.Arrays;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.config.RuoYiConfig;
+import io.eforge.enterprise.common.constant.Constants;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 图片处理工具类

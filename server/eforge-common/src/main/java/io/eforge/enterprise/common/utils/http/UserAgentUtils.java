@@ -1,8 +1,8 @@
-package com.ruoyi.common.utils.http;
+package io.eforge.enterprise.common.utils.http;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 import nl.basjes.parse.useragent.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
 

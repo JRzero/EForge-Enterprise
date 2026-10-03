@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.bean;
+package io.eforge.enterprise.common.utils.bean;
 
 import java.util.Set;
 import jakarta.validation.ConstraintViolation;

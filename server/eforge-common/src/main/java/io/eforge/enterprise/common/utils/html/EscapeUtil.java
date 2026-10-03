@@ -1,6 +1,6 @@
-package com.ruoyi.common.utils.html;
+package io.eforge.enterprise.common.utils.html;
 
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 转义和反转义工具类

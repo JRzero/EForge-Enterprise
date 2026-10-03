@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.file;
+package io.eforge.enterprise.common.utils.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,15 +6,15 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.exception.file.FileNameLengthLimitExceededException;
-import com.ruoyi.common.exception.file.FileSizeLimitExceededException;
-import com.ruoyi.common.exception.file.InvalidExtensionException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
-import com.ruoyi.common.utils.uuid.Seq;
+import io.eforge.enterprise.common.config.RuoYiConfig;
+import io.eforge.enterprise.common.constant.Constants;
+import io.eforge.enterprise.common.exception.file.FileNameLengthLimitExceededException;
+import io.eforge.enterprise.common.exception.file.FileSizeLimitExceededException;
+import io.eforge.enterprise.common.exception.file.InvalidExtensionException;
+import io.eforge.enterprise.common.utils.DateUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.uuid.IdUtils;
+import io.eforge.enterprise.common.utils.uuid.Seq;
 
 /**
  * 文件上传工具类

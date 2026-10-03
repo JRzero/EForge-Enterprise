@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.file;
+package io.eforge.enterprise.common.utils.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,11 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import com.ruoyi.common.config.RuoYiConfig;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
+import io.eforge.enterprise.common.config.RuoYiConfig;
+import io.eforge.enterprise.common.constant.Constants;
+import io.eforge.enterprise.common.utils.DateUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.uuid.IdUtils;
 
 /**
  * 文件处理工具类

@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils;
+package io.eforge.enterprise.common.utils;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;

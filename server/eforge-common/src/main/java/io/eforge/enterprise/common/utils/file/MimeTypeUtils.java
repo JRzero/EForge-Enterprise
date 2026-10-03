@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.file;
+package io.eforge.enterprise.common.utils.file;
 
 /**
  * 媒体类型工具类

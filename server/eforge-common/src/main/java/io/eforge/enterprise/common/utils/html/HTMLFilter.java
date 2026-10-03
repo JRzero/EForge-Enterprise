@@ -1,4 +1,4 @@
-package com.ruoyi.common.utils.html;
+package io.eforge.enterprise.common.utils.html;
 
 import java.util.ArrayList;
 import java.util.Collections;
