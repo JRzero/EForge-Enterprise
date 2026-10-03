@@ -1,12 +1,12 @@
-package com.ruoyi.common.annotation;
+package io.eforge.enterprise.common.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.ruoyi.common.constant.CacheConstants;
-import com.ruoyi.common.enums.LimitType;
+import io.eforge.enterprise.common.constant.CacheConstants;
+import io.eforge.enterprise.common.enums.LimitType;
 
 /**
  * 限流注解

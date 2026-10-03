@@ -1,4 +1,4 @@
-package com.ruoyi.common.annotation;
+package io.eforge.enterprise.common.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

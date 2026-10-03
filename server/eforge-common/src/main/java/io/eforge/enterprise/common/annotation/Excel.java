@@ -1,4 +1,4 @@
-package com.ruoyi.common.annotation;
+package io.eforge.enterprise.common.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 import java.math.BigDecimal;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import com.ruoyi.common.utils.poi.ExcelHandlerAdapter;
+import io.eforge.enterprise.common.utils.poi.ExcelHandlerAdapter;
 
 /**
  * 自定义导出Excel数据注解

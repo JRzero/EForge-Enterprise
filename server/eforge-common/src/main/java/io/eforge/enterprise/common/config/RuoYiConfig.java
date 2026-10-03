@@ -1,4 +1,4 @@
-package com.ruoyi.common.config;
+package io.eforge.enterprise.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

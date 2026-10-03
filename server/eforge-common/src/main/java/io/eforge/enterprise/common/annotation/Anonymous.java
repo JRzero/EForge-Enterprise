@@ -1,18 +1,19 @@
-package com.ruoyi.common.annotation;
+package io.eforge.enterprise.common.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Excel注解集
+ * 匿名访问不鉴权注解
  * 
  * @author ruoyi
  */
-@Target(ElementType.FIELD)
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Excels
+@Documented
+public @interface Anonymous
 {
-    public Excel[] value();
 }
