@@ -52,6 +52,9 @@ jobs:
       - name: Verify clean server build
         run: mvn -B -ntp -f server/pom.xml clean verify
 
+      - name: Remove regenerated build outputs before commit
+        run: find server -type d -name target -prune -exec rm -rf {} +
+
       - name: Commit repository hygiene fix
         run: |
           git config user.name "github-actions[bot]"
