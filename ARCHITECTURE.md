@@ -2,62 +2,75 @@
 
 ## 1. Positioning
 
-EForge Enterprise is a full-stack enterprise application framework.
+EForge Enterprise is a reusable full-stack enterprise application framework.
 
 It combines:
 
-- **EForge** as the frontend foundation.
-- **RuoYi-derived backend capabilities** as the server foundation.
-- **OpenAPI** as the front/back contract boundary.
-- **MySQL + Redis** as the default infrastructure baseline.
+- **EForge** as the independently versioned React frontend foundation.
+- **RuoYi-derived backend capabilities** as the initial enterprise server baseline.
+- **OpenAPI** as the canonical frontend/backend contract source.
+- **MySQL + Redis** as the initial infrastructure baseline.
 
-It is not a direct merge of EForge and RuoYi-Vue. The goal is to preserve the strongest reusable capabilities of each side while replacing the tight Vue-specific coupling in the original RuoYi architecture.
+It is intentionally a **modular monolith**. The goal is not to recreate RuoYi with a React frontend, but to keep proven backend enterprise capabilities while replacing frontend-specific coupling and establishing a cleaner contract boundary.
 
-## 2. System layers
+## 2. System architecture
 
 ```text
 Business Applications
 CRM / ESG / Project / Quality / Internal Systems
                     │
                     ▼
-┌──────────────────────────────────────────────┐
-│ Enterprise Application Layer               │
-│ Product routes / pages / domain services   │
-├──────────────────────────────────────────────┤
-│ Frontend Foundation                        │
-│ EForge                                     │
-│ app / patterns / data / forms / ui / core │
-├──────────────────────────────────────────────┤
-│ Integration Contract Layer                 │
-│ auth / permissions / menu / API / paging   │
-│ OpenAPI + generated TypeScript client      │
-├──────────────────────────────────────────────┤
-│ Backend Enterprise Services                │
-│ user / role / dept / menu / dict / config  │
-│ audit / notice / job / generator           │
-├──────────────────────────────────────────────┤
-│ Backend Foundation                         │
-│ Spring Boot / Spring Security / MyBatis    │
-│ Redis / data-scope / logging / validation  │
-├──────────────────────────────────────────────┤
-│ Infrastructure                             │
-│ MySQL / Redis / object storage             │
-└──────────────────────────────────────────────┘
+┌────────────────────────────────────────────────┐
+│ Product Layer                                  │
+│ domain pages / domain services / domain rules  │
+├────────────────────────────────────────────────┤
+│ EForge Frontend Foundation                     │
+│ @eforge/app / patterns / data / forms / ui     │
+├────────────────────────────────────────────────┤
+│ Generated Client + Integration Layer           │
+│ OpenAPI TS client / auth / query adapters      │
+├────────────────────────────────────────────────┤
+│ EForge Enterprise API                          │
+│ /api/v1/**                                     │
+│ typed DTOs / PageResponse / ProblemDetail      │
+├────────────────────────────────────────────────┤
+│ Enterprise Services                            │
+│ IAM / org / menu / dict / config / logs / job  │
+├────────────────────────────────────────────────┤
+│ Backend Foundation                             │
+│ Spring Security / MyBatis / data scope / Redis │
+├────────────────────────────────────────────────┤
+│ Infrastructure                                 │
+│ MySQL / Redis / Object Storage                 │
+└────────────────────────────────────────────────┘
 ```
 
 ## 3. Repository model
 
-The repository is a **full-stack integration repository**.
+Two repositories are maintained:
+
+```text
+JRzero/EForge
+└─ reusable React frontend foundation
+
+JRzero/EForge-Enterprise
+└─ full-stack enterprise framework
+```
+
+EForge source is not copied into this repository.
+
+### EForge Enterprise layout
 
 ```text
 EForge-Enterprise/
 ├─ server/
-│  ├─ eforge-admin
+│  ├─ pom.xml
+│  ├─ eforge-boot
 │  ├─ eforge-framework
 │  ├─ eforge-system
 │  ├─ eforge-common
-│  ├─ eforge-generator
-│  └─ eforge-quartz
+│  ├─ eforge-generator      # optional
+│  └─ eforge-quartz         # optional
 │
 ├─ web/
 │  ├─ app/
@@ -67,7 +80,7 @@ EForge-Enterprise/
 │
 ├─ contracts/
 │  ├─ openapi/
-│  └─ schemas/
+│  └─ *.md
 │
 ├─ sql/
 ├─ deploy/
@@ -78,19 +91,11 @@ EForge-Enterprise/
 └─ README.md
 ```
 
-### Repository boundaries
-
-- **EForge source is not copied into this repository.**
-- EForge remains independently versioned in `JRzero/EForge`.
-- `web/` consumes EForge packages.
-- Backend code derived from RuoYi keeps required upstream attribution/license notices.
-- Domain-specific components remain in product projects until repeated reuse proves a shared abstraction.
-
 ## 4. Technology baseline
 
-Initial baseline:
-
 ### Backend
+
+Initial baseline:
 
 - Java 17
 - Spring Boot 3.5.x
@@ -102,99 +107,129 @@ Initial baseline:
 - springdoc-openapi
 - Maven multi-module
 
-Why Spring Boot 3.5.x first:
+Pinned RuoYi reference:
 
-- RuoYi 3.9.2 maintains an official `springboot3` branch.
-- Spring Boot 3 has broader ecosystem compatibility for an initial enterprise foundation.
-- Spring Boot 4 remains an explicit upgrade path after the framework stabilizes.
+```text
+repository: yangzongzhuan/RuoYi-Vue
+version:    3.9.2
+branch:     springboot3
+commit:     a51a838b71b446ea27256900efe7ed2faa2a02fd
+```
+
+Spring Boot 4 is an explicit future upgrade path, not part of the first baseline.
 
 ### Frontend
 
+Architecture baseline:
+
 - React 19
 - TypeScript
-- EForge v0.4+
+- EForge v0.4+ architecture
 - TanStack Query
 - EForge Application Runtime
-- Generated OpenAPI TypeScript client
+- generated OpenAPI TypeScript client
 
-## 5. Backend inheritance strategy
-
-RuoYi is treated as an **upstream backend implementation source**, not as the product architecture.
-
-### Preserve initially
-
-- authentication flow
-- Spring Security permission checks
-- JWT/token session model
-- Redis-backed login state
-- user / role / department / post
-- menu and permission model
-- dictionary and parameter configuration
-- operation/login logs
-- data-scope mechanism
-- scheduled tasks
-- code generator foundation
-- common validation / exception handling utilities
-
-### Refactor or replace
-
-- Vue-specific route payloads
-- component-path based dynamic routing
-- frontend request assumptions
-- ad-hoc `AjaxResult` consumption in React business code
-- `TableDataInfo` consumption in React business code
-- Vue templates in the generator
-- framework branding and non-essential demo/navigation entries
-
-### Deferred
-
-- microservices split
-- multi-tenancy
-- workflow engine
-- low-code renderer
-- distributed transactions
-- message queue
-- Elasticsearch
-
-These are added only after a real project proves the need.
-
-## 6. Front/back contract boundary
-
-Business React code must not directly depend on RuoYi response structures.
-
-### Backend compatibility objects
-
-RuoYi currently exposes shapes such as:
+Pinned EForge architecture reference:
 
 ```text
-AjaxResult
-code / msg / data
-
-TableDataInfo
-code / msg / rows / total
+repository: JRzero/EForge
+commit:     a7b644b724f4264c1ca015ce4c686ca94476d62f
 ```
 
-### EForge Enterprise frontend contract
+A floating dependency on EForge `main` is not allowed in CI.
 
-The integration layer normalizes them into stable application contracts:
+## 5. Server architecture
 
-```ts
-export interface ApiResult<T> {
-  data: T;
-  message?: string;
-}
+The server is a modular monolith.
 
-export interface PageResult<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+### Module intent
+
+```text
+eforge-boot
+  executable application + web entry point
+
+eforge-framework
+  Spring/Security/web/runtime infrastructure
+
+eforge-system
+  user/role/dept/post/menu/dict/config/log services
+
+eforge-common
+  shared primitives/utilities
+
+eforge-generator
+  optional developer tooling
+
+eforge-quartz
+  optional scheduling capability
 ```
 
-Long term, OpenAPI-generated clients become the canonical transport surface.
+The module split initially follows proven RuoYi boundaries to minimize migration risk.
 
-### Rule
+Do not create Maven modules for every business entity.
+
+Future domain modules such as `eforge-module-esg` or `eforge-module-crm` belong in product repositories until repeated reuse proves they belong in the framework.
+
+## 6. RuoYi inheritance strategy
+
+RuoYi is an upstream implementation source, not the architectural identity of the new framework.
+
+### Preserve first
+
+- Spring Security method authorization
+- JWT/Redis login-state behavior
+- user / role / department / post persistence
+- permission evaluation
+- dictionary/configuration services
+- operation/login logs
+- MyBatis/PageHelper foundations
+- optional Quartz behavior
+
+### Preserve but classify as security-critical migration code
+
+- data-scope implementation
+- token/session implementation
+- security filters
+- security exception handling
+
+These require parity tests before redesign.
+
+### Keep only for migration compatibility
+
+- `AjaxResult`
+- `TableDataInfo`
+- legacy `/login`
+- legacy `getInfo`
+- legacy `getRouters`
+- Vue-oriented generator output
+
+### Replace
+
+- Vue Router payload generation
+- database-driven component path loading
+- Vue frontend source
+- Vue page templates
+- public production Swagger/Druid defaults
+- framework/demo branding not relevant to EForge Enterprise
+
+## 7. API architecture
+
+New APIs are versioned:
+
+```text
+/api/v1/**
+```
+
+New endpoints use:
+
+- concrete request/response DTOs
+- HTTP status semantics
+- `PageResponse<T>` for paged lists
+- Spring `ProblemDetail` / RFC 7807 for errors
+
+Legacy RuoYi response wrappers are migration-only.
+
+### Contract flow
 
 ```text
 Spring Controller
@@ -203,86 +238,64 @@ OpenAPI
       ↓
 Generated TypeScript Client
       ↓
-Integration Adapter
+Integration / Query Adapter
       ↓
 EForge Data Layer
       ↓
 Business Page
 ```
 
-Do not hand-write duplicate API types when they can be generated.
+Generated TypeScript types/functions are never manually duplicated.
 
-## 7. Authentication and authorization
+## 8. Authentication bootstrap
 
-Backend authorization remains the security boundary.
-
-```text
-Login
-  ↓
-Spring Security
-  ↓
-JWT/session token
-  ↓
-Redis login state
-  ↓
-getInfo
-  ├─ user
-  ├─ roles
-  └─ permissions
-```
-
-Frontend EForge permissions are UX controls only.
+The canonical app startup contract is:
 
 ```text
-Backend @PreAuthorize = security
-Frontend PermissionGate = visibility / interaction UX
+POST /api/v1/auth/login
+        ↓
+access token
+        ↓
+GET /api/v1/app/bootstrap
+        ├─ user
+        ├─ roles
+        ├─ permissions
+        └─ navigation
+        ↓
+EForgeApplication
 ```
 
-Never treat frontend permission checks as authorization.
+The initial token implementation may preserve RuoYi's Redis-backed login state.
 
-## 8. Menu and route architecture
-
-This is a major deliberate divergence from original RuoYi Vue routing.
-
-### Original coupling
+Backend authorization is authoritative:
 
 ```text
-sys_menu
-  ↓
-component = "system/user/index"
-  ↓
-getRouters()
-  ↓
-Vue dynamic component resolution
+Spring @PreAuthorize / data scope = security boundary
+EForge PermissionGate / route UX = frontend behavior only
 ```
 
-This couples backend database rows directly to frontend implementation file paths.
+## 9. Navigation and route model
 
-### EForge Enterprise model
+The backend navigation tree and frontend route registry are intentionally separate models.
 
-Backend menu data controls:
+### Navigation nodes
 
-- visibility
-- ordering
-- hierarchy
-- permission assignment
-- optional external links
+```text
+GROUP     navigation grouping only
+ROUTE     maps to a frontend routeId
+EXTERNAL  explicit external URL
+```
 
-Frontend route registry controls:
-
-- URL path
-- React component
-- page metadata
-- route component binding
-
-Recommended contract:
+Example:
 
 ```json
 {
+  "key": "system-users",
+  "type": "ROUTE",
   "routeId": "system-users",
-  "visible": true,
+  "label": "Users",
   "order": 10,
-  "permission": "system:user:list"
+  "children": []
 }
 ```
 
@@ -291,75 +304,71 @@ Frontend:
 ```ts
 defineAppRoutes([
   {
-    id: "system-users",
-    path: "/system/users",
-    title: "Users",
-    access: { permission: "system:user:list" },
+    id: 'system-users',
+    path: '/system/users',
+    title: 'Users',
+    access: {permission: 'system:user:list'},
     component: UsersPage
   }
 ])
 ```
 
-Integration:
+### Database additions
 
 ```text
-Database Menu Assignment
-        ↓
-Current-user navigation grants
-        ↓
-routeId
-        ↓
-EForge Route Registry
-        ↓
-React Page
+sys_menu
++ menu_key varchar(100) unique
++ route_id varchar(100) null
 ```
 
-### Critical rule
+Rules:
 
-The backend must not send React component paths and the frontend must not execute component names received from the database.
+- `menu_key` identifies every navigation node.
+- `route_id` is present only for ROUTE nodes.
+- `component` remains temporarily for upstream compatibility.
+- React never executes component names from database rows.
 
-## 9. Enterprise module boundaries
+## 10. Data scope
 
-Initial system modules:
+The existing RuoYi data-scope mechanism is retained for initial behavior parity.
+
+It is security-sensitive because it propagates generated SQL fragments and includes MySQL-specific hierarchy behavior.
+
+Initial policy:
+
+1. preserve behavior
+2. add integration tests for every data-scope mode
+3. establish a green migration baseline
+4. redesign only in a later isolated change
+
+No data-scope rewrite is allowed during the initial backend import.
+
+## 11. Security defaults
+
+Production defaults must be stricter than upstream development defaults.
+
+Required:
+
+- Swagger/OpenAPI UI disabled or authenticated in production
+- Druid console disabled or authenticated in production
+- explicit CORS origins
+- no anonymous monitoring endpoints
+- secrets supplied from environment/configuration
+- no stack traces/internal exception classes in API responses
+- backend permission/data-scope checks on protected endpoints
+
+## 12. Generator direction
+
+The generator evolves from Vue-oriented source generation into EForge Enterprise scaffolding.
+
+Target:
 
 ```text
-Identity & Access
-├─ User
-├─ Role
-├─ Department
-├─ Post
-├─ Permission
-└─ Menu
-
-Platform Configuration
-├─ Dictionary
-├─ Parameters
-└─ Notices
-
-Operations
-├─ Login Log
-├─ Operation Log
-├─ Online Sessions
-├─ Server/Cache Observability
-└─ Scheduled Jobs
-
-Developer Productivity
-├─ OpenAPI
-└─ Generator
-```
-
-## 10. Generator direction
-
-The generator must evolve from RuoYi's Vue-oriented generator into an EForge Enterprise generator.
-
-Target output:
-
-```text
-Database Table / Domain Metadata
+Table / Domain Metadata
         ↓
 Generator
         ├─ Backend
-        │  ├─ Entity
+        │  ├─ Entity / DTO
         │  ├─ Mapper
         │  ├─ Service
         │  └─ Controller
@@ -368,50 +377,54 @@ Generator
         │  └─ OpenAPI
         │
         └─ Frontend
-           ├─ Route registration
-           ├─ generated API client usage
+           ├─ route registration
+           ├─ generated client usage
            ├─ ListPage
            ├─ FormPage
            └─ DetailPage
 ```
 
-Generator templates must use EForge public APIs, never Astryx directly.
+Generated frontend code imports EForge public APIs, never Astryx directly.
 
-## 11. Dependency direction
+## 13. Dependency boundaries
 
-```text
-business feature
-      ↓
-integration contracts
-      ↓
-EForge frontend packages
+Forbidden:
 
-business service
-      ↓
-system/framework/common server modules
-      ↓
-Spring Boot infrastructure
-```
+- server code depending on React/frontend implementation details
+- product pages consuming legacy RuoYi Vue contracts
+- React business code importing Astryx directly
+- backend navigation values resolving arbitrary React component paths
+- floating EForge `main` dependencies in CI
+- generator output introducing domain-specific components into EForge
 
-Forbidden dependencies:
+## 14. Deferred architecture
 
-- `server` depending on frontend implementation details.
-- business pages importing RuoYi Vue contracts directly.
-- React business code importing Astryx directly.
-- generator producing domain-specific abstractions into EForge core packages.
+Not part of the initial framework:
 
-## 12. Initial delivery milestone
+- microservices
+- multi-tenancy
+- workflow engine
+- MQ
+- distributed transactions
+- Elasticsearch
+- low-code renderer
+- business-domain packages
 
-Architecture v0.1 is complete when these contracts are fixed:
+These require evidence from real applications before adoption.
 
-1. technology baseline
-2. repository/module structure
-3. authentication contract
-4. permissions contract
-5. menu/route contract
-6. API response/paging contract
-7. OpenAPI strategy
-8. generator boundary
-9. upstream attribution strategy
+## 15. Architecture completion criteria
 
-Implementation begins only after these are reviewed.
+Architecture v0.1 is complete when these decisions are fixed:
+
+1. modular-monolith server boundary
+2. pinned technology/upstream baselines
+3. RuoYi migration boundary
+4. EForge dependency boundary
+5. typed versioned API contract
+6. authentication/bootstrap contract
+7. navigation vs route contract
+8. security/data-scope migration policy
+9. generator boundary
+10. upstream attribution strategy
+
+Implementation then proceeds through the roadmap in `docs/roadmap.md`.
