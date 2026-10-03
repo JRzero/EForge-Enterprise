@@ -9,7 +9,7 @@ EForge Enterprise is a full-stack enterprise application framework built on:
 
 ## Current status
 
-Architecture design v0.1 has completed its first architecture review. Server implementation has not started yet.
+The RuoYi-derived Spring Boot 3 server foundation is implemented and runtime-verified with MySQL 8.4 and Redis 7.4. Module identity and Java namespace migration to `io.eforge.enterprise` are complete; the next milestone is the `/api/v1` contract layer and EForge React integration.
 
 Key documents:
 
