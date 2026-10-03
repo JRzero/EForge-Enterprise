@@ -1,0 +1,22 @@
+# Maven
+**/target/
+*.class
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs / local env
+*.log
+.env
+.env.*
+!.env.example
