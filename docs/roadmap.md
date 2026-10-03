@@ -29,7 +29,7 @@
 - [ ] add data-scope parity tests
 - [ ] verify MySQL initialization
 - [ ] verify Redis-backed authentication
-- [ ] harden Swagger/Druid/CORS/secrets defaults
+- [x] harden Swagger/Druid/CORS/secrets defaults
 
 ## Phase 2 — Typed API and EForge web shell
 
