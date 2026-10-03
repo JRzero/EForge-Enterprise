@@ -1,0 +1,65 @@
+name: cleanup-maven-build-artifacts
+
+on:
+  push:
+    branches: ['fix/remove-maven-build-artifacts']
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Remove committed Maven build outputs
+        run: |
+          find server -type d -name target -prune -exec rm -rf {} +
+
+          cat > .gitignore <<'EOF'
+          # Maven
+          **/target/
+          *.class
+
+          # Node / frontend
+          node_modules/
+          dist/
+          coverage/
+          playwright-report/
+          test-results/
+
+          # IDE / OS
+          .idea/
+          .vscode/
+          .DS_Store
+          Thumbs.db
+
+          # Logs / local env
+          *.log
+          .env
+          .env.*
+          !.env.example
+          EOF
+
+      - name: Verify clean server build
+        run: mvn -B -ntp -f server/pom.xml clean verify
+
+      - name: Commit repository hygiene fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No cleanup changes to commit."
+          else
+            git commit -m "fix: remove committed Maven build artifacts [skip ci]"
+            git push
+          fi
