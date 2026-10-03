@@ -1,7 +1,7 @@
-package com.ruoyi.common.exception.base;
+package io.eforge.enterprise.common.exception.base;
 
-import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.StringUtils;
+import io.eforge.enterprise.common.utils.MessageUtils;
+import io.eforge.enterprise.common.utils.StringUtils;
 
 /**
  * 基础异常

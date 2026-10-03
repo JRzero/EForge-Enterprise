@@ -1,4 +1,4 @@
-package com.ruoyi.common.enums;
+package io.eforge.enterprise.common.enums;
 
 /**
  * 限流类型

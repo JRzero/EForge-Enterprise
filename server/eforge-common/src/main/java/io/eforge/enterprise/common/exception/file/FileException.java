@@ -1,6 +1,6 @@
-package com.ruoyi.common.exception.file;
+package io.eforge.enterprise.common.exception.file;
 
-import com.ruoyi.common.exception.base.BaseException;
+import io.eforge.enterprise.common.exception.base.BaseException;
 
 /**
  * 文件信息异常类

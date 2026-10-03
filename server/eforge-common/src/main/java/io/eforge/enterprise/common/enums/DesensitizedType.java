@@ -1,7 +1,7 @@
-package com.ruoyi.common.enums;
+package io.eforge.enterprise.common.enums;
 
 import java.util.function.Function;
-import com.ruoyi.common.utils.DesensitizedUtil;
+import io.eforge.enterprise.common.utils.DesensitizedUtil;
 
 /**
  * 脱敏类型

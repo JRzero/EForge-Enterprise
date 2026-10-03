@@ -1,4 +1,4 @@
-package com.ruoyi.common.exception;
+package io.eforge.enterprise.common.exception;
 
 /**
  * 全局异常

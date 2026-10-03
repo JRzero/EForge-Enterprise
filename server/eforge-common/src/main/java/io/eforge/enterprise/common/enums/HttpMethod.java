@@ -1,4 +1,4 @@
-package com.ruoyi.common.enums;
+package io.eforge.enterprise.common.enums;
 
 import java.util.HashMap;
 import java.util.Map;
