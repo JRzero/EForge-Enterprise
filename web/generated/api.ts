@@ -91,6 +91,57 @@ export type ChangePasswordRequestWrite = {
     newPassword: string;
     oldPassword: string;
 };
+export type DeleteLogsRequest = {
+    ids: string[];
+};
+export type LoginLogResponse = {
+    browser?: string;
+    id: string;
+    ip?: string;
+    location?: string;
+    loggedInAt?: string;
+    message?: string;
+    operatingSystem?: string;
+    status?: string;
+    username?: string;
+};
+export type PageResponseLoginLogResponse = {
+    items: LoginLogResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type UnlockLoginRequest = {
+    username: string;
+};
+export type OperationLogResponse = {
+    businessType?: number;
+    duration?: number;
+    id: string;
+    ip?: string;
+    location?: string;
+    operatedAt?: string;
+    operator?: string;
+    status?: string;
+    title: string;
+};
+export type PageResponseOperationLogResponse = {
+    items: OperationLogResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type OperationLogDetail = {
+    departmentName?: string;
+    entry: OperationLogResponse;
+    errorMessage?: string;
+    method?: string;
+    operatorType?: number;
+    requestMethod?: string;
+    requestParameters?: string;
+    responseBody?: string;
+    url?: string;
+};
 export type DeleteConfigurationsRequest = {
     ids: string[];
 };
@@ -558,6 +609,169 @@ export function changeMyPassword(changePasswordRequest: ChangePasswordRequestWri
         method: "PUT",
         body: changePasswordRequest
     }));
+}
+export function deleteLoginLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/login-logs", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteLogsRequest
+    }));
+}
+export function listLoginLogs({ page, pageSize, ip, username, status, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    ip?: string;
+    username?: string;
+    status?: number;
+    $from?: string;
+    to?: string;
+    sort?: "username" | "time";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseLoginLogResponse;
+    }>(`/api/v1/monitor/login-logs${QS.query(QS.explode({
+        page,
+        pageSize,
+        ip,
+        username,
+        status,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
+export function clearLoginLogs(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/login-logs/clear", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function exportLoginLogs({ page, pageSize, ip, username, status, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    ip?: string;
+    username?: string;
+    status?: number;
+    $from?: string;
+    to?: string;
+    sort?: "username" | "time";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/monitor/login-logs/export${QS.query(QS.explode({
+        page,
+        pageSize,
+        ip,
+        username,
+        status,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function unlockLoginAccount(unlockLoginRequest: UnlockLoginRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/login-logs/unlock", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: unlockLoginRequest
+    }));
+}
+export function deleteOperationLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/operation-logs", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteLogsRequest
+    }));
+}
+export function listOperationLogs({ page, pageSize, ip, title, operator, businessType, status, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    ip?: string;
+    title?: string;
+    operator?: string;
+    businessType?: number;
+    status?: number;
+    $from?: string;
+    to?: string;
+    sort?: "operator" | "time" | "duration";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseOperationLogResponse;
+    }>(`/api/v1/monitor/operation-logs${QS.query(QS.explode({
+        page,
+        pageSize,
+        ip,
+        title,
+        operator,
+        businessType,
+        status,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
+export function clearOperationLogs(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/operation-logs/clear", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function exportOperationLogs({ page, pageSize, ip, title, operator, businessType, status, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    ip?: string;
+    title?: string;
+    operator?: string;
+    businessType?: number;
+    status?: number;
+    $from?: string;
+    to?: string;
+    sort?: "operator" | "time" | "duration";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/monitor/operation-logs/export${QS.query(QS.explode({
+        page,
+        pageSize,
+        ip,
+        title,
+        operator,
+        businessType,
+        status,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getOperationLog(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: OperationLogDetail;
+    }>(`/api/v1/monitor/operation-logs/${encodeURIComponent(id)}`, {
+        ...opts
+    });
 }
 export function deleteConfigurations(deleteConfigurationsRequest: DeleteConfigurationsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/system/configurations", oazapfts.json({

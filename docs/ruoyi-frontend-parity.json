@@ -249,8 +249,17 @@
         "unlockLogininfor",
         "cleanLogininfor"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/LoginLogController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogService.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogContracts.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogControllerTest.java",
+        "server/scripts/verify-logs-integration.ps1",
+        "docs/security-review-logs-v1.md",
+        "web/tests/unit/log-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/online.js",
@@ -268,8 +277,17 @@
         "delOperlog",
         "cleanOperlog"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/OperationLogController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogService.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogContracts.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/LogControllerTest.java",
+        "server/scripts/verify-logs-integration.ps1",
+        "docs/security-review-logs-v1.md",
+        "web/tests/unit/log-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/server.js",

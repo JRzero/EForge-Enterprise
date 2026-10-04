@@ -38,8 +38,8 @@ It is a work inventory, not executable proof of completion.
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
-| Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Missing |
-| Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
+| Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client prepared and actual SQL/filter/order/export/permission checks passed; final stage regression/CI and React page pending |
+| Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client prepared; actual password lock/Redis TTL/unlock and ACL-failure checks passed; final stage regression/CI and React page pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
@@ -684,3 +684,34 @@ passes the 27 real browser tests and exact committed OpenAPI comparison.
 The final capability audit stays pending; operation/login logs are next, followed
 by online sessions, monitoring/jobs, generator/form builder and complete shell
 and shared capabilities. The full parity objective remains active.
+
+## Operation/login log API checkpoint (2026-10-05)
+
+Ten canonical operations now cover both typed lists, protected operation detail,
+idempotent immutable-ID batch deletion, existing full clear, complete filtered/
+sorted XLSX and POST password-retry unlock. Original global monitor grants remain
+authoritative. Summaries omit raw operation payloads; detail uses the original
+query button grant on the server. Five enum sort fields and two directions map
+only to fixed SQL columns, with deterministic ID tie-breakers. Calendar dates
+include both day boundaries. Export ignores list page/pageSize. Clear preserves
+the original TRUNCATE/ID reset behavior; subsequent asynchronous events can appear.
+
+Validation passed 280 backend tests (32 new log cases plus all ten unchanged
+data-scope cases), 56 web unit cases, lint/typecheck/build, 30 fixture and 27 live
+browser regressions. Owned MySQL checks prove actual filters/order/paging/detail,
+calendar edges, complete sorted XLSX, deduplication/missing-ID deletion and SQL
+failure preservation, then clear historical records. An owned no-role account is
+denied all ten operations. Five real password failures produce a Redis count/TTL
+and reject correct credentials; ACL denial of DEL/UNLINK yields 503 and preserves
+retry state, then canonical unlock removes it and permits correct login while
+keeping an earlier valid session. All previous module/runtime/captcha and
+production-default checks pass. Actual OpenAPI equality and generated-client
+reproducibility pass; all 125 existing path/schema entries are semantically
+unchanged. The committed snapshot uses the repository's standard OpenAPI
+normalizer and only adds the new log paths/schemas.
+
+The security/mutation boundaries are in `security-review-logs-v1.md`. Current
+implementation CI remains pending. Neither log React route is bound yet. The
+pages still need full filter/date/server-sort, columns/selection, confirmations,
+detail JSON formatting/copy, downloads, unlock UX, cancellation/retry/keyboard/
+mobile and real browser acceptance. The full original parity objective continues.

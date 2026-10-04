@@ -4,6 +4,8 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'OPERATION_LOG_NOT_FOUND') return '日志已不存在，请刷新后重试。';
+  if (code === 'LOGIN_UNLOCK_UNAVAILABLE') return '账号解锁暂时未能完成，请稍后重试。';
   if (code === 'NOTICE_NOT_FOUND') return '公告已不存在，请刷新后重试。';
   if (code === 'NOTICE_IMAGE_INVALID') return '请选择小于 5 MB 的有效 JPG、PNG 或静态 SVG 图片。';
   if (code === 'NOTICE_IMAGE_STORAGE_UNAVAILABLE') return '图片暂时无法保存，请稍后重试。';

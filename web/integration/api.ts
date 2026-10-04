@@ -23,6 +23,8 @@ import {listConfigurations, getConfiguration, getConfigurationValue, createConfi
   deleteConfigurations, refreshConfigurationCache, exportConfigurations, type ConfigurationRequest} from '../generated/api';
 import {listNotices, getNotice, createNotice, updateNotice, deleteNotices, getNoticeFeed,
   markNoticesRead, listNoticeReaders, uploadNoticeImage, type NoticeRequest} from '../generated/api';
+import {listOperationLogs, getOperationLog, deleteOperationLogs, clearOperationLogs, exportOperationLogs,
+  listLoginLogs, deleteLoginLogs, clearLoginLogs, exportLoginLogs, unlockLoginAccount} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -43,6 +45,36 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listOperationLogs(query: Parameters<typeof listOperationLogs>[0], signal?: AbortSignal) {
+      return (await listOperationLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getOperationLog(id: string, signal?: AbortSignal) {
+      return (await getOperationLog(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async deleteOperationLogs(ids: string[]) {
+      await deleteOperationLogs({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async clearOperationLogs() {
+      await clearOperationLogs({baseUrl: '', fetch: transport(true)});
+    },
+    async exportOperationLogs(query: Parameters<typeof exportOperationLogs>[0]) {
+      return (await exportOperationLogs(query, {baseUrl: '', fetch: transport(true, 120000)})).data;
+    },
+    async listLoginLogs(query: Parameters<typeof listLoginLogs>[0], signal?: AbortSignal) {
+      return (await listLoginLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async deleteLoginLogs(ids: string[]) {
+      await deleteLoginLogs({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async clearLoginLogs() {
+      await clearLoginLogs({baseUrl: '', fetch: transport(true)});
+    },
+    async exportLoginLogs(query: Parameters<typeof exportLoginLogs>[0]) {
+      return (await exportLoginLogs(query, {baseUrl: '', fetch: transport(true, 120000)})).data;
+    },
+    async unlockLoginAccount(username: string) {
+      await unlockLoginAccount({username}, {baseUrl: '', fetch: transport(true)});
+    },
     async listNotices(query: Parameters<typeof listNotices>[0], signal?: AbortSignal) {
       return (await listNotices(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

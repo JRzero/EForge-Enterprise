@@ -300,3 +300,18 @@ public `/profile/upload/notices/` namespace. Malformed content returns 400
 NOTICE_IMAGE_INVALID; storage failure returns 503 NOTICE_IMAGE_STORAGE_UNAVAILABLE.
 Client cancellation does not imply server-side deletion of a committed upload.
 The API returns no legacy common-upload wrappers or caller-controlled paths.
+
+### Monitor operation/login logs
+
+Canonical `/api/v1/monitor/operation-logs` and `/api/v1/monitor/login-logs`
+provide typed pages, validated calendar/date/status/text filters and enum-only
+server sorting. Operation detail uses the original query grant; summaries omit
+request/response/error payloads. POST export preserves original XLSX fields and
+filters/order while ignoring list paging. DELETE accepts `{ids: string[]}` and
+returns idempotent 204 for immutable log IDs. POST clear retains existing full
+clear semantics; asynchronous audit records may arrive afterwards. POST login
+unlock accepts `{username: string}` and clears only Redis password retry state,
+returning 204 or generic 503 LOGIN_UNLOCK_UNAVAILABLE. Original monitor grants
+remain authoritative. See `docs/security-review-logs-v1.md` for mutation, payload,
+sorting and compatibility boundaries. React pages and generated-client/runtime
+verification are tracked separately in the parity inventory.
