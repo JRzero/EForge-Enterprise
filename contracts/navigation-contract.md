@@ -264,3 +264,15 @@ External URLs are explicit:
 ```
 
 Do not overload application route paths or component fields with external URLs.
+
+## Menu administration
+
+The implemented `/menu` page binds `system-menus` through V012. Menu writes
+select actual registered route IDs rather than backend component strings. Parent
+options can exclude a target and its complete database subtree, including
+descendants through ungranted parents. The final write still validates hierarchy
+and object authorization. Query/cache fields are preserved as compatibility
+metadata; completing their shell behavior remains tracked in the parity inventory.
+
+Icon previews use only names in the attributed, pinned asset manifest described
+by ADR-0014. An arbitrary database icon string cannot resolve a component or URL.

@@ -28,6 +28,8 @@ $childBody=Menu-Body "menu-child-$runId" "Menu child-$runId" $group.id
 $child=Menu-Create $childBody
 $leafBody=Menu-Body "menu-leaf-$runId" "Menu leaf-$runId" $child.id 'FUNCTION';$leafBody.permission='system:post:query'
 $leaf=Menu-Create $leafBody
+$parentChoices=@((Request "$menuBase/options?excludeId=$($group.id)" 'GET' '' $authorized).Content | ConvertFrom-Json)
+Assert-Check (!($parentChoices.id -contains $group.id) -and !($parentChoices.id -contains $child.id) -and !($parentChoices.id -contains $leaf.id)) 'Parent options must exclude the complete editing subtree.'
 $externalBody=Menu-Body "menu-external-$runId" "External-$runId" '0' 'EXTERNAL';$externalBody.externalUrl='https://example.com/documentation'
 $external=Menu-Create $externalBody
 Assert-Problem (Request $menuBase 'POST' ($groupBody | ConvertTo-Json -Compress) $authorized) 409 'MENU_KEY_EXISTS'
@@ -62,7 +64,7 @@ $badRoute=Menu-Patch $postRoute;$badRoute.routeId='account-profile'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
 $badRoute=Menu-Patch $postRoute;$badRoute.permission='system:user:list'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
-$pending=$menuRows | Where-Object key -eq 'system-menus';$pendingPatch=Menu-Patch $pending
+$pending=$menuRows | Where-Object key -eq 'system-dictionaries';$pendingPatch=Menu-Patch $pending
 Assert-Check (!$pending.routeId -and (Menu-Update $pending.id $pendingPatch).StatusCode -eq 204) 'Existing pending legacy route must remain editable without inventing a React binding.'
 
 $menuRole=Create-Role 'menu-session' @('system','system-posts','system-post-query','system-menus','system-menu-query','system-menu-add','system-menu-edit','system-menu-remove')

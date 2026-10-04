@@ -28,5 +28,5 @@ public final class MenuContracts
     public record MenuRouteOption(@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String id,
             @Schema(requiredMode=Schema.RequiredMode.REQUIRED) String path,String permission) {}
     public record MenuSortItem(@NotNull @Pattern(regexp="[1-9][0-9]{0,18}") String id,@NotNull @Min(0) @Max(9999) Integer sort) {}
-    public record MenuSortRequest(@NotNull @Size(min=1,max=100) List<@NotNull @jakarta.validation.Valid MenuSortItem> items) {}
+    public record MenuSortRequest(@NotNull @Size(min=1,max=2000) List<@NotNull @jakarta.validation.Valid MenuSortItem> items) {}
 }

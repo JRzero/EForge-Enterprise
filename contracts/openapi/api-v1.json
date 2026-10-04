@@ -420,7 +420,7 @@
             "items": {
               "$ref": "#/components/schemas/MenuSortItem"
             },
-            "maxItems": 100,
+            "maxItems": 2000,
             "minItems": 1,
             "type": "array"
           }
@@ -1895,6 +1895,17 @@
     "/api/v1/system/menus/options": {
       "get": {
         "operationId": "getMenuOptions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "excludeId",
+            "required": false,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {

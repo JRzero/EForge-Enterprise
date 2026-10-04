@@ -41,8 +41,8 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async getMenu(id: string, signal?: AbortSignal) {
       return (await getMenu(id, {baseUrl: '', fetch: transport(true), signal})).data;
     },
-    async getMenuOptions(signal?: AbortSignal) {
-      return (await getMenuOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    async getMenuOptions(signal?: AbortSignal, excludeId?: string) {
+      return (await getMenuOptions({excludeId}, {baseUrl: '', fetch: transport(true), signal})).data;
     },
     async getMenuRouteOptions(signal?: AbortSignal) {
       return (await getMenuRouteOptions({baseUrl: '', fetch: transport(true), signal})).data;

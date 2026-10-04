@@ -489,11 +489,15 @@ export function createMenu(menuWriteRequest: MenuWriteRequest, opts?: Oazapfts.R
         body: menuWriteRequest
     }));
 }
-export function getMenuOptions(opts?: Oazapfts.RequestOpts) {
+export function getMenuOptions({ excludeId }: {
+    excludeId?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: MenuResponse[];
-    }>("/api/v1/system/menus/options", {
+    }>(`/api/v1/system/menus/options${QS.query(QS.explode({
+        excludeId
+    }))}`, {
         ...opts
     });
 }

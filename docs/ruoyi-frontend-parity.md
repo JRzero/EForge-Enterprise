@@ -11,8 +11,9 @@ The pinned Spring Boot 3 backend commit has already separated its frontend
 repositories. For an inspectable reference of the same RuoYi version, inventory
 the official v3.9.2 frontend at
 `yangzongzhuan/RuoYi-Vue@0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0`.
-This is a read-only **behavior reference**, not a dependency, copied Vue app,
-or advancement of the pinned backend commit. The backend's actual controllers,
+This remains the immutable **behavior reference**; the Vue application is not
+imported. ADR-0014 explicitly reuses its attributed static SVG icon bundle.
+The pinned backend commit is unchanged. The backend's actual controllers,
 services and security behavior remain authoritative for supported operations.
 The reference contains capabilities absent from the initial Phase 2 shell.
 
@@ -33,7 +34,7 @@ It is a work inventory, not executable proof of completion.
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionary controls pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
-| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Canonical API/client groundwork implemented; role grant trees already verified; React menu page/icon selection and browser acceptance pending |
+| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally; shared dictionary tags and query/cache shell behavior pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Missing |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
@@ -357,7 +358,39 @@ and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/3720298337
 All three server jobs passed, including Linux menu/API and live browser
 integration and exact live OpenAPI equality on the final implementation.
 
-The React menu tree page, parent/icon controls, actual menu-page browser
-acceptance, query/cache shell behavior and other missing groups remain required.
-No menu navigation route is seeded before an actual page exists. The full
-frontend parity objective stays active.
+At that API-only checkpoint the React page, parent/icon controls and browser
+acceptance remained required. The next checkpoint implements the page before
+seeding its navigation route. Query/cache shell behavior and other missing groups
+remain required. The full frontend parity objective stays active.
+
+## Menu administration page checkpoint (2026-10-04)
+
+The lazy `/menu` page implements hierarchical filtering, individual/all-node
+expand/collapse, tree CRUD, parent search/exclusion, stable identities, actual
+registered route choices, external URLs, button permissions, status/visibility,
+field clearing and whole-tree atomic sorting. V012 binds the implemented page.
+Parent options exclude all descendants through ungranted intermediate parents;
+the backend still validates every write. Batch sorting supports 2000 objects;
+real browser verification persists 105 changed nodes in one request.
+
+The complete 88-icon picker supports search, select/clear, keyboard navigation,
+Escape/focus return and mobile bounds. Browser checks decode and draw every
+normalized asset. ADR-0014 records the immutable attributed SVG bundle, original
+MIT license, source/output hashes and normalization. Unknown legacy icon names
+remain retainable with a neutral preview.
+
+Fixture tests cover large IDs, scoped/filtered roots, unavailable current parents,
+safe external URLs, read-only controls, list/write/sort retry and committed-write
+bootstrap failure with refresh-only retry. Live tests cover actual CRUD and
+duplicate errors, reparenting, field clearing, assigned/parent deletion guards,
+105-row persistence, route metadata and another existing session's immediate
+permission revoke/restore without bootstrap. A scoped editor cannot acquire an
+unowned permission or select descendants through an ungranted parent.
+
+Local verification passed 170 backend tests including all ten unchanged
+data-scope cases; lint/typecheck, 35 unit tests, build, fifteen fixture and eighteen
+live browser cases. All disposable MySQL/Redis module integration scripts passed,
+including initialization, login, `/getInfo`, session TTL, captcha replay and seeded
+routes. Exact live OpenAPI equality and generated-client reproducibility passed.
+Current page CI is pending. Shared dictionary tags, full shell icon/query/cache
+behavior and all other missing groups remain in scope.

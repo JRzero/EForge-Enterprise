@@ -67,4 +67,26 @@ The final Linux runtime includes real menu verification, all fifteen existing
 live browser regressions and exact exported OpenAPI equality. Local Maven
 verification passed 168 tests; web validation passed lint/typecheck, thirty unit
 tests, build and twelve fixture cases. Menu React page, icon controls and its
-own live browser acceptance remain pending.
+own live browser acceptance remained pending at that API-only checkpoint.
+
+## Menu page follow-up
+
+The lazy React menu page uses generated contracts and the existing operation
+permissions. Stable keys are read-only after assignment; route choices come from
+the packaged actual route registry. V012 binds the implemented `system-menus`
+page. Query/cache metadata is persisted without claiming the remaining shell
+behavior is complete.
+
+Parent options accept an optional excluded target and remove its entire database
+subtree before projecting the operator's grants. This excludes descendants even
+through an ungranted intermediate parent. The excluded target itself must be
+accessible. Existing unavailable parents may still be retained under the prior
+write rule. Atomic sort accepts up to 2000 validated objects, retaining the same
+per-object authorization and transaction boundary.
+
+The icon picker resolves only exact names from 88 pinned static SVG assets.
+ADR-0014 documents attribution, deterministic normalization and active/external
+content rejection. Unknown legacy names have a neutral preview. Native dialogs,
+keyboard navigation and narrow-screen checks cover the controls; fixture checks
+decode and draw every icon. A committed mutation followed by a bootstrap failure
+offers a refresh-only retry, avoiding duplicate writes.

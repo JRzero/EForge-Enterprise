@@ -37,6 +37,15 @@ public class MenuService
         return mapper.rows().stream().filter(row->available.contains(row.id()) && matching.contains(row.id())).map(this::response).toList();
     }
     public MenuResponse get(String id) { return response(require(identifier(id),mapper.rows(),available())); }
+    public List<MenuResponse> options(String excludeId)
+    {
+        var rows=mapper.rows();var available=available();Set<Long> excluded=new HashSet<>();
+        if(excludeId!=null) {
+            excluded.add(require(identifier(excludeId),rows,available).id());
+            boolean changed=true;while(changed) {changed=false;for(var row:rows) if(excluded.contains(row.parentId()) && excluded.add(row.id())) changed=true;}
+        }
+        return rows.stream().filter(row->available.contains(row.id()) && !excluded.contains(row.id())).map(this::response).toList();
+    }
     public List<MenuRouteOption> routeOptions() { return routes.options(); }
     public MenuResponse create(MenuWriteRequest request)
     {

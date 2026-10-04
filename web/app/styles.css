@@ -108,3 +108,13 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .grant-spacer {width: 24px; min-width: 24px;}
 .grant-unavailable {margin-top: 12px; overflow-wrap: anywhere;}
 .role-user-list {min-width: 0;} .role-users-page .post-dialog {width: min(1100px, calc(100vw - 32px));}
+.menus-page .ef-data-table__toolbar {display: none;} .menus-page .post-filters {flex-wrap: wrap;}
+.menus-page .post-dialog {width: min(740px, calc(100vw - 32px));}
+.menu-icon {display: inline-block; width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; vertical-align: middle;}
+.menu-icon-picker {min-width: 0; border: 1px solid #d4e2da; border-radius: 8px; padding: 12px; display: grid; gap: 12px;}
+.menu-icon-picker summary {cursor: pointer; padding: 10px; border: 1px solid #d4e2da; border-radius: 6px; overflow-wrap: anywhere;}
+.menu-icon-picker summary img {margin-inline: 8px;} .menu-icon-picker summary[aria-disabled=true] {cursor: default; opacity: .6;}
+.menu-icon-options {display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; max-height: 240px; overflow: auto; padding: 4px;}
+.menu-icon-options button {display: flex; gap: 8px; align-items: center; padding: 8px; min-width: 0; border: 1px solid #d4e2da; border-radius: 5px; background: #f4f8f6; cursor: pointer; font: inherit;}
+.menu-icon-options button span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;} .menu-icon-options [aria-pressed=true] {border-color: #337a61; background: #d8ece1;}
+@media (max-width: 550px) {.menu-icon-options {grid-template-columns: repeat(2,minmax(0,1fr));}}

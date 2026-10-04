@@ -128,6 +128,20 @@ class MenuControllerTest
         var rows=new ArrayList<MenuMutationMapper.Row>();for(int id=1;id<=64;id++) rows.add(row(id,id-1,"node-"+id,"Node "+id,"M","node-"+id,null));when(mapper.rows()).thenReturn(rows);
         mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(BODY.replace("\"parentId\":\"0\"","\"parentId\":\"64\""))).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("MENU_CYCLE"));verify(mapper,never()).insert(any());
     }
+    @Test void parentOptionsExcludeTheEntireSubtreeEvenThroughUngrantedAncestors() throws Exception
+    {
+        var rows=new ArrayList<>(mapper.rows());rows.set(3,row(4,2,"hidden-parent","Hidden parent","M","hidden",null));rows.add(row(5,4,"granted-grandchild","Grandchild","M","grandchild",null));when(mapper.rows()).thenReturn(rows);
+        actor(2,Set.of("system:menu:query"));when(mapper.grantedIds(2L)).thenReturn(List.of(1L,2L,3L,5L));
+        mvc.perform(get(PATH+"/options?excludeId=2")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].id").value("1"));
+        mvc.perform(get(PATH+"/options?excludeId=4")).andExpect(status().isForbidden());
+    }
+    @Test void wholeTreeSortMayAtomicallyIncludeMoreThanOneHundredMenus() throws Exception
+    {
+        var rows=new ArrayList<MenuMutationMapper.Row>();for(int id=1;id<=150;id++) rows.add(row(id,0,"node-"+id,"Node "+id,"M","node-"+id,null));when(mapper.rows()).thenReturn(rows);
+        String body="{\"items\":["+java.util.stream.IntStream.rangeClosed(1,150).mapToObj(id->"{\"id\":\""+id+"\",\"sort\":"+id+"}").collect(java.util.stream.Collectors.joining(","))+"]}";
+        mvc.perform(put(PATH+"/sort").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNoContent());
+        verify(legacy).updateMenuSort(argThat(ids->ids.length==150 && ids[149].equals("150")),argThat(sorts->sorts.length==150 && sorts[149].equals("150")));
+    }
     @TestConfiguration static class Configuration
     {@Bean PermitAllUrlProperties permitAllUrlProperties(){return new PermitAllUrlProperties();}@Bean CorsFilter corsFilter(){return new CorsFilter(new UrlBasedCorsConfigurationSource());}}
 }

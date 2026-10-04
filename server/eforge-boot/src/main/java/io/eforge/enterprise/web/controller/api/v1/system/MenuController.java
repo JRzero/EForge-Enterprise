@@ -22,7 +22,7 @@ public class MenuController
             @RequestParam(required=false) @Pattern(regexp="[01]?") String status,@RequestParam(required=false) Boolean visible)
     {return menus.list(name,status,visible);}
     @GetMapping("/options") @PreAuthorize("@ss.hasAnyPermi('system:menu:query,system:menu:add,system:menu:edit')") @Operation(operationId="getMenuOptions")
-    public List<MenuResponse> options() {return menus.list(null,null,null);}
+    public List<MenuResponse> options(@RequestParam(required=false) @Pattern(regexp="[1-9][0-9]{0,18}") String excludeId) {return menus.options(excludeId);}
     @GetMapping("/routes") @PreAuthorize("@ss.hasAnyPermi('system:menu:query,system:menu:add,system:menu:edit')") @Operation(operationId="getMenuRouteOptions")
     public List<MenuRouteOption> routes() {return menus.routeOptions();}
     @GetMapping("/{id}") @PreAuthorize("@ss.hasPermi('system:menu:query')") @Operation(operationId="getMenu")

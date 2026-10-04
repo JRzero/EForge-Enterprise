@@ -3,7 +3,7 @@
   "backendCommit": "a51a838b71b446ea27256900efe7ed2faa2a02fd",
   "frontendBehaviorCommit": "0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
   "frontendRelease": "v3.9.2",
-  "reason": "The pinned springboot3 backend commit has split frontend repositories. This immutable same-version historical frontend is a behavior reference only, not an imported dependency or a backend baseline advance.",
+  "reason": "The pinned springboot3 backend commit has split frontend repositories. The immutable same-version historical frontend supplies behavior references and the explicitly attributed static SVG bundle under ADR-0014; no Vue application is imported and the backend baseline stays unchanged.",
   "sourceFiles": [
     "ruoyi-ui/src/App.vue",
     "ruoyi-ui/src/api/login.js",
@@ -359,7 +359,7 @@
         "updateMenuSort",
         "delMenu"
       ],
-      "state": "partial-api-client",
+      "state": "partial-shared-controls-and-shell",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/MenuController.java",
         "MenuControllerTest",
@@ -370,14 +370,21 @@
         "sql/migrations/V011__menu_name_uniqueness.sql",
         "web/generated/api.ts",
         "web/integration/api.ts",
-        "RoleControllerTest"
+        "RoleControllerTest",
+        "web/features/menus/MenusPage.tsx",
+        "web/features/menus/MenuEditor.tsx",
+        "web/features/menus/IconPicker.tsx",
+        "web/scripts/import-ruoyi-icons.mjs",
+        "web/tests/unit/menu-tree.test.ts",
+        "web/tests/unit/menu-icons.test.ts",
+        "web/tests/e2e/menus.spec.ts",
+        "web/tests/live/menus.spec.ts",
+        "docs/adr/0014-pinned-menu-icon-assets.md",
+        "sql/migrations/V012__menus_route.sql"
       ],
       "remaining": [
-        "React hierarchical menu CRUD/filter/expand/collapse and editable batch sort page",
-        "Parent selection excluding descendants, registered route binding and external-link forms",
-        "Icon selection and shared dictionary-driven tags",
-        "Actual menu-page live browser, permission, failure/retry, keyboard and mobile validation",
-        "Shell behavior for query/cache metadata and remaining embedded-route capabilities"
+        "Shared dictionary-driven tags",
+        "Shell icon rendering, query/cache metadata behavior and remaining embedded-route capabilities"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "1cc8a539aa139e3f21bfa331f45ceadc1585d31f",
@@ -386,6 +393,11 @@
         "conclusion": "success",
         "scope": "Canonical menu API/generated client, actual packaged navigation catalog, hierarchy/object/permission guards, atomic sorting, database uniqueness, immediate session refresh and all existing page regressions; React menu page remains pending.",
         "localTests": {"backend": 168, "webUnit": 30, "fixtureBrowser": 12, "liveBrowser": 15}
+      },
+      "localMenuPageValidation": {
+        "backend": 170, "webUnit": 35, "fixtureBrowser": 15, "liveBrowser": 18,
+        "conclusion": "success", "pageCi": "pending",
+        "scope": "Menu tree CRUD, full 88-icon picker, scoped parent exclusions, route metadata, 105-row atomic sort, immediate existing-session permission checks, retry/keyboard/mobile checks and all prior module regressions."
       }
     },
     {

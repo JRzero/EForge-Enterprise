@@ -4,6 +4,17 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'MENU_NOT_FOUND') return '菜单已不存在，请刷新后重试。';
+  if (code === 'MENU_KEY_IMMUTABLE') return '已有菜单的稳定标识不能修改。';
+  if (code === 'MENU_KEY_EXISTS') return '菜单标识已存在，请使用其他标识。';
+  if (code === 'MENU_NAME_EXISTS') return '该上级菜单下已存在同名菜单。';
+  if (code === 'MENU_ROUTE_EXISTS') return '所选页面已关联其他菜单。';
+  if (code === 'MENU_PATH_EXISTS') return '目录地址已存在，请使用其他地址。';
+  if (code === 'MENU_HAS_CHILDREN') return '该菜单包含子菜单，不能删除或改为按钮、外链。';
+  if (code === 'MENU_IN_USE') return '该菜单已分配给角色，请先取消授权。';
+  if (code === 'MENU_CYCLE') return '上级菜单不能是当前菜单或其下级，且层级不能超过 64 层。';
+  if (code === 'MENU_IDENTITY_EXISTS') return '菜单名称或标识已存在，请修改后重试。';
+  if (code === 'MENU_WRITE_CONFLICT') return '菜单状态已变化，请刷新后重试。';
   if (code === 'ROLE_NOT_FOUND') return '角色已不存在，请刷新后重试。';
   if (code === 'ROLE_NAME_EXISTS') return '角色名称已存在，请使用其他名称。';
   if (code === 'ROLE_KEY_EXISTS') return '角色权限字符已存在，请使用其他字符。';
