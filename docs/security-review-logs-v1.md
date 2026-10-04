@@ -88,4 +88,5 @@ previous valid session. Fixture cases cover rejected clipboard access/fallback
 cleanup, invalid JSON, no-grant controls, failed confirmations, request abort,
 dictionary labels, keyboard and mobile behavior. Route binding changes only
 the two existing ROUTE nodes; the log GROUP never becomes a React route.
-Page-commit cloud verification is tracked in the parity document.
+Page commit `fa7e2ebdd783e12cae74526a9371d4df69adaf58` passes server CI
+`37241473195` (all three jobs) and web CI `37241473251`.
