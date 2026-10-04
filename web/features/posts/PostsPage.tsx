@@ -1,3 +1,5 @@
+import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
+import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -12,6 +14,7 @@ const emptyFilters = {code: '', name: '', status: ''};
 const columnLabels = {id: '岗位编号', code: '岗位编码', name: '岗位名称', sort: '显示顺序', status: '状态', createdAt: '创建时间'};
 
 export function PostsPage() {
+  const statusDictionary = useDictionary('sys_normal_disable');
   const api = useApi();
   const [draft, setDraft] = useState(emptyFilters);
   const [showFilters, setShowFilters] = useState(true);
@@ -52,13 +55,13 @@ export function PostsPage() {
   const columns = useMemo<ColumnDef<PostResponse>[]>(() => [
     {accessorKey: 'id', header: '岗位编号'}, {accessorKey: 'code', header: '岗位编码'},
     {accessorKey: 'name', header: '岗位名称'}, {accessorKey: 'sort', header: '显示顺序'},
-    {accessorKey: 'status', header: '状态', cell: ({row}) => <span className={`post-status status-${row.original.status}`}>{row.original.status === '0' ? '正常' : '停用'}</span>},
+    {accessorKey: 'status', header: '状态', cell: ({row}) => <DictionaryTag options={statusDictionary.options} value={row.original.status} />},
     {accessorKey: 'createdAt', header: '创建时间', cell: ({row}) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleString('zh-CN') : '—'},
     {id: 'actions', header: '操作', cell: ({row}) => <div className="post-row-actions">
       <PermissionGate permission="system:post:edit"><Button label="修改" aria-label={`修改 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { void edit(row.original.id); }} /></PermissionGate>
       <PermissionGate permission="system:post:remove"><Button label="删除" aria-label={`删除 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { setActionError(''); setDeleting([row.original.id]); }} /></PermissionGate>
     </div>}
-  ], [edit, busy]);
+  ], [edit, busy, statusDictionary.options]);
 
   function refresh(message = '') {
     setFeedback(message); setSelection({}); setVersion(value => value + 1);
@@ -96,11 +99,11 @@ export function PostsPage() {
   }
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
   return <section className="posts-page">
-    <PageHeader title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理" />
+    <PageHeader title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} />
     <form hidden={!showFilters} className="post-filters" onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
       <Input label="岗位编码筛选" value={draft.code} onChange={code => setDraft({...draft, code})} />
       <Input label="岗位名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><option value="0">正常</option><option value="1">停用</option></select></label>
+      <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} />
     </form>
     <div className="post-toolbar">
@@ -126,7 +129,7 @@ export function PostsPage() {
         <Input label="岗位编码" value={editor.form.code} aria-required="true" isDisabled={busy} onChange={code => setEditor({...editor, form: {...editor.form, code}})} />
         <Input label="岗位名称" value={editor.form.name} aria-required="true" isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
         <label>显示顺序<input type="number" min={0} max={2147483647} step={1} value={editor.form.sort} required disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sort: Number(event.target.value)}})} /></label>
-        <label>岗位状态<select aria-label="岗位状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><option value="0">正常</option><option value="1">停用</option></select></label>
+        <label>岗位状态<select aria-label="岗位状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
         <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
         {actionError ? <p role="alert">{actionError}</p> : null}
         <div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存岗位'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setEditor(null); setActionError(''); }} /></div>

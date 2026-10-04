@@ -38,7 +38,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
     const controller = new AbortController(); setData(null); setLoading(true); setSelection({}); setError('');
     const request = entryMode ? api.listDictionaryEntries(dictionaryId!, {label: filters.name, status: filters.status, page, pageSize}, controller.signal)
       : api.listDictionaries({name: filters.name, code: filters.code, status: filters.status, $from: filters.from || undefined, to: filters.to || undefined, page, pageSize}, controller.signal);
-    request.then(result => {if (!controller.signal.aborted) {setData(result); setLoading(false);}}).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+    request.then(result => {if (!controller.signal.aborted) {const lastPage = Math.max(1, Math.ceil(result.total / pageSize)); if (page > lastPage) {setPage(lastPage); return;} setData(result); setLoading(false);}}).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
     return () => controller.abort();
   }, [api, entryMode, dictionaryId, filters, page, pageSize, version]);
   const refresh = useCallback((message = '') => {setFeedback(message); setSelection({}); setVersion(value => value + 1);}, []);

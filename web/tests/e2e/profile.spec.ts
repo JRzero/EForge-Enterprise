@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './fixtures';
 test('authenticated self-service route retries without grants, validates forms, and supports mobile cancel/close', async ({page}) => {
   let failed = true, writes = 0;
   const user = {id:'9007199254740993',username:'ordinary',displayName:'普通用户'};

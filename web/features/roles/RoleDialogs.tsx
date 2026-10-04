@@ -1,3 +1,5 @@
+import {DictionaryOptions} from '../../app/useDictionary';
+import type {DictionaryValueOption} from '../../generated/api';
 import {useMemo, useState, type FormEvent} from 'react';
 import {Button, Input} from '@eforge/ui';
 import type {RoleEditorResponse, RoleMenuOption, RoleScopeResponse, RoleWriteRequest} from '../../generated/api';
@@ -9,7 +11,7 @@ import {linkedSeeds, submittedGrants, type GrantNode} from './grants';
 
 function sameSelection(left: string[], right: string[]) { return left.length === right.length && left.every(key => right.includes(key)); }
 
-export function RoleEditor({detail, menus, onClose, onSaved}: {detail: RoleEditorResponse | null; menus: RoleMenuOption[]; onClose: () => void; onSaved: () => Promise<void>}) {
+export function RoleEditor({statusOptions, detail, menus, onClose, onSaved}: {statusOptions: DictionaryValueOption[]; detail: RoleEditorResponse | null; menus: RoleMenuOption[]; onClose: () => void; onSaved: () => Promise<void>}) {
   const api = useApi();
   const [form, setForm] = useState<RoleWriteRequest>(() => detail ? {name: detail.role.name, key: detail.role.key, sort: detail.role.sort, status: detail.role.status, remark: detail.role.remark ?? '', menuLinked: detail.role.menuLinked, menuKeys: detail.role.menuLinked ? linkedSeeds(menus, [...new Set([...detail.checkedMenuKeys, ...detail.menuKeys.filter(key => !menus.some(node => node.key === key))])]) : detail.menuKeys}
     : {name: '', key: '', sort: 0, status: '0', remark: '', menuLinked: true, menuKeys: []});
@@ -31,7 +33,7 @@ export function RoleEditor({detail, menus, onClose, onSaved}: {detail: RoleEdito
     <Input label="角色名称" value={form.name} aria-required="true" isDisabled={busy} onChange={name => setForm({...form, name})} />
     <Input label="权限字符" value={form.key} aria-required="true" isDisabled={busy} onChange={key => setForm({...form, key})} />
     <label>角色顺序<input type="number" min={0} max={9999} required disabled={busy} value={form.sort} onChange={event => setForm({...form, sort: Number(event.target.value)})} /></label>
-    <label>角色状态<select aria-label="角色状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><option value="0">正常</option><option value="1">停用</option></select></label>
+    <label>角色状态<select aria-label="角色状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><DictionaryOptions options={statusOptions} current={form.status} /></select></label>
     <GrantTree label="菜单权限" kind="菜单" nodes={menus} selected={form.menuKeys} linked={form.menuLinked} disabled={busy}
       onChange={menuKeys => { setSelectionDirty(true); setForm({...form, menuKeys}); }} onLinkedChange={(menuLinked, keys) => {
         const menuKeys = detail && !selectionDirty ? (menuLinked ? linkedSeeds(menus, detail.menuKeys) : detail.menuKeys) : keys;

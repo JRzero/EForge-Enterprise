@@ -1,4 +1,4 @@
-import {test, expect} from '@playwright/test';
+import {test, expect} from './fixtures';
 test('read-only user permissions, scoped department roots, failure retry and mobile overflow', async ({page}) => {
   await page.route('**/captchaImage', route => route.fulfill({json: {code: 200, captchaEnabled: false}}));
   await page.route('**/api/v1/auth/login', route => route.fulfill({json: {accessToken: 'fixture-token', tokenType: 'Bearer'}}));

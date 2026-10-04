@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './fixtures';
+import type {Page} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 const manifest = JSON.parse(readFileSync(new URL('../../features/menus/icons.json', import.meta.url), 'utf8')) as {icons: {name: string}[]};
 const id = '9007199254740993';

@@ -1,3 +1,5 @@
+import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
+import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -25,6 +27,7 @@ function Choices({label, options, selected, disabled, onChange}: {label: string;
 }
 
 export function UsersPage() {
+  const statusDictionary = useDictionary('sys_normal_disable'), sexDictionary = useDictionary('sys_user_sex');
   const api = useApi(); const bootstrap = useBootstrap();
   const [draft, setDraft] = useState(emptyFilters); const [filters, setFilters] = useState(emptyFilters);
   const [showFilters, setShowFilters] = useState(true); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10);
@@ -81,7 +84,7 @@ export function UsersPage() {
         onChange={checked => setSelection(previous => ({...previous, [row.original.id]: checked}))} />},
     {accessorKey: 'id', header: '用户编号'}, {accessorKey: 'username', header: '登录账号'}, {accessorKey: 'displayName', header: '用户昵称'},
     {accessorKey: 'departmentName', header: '部门', cell: ({row}) => row.original.departmentName || '—'}, {accessorKey: 'phone', header: '手机号码'},
-    {accessorKey: 'status', header: '状态', cell: ({row}) => <div><span className={`post-status status-${row.original.status}`}>{row.original.status === '0' ? '正常' : '停用'}</span>
+    {accessorKey: 'status', header: '状态', cell: ({row}) => <div><DictionaryTag options={statusDictionary.options} value={row.original.status} />
       {row.original.id !== '1' ? <PermissionGate permission="system:user:edit"><Button label={row.original.status === '0' ? '停用' : '启用'} size="sm" variant="ghost" isDisabled={busy}
         aria-label={`${row.original.status === '0' ? '停用' : '启用'}用户 ${row.original.username}`} onClick={() => { setActionError(''); setAction({kind: 'status', user: row.original}); }} /></PermissionGate> : null}</div>},
     {accessorKey: 'createdAt', header: '创建时间', cell: ({row}) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleString('zh-CN') : '—'},
@@ -91,7 +94,7 @@ export function UsersPage() {
       <PermissionGate permission="system:user:resetPwd"><Button label="重置密码" size="sm" variant="ghost" aria-label={`重置密码 ${row.original.username}`} isDisabled={busy} onClick={() => { setActionError(''); setAction({kind: 'password', user: row.original, password: ''}); }} /></PermissionGate>
       <PermissionGate permission="system:user:edit"><Button label="分配角色" size="sm" variant="ghost" aria-label={`分配角色 ${row.original.username}`} isDisabled={busy} onClick={() => { void openRoles(row.original); }} /></PermissionGate>
     </div>}
-  ], [busy, data, loading, selection, openEditor, openRoles]);
+  ], [busy, data, loading, selection, openEditor, openRoles, statusDictionary.options]);
   function refresh(message = '') { setFeedback(message); setSelection({}); setVersion(value => value + 1); }
   function close() { setEditor(null); setAction(null); setImporting(null); setActionError(''); }
   function validPassword(password: string) { return password.length >= 5 && password.length <= 20 && !/[<>"'|\\]/.test(password); }
@@ -147,7 +150,7 @@ export function UsersPage() {
   const tree = useMemo(() => searchedDepartmentTree(departments, departmentSearch, collapsed), [departments, departmentSearch, collapsed]);
   const parentOptions = editor ? departmentTree(editor.options.departments).filter(row =>
     (row.department.status === '0' || row.department.id === editor.form.departmentId) && (row.path.toLowerCase().includes(parentSearch.trim().toLowerCase()) || row.department.id === editor.form.departmentId)) : [];
-  return <section className="posts-page users-page"><PageHeader title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理" />
+  return <section className="posts-page users-page"><PageHeader title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={sexDictionary} />
     <div className="user-layout"><aside className="user-departments" aria-label="用户部门筛选">
       <Input label="搜索部门" value={departmentSearch} onChange={setDepartmentSearch} />
       <Button label="全部部门" variant="ghost" onClick={() => { setDraft({...draft, departmentId: undefined}); setFilters({...filters, departmentId: undefined}); setPage(1); }} />
@@ -159,7 +162,7 @@ export function UsersPage() {
     </aside><div className="user-content">
       <form hidden={!showFilters} className="post-filters" onSubmit={event => { event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; } setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
         <Input label="登录账号筛选" value={draft.username} onChange={username => setDraft({...draft, username})} /><Input label="手机号码筛选" value={draft.phone} onChange={phone => setDraft({...draft, phone})} />
-        <label>用户状态筛选<select aria-label="用户状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><option value="0">正常</option><option value="1">停用</option></select></label>
+        <label>用户状态筛选<select aria-label="用户状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
         <label>开始日期<input aria-label="开始日期" type="date" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<input aria-label="结束日期" type="date" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
         <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} />
       </form>
@@ -184,8 +187,8 @@ export function UsersPage() {
       <Input label="搜索归属部门" value={parentSearch} onChange={setParentSearch} />
       <label>归属部门<select aria-label="归属部门" value={editor.form.departmentId ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, departmentId: event.target.value || undefined}})}><option value="">未指定部门</option>{editor.form.departmentId && !parentOptions.some(row => row.department.id === editor.form.departmentId) ? <option value={editor.form.departmentId}>当前归属部门</option> : null}{parentOptions.map(row => <option key={row.department.id} value={row.department.id}>{row.path}{row.department.status === '1' ? '（停用）' : ''}</option>)}</select></label>
       <Input label="手机号码" value={editor.form.phone ?? ''} isDisabled={busy} onChange={phone => setEditor({...editor, form: {...editor.form, phone}})} /><Input label="邮箱" value={editor.form.email ?? ''} isDisabled={busy} onChange={email => setEditor({...editor, form: {...editor.form, email}})} />
-      <label>用户性别<select aria-label="用户性别" value={editor.form.sex} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sex: event.target.value}})}><option value="0">男</option><option value="1">女</option><option value="2">未知</option></select></label>
-      <label>用户状态<select aria-label="用户状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><option value="0">正常</option><option value="1">停用</option></select></label>
+      <label>用户性别<select aria-label="用户性别" value={editor.form.sex} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sex: event.target.value}})}><DictionaryOptions options={sexDictionary.options} current={editor.form.sex} /></select></label>
+      <label>用户状态<select aria-label="用户状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
       <Choices label="岗位" options={editor.options.posts} selected={editor.form.postIds} disabled={busy} onChange={postIds => setEditor({...editor, form: {...editor.form, postIds}})} /><Choices label="角色" options={editor.options.roles} selected={editor.form.roleIds} disabled={busy} onChange={roleIds => setEditor({...editor, form: {...editor.form, roleIds}})} />
       <label>备注<textarea aria-label="备注" maxLength={500} value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="保存用户" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={close} /></div>
     </form></ResourceDialog> : null}

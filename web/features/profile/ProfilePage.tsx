@@ -1,3 +1,4 @@
+import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
 import {useEffect, useState, type FormEvent} from 'react';
 import {PageHeader} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
@@ -7,6 +8,7 @@ import {errorMessage} from '../../integration/errors';
 import {AvatarDialog} from './AvatarDialog';
 
 export function ProfilePage() {
+  const sexDictionary = useDictionary('sys_user_sex');
   const api = useApi(); const controls = useApplicationControls();
   const [profile, setProfile] = useState<ProfileResponse | null>(null); const [version, setVersion] = useState(0);
   const [form, setForm] = useState<UpdateProfileRequest>({displayName:'',email:'',phone:'',sex:'2'});
@@ -40,7 +42,7 @@ export function ProfilePage() {
     try { await api.changeMyPassword({oldPassword:passwords.oldPassword,newPassword:passwords.newPassword}); setPasswords({oldPassword:'',newPassword:'',confirmPassword:''}); setShowPasswords(false); setFeedback('密码已修改，请使用新密码登录。'); }
     catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
-  return <section className="profile-page"><PageHeader title="个人中心" description="维护个人资料、登录密码和头像。" />
+  return <section className="profile-page"><PageHeader title="个人中心" description="维护个人资料、登录密码和头像。" /><DictionaryNotice dictionary={sexDictionary} />
     {loadError ? <div><p role="alert">{loadError}</p><Button label="重试加载个人资料" onClick={() => setVersion(value => value+1)} /></div> : !profile ? <p role="status">正在加载个人资料…</p> :
     <div className="profile-layout"><aside className="profile-summary"><h2>个人信息</h2>
       <button className="profile-avatar" onClick={() => setAvatar(true)} aria-label="修改头像" disabled={busy}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="当前头像" /> : <span aria-hidden="true">{profile.displayName.slice(0,1)}</span>}</button>
@@ -56,7 +58,7 @@ export function ProfilePage() {
         <Input label="用户昵称" value={form.displayName} onChange={value => setForm({...form,displayName:value})} isDisabled={busy} />
         <Input label="手机号码" value={form.phone} onChange={value => setForm({...form,phone:value})} isDisabled={busy} />
         <Input label="邮箱" type="email" value={form.email} onChange={value => setForm({...form,email:value})} isDisabled={busy} />
-        <fieldset disabled={busy}><legend>性别</legend>{([['0','男'],['1','女'],['2','未知']] as const).map(([value,label]) => <label key={value}><input type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
+        <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><input type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
         <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => controls.navigate('/dashboard')} /></div>
       </form> : <form role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
         {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <Input key={key} label={['旧密码','新密码','确认新密码'][index]!} type={showPasswords ? 'text' : 'password'} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}

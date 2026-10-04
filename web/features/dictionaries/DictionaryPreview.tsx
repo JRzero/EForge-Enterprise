@@ -5,13 +5,13 @@ import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {errorMessage} from '../../integration/errors';
 import type {DictionaryEntryResponse, DictionaryTypeOption, DictionaryValueOption} from '../../generated/api';
-import {dictionaryPreview} from './preview';
+import {dictionaryPreview, DictionaryPreviewChangedError} from './preview';
 export function DictionaryPreview({type, statusOptions, onClose}: {type: DictionaryTypeOption; statusOptions: DictionaryValueOption[]; onClose: () => void}) {
   const api = useApi(), [rows, setRows] = useState<DictionaryEntryResponse[] | null>(null), [error, setError] = useState(''), [version, setVersion] = useState(0);
   useEffect(() => {
     const controller = new AbortController(); setRows(null); setError('');
     dictionaryPreview(page => api.listDictionaryEntries(type.id, {page, pageSize: 100}, controller.signal), controller.signal)
-      .then(value => {if (!controller.signal.aborted) setRows(value);}).catch(cause => {if (!controller.signal.aborted) setError(errorMessage(cause));});
+      .then(value => {if (!controller.signal.aborted) setRows(value);}).catch(cause => {if (!controller.signal.aborted) setError(cause instanceof DictionaryPreviewChangedError ? cause.message : errorMessage(cause));});
     return () => controller.abort();
   }, [api, type.id, version]);
   return <ResourceDialog titleId="dictionary-preview-title" busy={false} onCancel={onClose}><h2 id="dictionary-preview-title">字典预览：{type.name}</h2><p>{type.code}</p>

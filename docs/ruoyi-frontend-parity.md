@@ -30,12 +30,12 @@ It is a work inventory, not executable proof of completion.
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
-| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionary controls remain pending |
-| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionary controls pending |
+| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionaries integrated and verified locally; current CI/audit pending |
+| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionaries integrated and verified locally; current CI/audit pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
-| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared dictionary tags and query/cache shell behavior pending |
-| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Full page acceptance and shared integration remain pending |
+| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared status/visibility dictionaries verified locally; query/cache shell behavior pending |
+| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
@@ -466,5 +466,33 @@ committed contract and generated-client reproducibility passed.
 
 This is partial page acceptance. Further live pagination/type switching, type
 dates/bulk deletion/export, metadata and preview failure cases, and shared tags
-in existing resource pages remain required. CI for this implementation is pending.
+in existing resource pages remain required. Implementation
+`29bbe86e13bd86f6ebeeba4a9b779c5c77033188` passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37216715513)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37216715547).
 All other missing capability groups retain their original scope.
+
+## Shared dictionary and page acceptance checkpoint (2026-10-05)
+
+Status tags and filter/editor choices now load canonical dictionaries in posts,
+departments, roles/allocation, users and menus. Menu visibility and user/profile
+sex controls also use dictionary labels. Lookup runs independently of list
+loading, aborts on unmount and exposes retry. Existing select values remain
+retainable as raw codes when an option disappears. No client cache hides later
+dictionary edits. A real mutation/restoration test proves custom labels and CSS
+styles reach all five management pages, their filters/editors and sex controls.
+
+Real 12-type/105-entry tests cover date filtering, page boundaries, page size,
+whole preview, type switching, columns, filtered type XLSX and batch deletion.
+Deleting a last page now returns to the remaining last page. The fixture suite
+found and fixed preview consistency errors being mislabeled as network failures;
+a dedicated error retains the actual data-change explanation and retry action.
+Metadata failure and independent shared-lookup failure/recovery are covered.
+
+Local validation passes 188 backend tests, 42 web unit tests, lint/typecheck,
+build, 20 fixture and 21 live browser cases. All disposable module scripts,
+production-default checks, exact live OpenAPI and client reproducibility pass.
+Current implementation CI is pending. Further live editor CSS/style/default/sort
+boundaries, cache refresh UI, read-only dictionary grants and preview cancellation
+remain in the dictionary acceptance audit. The full shell and other missing
+groups remain required; this checkpoint does not complete the overall objective.

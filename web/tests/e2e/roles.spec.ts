@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './fixtures';
+import type {Page} from '@playwright/test';
 const id = '9007199254740993';
 const role = {id, name: '范围内角色', key: 'reader', sort: 1, status: '0', dataScope: '2', menuLinked: true, departmentLinked: true};
 async function session(page: Page, permissions: string[]) {

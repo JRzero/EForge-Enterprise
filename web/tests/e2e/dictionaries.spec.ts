@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './fixtures';
+import type {Page} from '@playwright/test';
 import type {DictionaryEntryResponse} from '../../generated/api';
 const id = '9007199254740993';
 const type = {id, name: '测试字典', code: 'test_dict', status: '0', remark: ''};
@@ -55,4 +56,23 @@ test('entry editor saves zero values, styling and defaults on the exact dictiona
   await page.getByRole('button', {name: '新增字典数据'}).click(); const dialog = page.getByRole('dialog');
   await dialog.getByLabel('数据标签').fill('零值'); await dialog.getByLabel('数据键值').fill('0'); await dialog.getByLabel('样式属性').fill('custom-tag'); await dialog.getByLabel('回显样式').selectOption('PRIMARY'); await dialog.getByLabel('默认项').check(); await dialog.getByLabel('字典状态').selectOption('1'); await dialog.getByRole('button', {name: '保存字典'}).click();
   await expect(dialog).toHaveCount(0); expect(payload).toEqual({dictionaryId: id, label: '零值', value: '0', sort: 0, style: 'PRIMARY', cssClass: 'custom-tag', defaultEntry: true, status: '1', remark: ''});
+});
+
+test('metadata failure disables editing until retry and inconsistent preview supports recovery', async ({page}) => {
+  await page.route('**/api/v1/system/dictionaries?*', route => route.fulfill({json: {items: [type], total: 1, page: 1, pageSize: 10}}));
+  await page.route('**/api/v1/system/dictionaries/cache/refresh', route => route.fulfill({status: 204}));
+  await authenticate(page, ['system:dict:list', 'system:dict:add', 'system:dict:remove']);
+  await expect(page.getByRole('button', {name: '新增字典类型'})).toBeEnabled();
+  let failMetadata = true;
+  await page.route('**/api/v1/system/dictionaries/options', route => route.fulfill(failMetadata ? {status: 503, json: {}} : {json: [type]}));
+  await page.getByRole('button', {name: '刷新字典缓存'}).click(); await expect(page.getByRole('alert')).toContainText('字典选项加载失败'); await expect(page.getByRole('button', {name: '新增字典类型'})).toBeDisabled();
+  failMetadata = false; await page.getByRole('button', {name: '重试字典选项'}).click(); await expect(page.getByRole('button', {name: '新增字典类型'})).toBeEnabled();
+  let drift = true;
+  await page.route('**/api/v1/system/dictionary-entries?*', route => {
+    const current = Number(new URL(route.request().url()).searchParams.get('page'));
+    const items = Array.from({length: current === 1 ? 100 : 1}, (_, index) => {const value = (current - 1) * 100 + index; return {id: String(value + 1), dictionaryId: id, dictionaryCode: type.code, label: `预览${value}`, value: String(value), sort: value, status: '0', style: 'DEFAULT', defaultEntry: false};});
+    return route.fulfill({json: {items, page: current, pageSize: 100, total: current === 2 && drift ? 102 : 101}});
+  });
+  await page.getByRole('button', {name: '预览字典 测试字典'}).click(); const dialog = page.getByRole('dialog'); await expect(dialog.getByRole('alert')).toContainText('字典数据已变化'); drift = false; await dialog.getByRole('button', {name: '重试预览'}).click(); await expect(dialog.locator('p[role=status]')).toHaveText('共计 101 条，正常 101 条，停用 0 条'); await expect(dialog.getByText('预览100', {exact: true})).toBeAttached(); await page.keyboard.press('Escape');
+  await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期');
 });

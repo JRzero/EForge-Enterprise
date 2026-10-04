@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './fixtures';
+import type {Page} from '@playwright/test';
 const bootstrap = {user: {id: '1', username: 'admin', displayName: '管理员'}, roles: ['admin'], permissions: ['app:dashboard:view'],
   navigation: [{key: 'workspace', type: 'GROUP', label: '我的空间', order: 0, children: [
     {key: 'dashboard', type: 'ROUTE', routeId: 'dashboard', label: '工作台', order: 0, children: []},

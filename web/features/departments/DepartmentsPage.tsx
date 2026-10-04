@@ -1,3 +1,5 @@
+import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
+import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -13,6 +15,7 @@ const blank: DepartmentRequest = {parentId: '', name: '', sort: 0, status: '0', 
 type TreeRow = ReturnType<typeof departmentTree>[number];
 
 export function DepartmentsPage() {
+  const statusDictionary = useDictionary('sys_normal_disable');
   const api = useApi();
   const [draft, setDraft] = useState(emptyFilters), [filters, setFilters] = useState(emptyFilters);
   const [rows, setRows] = useState<DepartmentResponse[]>([]), [version, setVersion] = useState(0);
@@ -50,14 +53,14 @@ export function DepartmentsPage() {
     {id: 'sort', header: '显示顺序', cell: ({row}) => <PermissionGate permission="system:dept:edit" fallback={<span>{row.original.department.sort}</span>}>
       <input type="number" min={0} max={2147483647} step={1} className="department-sort" aria-label={`排序 ${row.original.department.name}`} disabled={busy}
         value={sorts[row.original.department.id] ?? row.original.department.sort} onChange={event => setSorts(value => ({...value, [row.original.department.id]: Number(event.target.value)}))} /></PermissionGate>},
-    {id: 'status', header: '状态', cell: ({row}) => <span className={`post-status status-${row.original.department.status}`}>{row.original.department.status === '0' ? '正常' : '停用'}</span>},
+    {id: 'status', header: '状态', cell: ({row}) => <DictionaryTag options={statusDictionary.options} value={row.original.department.status} />},
     {id: 'createdAt', header: '创建时间', cell: ({row}) => row.original.department.createdAt ? new Date(row.original.department.createdAt).toLocaleString('zh-CN') : '—'},
     {id: 'actions', header: '操作', cell: ({row}) => <div className="post-row-actions">
       <PermissionGate permission="system:dept:edit"><Button label="修改" aria-label={`修改部门 ${row.original.department.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { void openEditor(row.original.department.id); }} /></PermissionGate>
       <PermissionGate permission="system:dept:add"><Button label="新增" aria-label={`新增子部门 ${row.original.department.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { void openEditor(undefined, row.original.department.id); }} /></PermissionGate>
       {row.original.department.parentId !== '0' ? <PermissionGate permission="system:dept:remove"><Button label="删除" aria-label={`删除部门 ${row.original.department.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { setActionError(''); setDeleting(row.original.department); }} /></PermissionGate> : null}
     </div>}
-  ], [collapsed, sorts, busy, openEditor]);
+  ], [collapsed, sorts, busy, openEditor, statusDictionary.options]);
   async function save(event: FormEvent) {
     event.preventDefault(); if (!editor || busy) return;
     const form = editor.form;
@@ -90,10 +93,10 @@ export function DepartmentsPage() {
   }
   const options = useMemo(() => departmentTree(editor?.options ?? []), [editor?.options]);
   return <section className="posts-page departments-page">
-    <PageHeader title="部门管理" description="维护组织层级、部门状态与显示顺序。" eyebrow="系统管理" />
+    <PageHeader title="部门管理" description="维护组织层级、部门状态与显示顺序。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} />
     <form hidden={!showFilters} className="post-filters" onSubmit={event => { event.preventDefault(); setFilters({...draft}); setVersion(value => value + 1); }}>
       <Input label="部门名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>部门状态筛选<select aria-label="部门状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><option value="0">正常</option><option value="1">停用</option></select></label>
+      <label>部门状态筛选<select aria-label="部门状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} />
     </form>
     <div className="post-toolbar">
@@ -121,7 +124,7 @@ export function DepartmentsPage() {
         <Input label="负责人" value={editor.form.leader ?? ''} isDisabled={busy} onChange={leader => setEditor({...editor, form: {...editor.form, leader}})} />
         <Input label="联系电话" value={editor.form.phone ?? ''} isDisabled={busy} onChange={phone => setEditor({...editor, form: {...editor.form, phone}})} />
         <Input label="邮箱" type="email" value={editor.form.email ?? ''} isDisabled={busy} onChange={email => setEditor({...editor, form: {...editor.form, email}})} />
-        <label>部门状态<select aria-label="部门状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><option value="0">正常</option><option value="1">停用</option></select></label>
+        <label>部门状态<select aria-label="部门状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
         {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="保存部门" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setEditor(null); setActionError(''); }} /></div>
       </form></ResourceDialog> : null}
     {deleting ? <ResourceDialog titleId="department-delete-title" alert busy={busy} onCancel={() => { setDeleting(null); setActionError(''); }}><h2 id="department-delete-title">确认删除部门</h2>

@@ -1,3 +1,5 @@
+import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
+import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
 import {DataTable, type ColumnDef, type RowSelectionState} from '@eforge/data';
@@ -10,7 +12,7 @@ import {errorMessage} from '../../integration/errors';
 import {useRoleSnapshot} from './useRoleSnapshot';
 
 function RoleUserList({roleId, assigned, version, busy, onAction}: {roleId: string; assigned: boolean; version: number; busy: boolean; onAction: (ids: string[]) => void}) {
-  const api = useApi();
+  const api = useApi(), statusDictionary = useDictionary('sys_normal_disable');
   const [draft, setDraft] = useState({username: '', phone: ''}), [filters, setFilters] = useState({username: '', phone: ''});
   const [page, setPage] = useState(1), [pageSize, setPageSize] = useState(10), [reload, setReload] = useState(0), [showFilters, setShowFilters] = useState(true);
   const [data, setData] = useState<PageResponseUserResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
@@ -28,12 +30,12 @@ function RoleUserList({roleId, assigned, version, busy, onAction}: {roleId: stri
       onChange={checked => setSelection(checked ? Object.fromEntries((data?.items ?? []).filter(user => user.id !== '1').map(user => [user.id, true])) : {})} />,
       cell: ({row}) => <Checkbox label={`选择授权用户 ${row.original.username}`} isLabelHidden size="sm" isDisabled={busy || row.original.id === '1'} value={!!selection[row.original.id]} onChange={checked => setSelection(previous => ({...previous, [row.original.id]: checked}))} />},
     {accessorKey: 'username', header: '登录账号'}, {accessorKey: 'displayName', header: '用户昵称'}, {accessorKey: 'email', header: '邮箱'}, {accessorKey: 'phone', header: '手机'},
-    {accessorKey: 'status', header: '状态', cell: ({row}) => <span className={`post-status status-${row.original.status}`}>{row.original.status === '0' ? '正常' : '停用'}</span>},
+    {accessorKey: 'status', header: '状态', cell: ({row}) => <DictionaryTag options={statusDictionary.options} value={row.original.status} />},
     {accessorKey: 'createdAt', header: '创建时间', cell: ({row}) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleString('zh-CN') : '—'},
     ...(assigned ? [{id: 'actions', header: '操作', cell: ({row}: {row: {original: UserResponse}}) => row.original.id === '1' ? <span>受保护</span> : <PermissionGate permission="system:role:edit"><Button label="取消授权" aria-label={`取消授权 ${row.original.username}`} variant="ghost" size="sm" isDisabled={busy || roleId === '1'} onClick={() => onAction([row.original.id])} /></PermissionGate>}] : [])
-  ], [busy, loading, data, selection, assigned, roleId, onAction]);
+  ], [busy, loading, data, selection, assigned, roleId, onAction, statusDictionary.options]);
   function query(event: FormEvent) { event.preventDefault(); setPage(1); setFilters({...draft}); setReload(previous => previous + 1); }
-  return <div className="role-user-list"><form hidden={!showFilters} className="post-filters" onSubmit={query}>
+  return <div className="role-user-list"><DictionaryNotice dictionary={statusDictionary} /><form hidden={!showFilters} className="post-filters" onSubmit={query}>
     <Input label="用户账号筛选" value={draft.username} isDisabled={busy} onChange={username => setDraft({...draft, username})} /><Input label="手机号码筛选" value={draft.phone} isDisabled={busy} onChange={phone => setDraft({...draft, phone})} />
     <Button label="查询用户" type="submit" isDisabled={busy} /><Button label="重置用户筛选" variant="secondary" isDisabled={busy} onClick={() => { setDraft({username: '', phone: ''}); setFilters({username: '', phone: ''}); setPage(1); setReload(previous => previous + 1); }} />
   </form><div className="post-toolbar"><PermissionGate permission="system:role:edit"><Button label={assigned ? '批量取消授权' : '确认添加用户'} isDisabled={busy || !selected.length || roleId === '1'} onClick={() => onAction(selected)} /></PermissionGate>

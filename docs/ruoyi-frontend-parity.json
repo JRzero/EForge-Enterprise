@@ -311,13 +311,22 @@
         "web/tests/live/departments.spec.ts",
         "web/tests/e2e/departments.spec.ts",
         "web/tests/unit/department-tree.test.ts",
-        "docs/security-review-departments-v1.md"
+        "docs/security-review-departments-v1.md",
+        "web/app/useDictionary.tsx",
+        "web/tests/live/dictionaries.spec.ts"
       ],
       "lastVerified": {
         "implementationCommit": "a0ef1f2141e9b09f5c6f38e923835ec2d690f091",
         "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617317",
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617309",
         "conclusion": "success"
+      },
+      "sharedDictionaryValidation": {
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
     {
@@ -346,18 +355,18 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Complete data-page pagination/type switching/field clearing and failure-recovery browser acceptance",
-        "Live multi-page preview and shared dictionary integration into existing resource pages"
+        "Live editor CSS/style/default/sort boundaries and cancellation acceptance",
+        "Shared lookup removed/unknown-option and read-only-grant final audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
-        "fixtureBrowser": 18,
-        "liveBrowser": 19,
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Partial dictionary page acceptance; remaining requirements are explicit."
+        "scope": "Dictionary pagination/dates/bulk/export/whole preview, shared dictionary mutation and all module regressions; remaining boundaries stay explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -395,18 +404,18 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Complete type-page dates/paging/selection/bulk deletion/export and denied-user browser acceptance",
-        "Live multi-page preview, metadata failures and shared dictionary integration into existing resource pages"
+        "Live cache-refresh UI, read-only grants/internal-route denial and preview cancellation",
+        "Final full dictionary page acceptance audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
-        "fixtureBrowser": 18,
-        "liveBrowser": 19,
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Partial dictionary page acceptance; remaining requirements are explicit."
+        "scope": "Dictionary pagination/dates/bulk/export/whole preview, shared dictionary mutation and all module regressions; remaining boundaries stay explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -449,10 +458,11 @@
         "web/tests/e2e/menus.spec.ts",
         "web/tests/live/menus.spec.ts",
         "docs/adr/0014-pinned-menu-icon-assets.md",
-        "sql/migrations/V012__menus_route.sql"
+        "sql/migrations/V012__menus_route.sql",
+        "web/app/useDictionary.tsx",
+        "web/tests/live/dictionaries.spec.ts"
       ],
       "remaining": [
-        "Shared dictionary-driven tags",
         "Shell icon rendering, query/cache metadata behavior and remaining embedded-route capabilities"
       ],
       "lastVerifiedCoreApi": {
@@ -483,6 +493,13 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236366",
         "conclusion": "success",
         "scope": "Menu React page, all 88 pinned SVG icons, cross-platform asset hashes, hierarchy/scope/route guards, atomic sorting, existing-session revocation and full module regressions. Shared dictionary tags and remaining shell behavior stay pending."
+      },
+      "sharedDictionaryValidation": {
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
     {
@@ -514,7 +531,9 @@
         "PostControllerTest",
         "server/scripts/verify-posts-integration.ps1",
         "web/tests/live/posts.spec.ts",
-        "web/tests/e2e/posts.spec.ts"
+        "web/tests/e2e/posts.spec.ts",
+        "web/app/useDictionary.tsx",
+        "web/tests/live/dictionaries.spec.ts"
       ],
       "validation": {
         "implementationCommit": "9bc400d8d46fef1e0d184dd6752d0370061bb465",
@@ -522,6 +541,13 @@
         "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473129",
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473141",
         "conclusion": "success"
+      },
+      "sharedDictionaryValidation": {
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
     {
@@ -541,7 +567,7 @@
         "authUserSelectAll",
         "deptTreeSelect"
       ],
-      "state": "partial-shared-controls",
+      "state": "partial-validation",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/RoleController.java",
         "RoleControllerTest",
@@ -558,10 +584,12 @@
         "web/tests/e2e/roles.spec.ts",
         "web/tests/live/roles.spec.ts",
         "docs/adr/0012-role-user-internal-route.md",
-        "sql/migrations/V010__roles_route.sql"
+        "sql/migrations/V010__roles_route.sql",
+        "web/app/useDictionary.tsx",
+        "web/tests/live/dictionaries.spec.ts"
       ],
       "remaining": [
-        "Shared dictionary-driven status tags when dictionary contracts are implemented"
+        "Current shared-dictionary implementation CI and final per-feature acceptance audit"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "fc4d90670db58c413bb8f8f71a5a025ff4792ce5",
@@ -582,6 +610,13 @@
           "fixtureBrowser": 12,
           "liveBrowser": 15
         }
+      },
+      "sharedDictionaryValidation": {
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
     {
@@ -602,7 +637,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-shared-controls",
+      "state": "partial-validation",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -619,7 +654,9 @@
         "web/tests/live/profile.spec.ts",
         "web/tests/e2e/profile.spec.ts",
         "web/tests/unit/profile-crop.test.ts",
-        "docs/adr/0011-authenticated-internal-routes.md"
+        "docs/adr/0011-authenticated-internal-routes.md",
+        "web/app/useDictionary.tsx",
+        "web/tests/live/dictionaries.spec.ts"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "fb8d9a0718f51e86fe7abdf2b33b3808a1c6c6e1",
@@ -629,7 +666,7 @@
         "scope": "Core administration APIs and regression of existing pages; user frontend parity remains incomplete."
       },
       "remaining": [
-        "Shared dictionary-driven controls when dictionary contracts are implemented"
+        "Current shared-dictionary implementation CI and final per-feature acceptance audit"
       ],
       "lastVerifiedAdministration": {
         "implementationCommit": "7c0b3cd439ba7a063adc458f183bdf51f130ab35",
@@ -651,6 +688,13 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064167",
         "conclusion": "success",
         "scope": "Personal profile/password forms, avatar crop/drag/zoom/rotation/preview/upload, internal authenticated route, keyboard/mobile and no-grant real browser validation."
+      },
+      "sharedDictionaryValidation": {
+        "fixtureBrowser": 20,
+        "liveBrowser": 21,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
     {

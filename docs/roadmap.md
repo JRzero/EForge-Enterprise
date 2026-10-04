@@ -47,12 +47,12 @@
 
 ## Phase 3 — Core enterprise modules
 
-- [ ] user management (administration/import and profile APIs verified in CI; React profile/crop, keyboard/mobile and real browser checks verified in CI; shared dictionary integration pending)
-- [ ] role management (canonical API/client, React administration/allocation pages and interactive menu/department trees verified locally and in CI; shared dictionary integration pending; verification evidence in the parity inventory)
+- [ ] user management (administration/import and profile verified in CI; shared status/sex dictionaries integrated and verified locally; current CI and full capability audit pending)
+- [ ] role management (canonical API/client, administration/allocation pages and grant/department trees verified in CI; shared status dictionaries integrated and verified locally; current CI and full capability audit pending)
 - [x] department management (canonical hierarchy API, EForge page, live CRUD/sort/data-scope verification)
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
-- [ ] menu/permission management (canonical API/client and React tree CRUD/filter/sort, full icon picker, scoped parent choices and existing-session refresh verified locally and in CI; shared dictionary tags and query/cache shell behavior pending)
-- [ ] dictionary (canonical APIs/client verified in CI; React type/data pages, preview and tag component implemented with local CRUD/export acceptance; full page browser acceptance and shared integration pending)
+- [ ] menu/permission management (canonical API/client and React tree/icons/scope/session refresh verified in CI; status/visibility dictionaries verified locally; query/cache shell behavior pending)
+- [ ] dictionary (type/data pages, paging/dates, whole preview, CRUD/bulk/export and shared integration verified locally; remaining field/abort/cache browser acceptance and current CI pending)
 - [ ] configuration
 - [ ] notices
 - [ ] operation/login logs

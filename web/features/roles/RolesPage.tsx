@@ -1,3 +1,5 @@
+import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
+import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -14,6 +16,7 @@ const emptyFilters = {name: '', key: '', status: '', beginDate: '', endDate: ''}
 const labels = {id: '角色编号', name: '角色名称', key: '权限字符', sort: '显示顺序', status: '状态', createdAt: '创建时间'};
 type Action = {kind: 'delete'; ids: string[]} | {kind: 'status'; role: RoleResponse};
 export function RolesPage() {
+  const statusDictionary = useDictionary('sys_normal_disable');
   const api = useApi(), controls = useApplicationControls();
   const snapshot = useRoleSnapshot();
   const [draft, setDraft] = useState(emptyFilters), [filters, setFilters] = useState(emptyFilters);
@@ -51,7 +54,7 @@ export function RolesPage() {
       onChange={checked => setSelection(checked ? Object.fromEntries((data?.items ?? []).filter(role => role.id !== '1').map(role => [role.id, true])) : {})} />,
       cell: ({row}) => <Checkbox label={`选择角色 ${row.original.name}`} isLabelHidden size="sm" isDisabled={busy || row.original.id === '1'} value={!!selection[row.original.id]} onChange={checked => setSelection(previous => ({...previous, [row.original.id]: checked}))} />},
     {accessorKey: 'id', header: '角色编号'}, {accessorKey: 'name', header: '角色名称'}, {accessorKey: 'key', header: '权限字符'}, {accessorKey: 'sort', header: '显示顺序'},
-    {accessorKey: 'status', header: '状态', cell: ({row}) => <div className="post-row-actions"><span className={`post-status status-${row.original.status}`}>{row.original.status === '0' ? '正常' : '停用'}</span>{row.original.id !== '1' ? <PermissionGate permission="system:role:edit"><Button label={row.original.status === '0' ? '停用' : '启用'} aria-label={`${row.original.status === '0' ? '停用' : '启用'}角色 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { setActionError(''); setAction({kind: 'status', role: row.original}); }} /></PermissionGate> : null}</div>},
+    {accessorKey: 'status', header: '状态', cell: ({row}) => <div className="post-row-actions"><DictionaryTag options={statusDictionary.options} value={row.original.status} />{row.original.id !== '1' ? <PermissionGate permission="system:role:edit"><Button label={row.original.status === '0' ? '停用' : '启用'} aria-label={`${row.original.status === '0' ? '停用' : '启用'}角色 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { setActionError(''); setAction({kind: 'status', role: row.original}); }} /></PermissionGate> : null}</div>},
     {accessorKey: 'createdAt', header: '创建时间', cell: ({row}) => row.original.createdAt ? new Date(row.original.createdAt).toLocaleString('zh-CN') : '—'},
     {id: 'actions', header: '操作', cell: ({row}) => row.original.id === '1' ? <span>受保护</span> : <div className="post-row-actions">
       <PermissionGate permission="system:role:edit"><Button label="修改" aria-label={`修改角色 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { void openEditor(row.original.id); }} />
@@ -59,7 +62,7 @@ export function RolesPage() {
         <Button label="分配用户" aria-label={`分配用户 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => controls.navigate(`/role/users/${row.original.id}`)} /></PermissionGate>
       <PermissionGate permission="system:role:remove"><Button label="删除" aria-label={`删除角色 ${row.original.name}`} variant="ghost" size="sm" isDisabled={busy} onClick={() => { setActionError(''); setAction({kind: 'delete', ids: [row.original.id]}); }} /></PermissionGate>
     </div>}
-  ], [busy, loading, data, selection, openEditor, openScope, controls]);
+  ], [busy, loading, data, selection, openEditor, openScope, controls, statusDictionary.options]);
   async function confirm() {
     if (!action || busy) return; setBusy(true); setActionError('');
     try {
@@ -77,9 +80,9 @@ export function RolesPage() {
     event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; }
     setActionError(''); setPage(1); setFilters({...draft}); setVersion(previous => previous + 1);
   }
-  return <section className="posts-page roles-page"><PageHeader title="角色管理" description="管理角色、菜单权限、数据范围与用户授权。" eyebrow="系统管理" />
+  return <section className="posts-page roles-page"><PageHeader title="角色管理" description="管理角色、菜单权限、数据范围与用户授权。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} />
     <form hidden={!showFilters} className="post-filters" onSubmit={query}><Input label="角色名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <Input label="权限字符筛选" value={draft.key} onChange={key => setDraft({...draft, key})} /><label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><option value="0">正常</option><option value="1">停用</option></select></label>
+      <Input label="权限字符筛选" value={draft.key} onChange={key => setDraft({...draft, key})} /><label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
       <label>开始日期<input type="date" aria-label="开始日期" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<input type="date" aria-label="结束日期" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh(); }} />
     </form><div className="post-toolbar"><PermissionGate permission="system:role:add"><Button label="新增角色" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
@@ -93,7 +96,7 @@ export function RolesPage() {
     {snapshot.error ? <div role="alert"><p>角色操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无角色" pagination={false} sortable={false} showColumnVisibility={false} columnVisibility={visibility} getRowId={row => row.id} /></div>
     <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => { setPageSize(Number(event.target.value)); setPage(1); }}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label><Button label="上一页" variant="secondary" isDisabled={loading || page === 1} onClick={() => setPage(previous => previous - 1)} /><Button label="下一页" variant="secondary" isDisabled={loading || !data || page * pageSize >= data.total} onClick={() => setPage(previous => previous + 1)} /></div>
-    {editor ? <RoleEditor detail={editor.detail} menus={editor.menus} onClose={() => setEditor(null)} onSaved={() => saved('角色已保存。')} /> : null}
+    {editor ? <RoleEditor statusOptions={statusDictionary.options} detail={editor.detail} menus={editor.menus} onClose={() => setEditor(null)} onSaved={() => saved('角色已保存。')} /> : null}
     {scope ? <RoleScopeDialog id={scope.role.id} name={scope.role.name} snapshot={scope.snapshot} onClose={() => setScope(null)} onSaved={() => saved('数据权限已保存。')} /> : null}
     {action ? <ResourceDialog titleId="role-action-title" alert busy={busy} onCancel={() => { setAction(null); setActionError(''); }}><h2 id="role-action-title">{action.kind === 'delete' ? '确认删除角色' : `确认${action.role.status === '0' ? '停用' : '启用'}角色`}</h2><p>{action.kind === 'delete' ? `将删除所选的 ${action.ids.length} 个角色。已分配给用户的角色无法删除。` : `角色：${action.role.name}`}</p>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label={action.kind === 'delete' ? '确认删除' : '确认状态变更'} isDisabled={busy} onClick={() => { void confirm(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setAction(null); setActionError(''); }} /></div></ResourceDialog> : null}
   </section>;

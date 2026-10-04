@@ -1,3 +1,5 @@
+import {DictionaryOptions} from '../../app/useDictionary';
+import type {DictionaryValueOption} from '../../generated/api';
 import {useMemo, useState, type FormEvent} from 'react';
 import {Button, Input} from '@eforge/ui';
 import type {MenuResponse, MenuRouteOption, MenuWriteRequest} from '../../generated/api';
@@ -8,7 +10,7 @@ import {menuParents} from './tree';
 import {IconPicker} from './IconPicker';
 
 export const menuTypeLabels = {GROUP: '目录', ROUTE: '菜单', EXTERNAL: '外链', FUNCTION: '按钮'};
-export function MenuEditor({detail, parentId, options, routes, onClose, onSaved}: {detail: MenuResponse | null; parentId: string; options: MenuResponse[]; routes: MenuRouteOption[]; onClose: () => void; onSaved: () => Promise<void>}) {
+export function MenuEditor({visibilityOptions, statusOptions, detail, parentId, options, routes, onClose, onSaved}: {visibilityOptions: DictionaryValueOption[]; statusOptions: DictionaryValueOption[]; detail: MenuResponse | null; parentId: string; options: MenuResponse[]; routes: MenuRouteOption[]; onClose: () => void; onSaved: () => Promise<void>}) {
   const api = useApi(); const [form, setForm] = useState<MenuWriteRequest>(() => detail ? {key: detail.key ?? '', name: detail.name, parentId: detail.parentId, sort: detail.sort, type: detail.type, status: detail.status, visible: detail.visible, routeId: detail.routeId ?? '', externalUrl: detail.externalUrl ?? '', permission: detail.permission ?? '', icon: detail.icon ?? '', remark: detail.remark ?? '', groupPath: detail.groupPath ?? '', queryText: detail.queryText ?? '', cached: detail.cached}
     : {key: '', name: '', parentId, sort: 0, type: 'GROUP', status: '0', visible: true, groupPath: '', cached: true, permission: '', icon: '', remark: '', queryText: ''});
   const [search, setSearch] = useState(''), [busy, setBusy] = useState(false), [error, setError] = useState('');
@@ -49,8 +51,8 @@ export function MenuEditor({detail, parentId, options, routes, onClose, onSaved}
     {form.type === 'EXTERNAL' ? <Input label="外链地址" value={form.externalUrl ?? ''} isDisabled={busy} onChange={externalUrl => setForm({...form, externalUrl})} /> : null}
     <Input label="权限标识" value={form.permission ?? ''} isDisabled={busy || form.type === 'ROUTE' && !!form.routeId} onChange={permission => setForm({...form, permission})} />
     {form.type !== 'FUNCTION' ? <><IconPicker value={form.icon ?? ''} disabled={busy} onChange={icon => setForm({...form, icon})} />
-      <label>显示状态<select aria-label="显示状态" disabled={busy} value={form.visible ? 'show' : 'hide'} onChange={event => setForm({...form, visible: event.target.value === 'show'})}><option value="show">显示</option><option value="hide">隐藏</option></select></label></> : null}
-    <label>菜单状态<select aria-label="菜单状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><option value="0">正常</option><option value="1">停用</option></select></label>
+      <label>显示状态<select aria-label="显示状态" disabled={busy} value={form.visible ? 'show' : 'hide'} onChange={event => setForm({...form, visible: event.target.value === 'show'})}><DictionaryOptions options={visibilityOptions} current={form.visible ? 'show' : 'hide'} /></select></label></> : null}
+    <label>菜单状态<select aria-label="菜单状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><DictionaryOptions options={statusOptions} current={form.status} /></select></label>
     <label>备注<textarea aria-label="备注" maxLength={500} disabled={busy} value={form.remark ?? ''} onChange={event => setForm({...form, remark: event.target.value})} /></label>
     {error ? <p role="alert">{error}</p> : null}<div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存菜单'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={onClose} /></div>
   </form></ResourceDialog>;
