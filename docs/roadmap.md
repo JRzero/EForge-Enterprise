@@ -52,7 +52,7 @@
 - [x] department management (canonical hierarchy API, EForge page, live CRUD/sort/data-scope verification)
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
 - [ ] menu/permission management (canonical API/client and React tree CRUD/filter/sort, full icon picker, scoped parent choices and existing-session refresh verified locally and in CI; shared dictionary tags and query/cache shell behavior pending)
-- [ ] dictionary (canonical type/data APIs, generated client, Redis rename/invalidation and atomic batch guards verified locally; React pages, preview and shared labels pending)
+- [ ] dictionary (canonical type/data APIs, generated client, Redis rename/invalidation and atomic batch guards verified locally and in CI; React pages, preview and shared labels pending)
 - [ ] configuration
 - [ ] notices
 - [ ] operation/login logs

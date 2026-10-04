@@ -35,7 +35,7 @@ It is a work inventory, not executable proof of completion.
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared dictionary tags and query/cache shell behavior pending |
-| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Canonical type/data API and generated client verified locally; React pages, preview and shared tags pending |
+| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Canonical type/data API and generated client verified locally and in CI; React pages, preview and shared tags pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
@@ -435,5 +435,10 @@ browser regressions passed. Generated dictionary transport preserves large IDs,
 filters, repeated values and binary exports; cache failure supports session-safe
 retry and 401 clears it. All module runtime scripts, login, `/getInfo`, Redis
 session/TTL, route seeds, exact live OpenAPI equality and generated reproducibility
-passed. Current API/client CI is pending. React dictionary type/data pages,
-preview, shared labels and their own browser acceptance remain required.
+passed. Implementation `8d8cea038a1a7ecbd2269af9a055b6157bb9e231` passed all
+three [server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558469)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558391).
+Linux verification includes the actual Redis ACL fault/MySQL rollback, all module
+scripts and eighteen live browser regressions, and exact exported OpenAPI equality.
+React dictionary type/data pages, preview, shared labels and their own browser
+acceptance remain required. The full frontend objective stays active.

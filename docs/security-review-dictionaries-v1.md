@@ -62,3 +62,13 @@ It denies only DEL/UNLINK on its disposable Redis instance to prove a 503 rolls
 back both actual type and entry rename updates, then restores those commands.
 Final test counts and CI evidence belong in the parity inventory. React dictionary
 pages, preview, shared tags and their browser acceptance remain required.
+
+Implementation `8d8cea038a1a7ecbd2269af9a055b6157bb9e231` passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558469)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558391).
+Local verification passed 188 backend tests, including eighteen dictionary cases
+and all ten unchanged data-scope cases; lint/typecheck, 37 web unit tests, build,
+fifteen fixture and eighteen live browser cases. Both Windows and Linux disposable
+runtime checks passed actual dictionary/previous-module operations, Redis ACL
+fault/MySQL rollback and exact exported OpenAPI equality. Generated clients
+reproduce. This evidence proves the API/client slice, not dictionary UI parity.

@@ -331,9 +331,33 @@
         "delData"
       ],
       "state": "partial-api-client",
-      "evidence": ["DictionaryControllerTest", "server/scripts/verify-dictionaries-integration.ps1", "docs/security-review-dictionaries-v1.md", "web/generated/api.ts", "web/integration/api.ts", "web/tests/unit/dictionary-api.test.ts"],
-      "remaining": ["React data page, filtering/paging/selection/CRUD/batch deletion/export and keyboard/mobile acceptance", "Dictionary preview and shared tag/default controls"],
-      "localValidation": {"backend": 188, "webUnit": 37, "fixtureBrowser": 15, "liveBrowser": 18, "conclusion": "success", "apiCi": "pending"}
+      "evidence": [
+        "DictionaryControllerTest",
+        "server/scripts/verify-dictionaries-integration.ps1",
+        "docs/security-review-dictionaries-v1.md",
+        "web/generated/api.ts",
+        "web/integration/api.ts",
+        "web/tests/unit/dictionary-api.test.ts"
+      ],
+      "remaining": [
+        "React data page, filtering/paging/selection/CRUD/batch deletion/export and keyboard/mobile acceptance",
+        "Dictionary preview and shared tag/default controls"
+      ],
+      "localValidation": {
+        "backend": 188,
+        "webUnit": 37,
+        "fixtureBrowser": 15,
+        "liveBrowser": 18,
+        "conclusion": "success",
+        "apiCi": "success"
+      },
+      "lastVerifiedCoreApi": {
+        "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558469",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558391",
+        "conclusion": "success",
+        "scope": "Canonical type/data contracts, original permissions and consumer semantics, atomic batch guards, real unique indexes/concurrent creation, rename/Redis invalidation, actual Redis fault/MySQL rollback and all existing module/browser regressions; dictionary React pages and shared controls remain pending."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/dict/type.js",
@@ -347,9 +371,34 @@
         "optionselect"
       ],
       "state": "partial-api-client",
-      "evidence": ["DictionaryControllerTest", "server/scripts/verify-dictionaries-integration.ps1", "sql/migrations/V013__dictionary_type_uniqueness.sql", "docs/security-review-dictionaries-v1.md", "web/generated/api.ts", "web/integration/api.ts", "web/tests/unit/dictionary-api.test.ts"],
-      "remaining": ["React type page, filtering/dates/paging/selection/CRUD/batch deletion/export/cache refresh", "Preview/detail navigation, shared dictionary labels and keyboard/mobile browser acceptance"],
-      "localValidation": {"backend": 188, "webUnit": 37, "fixtureBrowser": 15, "liveBrowser": 18, "conclusion": "success", "apiCi": "pending"}
+      "evidence": [
+        "DictionaryControllerTest",
+        "server/scripts/verify-dictionaries-integration.ps1",
+        "sql/migrations/V013__dictionary_type_uniqueness.sql",
+        "docs/security-review-dictionaries-v1.md",
+        "web/generated/api.ts",
+        "web/integration/api.ts",
+        "web/tests/unit/dictionary-api.test.ts"
+      ],
+      "remaining": [
+        "React type page, filtering/dates/paging/selection/CRUD/batch deletion/export/cache refresh",
+        "Preview/detail navigation, shared dictionary labels and keyboard/mobile browser acceptance"
+      ],
+      "localValidation": {
+        "backend": 188,
+        "webUnit": 37,
+        "fixtureBrowser": 15,
+        "liveBrowser": 18,
+        "conclusion": "success",
+        "apiCi": "success"
+      },
+      "lastVerifiedCoreApi": {
+        "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558469",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37214558391",
+        "conclusion": "success",
+        "scope": "Canonical type/data contracts, original permissions and consumer semantics, atomic batch guards, real unique indexes/concurrent creation, rename/Redis invalidation, actual Redis fault/MySQL rollback and all existing module/browser regressions; dictionary React pages and shared controls remain pending."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/menu.js",
@@ -396,11 +445,20 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983373",
         "conclusion": "success",
         "scope": "Canonical menu API/generated client, actual packaged navigation catalog, hierarchy/object/permission guards, atomic sorting, database uniqueness, immediate session refresh and all existing page regressions; React menu page remains pending.",
-        "localTests": {"backend": 168, "webUnit": 30, "fixtureBrowser": 12, "liveBrowser": 15}
+        "localTests": {
+          "backend": 168,
+          "webUnit": 30,
+          "fixtureBrowser": 12,
+          "liveBrowser": 15
+        }
       },
       "localMenuPageValidation": {
-        "backend": 170, "webUnit": 35, "fixtureBrowser": 15, "liveBrowser": 18,
-        "conclusion": "success", "pageCi": "success",
+        "backend": 170,
+        "webUnit": 35,
+        "fixtureBrowser": 15,
+        "liveBrowser": 18,
+        "conclusion": "success",
+        "pageCi": "success",
         "scope": "Menu tree CRUD, full 88-icon picker, scoped parent exclusions, route metadata, 105-row atomic sort, immediate existing-session permission checks, retry/keyboard/mobile checks and all prior module regressions."
       },
       "lastVerifiedMenuPage": {
@@ -502,7 +560,12 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269883",
         "conclusion": "success",
         "scope": "Role administration, linked/independent grant and department trees, five scope forms, allocation deep links and batch actions, raw-association preservation, actual existing-session authorization, XLSX, keyboard/mobile and refresh-only retry; shared dictionary controls remain pending.",
-        "localTests": {"backend": 148, "webUnit": 30, "fixtureBrowser": 12, "liveBrowser": 15}
+        "localTests": {
+          "backend": 148,
+          "webUnit": 30,
+          "fixtureBrowser": 12,
+          "liveBrowser": 15
+        }
       }
     },
     {
