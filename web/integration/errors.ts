@@ -84,6 +84,7 @@ function messageFor(status: number, code: string): string {
   if (code === 'CAPTCHA_INVALID') return '验证码不正确或已过期，请重新输入。';
   if (code === 'AUTHENTICATION_FAILED') return '账号或密码不正确，或账号暂时无法登录。';
   if (code === 'VALIDATION_ERROR') return '请检查填写内容后重试。';
+  if (code === 'ONLINE_SESSIONS_UNAVAILABLE') return '在线会话暂时无法读取或撤销，请稍后重试。';
   if (status === 401) return '登录已过期，请重新登录。';
   if (status === 403) return '当前账号没有操作权限。';
   return '服务暂时不可用，请稍后重试。';

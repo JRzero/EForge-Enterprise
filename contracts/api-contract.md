@@ -315,3 +315,15 @@ returning 204 or generic 503 LOGIN_UNLOCK_UNAVAILABLE. Original monitor grants
 remain authoritative. See `docs/security-review-logs-v1.md` for mutation, payload,
 sorting and compatibility boundaries. React pages and generated-client/runtime
 verification are tracked separately in the parity inventory.
+
+### Monitor online sessions
+
+GET `/api/v1/monitor/online-sessions` returns `PageResponse<OnlineSessionResponse>`
+with optional bounded page/pageSize and exact username/IP filters. It projects
+opaque session UUIDs and safe metadata from Redis, skips expired sessions and
+sorts cached time/UUID descending before paging. DELETE `/{id}` requires the
+original force-logout grant and removes only that login cache key, returning
+idempotent 204. Bearer tokens and cached credentials/grants are never exposed.
+Redis enumeration/deletion faults return generic 503 ONLINE_SESSIONS_UNAVAILABLE.
+The legacy endpoints remain isolated and unchanged. Security and revocation
+semantics are documented in `docs/security-review-online-sessions-v1.md`.

@@ -25,6 +25,7 @@ import {listNotices, getNotice, createNotice, updateNotice, deleteNotices, getNo
   markNoticesRead, listNoticeReaders, uploadNoticeImage, type NoticeRequest} from '../generated/api';
 import {listOperationLogs, getOperationLog, deleteOperationLogs, clearOperationLogs, exportOperationLogs,
   listLoginLogs, deleteLoginLogs, clearLoginLogs, exportLoginLogs, unlockLoginAccount} from '../generated/api';
+import {listOnlineSessions, revokeOnlineSession} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -45,6 +46,12 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listOnlineSessions(query: Parameters<typeof listOnlineSessions>[0], signal?: AbortSignal) {
+      return (await listOnlineSessions(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async revokeOnlineSession(id: string) {
+      await revokeOnlineSession(id, {baseUrl: '', fetch: transport(true)});
+    },
     async listOperationLogs(query: Parameters<typeof listOperationLogs>[0], signal?: AbortSignal) {
       return (await listOperationLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

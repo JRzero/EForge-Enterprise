@@ -114,6 +114,22 @@ export type PageResponseLoginLogResponse = {
 export type UnlockLoginRequest = {
     username: string;
 };
+export type OnlineSessionResponse = {
+    browser?: string;
+    departmentName?: string;
+    id: string;
+    ip?: string;
+    location?: string;
+    loggedInAt?: string;
+    operatingSystem?: string;
+    username: string;
+};
+export type PageResponseOnlineSessionResponse = {
+    items: OnlineSessionResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
 export type OperationLogResponse = {
     businessType?: number;
     duration?: number;
@@ -686,6 +702,30 @@ export function unlockLoginAccount(unlockLoginRequest: UnlockLoginRequest, opts?
         method: "POST",
         body: unlockLoginRequest
     }));
+}
+export function listOnlineSessions({ page, pageSize, ip, username }: {
+    page?: number;
+    pageSize?: number;
+    ip?: string;
+    username?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseOnlineSessionResponse;
+    }>(`/api/v1/monitor/online-sessions${QS.query(QS.explode({
+        page,
+        pageSize,
+        ip,
+        username
+    }))}`, {
+        ...opts
+    });
+}
+export function revokeOnlineSession(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/monitor/online-sessions/${encodeURIComponent(id)}`, {
+        ...opts,
+        method: "DELETE"
+    });
 }
 export function deleteOperationLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/monitor/operation-logs", oazapfts.json({

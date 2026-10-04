@@ -40,7 +40,7 @@ It is a work inventory, not executable proof of completion.
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
-| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
+| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client prepared; actual Redis projection/filter/paging, permission/fault handling and targeted revocation verified; final regression/CI and React page pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
@@ -753,3 +753,34 @@ page commit `fa7e2ebdd783e12cae74526a9371d4df69adaf58` passes server CI
 `37241473195` (all three jobs) and web CI `37241473251`. The final capability audit and full parity goal stay
 pending. Online sessions, monitoring/jobs, generator/form builder and complete
 shell/shared capabilities remain next.
+
+## Online-session API checkpoint (2026-10-05)
+
+Two canonical endpoints now project safe Redis session metadata and revoke one
+validated opaque UUID under the original separate monitor grants. They preserve
+exact username/IP matching, including combined filters, while providing bounded
+server paging and deterministic cached-time/UUID ordering. Expired reads and
+partial/mismatched cache records are skipped. No bearer JWT, password hash or
+cached grants enter responses. Deletion touches only the selected login key;
+missing sessions remain idempotent 204. Redis read/delete faults return generic
+503 and retain the target session when deletion is denied. Compatibility
+endpoints and TokenService refresh/authentication semantics remain unchanged.
+
+Validation passes 294 backend cases (14 new online cases and all ten unchanged
+data-scope cases), 58 web unit cases, lint/typecheck/build, generated-client
+reproducibility, production defaults, 34 fixture and 29 real browser regressions.
+The owned MySQL/Redis harness creates three sessions of one no-role account,
+checks exact combined filters/stable paging and safe projections, rejects both
+unauthorized grants, denies KEYS then DEL/UNLINK, and verifies generic 503 with
+preserved state. Successful revocation removes exactly the chosen Redis key and
+makes its next bootstrap return 401; two other sessions and the caller retain
+200. All previous modules, SQL/Redis faults, captcha and runtime checks pass.
+Final live canonical OpenAPI exactly equals the committed snapshot; all 140
+previous path/schema entries are unchanged. Evidence is `online-backend.log`,
+`online-fixtures.log` and `online-final-runtime.log` in the ignored boot target.
+
+The security boundary is in `security-review-online-sessions-v1.md`. Exact API
+commit CI remains pending; no online React route is bound at this checkpoint.
+Its page, confirmations, errors/cancellation/mobile/keyboard and actual UI
+revocation remain next, followed by monitoring/jobs, generator/form builder and
+complete shell/shared capabilities. The full original goal remains unfinished.

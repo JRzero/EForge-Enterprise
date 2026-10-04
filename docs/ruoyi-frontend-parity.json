@@ -272,8 +272,17 @@
         "list",
         "forceLogout"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/OnlineSessionController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/OnlineSessionService.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/OnlineSessionContracts.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/OnlineSessionControllerTest.java",
+        "server/scripts/verify-online-sessions-integration.ps1",
+        "docs/security-review-online-sessions-v1.md",
+        "web/tests/unit/online-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/operlog.js",
