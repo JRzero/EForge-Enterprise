@@ -258,7 +258,12 @@
         "server/scripts/verify-logs-integration.ps1",
         "docs/security-review-logs-v1.md",
         "web/tests/unit/log-api.test.ts",
-        "contracts/openapi/api-v1.json"
+        "contracts/openapi/api-v1.json",
+        "web/features/logs/LogsPage.tsx",
+        "web/features/logs/OperationLogDetailDialog.tsx",
+        "web/tests/e2e/logs.spec.ts",
+        "web/tests/live/logs.spec.ts",
+        "sql/migrations/V018__logs_routes.sql"
       ]
     },
     {
@@ -286,7 +291,12 @@
         "server/scripts/verify-logs-integration.ps1",
         "docs/security-review-logs-v1.md",
         "web/tests/unit/log-api.test.ts",
-        "contracts/openapi/api-v1.json"
+        "contracts/openapi/api-v1.json",
+        "web/features/logs/LogsPage.tsx",
+        "web/features/logs/OperationLogDetailDialog.tsx",
+        "web/tests/e2e/logs.spec.ts",
+        "web/tests/live/logs.spec.ts",
+        "sql/migrations/V018__logs_routes.sql"
       ]
     },
     {

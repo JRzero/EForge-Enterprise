@@ -38,8 +38,8 @@ It is a work inventory, not executable proof of completion.
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
-| Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client prepared and actual SQL/filter/order/export/permission checks passed; final stage regression/CI and React page pending |
-| Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client prepared; actual password lock/Redis TTL/unlock and ACL-failure checks passed; final stage regression/CI and React page pending |
+| Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally, including actual audit payload/clipboard/XLSX/last-page deletion; page CI and final capability audit pending |
+| Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally, including actual password lock/unlock, session preservation and deletion; page CI and final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
@@ -710,8 +710,45 @@ reproducibility pass; all 125 existing path/schema entries are semantically
 unchanged. The committed snapshot uses the repository's standard OpenAPI
 normalizer and only adds the new log paths/schemas.
 
-The security/mutation boundaries are in `security-review-logs-v1.md`. Current
-implementation CI remains pending. Neither log React route is bound yet. The
-pages still need full filter/date/server-sort, columns/selection, confirmations,
-detail JSON formatting/copy, downloads, unlock UX, cancellation/retry/keyboard/
-mobile and real browser acceptance. The full original parity objective continues.
+The security/mutation boundaries are in `security-review-logs-v1.md`. The API-only
+commit `5e8b350a720ef23d94424e505041f296111329e7` passed exact-head server CI
+`37239622151` (all three jobs) and web CI `37239622127`. At that checkpoint neither
+React log route was bound; page acceptance is tracked separately below.
+The full original parity objective continues.
+
+## Operation/login log page checkpoint (2026-10-05)
+
+Both lazy React routes now consume the generated canonical client. V018 binds
+only the existing operation/login ROUTE nodes; their original `system-logs`
+GROUP remains a group. The public catalog contains eleven routes and actual
+seeded bootstrap navigation includes both log pages in the nested log group.
+Pending legacy-menu checks now use the still-unimplemented online-session node.
+
+The pages retain original filters and inclusive dates, server pagination and
+the five sortable fields, two-way sort order, column visibility, exact-ID
+selection, guarded delete/clear/unlock and complete filtered XLSX. Operation
+detail fetch has its own query grant, cancellation and retry. Request/response
+JSON is formatted as escaped text, invalid text remains intact, and copying
+reports success only after the real operation completes; unavailable clipboard
+support uses a cleaned-up textarea fallback, while rejection allows manual copy.
+Dictionary labels and failures remain consistent with the shared lookup layer.
+
+Validation passes 280 backend cases, 56 unit cases, frontend lint/typecheck/build,
+generated-client reproducibility, production defaults, 34 fixture and 29 live
+browser cases. Four fixture cases exercise no-grant/read-only UX, unsafe strings,
+JSON/copy errors and fallback cleanup, cancellation, failure retries, exact
+large IDs, all controls and mobile/keyboard behavior. The two new live cases
+create twelve actual audited writes, verify inert HTML inside request JSON and
+real clipboard/XLSX output, recover after deleting the last page and clear owned
+history. An owned no-role account produces five failed passwords plus a locked
+attempt; the page unlocks its Redis retry state, permits correct login and
+preserves the earlier valid session. Failure rows are deleted and login history
+is cleared. Live normalized OpenAPI exactly matches the committed snapshot.
+
+All existing disposable module/runtime checks, including actual SQL deletion
+faults and Redis unlock ACL denial, pass in the same run. Evidence logs are
+`logs-page-backend.log`, `logs-page-all-fixtures.log` and
+`logs-page-runtime-final.log` under the ignored boot target directory. Exact
+page-commit CI remains pending. The final capability audit and full parity goal stay
+pending. Online sessions, monitoring/jobs, generator/form builder and complete
+shell/shared capabilities remain next.

@@ -55,7 +55,7 @@
 - [ ] dictionary (type/data pages, paging/dates, whole preview, CRUD/bulk/export and shared integration verified locally; remaining field/abort/cache browser acceptance and current CI pending)
 - [ ] configuration (canonical API/client and page passed CI; filters/CRUD/bulk/XLSX/cache, permission/error/mobile and real persistence verified; final acceptance audit pending)
 - [ ] notices (canonical API/client, rich editor/rendering, administration/top-feed/readers UI and JPG/PNG/static-SVG upload passed local verification and exact-commit CI at c7605fe: server 37237590148, web 37237590166; full capability audit remains pending)
-- [ ] operation/login logs (ten canonical operations and generated client verified locally, including real sorting/XLSX/permissions/password-lock/Redis-unlock failure; current CI and React pages pending)
+- [ ] operation/login logs (ten canonical operations/client and both React pages verified locally, including real audit detail/copy/sorting/XLSX/deletion/password-lock/unlock/session preservation; API CI green, page CI and final capability audit pending)
 - [ ] online session management
 
 ## Phase 4 — Generator

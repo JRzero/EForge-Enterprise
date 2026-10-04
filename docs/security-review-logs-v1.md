@@ -47,9 +47,9 @@ transport failure does not establish whether a command committed. Correct-passwo
 login and existing-session survival require actual runtime evidence.
 
 Audit annotation request/response payload capture excludes operation results;
-log data is never interpolated into SQL or HTML. The forthcoming React details
-must render escaped text, format valid JSON, preserve invalid/plain text and
-provide copy feedback/failure handling. Original server-side redaction stays
+log data is never interpolated into SQL or HTML. React details render escaped
+text, format valid JSON, preserve invalid/plain text and provide real copy
+feedback/failure handling. Original server-side redaction stays
 unchanged. Production consoles remain protected by existing defaults.
 
 ## Verification scope
@@ -74,5 +74,18 @@ DEL/UNLINK denial returns 503 and preserves the retry count; recovery permits
 correct-password login and retains the earlier valid session. Owned historical
 rows disappear after clear. Existing 125 path/schema entries are semantically
 unchanged. Logs are `logs-backend.log`, `logs-api-final-runtime.log` and
-`logs-api-fixtures.log` under the ignored boot target directory. CI and log React
-page acceptance remain pending at this checkpoint.
+`logs-api-fixtures.log` under the ignored boot target directory. API commit
+`5e8b350a720ef23d94424e505041f296111329e7` passes server CI `37239622151`
+(all three jobs) and web CI `37239622127`. React page acceptance is a separate
+checkpoint.
+
+Page verification passes 280 backend, 56 unit, 34 fixture and 29 live browser
+cases plus the full owned MySQL/Redis module/runtime suite. Real audited request
+HTML is inert inside formatted JSON; real clipboard contents and complete XLSX
+are checked. Last-page deletion returns to page one, and clear removes owned
+historical rows. Page unlock follows actual password locking and preserves a
+previous valid session. Fixture cases cover rejected clipboard access/fallback
+cleanup, invalid JSON, no-grant controls, failed confirmations, request abort,
+dictionary labels, keyboard and mobile behavior. Route binding changes only
+the two existing ROUTE nodes; the log GROUP never becomes a React route.
+Page-commit cloud verification is tracked in the parity document.
