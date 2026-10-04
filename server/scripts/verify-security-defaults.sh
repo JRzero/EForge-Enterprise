@@ -4,13 +4,17 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/eforge-boot/src/main/resources/application.yml"
 DRUID="$ROOT/eforge-boot/src/main/resources/application-druid.yml"
-SECURITY="$ROOT/eforge-framework/src/main/java/com/ruoyi/framework/config/SecurityConfig.java"
-RESOURCES="$ROOT/eforge-framework/src/main/java/com/ruoyi/framework/config/ResourcesConfig.java"
+SECURITY="$ROOT/eforge-framework/src/main/java/io/eforge/enterprise/framework/config/SecurityConfig.java"
+RESOURCES="$ROOT/eforge-framework/src/main/java/io/eforge/enterprise/framework/config/ResourcesConfig.java"
 
 fail() {
   echo "security-default check failed: $1" >&2
   exit 1
 }
+
+for file in "$APP" "$DRUID" "$SECURITY" "$RESOURCES"; do
+  [[ -f "$file" ]] || fail "missing input: $file"
+done
 
 grep -Fq 'secret: ${EFORGE_TOKEN_SECRET}' "$APP"   || fail "token secret must come from EFORGE_TOKEN_SECRET"
 

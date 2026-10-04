@@ -18,6 +18,15 @@ EForge application startup
 
 ## Login response
 
+The canonical login endpoint accepts `username`, `password`, and optional
+`code` / `uuid` captcha values. Username and password are required and bounded
+to the preserved upstream maximum of 20 characters. Omitted captcha values
+are normalized to empty strings; captcha validation remains authoritative in
+the existing authentication service. Until a canonical captcha endpoint is
+implemented, clients obtain challenges from legacy `/captchaImage`.
+
+Successful login returns HTTP 200 with `Cache-Control: no-store`.
+
 ```json
 {
   "accessToken": "...",
@@ -26,6 +35,30 @@ EForge application startup
 ```
 
 The initial implementation may preserve RuoYi's Redis-backed token/session behavior behind this contract.
+
+The implementation reuses that existing authentication service and Redis TTL.
+It does not change password retry, account lockout, captcha consumption, or
+data-scope behavior. Legacy `/login` remains available during migration.
+
+Failures use `application/problem+json` with real HTTP statuses:
+
+| HTTP status | Code | Meaning |
+| --- | --- | --- |
+| 400 | `VALIDATION_ERROR` | Missing/invalid fields or unreadable JSON |
+| 400 | `CAPTCHA_INVALID` | Incorrect, expired, or already consumed captcha |
+| 401 | `AUTHENTICATION_FAILED` | Credentials or authentication provider rejected login |
+| 403 | `LOGIN_BLOCKED` | Existing IP blacklist denied login |
+| 500 | `INTERNAL_ERROR` | Unexpected failure outside the upstream provider-rejection boundary |
+
+Responses never include the upstream exception message or rejected values.
+The upstream login service collapses provider failures into `ServiceException`;
+the login adapter deliberately maps that coarse rejection category to 401.
+Distinguishing provider outages from account rejection requires a later,
+isolated change to that compatibility boundary.
+
+The authenticated OpenAPI group `/v3/api-docs/api-v1` contains canonical APIs
+only. OpenAPI remains disabled by default. Client generation and bootstrap
+implementation are subsequent milestones.
 
 ## Bootstrap response
 

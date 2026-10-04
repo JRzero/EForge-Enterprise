@@ -19,6 +19,7 @@ import io.eforge.enterprise.framework.config.properties.PermitAllUrlProperties;
 import io.eforge.enterprise.framework.security.filter.JwtAuthenticationTokenFilter;
 import io.eforge.enterprise.framework.security.handle.AuthenticationEntryPointImpl;
 import io.eforge.enterprise.framework.security.handle.LogoutSuccessHandlerImpl;
+import io.eforge.enterprise.framework.security.handle.ApiSecurityProblemHandler;
 
 /**
  * Spring Security configuration.
@@ -32,6 +33,9 @@ public class SecurityConfig
 {
     @Autowired
     private AuthenticationEntryPointImpl unauthorizedHandler;
+
+    @Autowired
+    private ApiSecurityProblemHandler apiProblemHandler;
 
     @Autowired
     private LogoutSuccessHandlerImpl logoutSuccessHandler;
@@ -60,12 +64,25 @@ public class SecurityConfig
             // Keep Spring Security's default response headers. Only allow
             // same-origin framing for compatibility with trusted diagnostics.
             .headers(headers -> headers.frameOptions(options -> options.sameOrigin()))
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, failure) -> {
+                    if (ApiSecurityProblemHandler.isApiRequest(request))
+                        apiProblemHandler.commence(request, response, failure);
+                    else
+                        unauthorizedHandler.commence(request, response, failure);
+                })
+                .accessDeniedHandler((request, response, failure) -> {
+                    if (ApiSecurityProblemHandler.isApiRequest(request))
+                        apiProblemHandler.handle(request, response, failure);
+                    else
+                        response.sendError(403);
+                }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(requests -> {
                 permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
 
                 requests.requestMatchers("/login", "/register", "/captchaImage").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                     // Preserve upstream public uploaded-resource behavior.
                     .requestMatchers(HttpMethod.GET, "/profile/**").permitAll()
                     // OpenAPI/Swagger/Druid are authenticated whenever enabled.

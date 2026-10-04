@@ -83,6 +83,10 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
   group-configs:
+    - group: 'api-v1'
+      display-name: 'EForge Enterprise canonical API v1'
+      paths-to-match: '/api/v1/**'
+      packages-to-scan: io.eforge.enterprise.web.controller.api.v1
     - group: 'default'
       display-name: 'EForge Enterprise API'
       paths-to-match: '/**'
