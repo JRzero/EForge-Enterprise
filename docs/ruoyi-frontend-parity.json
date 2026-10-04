@@ -373,13 +373,20 @@
         "updatePost",
         "delPost"
       ],
-      "state": "implemented-awaiting-current-commit-ci",
+      "state": "verified",
       "evidence": [
         "PostControllerTest",
         "server/scripts/verify-posts-integration.ps1",
         "web/tests/live/posts.spec.ts",
         "web/tests/e2e/posts.spec.ts"
-      ]
+      ],
+      "validation": {
+        "implementationCommit": "9bc400d8d46fef1e0d184dd6752d0370061bb465",
+        "date": "2026-10-04",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473129",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473141",
+        "conclusion": "success"
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/role.js",

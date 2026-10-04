@@ -94,7 +94,7 @@ then departments/users/roles and the remaining groups. All groups remain in scop
 
 Validation commands are Maven `verify`, all web lint/typecheck/unit/build/client
 checks, fixture browser tests and `verify-auth-integration.ps1 -VerifyWeb`.
-Current-commit CI must also pass before treating this checkpoint as fully verified.
+Implementation commit `9bc400d8d46fef1e0d184dd6752d0370061bb465` passed both [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473129) and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37181473141). The server suite contains 53 tests, the web unit suite 13 tests, and the fixture/live browser suites 10 tests in total. Documentation-only evidence updates do not change the verified runtime.
 Posts now use only generated canonical API functions; legacy service entities and
 Excel annotations remain behind the server facade. V003 binds the actual React
 route; V004 adds database code/name uniqueness. A database with existing duplicate
