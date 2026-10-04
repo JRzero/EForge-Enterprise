@@ -445,7 +445,15 @@
         "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292747",
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292813",
         "conclusion": "success",
-        "scope": "Role API/generated client, allocation/grant guards, five real data-scope modes, immediate Redis session refresh and regression of existing pages; role React frontend remains incomplete."
+        "scope": "Role API/generated client, allocation/grant guards, five real data-scope modes, immediate Redis session refresh and regression of existing pages; role React frontend remained incomplete at this historical API-only checkpoint."
+      },
+      "lastVerifiedRolePage": {
+        "implementationCommit": "bab6b2e13e63ba1423699fad2ba8139b86bdc1d9",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269908",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269883",
+        "conclusion": "success",
+        "scope": "Role administration, linked/independent grant and department trees, five scope forms, allocation deep links and batch actions, raw-association preservation, actual existing-session authorization, XLSX, keyboard/mobile and refresh-only retry; shared dictionary controls remain pending.",
+        "localTests": {"backend": 148, "webUnit": 30, "fixtureBrowser": 12, "liveBrowser": 15}
       }
     },
     {

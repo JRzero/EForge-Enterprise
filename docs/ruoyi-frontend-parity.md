@@ -318,4 +318,9 @@ fixture browser cases. The complete disposable MySQL/Redis runtime passed all
 fifteen live browser cases and all module integration scripts, including route
 seed contracts, login, `/getInfo`, Redis TTL/session state and captcha replay.
 The live OpenAPI snapshot is unchanged and the generated client is reproducible.
-Implementation CI evidence will be recorded after the pushed revision passes.
+Implementation `bab6b2e13e63ba1423699fad2ba8139b86bdc1d9` passed
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269908)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269883).
+All three server jobs passed, including Linux live browser/role integration and
+exact live OpenAPI comparison. Shared dictionary controls and all other missing
+groups remain in scope; the full objective is not complete.

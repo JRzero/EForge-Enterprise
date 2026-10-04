@@ -130,3 +130,11 @@ If the refresh fails, the dialog closes and the page reports that the change was
 saved, with a refresh-only retry. The fixture verifies that this retry does not
 repeat the mutation. Mutations remain disabled while the refresh is pending;
 generation checks discard obsolete local refresh outcomes.
+
+Page implementation `bab6b2e13e63ba1423699fad2ba8139b86bdc1d9` passed all
+three [server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269908)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37201269883),
+including Linux full runtime/browser verification and exact OpenAPI comparison.
+Final local evidence is 148 backend tests, 30 web unit tests, twelve fixture
+browser cases and fifteen live browser cases; shared dictionary integration
+and other missing frontend groups remain pending.
