@@ -330,26 +330,34 @@
         "updateData",
         "delData"
       ],
-      "state": "partial-api-client",
+      "state": "partial-ui",
       "evidence": [
         "DictionaryControllerTest",
         "server/scripts/verify-dictionaries-integration.ps1",
         "docs/security-review-dictionaries-v1.md",
         "web/generated/api.ts",
         "web/integration/api.ts",
-        "web/tests/unit/dictionary-api.test.ts"
+        "web/tests/unit/dictionary-api.test.ts",
+        "web/features/dictionaries/DictionariesPage.tsx",
+        "web/app/components/DictionaryTag.tsx",
+        "web/tests/unit/dictionary-presentation.test.ts",
+        "web/tests/e2e/dictionaries.spec.ts",
+        "web/tests/live/dictionaries.spec.ts",
+        "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "React data page, filtering/paging/selection/CRUD/batch deletion/export and keyboard/mobile acceptance",
-        "Dictionary preview and shared tag/default controls"
+        "Complete data-page pagination/type switching/field clearing and failure-recovery browser acceptance",
+        "Live multi-page preview and shared dictionary integration into existing resource pages"
       ],
       "localValidation": {
         "backend": 188,
-        "webUnit": 37,
-        "fixtureBrowser": 15,
-        "liveBrowser": 18,
+        "webUnit": 42,
+        "fixtureBrowser": 18,
+        "liveBrowser": 19,
         "conclusion": "success",
-        "apiCi": "success"
+        "apiCi": "success",
+        "uiCi": "pending",
+        "scope": "Partial dictionary page acceptance; remaining requirements are explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -370,7 +378,7 @@
         "refreshCache",
         "optionselect"
       ],
-      "state": "partial-api-client",
+      "state": "partial-ui",
       "evidence": [
         "DictionaryControllerTest",
         "server/scripts/verify-dictionaries-integration.ps1",
@@ -378,19 +386,27 @@
         "docs/security-review-dictionaries-v1.md",
         "web/generated/api.ts",
         "web/integration/api.ts",
-        "web/tests/unit/dictionary-api.test.ts"
+        "web/tests/unit/dictionary-api.test.ts",
+        "web/features/dictionaries/DictionariesPage.tsx",
+        "web/app/components/DictionaryTag.tsx",
+        "web/tests/unit/dictionary-presentation.test.ts",
+        "web/tests/e2e/dictionaries.spec.ts",
+        "web/tests/live/dictionaries.spec.ts",
+        "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "React type page, filtering/dates/paging/selection/CRUD/batch deletion/export/cache refresh",
-        "Preview/detail navigation, shared dictionary labels and keyboard/mobile browser acceptance"
+        "Complete type-page dates/paging/selection/bulk deletion/export and denied-user browser acceptance",
+        "Live multi-page preview, metadata failures and shared dictionary integration into existing resource pages"
       ],
       "localValidation": {
         "backend": 188,
-        "webUnit": 37,
-        "fixtureBrowser": 15,
-        "liveBrowser": 18,
+        "webUnit": 42,
+        "fixtureBrowser": 18,
+        "liveBrowser": 19,
         "conclusion": "success",
-        "apiCi": "success"
+        "apiCi": "success",
+        "uiCi": "pending",
+        "scope": "Partial dictionary page acceptance; remaining requirements are explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",

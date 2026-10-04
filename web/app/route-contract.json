@@ -4,5 +4,6 @@
   {"id": "system-departments", "path": "/dept", "permission": "system:dept:list"},
   {"id": "system-users", "path": "/user", "permission": "system:user:list"},
   {"id": "system-roles", "path": "/role", "permission": "system:role:list"},
-  {"id": "system-menus", "path": "/menu", "permission": "system:menu:list"}
+  {"id": "system-menus", "path": "/menu", "permission": "system:menu:list"},
+  {"id": "system-dictionaries", "path": "/dict", "permission": "system:dict:list"}
 ]

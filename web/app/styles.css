@@ -118,3 +118,12 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .menu-icon-options button {display: flex; gap: 8px; align-items: center; padding: 8px; min-width: 0; border: 1px solid #d4e2da; border-radius: 5px; background: #f4f8f6; cursor: pointer; font: inherit;}
 .menu-icon-options button span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;} .menu-icon-options [aria-pressed=true] {border-color: #337a61; background: #d8ece1;}
 @media (max-width: 550px) {.menu-icon-options {grid-template-columns: repeat(2,minmax(0,1fr));}}
+.dictionaries-page .post-filters {flex-wrap: wrap;} .dictionary-link {background: none; border: 0; padding: 0; color: #24634e; text-decoration: underline; font: inherit; cursor: pointer;}
+.dictionary-tags {display: inline-flex; flex-wrap: wrap; gap: 6px; overflow-wrap: anywhere;}
+.dictionary-tag {padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd8d1; background: #f2f5f3; color: #28483b;}
+.dictionary-tag.tag-primary {background: #e6f0ff; border-color: #b6cef4; color: #17477e;}
+.dictionary-tag.tag-success {background: #e6f6ec; border-color: #b5dbc2; color: #246343;}
+.dictionary-tag.tag-info {background: #edf1f6; border-color: #c5ceda; color: #48576a;}
+.dictionary-tag.tag-warning {background: #fff3da; border-color: #e7ce95; color: #765016;}
+.dictionary-tag.tag-danger {background: #ffeded; border-color: #ecb9b9; color: #8b2e2e;}
+.dictionary-preview-items {max-height: 55vh; overflow: auto; margin: 12px 0;} .dictionary-preview-items > div {display: grid; grid-template-columns: 65px minmax(0,1fr); gap: 8px; padding: 12px; border-bottom: 1px solid #d4e2da;} .dictionary-preview-items dd {margin: 0; overflow-wrap: anywhere;}

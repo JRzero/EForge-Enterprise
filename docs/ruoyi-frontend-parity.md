@@ -35,7 +35,7 @@ It is a work inventory, not executable proof of completion.
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared dictionary tags and query/cache shell behavior pending |
-| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Canonical type/data API and generated client verified locally and in CI; React pages, preview and shared tags pending |
+| Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Full page acceptance and shared integration remain pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
@@ -442,3 +442,29 @@ Linux verification includes the actual Redis ACL fault/MySQL rollback, all modul
 scripts and eighteen live browser regressions, and exact exported OpenAPI equality.
 React dictionary type/data pages, preview, shared labels and their own browser
 acceptance remain required. The full frontend objective stays active.
+
+## Dictionary UI implementation checkpoint (2026-10-05)
+
+Lazy type/data pages now expose filtering, dates, paging, selection, column
+visibility, CRUD, exports and cache refresh. The public dictionary route is
+bound by V014; data detail is a static internal route requiring dict:list.
+Metadata loads independently with cancellation and retry. Preview loads every
+100-row page and rejects total drift, duplicate IDs and incomplete intermediate
+pages. The shared tag component preserves option order, duplicate labels,
+zero/false values, separator input, unknown-value visibility and escaped text.
+Data labels use whole keys, including comma-containing values.
+
+Local validation passed 188 backend tests including all ten data-scope cases,
+lint/typecheck, 42 web unit tests, build, 18 fixture and 19 live browser tests.
+The new live page test proves type/data CRUD, duplicate values/defaults, field
+clearing, styled comma keys, type rename with existing data, filtered XLSX content
+and child-bearing deletion protection. Fixtures additionally cover read-only
+actions, exact large IDs, 205-row preview, deep-link refresh, mobile bounds,
+invalid input and draft/cache failure recovery. All disposable module integration
+scripts and production-default checks passed; live OpenAPI exactly matches the
+committed contract and generated-client reproducibility passed.
+
+This is partial page acceptance. Further live pagination/type switching, type
+dates/bulk deletion/export, metadata and preview failure cases, and shared tags
+in existing resource pages remain required. CI for this implementation is pending.
+All other missing capability groups retain their original scope.

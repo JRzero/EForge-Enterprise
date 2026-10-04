@@ -1,4 +1,5 @@
 [
   {"id": "account-profile", "path": "/user/profile"},
-  {"id": "role-users", "path": "/role/users/:roleId", "permission": "system:role:list"}
+  {"id": "role-users", "path": "/role/users/:roleId", "permission": "system:role:list"},
+  {"id": "dictionary-data", "path": "/dict/data/:dictionaryId", "permission": "system:dict:list"}
 ]

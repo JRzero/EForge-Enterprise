@@ -10,6 +10,8 @@ const ProfilePage = lazy(() => import('../features/profile/ProfilePage').then(mo
 const RolesPage = lazy(() => import('../features/roles/RolesPage').then(module => ({default: module.RolesPage})));
 const RoleUsersPage = lazy(() => import('../features/roles/RoleUsersPage').then(module => ({default: module.RoleUsersPage})));
 const MenusPage = lazy(() => import('../features/menus/MenusPage').then(module => ({default: module.MenusPage})));
+const DictionariesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionariesPage})));
+const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
 const posts = contracts.find(route => route.id === 'system-posts');
@@ -26,6 +28,10 @@ const roleUsers = internalContracts.find(route => route.id === 'role-users');
 if (!roleUsers) throw new Error('Missing role user route contract.');
 const menus = contracts.find(route => route.id === 'system-menus');
 if (!menus) throw new Error('Missing menus route contract.');
+const dictionaries = contracts.find(route => route.id === 'system-dictionaries');
+if (!dictionaries) throw new Error('Missing dictionary route contract.');
+const dictionaryData = internalContracts.find(route => route.id === 'dictionary-data');
+if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
 export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
   access: {permission: dashboard.permission}, component: DashboardPage
@@ -45,8 +51,14 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: menus.id, path: menus.path, title: '菜单管理',
   access: {permission: menus.permission}, component: MenusPage
 }, {
+  id: dictionaries.id, path: dictionaries.path, title: '字典管理',
+  access: {permission: dictionaries.permission}, component: DictionariesPage
+}, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {
   id: roleUsers.id, path: roleUsers.path, title: '用户授权',
   access: {permission: roleUsers.permission}, component: RoleUsersPage
+}, {
+  id: dictionaryData.id, path: dictionaryData.path, title: '字典数据',
+  access: {permission: dictionaryData.permission}, component: DictionaryEntriesPage
 }]);
