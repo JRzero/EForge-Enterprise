@@ -92,3 +92,19 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .avatar-round {border-radius: 50%;} .avatar-settings {border: 1px solid #dce7e2; padding: 16px; border-radius: 6px; display: grid; gap: 12px; margin-bottom: 20px;} .avatar-settings label {display: flex; gap: 16px; justify-content: space-between;} .avatar-settings input {min-width: 0; max-width: 70%;}
 .enterprise-header a {font-size: 14px; color: #315c4d; margin-inline: 14px;}
 @media (max-width: 850px) {.profile-layout {grid-template-columns: minmax(0,1fr);} .profile-summary, .profile-editor {padding: 18px;} .profile-editor fieldset {flex-wrap: wrap;} .profile-summary dd {max-width: 100%;}}
+.roles-page .post-filters, .role-user-list .post-filters {flex-wrap: wrap;}
+.roles-page input[type=date] {font: inherit; border: 1px solid #ccdcd6; padding: 9px; border-radius: 6px;}
+.roles-page .ef-data-table__toolbar, .role-user-list .ef-data-table__toolbar {display: none;}
+.grant-fieldset {min-width: 0; border: 1px solid #d4e2da; border-radius: 8px; padding: 12px;}
+.grant-toolbar {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px;}
+.post-dialog .grant-toolbar label, .post-dialog .grant-row label, .post-dialog .grant-unavailable {display: flex; flex-direction: row; align-items: center; gap: 8px;}
+.grant-tree {list-style: none; padding: 0; margin: 0; max-height: 320px; overflow: auto;}
+.grant-tree ul {list-style: none; margin: 0; padding-inline-start: 20px;}
+.grant-tree ul[hidden] {display: none;}
+.grant-row {display: flex; align-items: center; gap: 3px; padding: 5px 0; min-width: 0;}
+.grant-row label {overflow-wrap: anywhere;}
+.grant-row input, .grant-toolbar input, .grant-unavailable input {flex-shrink: 0;}
+.grant-row button {border: 0; background: none; color: #315c4d; width: 24px; min-width: 24px; font: inherit; cursor: pointer;}
+.grant-spacer {width: 24px; min-width: 24px;}
+.grant-unavailable {margin-top: 12px; overflow-wrap: anywhere;}
+.role-user-list {min-width: 0;} .role-users-page .post-dialog {width: min(1100px, calc(100vw - 32px));}

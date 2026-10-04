@@ -1,8 +1,8 @@
 # Canonical role security review
 
 Date: 2026-10-04. Scope: `/api/v1/system/roles` and committed role changes in
-existing Redis sessions. This is a backend/client checkpoint; the React role
-page and interactive grant/department trees are still pending.
+existing Redis sessions. The original API checkpoint evidence remains below;
+the React role-page follow-up is described at the end.
 
 ## Authorization and migration boundary
 
@@ -81,4 +81,52 @@ and deleted-identity reuse. Passing results and CI links are recorded in the
 parity inventory. Implementation `fc4d906` passed all three server CI jobs and
 web CI; exact run links appear in that inventory. All 148 backend tests and
 23 web unit tests passed, alongside nine fixture and twelve live browser cases.
-Role React page and interactive tree/browser acceptance remain pending.
+Role React page and interactive tree/browser acceptance were pending at that
+API-only checkpoint.
+
+## React page follow-up
+
+The lazy `/role` page uses generated contracts, public EForge tables/forms/UI
+and original role operation permissions. The internal parameterized user page
+requires role list permission; positive decimal IDs remain strings, and changing
+the parameter resets its selection/dialog state. Assignment/cancellation UX
+uses the authoritative original backend edit permission, correcting mismatched
+guards in the behavior-reference frontend. The server still checks every object.
+Protected admin identities cannot be selected for mutations. Native dialogs
+retain focus/Escape behavior and disallow cancellation during a write.
+
+Grant trees are local to this feature. Explicit checkbox changes cascade only
+when linked; partial descendants produce half-checked ancestors, and independent
+mode leaves sibling selections untouched. Reading an existing parent association
+does not automatically select every descendant. The original menu page explicitly
+uses non-deep checked-state restoration; see the pinned
+[role behavior reference](https://github.com/yangzongzhuan/RuoYi-Vue/blob/0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0/ruoyi-ui/src/views/system/role/index.vue)
+and [Element UI node semantics](https://github.com/ElemeFE/element/blob/v2.15.14/packages/tree/src/model/node.js).
+No upstream source is copied into the product.
+
+Unchanged selections and changes to the linking flag alone preserve exact raw
+menu/department associations. This also avoids the legacy frontend's incidental
+association expansion when restoring department nodes or submitting inferred
+parents after an unrelated edit. Explicit selection changes still submit checked
+and half-checked keys, matching the original grant actions. Existing unavailable
+grants remain visible and can be retained or removed; new grants remain bounded
+by server options. This is conservative frontend mutation handling; the backend
+data-scope algorithm and its ten parity cases are unchanged.
+
+Successful mutations refresh the authoritative bootstrap snapshot. Fixtures
+cover exact large IDs, read-only controls, deep links, invalid IDs, load/save
+retry, keyboard tree navigation, mixed checkboxes, existing unavailable grants
+and mobile bounds. The live browser suite verifies actual raw-association
+preservation for parent-only and button-only menus and a parent-only department,
+all five scope forms, actual XLSX content, role filtering/date ranges,
+status confirmations, persistence after reload, page size and batch deletion.
+Twelve actual accounts exercise allocated/unallocated paging, phone filtering,
+single/batch cancellation, re-assignment and another existing session's immediate
+protected-endpoint denial/allowance. Current validation/CI results belong in the
+parity inventory; shared dictionary-driven status tags are still pending.
+
+A committed write and the subsequent bootstrap refresh have separate outcomes.
+If the refresh fails, the dialog closes and the page reports that the change was
+saved, with a refresh-only retry. The fixture verifies that this retry does not
+repeat the mutation. Mutations remain disabled while the refresh is pending;
+generation checks discard obsolete local refresh outcomes.

@@ -2,5 +2,6 @@
   {"id": "dashboard", "path": "/dashboard", "permission": "app:dashboard:view"},
   {"id": "system-posts", "path": "/post", "permission": "system:post:list"},
   {"id": "system-departments", "path": "/dept", "permission": "system:dept:list"},
-  {"id": "system-users", "path": "/user", "permission": "system:user:list"}
+  {"id": "system-users", "path": "/user", "permission": "system:user:list"},
+  {"id": "system-roles", "path": "/role", "permission": "system:role:list"}
 ]

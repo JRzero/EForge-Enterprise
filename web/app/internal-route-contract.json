@@ -1,3 +1,4 @@
 [
-  {"id": "account-profile", "path": "/user/profile"}
+  {"id": "account-profile", "path": "/user/profile"},
+  {"id": "role-users", "path": "/role/users/:roleId", "permission": "system:role:list"}
 ]

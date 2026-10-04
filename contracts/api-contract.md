@@ -173,8 +173,11 @@ accepts selected department IDs. All target objects in a batch are checked
 before writes. Role changes refresh affected existing Redis sessions after
 commit, including fresh scope metadata and active permissions. See
 `docs/security-review-roles-v1.md` for guards and consistency limitations.
-The generated TypeScript client includes these contracts; the React role page
-and interactive tree controls remain pending at this API checkpoint.
+The generated TypeScript client includes these contracts. The React role page
+and internal user-authorization route consume them. Editors preserve exact raw
+associations for unchanged selections/linking-only edits; explicit tree selection
+changes submit full/half-checked keys. Validation evidence is tracked in the
+frontend parity inventory, separately from shared dictionary integration.
 
 Authenticated self-service contracts live under `/api/v1/me`: GET returns a
 safe concrete profile with department, role/post labels, creation date and local

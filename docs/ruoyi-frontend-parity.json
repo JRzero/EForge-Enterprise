@@ -418,7 +418,7 @@
         "authUserSelectAll",
         "deptTreeSelect"
       ],
-      "state": "partial-api-client",
+      "state": "partial-shared-controls",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/RoleController.java",
         "RoleControllerTest",
@@ -427,14 +427,18 @@
         "docs/security-review-roles-v1.md",
         "sql/migrations/V009__role_uniqueness.sql",
         "web/generated/api.ts",
-        "web/integration/api.ts"
+        "web/integration/api.ts",
+        "web/features/roles/RolesPage.tsx",
+        "web/features/roles/RoleUsersPage.tsx",
+        "web/features/roles/GrantTree.tsx",
+        "web/tests/unit/role-grants.test.ts",
+        "web/tests/e2e/roles.spec.ts",
+        "web/tests/live/roles.spec.ts",
+        "docs/adr/0012-role-user-internal-route.md",
+        "sql/migrations/V010__roles_route.sql"
       ],
       "remaining": [
-        "React role CRUD/filter/date-range/status/export page",
-        "Linked and independent menu/button grant tree controls",
-        "Five-mode data-scope dialog and department selection tree",
-        "Allocated/unallocated user pages and batch assignment/cancellation",
-        "Strict role-page live browser, failure/retry and keyboard/mobile evidence"
+        "Shared dictionary-driven status tags when dictionary contracts are implemented"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "fc4d90670db58c413bb8f8f71a5a025ff4792ce5",

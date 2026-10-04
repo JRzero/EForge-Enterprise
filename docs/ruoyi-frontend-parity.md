@@ -30,7 +30,7 @@ It is a work inventory, not executable proof of completion.
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionary controls remain pending |
-| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API/generated client verified locally and in CI, including five real scope modes and immediate session revocation; React page and interactive trees pending |
+| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionary controls pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
@@ -280,6 +280,42 @@ commit `fc4d90670db58c413bb8f8f71a5a025ff4792ce5` passed
 [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292747)
 and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292813).
 All three server jobs passed, including full live browser/role integration and
-exact live OpenAPI comparison. React role forms, linked tree
-controls, scope dialog, user-allocation page and their browser tests remain
-pending; neither role frontend parity nor the full objective is complete.
+exact live OpenAPI comparison. At that API-only checkpoint React role forms,
+linked tree controls, scope dialog and user-allocation browser tests were pending.
+The following page checkpoint supersedes that limitation; the full objective
+remains active.
+
+## Role administration and allocation page checkpoint (2026-10-04)
+
+The lazy `/role` page implements filters/date ranges, paging, columns, selection,
+CRUD, confirmed status changes/deletion, actual XLSX export and all five scope
+forms. Menu/button and department trees support linked/independent selections,
+half-checked parents, expand/collapse, select/clear all and keyboard navigation.
+Unchanged selections and linking-flag-only edits preserve exact raw associations,
+including parent-only menus/departments and button-only grants. Existing grants
+outside the operator's available menu tree remain visible and removable.
+
+ADR-0012 documents the individually authorized `/role/users/:roleId` route.
+Its allocated/unallocated user tables implement filtering, paging, single/batch
+cancellation and batch assignment. IDs remain exact decimal strings, and role
+changes reset local state. The server enforces every object and operation guard.
+Twelve actual accounts verify another existing session's immediate permission
+denial/allowance after assignment, status changes and cancellation.
+
+The feature fixtures cover read-only guards, exact large IDs, deep links, invalid
+IDs, load/save retry, keyboard selection, unknown grants and mobile bounds.
+A saved mutation followed by a failed bootstrap explicitly reports the saved
+outcome and retries only the refresh. The live suite covers real persistence,
+raw-association preservation, duplicate identities, paging/bulk deletion,
+status confirmations, all scope forms and inspected XLSX workbook contents.
+
+Shared dictionary-driven status tags remain pending. This checkpoint does not
+assert full frontend parity.
+
+Final local validation passed Maven verification (148 backend tests, including
+ten data-scope cases), frontend lint/typecheck, 30 unit tests, build and twelve
+fixture browser cases. The complete disposable MySQL/Redis runtime passed all
+fifteen live browser cases and all module integration scripts, including route
+seed contracts, login, `/getInfo`, Redis TTL/session state and captcha replay.
+The live OpenAPI snapshot is unchanged and the generated client is reproducible.
+Implementation CI evidence will be recorded after the pushed revision passes.
