@@ -9,6 +9,7 @@ on:
       - 'web/**'
       - 'contracts/openapi/**'
       - '.github/workflows/server-ci.yml'
+      - '.gitattributes'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'web/**'
       - 'contracts/openapi/**'
       - '.github/workflows/server-ci.yml'
+      - '.gitattributes'
 
 permissions:
   contents: read

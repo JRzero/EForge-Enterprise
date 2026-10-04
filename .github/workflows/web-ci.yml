@@ -2,9 +2,9 @@ name: web-ci
 on:
   push:
     branches: [main, 'codex/**']
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.gitattributes']
   pull_request:
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.gitattributes']
 permissions:
   contents: read
 jobs:
