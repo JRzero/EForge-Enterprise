@@ -178,6 +178,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-roles-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-menus-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 
@@ -187,6 +188,13 @@ try {
     $commonLogin = (Request '/api/v1/auth/login' 'POST' '{"username":"ry","password":"admin123"}').Content | ConvertFrom-Json
     Assert-Check ([bool]$commonLogin.accessToken) 'Ordinary user login failed.'
     $commonHeaders = @{ Authorization = "Bearer $($commonLogin.accessToken)" }
+    Assert-Check (((Request '/api/v1/system/configurations/lookup?key=sys.account.captchaEnabled' 'GET' '' $commonHeaders).Content | ConvertFrom-Json).value -eq 'false') 'Authenticated configuration consumers must not require management grants.'
+    foreach ($path in @('/api/v1/system/configurations','/api/v1/system/configurations/1')) { Assert-Problem (Request $path 'GET' '' $commonHeaders) 403 'ACCESS_DENIED' }
+    foreach ($path in @('/api/v1/system/configurations/export','/api/v1/system/configurations/cache/refresh')) { Assert-Problem (Request $path 'POST' '' $commonHeaders) 403 'ACCESS_DENIED' }
+    $deniedConfiguration='{"name":"Denied","key":"denied","value":"denied","builtin":false}'
+    Assert-Problem (Request '/api/v1/system/configurations' 'POST' $deniedConfiguration $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/configurations/1' 'PUT' $deniedConfiguration $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/configurations' 'DELETE' '{"ids":["1"]}' $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Check ((Request '/api/v1/system/dictionaries/options' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Authenticated dictionary options must not require management grants.'
     $commonDictionaryValues=@((Request '/api/v1/system/dictionaries/lookup/sys_normal_disable' 'GET' '' $commonHeaders).Content | ConvertFrom-Json)
     Assert-Check ($commonDictionaryValues.Count -eq 2) 'Ordinary users must retain original dictionary consumer reads.'
@@ -228,7 +236,9 @@ try {
     Assert-Problem (Request '/api/v1/app/bootstrap' 'GET' '' $commonHeaders) 401 'AUTHENTICATION_REQUIRED'
 
     # Exercise preserved captcha behavior using a deterministic disposable Redis challenge.
-    Invoke-Docker exec $redisName redis-cli set 'sys_config:sys.account.captchaEnabled' '"true"' | Out-Null
+    $captchaConfiguration = ((Request '/api/v1/system/configurations?key=sys.account.captchaEnabled' 'GET' '' $authorized).Content | ConvertFrom-Json).items[0]
+    $captchaUpdate = @{name=$captchaConfiguration.name;key=$captchaConfiguration.key;value='true';builtin=$captchaConfiguration.builtin;remark=$captchaConfiguration.remark} | ConvertTo-Json -Compress
+    Assert-Check ((Request "/api/v1/system/configurations/$($captchaConfiguration.id)" 'PUT' $captchaUpdate $authorized).StatusCode -eq 204) 'Canonical captcha configuration update failed.'
     Assert-Problem (Request '/api/v1/auth/login' 'POST' $credentials) 400 'CAPTCHA_INVALID'
     Invoke-Docker exec $redisName redis-cli set 'captcha_codes:integration-challenge' '"42"' EX 120 | Out-Null
     $withCaptcha = '{"username":"admin","password":"admin123","code":"42","uuid":"integration-challenge"}'

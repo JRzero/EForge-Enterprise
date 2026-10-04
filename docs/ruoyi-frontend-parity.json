@@ -290,8 +290,15 @@
         "delConfig",
         "refreshCache"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/ConfigurationController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/system/ConfigurationControllerTest.java",
+        "server/scripts/verify-configurations-integration.ps1",
+        "docs/security-review-configurations-v1.md",
+        "web/tests/unit/configuration-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/system/dept.js",

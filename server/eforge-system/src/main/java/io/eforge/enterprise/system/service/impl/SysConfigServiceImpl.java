@@ -14,6 +14,7 @@ import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.system.domain.SysConfig;
 import io.eforge.enterprise.system.mapper.SysConfigMapper;
 import io.eforge.enterprise.system.service.ISysConfigService;
+import io.eforge.enterprise.system.service.ConfigurationValueReader;
 
 /**
  * 参数配置 服务层实现
@@ -28,6 +29,9 @@ public class SysConfigServiceImpl implements ISysConfigService
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private ConfigurationValueReader configurationValues;
 
     /**
      * 项目启动时，初始化参数到缓存
@@ -61,20 +65,7 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public String selectConfigByKey(String configKey)
     {
-        String configValue = Convert.toStr(redisCache.getCacheObject(getCacheKey(configKey)));
-        if (StringUtils.isNotEmpty(configValue))
-        {
-            return configValue;
-        }
-        SysConfig config = new SysConfig();
-        config.setConfigKey(configKey);
-        SysConfig retConfig = configMapper.selectConfig(config);
-        if (StringUtils.isNotNull(retConfig))
-        {
-            redisCache.setCacheObject(getCacheKey(configKey), retConfig.getConfigValue());
-            return retConfig.getConfigValue();
-        }
-        return StringUtils.EMPTY;
+        return configurationValues.get(configKey);
     }
 
     /**

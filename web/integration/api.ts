@@ -19,6 +19,8 @@ import {listDictionaries, getDictionary, getDictionaryOptions, getDictionaryValu
   updateDictionary, deleteDictionaries, refreshDictionaryCache, exportDictionaries,
   listDictionaryEntries, getDictionaryEntry, createDictionaryEntry, updateDictionaryEntry,
   deleteDictionaryEntries, exportDictionaryEntries, type DictionaryRequest, type EntryRequest} from '../generated/api';
+import {listConfigurations, getConfiguration, getConfigurationValue, createConfiguration, updateConfiguration,
+  deleteConfigurations, refreshConfigurationCache, exportConfigurations, type ConfigurationRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -39,6 +41,30 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listConfigurations(query: Parameters<typeof listConfigurations>[0], signal?: AbortSignal) {
+      return (await listConfigurations(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getConfiguration(id: string, signal?: AbortSignal) {
+      return (await getConfiguration(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getConfigurationValue(key: string, signal?: AbortSignal) {
+      return (await getConfigurationValue(key, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createConfiguration(request: ConfigurationRequest) {
+      return (await createConfiguration(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateConfiguration(id: string, request: ConfigurationRequest) {
+      await updateConfiguration(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteConfigurations(ids: string[]) {
+      await deleteConfigurations({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async refreshConfigurationCache() {
+      await refreshConfigurationCache({baseUrl: '', fetch: transport(true)});
+    },
+    async exportConfigurations(query: Parameters<typeof exportConfigurations>[0]) {
+      return (await exportConfigurations(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async listDictionaries(query: Parameters<typeof listDictionaries>[0], signal?: AbortSignal) {
       return (await listDictionaries(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

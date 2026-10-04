@@ -4,6 +4,10 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'CONFIGURATION_NOT_FOUND') return '参数已不存在，请刷新后重试。';
+  if (code === 'CONFIGURATION_KEY_EXISTS') return '参数键名已存在，请使用其他键名。';
+  if (code === 'CONFIGURATION_BUILTIN') return '内置参数不能删除，请重新选择。';
+  if (code === 'CONFIGURATION_CACHE_UNAVAILABLE') return '参数缓存暂时不可用，请稍后重试。';
   if (code === 'DICTIONARY_NOT_FOUND') return '字典类型已不存在，请刷新后重试。';
   if (code === 'DICTIONARY_ENTRY_NOT_FOUND') return '字典数据已不存在，请刷新后重试。';
   if (code === 'DICTIONARY_CODE_EXISTS') return '字典类型标识已存在，请使用其他标识。';

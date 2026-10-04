@@ -250,3 +250,22 @@ reads use current DB rows rather than trusting a potentially stale legacy cache;
 compatibility concurrency and partial cache-refresh limits are documented in
 `docs/security-review-dictionaries-v1.md`. V013 enforces type-code uniqueness.
 The API/client checkpoint does not establish dictionary React/shared-control parity.
+
+## Parameter configurations
+
+`/api/v1/system/configurations` provides concrete filtered paging and detail,
+201 creation with Location, 204 update/atomic batch deletion/cache refresh,
+filtered XLSX export and login-only `/lookup?key=...` consumer reads. Management
+permissions retain upstream `system:config:*`; unknown keys return an empty
+value. Unicode keys are query data, and IDs remain exact decimal strings.
+Builtin flags stay editable; builtin rows cannot be deleted. Every batch member
+is checked before mutation. V015 enforces config_key uniqueness in MySQL.
+
+Canonical mutations and compatibility policy reads share the root transaction
+mutex. Policy reads obtain committed database values and overwrite stale cache
+entries. Redis invalidation failure returns 503 and rolls back database writes;
+refresh may partially repopulate Redis and can be retried. Legacy writer limits
+and the additional database/lock cost for policy reads are documented in
+`docs/security-review-configurations-v1.md`. Parameter values retain upstream
+authenticated consumer visibility. The configuration React page and route are
+separate required acceptance work.

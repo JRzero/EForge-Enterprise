@@ -91,6 +91,34 @@ export type ChangePasswordRequestWrite = {
     newPassword: string;
     oldPassword: string;
 };
+export type DeleteConfigurationsRequest = {
+    ids: string[];
+};
+export type ConfigurationResponse = {
+    builtin: boolean;
+    createdAt?: string;
+    id: string;
+    key: string;
+    name: string;
+    remark?: string;
+    value: string;
+};
+export type PageResponseConfigurationResponse = {
+    items: ConfigurationResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type ConfigurationRequest = {
+    builtin: boolean;
+    key: string;
+    name: string;
+    remark?: string;
+    value: string;
+};
+export type ConfigurationValueResponse = {
+    value: string;
+};
 export type DepartmentResponse = {
     createdAt?: string;
     email?: string;
@@ -474,6 +502,99 @@ export function changeMyPassword(changePasswordRequest: ChangePasswordRequestWri
         ...opts,
         method: "PUT",
         body: changePasswordRequest
+    }));
+}
+export function deleteConfigurations(deleteConfigurationsRequest: DeleteConfigurationsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/configurations", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteConfigurationsRequest
+    }));
+}
+export function listConfigurations({ page, pageSize, name, key, builtin, $from, to }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    key?: string;
+    builtin?: boolean;
+    $from?: string;
+    to?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseConfigurationResponse;
+    }>(`/api/v1/system/configurations${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        key,
+        builtin,
+        "from": $from,
+        to
+    }))}`, {
+        ...opts
+    });
+}
+export function createConfiguration(configurationRequest: ConfigurationRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: ConfigurationResponse;
+    }>("/api/v1/system/configurations", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: configurationRequest
+    }));
+}
+export function refreshConfigurationCache(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/configurations/cache/refresh", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function exportConfigurations({ name, key, builtin, $from, to }: {
+    name?: string;
+    key?: string;
+    builtin?: boolean;
+    $from?: string;
+    to?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/configurations/export${QS.query(QS.explode({
+        name,
+        key,
+        builtin,
+        "from": $from,
+        to
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getConfigurationValue(key: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConfigurationValueResponse;
+    }>(`/api/v1/system/configurations/lookup${QS.query(QS.explode({
+        key
+    }))}`, {
+        ...opts
+    });
+}
+export function getConfiguration(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConfigurationResponse;
+    }>(`/api/v1/system/configurations/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateConfiguration(id: string, configurationRequest: ConfigurationRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/configurations/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: configurationRequest
     }));
 }
 export function listDepartments({ name, status, excludeId }: {
