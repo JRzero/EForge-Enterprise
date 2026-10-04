@@ -434,8 +434,15 @@
         "Linked and independent menu/button grant tree controls",
         "Five-mode data-scope dialog and department selection tree",
         "Allocated/unallocated user pages and batch assignment/cancellation",
-        "Strict live browser, failure/retry, keyboard/mobile and implementation CI evidence"
-      ]
+        "Strict role-page live browser, failure/retry and keyboard/mobile evidence"
+      ],
+      "lastVerifiedCoreApi": {
+        "implementationCommit": "fc4d90670db58c413bb8f8f71a5a025ff4792ce5",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292747",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292813",
+        "conclusion": "success",
+        "scope": "Role API/generated client, allocation/grant guards, five real data-scope modes, immediate Redis session refresh and regression of existing pages; role React frontend remains incomplete."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/user.js",

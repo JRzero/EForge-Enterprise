@@ -30,7 +30,7 @@ It is a work inventory, not executable proof of completion.
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionary controls remain pending |
-| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API/generated client verified locally, including five real scope modes and immediate session revocation; React page and interactive trees pending |
+| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API/generated client verified locally and in CI, including five real scope modes and immediate session revocation; React page and interactive trees pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
@@ -275,7 +275,11 @@ Workbook XML, real unique indexes, soft deletion/reuse and safe projections pass
 
 The stable frontend also passes lint/typecheck, 23 unit tests, build, nine fixture
 browser cases and twelve live browser cases. The final live OpenAPI snapshot
-matches the contract exactly and generated clients are reproducible. CI results
-will be recorded after pushing this checkpoint. React role forms, linked tree
+matches the contract exactly and generated clients are reproducible. Implementation
+commit `fc4d90670db58c413bb8f8f71a5a025ff4792ce5` passed
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292747)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37198292813).
+All three server jobs passed, including full live browser/role integration and
+exact live OpenAPI comparison. React role forms, linked tree
 controls, scope dialog, user-allocation page and their browser tests remain
 pending; neither role frontend parity nor the full objective is complete.

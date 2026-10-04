@@ -78,4 +78,7 @@ pages and XLSX XML content; assigned/unassigned users and mixed-invalid batch
 guards; existing-session grants/revocation/status; all five original data-scope
 modes; cross-scope role/user and menu-grant denial; concurrent duplicate creation
 and deleted-identity reuse. Passing results and CI links are recorded in the
-parity inventory after completion of validation.
+parity inventory. Implementation `fc4d906` passed all three server CI jobs and
+web CI; exact run links appear in that inventory. All 148 backend tests and
+23 web unit tests passed, alongside nine fixture and twelve live browser cases.
+Role React page and interactive tree/browser acceptance remain pending.
