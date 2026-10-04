@@ -269,3 +269,21 @@ and the additional database/lock cost for policy reads are documented in
 `docs/security-review-configurations-v1.md`. Parameter values retain upstream
 authenticated consumer visibility. The configuration React page and route are
 separate required acceptance work.
+
+## Notices and read state
+
+`/api/v1/system/notices` exposes typed paging/detail, 201 creation with Location,
+204 update/atomic batch deletion, `/feed`, `/read` and `/{id}/readers`.
+Listing/readers retain notice:list, writes retain add/edit/remove. Detail/feed
+and per-user marking preserve original authenticated consumer behavior,
+including known-ID detail/marking for closed notices. Actor IDs are session data.
+The feed returns the newest five active notices and its unread count covers
+those five. Reader identities/phones remain behind list permission.
+
+Batch marking is idempotent; every member is checked before writes. Canonical
+deletion and read-row cleanup share one database transaction. Content, status,
+type and remarks can be updated, with explicit content/remark clearing. Titles
+retain upstream validation; rich HTML is preserved as data. Safe editor/rendering
+and complete frontend acceptance remain required, as described in
+`docs/security-review-notices-v1.md`. No AjaxResult/TableDataInfo or database
+mapper maps cross the canonical boundary.

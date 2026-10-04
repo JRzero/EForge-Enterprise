@@ -37,7 +37,7 @@ It is a work inventory, not executable proof of completion.
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared status/visibility dictionaries verified locally; query/cache shell behavior pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
-| Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
+| Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client verified locally with real read ownership/guards/rollback; CI, rich editor/display, administration/top-feed UI and browser acceptance pending |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
 | Login logs | filters/date range/pagination, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
@@ -599,7 +599,40 @@ Real browser coverage proves CRUD, builtin rejection then editable removal,
 Unicode rename/current lookup, remark clearing, XLSX contents, cache refresh,
 dates, pagination, last-page recovery and batch selection/deletion.
 
-Page implementation CI and final module acceptance audit remain pending. The
+Page implementation 728b119 passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37222124701)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37222124702).
+The final module acceptance audit remains pending. The
 full objective stays active; notices with rich text and per-user read state are
 the next missing module, followed by the remaining logs/monitoring/jobs,
 generator/form builder and complete shell/shared capabilities.
+
+## Notice API/client checkpoint (2026-10-05)
+
+Eight canonical operations now provide paging/detail/create/update/delete,
+newest-five feed, session-owned batch read marking and paginated reader lists.
+Original list/add/edit/remove permissions remain, and original authenticated
+detail/feed/read behavior is preserved, including known-ID closed notices.
+The feed counts unread items only among its five visible active notices.
+Exact IDs, typed projections and concrete HTTP semantics replace legacy wrappers.
+Rich HTML is preserved as data; content and remarks can be explicitly cleared.
+Canonical deletion cleans notices/read rows in one transaction, and read batches
+prevalidate every member before mutation. Typed reader persistence fixes the
+actual database timestamp projection uncovered by the first runtime pass.
+
+Verification passed 229 backend tests (including 20 notice cases and all ten
+unchanged data-scope cases), 46 web unit tests, lint/typecheck/build, 24 fixture
+and 24 live browser regressions, every module integration script, production
+defaults, exact live OpenAPI equality and generated-client reproducibility.
+Actual MySQL checks prove Unicode/rich HTML CRUD and clearing, filters/paging,
+five-item order/status/unread behavior, idempotent per-user reads and compatibility
+feed visibility, typed readers/search, and full batch guards. A fixture database
+trigger fails notice deletion after read-row cleanup; HTTP 500 preserves both
+actual notice and read records. Ordinary users can consume/mark their own notices
+and receive 403 for every management operation and reader lists.
+
+Implementation CI remains pending. No notice React route is bound until the
+page exists. Administration, rich editor formatting/upload/video, safe rich-text
+display, top-feed detail/read/all-read and reader modal/browser acceptance remain
+required. This checkpoint does not establish notice frontend parity. The full
+objective and all remaining modules stay active.

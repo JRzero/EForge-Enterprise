@@ -21,6 +21,8 @@ import {listDictionaries, getDictionary, getDictionaryOptions, getDictionaryValu
   deleteDictionaryEntries, exportDictionaryEntries, type DictionaryRequest, type EntryRequest} from '../generated/api';
 import {listConfigurations, getConfiguration, getConfigurationValue, createConfiguration, updateConfiguration,
   deleteConfigurations, refreshConfigurationCache, exportConfigurations, type ConfigurationRequest} from '../generated/api';
+import {listNotices, getNotice, createNotice, updateNotice, deleteNotices, getNoticeFeed,
+  markNoticesRead, listNoticeReaders, type NoticeRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -41,6 +43,30 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listNotices(query: Parameters<typeof listNotices>[0], signal?: AbortSignal) {
+      return (await listNotices(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getNotice(id: string, signal?: AbortSignal) {
+      return (await getNotice(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createNotice(request: NoticeRequest) {
+      return (await createNotice(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateNotice(id: string, request: NoticeRequest) {
+      await updateNotice(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteNotices(ids: string[]) {
+      await deleteNotices({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async getNoticeFeed(signal?: AbortSignal) {
+      return (await getNoticeFeed({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async markNoticesRead(ids: string[]) {
+      await markNoticesRead({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async listNoticeReaders(id: string, query: Parameters<typeof listNoticeReaders>[1], signal?: AbortSignal) {
+      return (await listNoticeReaders(id, query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
     async listConfigurations(query: Parameters<typeof listConfigurations>[0], signal?: AbortSignal) {
       return (await listConfigurations(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

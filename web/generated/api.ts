@@ -264,6 +264,58 @@ export type MenuSortItem = {
 export type MenuSortRequest = {
     items: MenuSortItem[];
 };
+export type NoticeIdsRequest = {
+    ids: string[];
+};
+export type NoticeResponse = {
+    content: string;
+    createdAt?: string;
+    createdBy?: string;
+    id: string;
+    remark?: string;
+    status: string;
+    title: string;
+    "type": string;
+};
+export type PageResponseNoticeResponse = {
+    items: NoticeResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type NoticeRequest = {
+    content?: string;
+    remark?: string;
+    status: string;
+    title: string;
+    "type": string;
+};
+export type NoticeSummary = {
+    createdAt?: string;
+    createdBy?: string;
+    id: string;
+    read: boolean;
+    title: string;
+    "type": string;
+};
+export type NoticeFeed = {
+    items: NoticeSummary[];
+    unreadCount: number;
+};
+export type NoticeReader = {
+    departmentName?: string;
+    displayName?: string;
+    phone?: string;
+    readAt?: string;
+    userId: string;
+    username?: string;
+};
+export type PageResponseNoticeReader = {
+    items: NoticeReader[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
 export type DeletePostsRequest = {
     ids: string[];
 };
@@ -893,6 +945,89 @@ export function updateMenu(id: string, menuWriteRequest: MenuWriteRequest, opts?
         method: "PUT",
         body: menuWriteRequest
     }));
+}
+export function deleteNotices(noticeIdsRequest: NoticeIdsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/notices", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: noticeIdsRequest
+    }));
+}
+export function listNotices({ page, pageSize, title, author, $type }: {
+    page?: number;
+    pageSize?: number;
+    title?: string;
+    author?: string;
+    $type?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseNoticeResponse;
+    }>(`/api/v1/system/notices${QS.query(QS.explode({
+        page,
+        pageSize,
+        title,
+        author,
+        "type": $type
+    }))}`, {
+        ...opts
+    });
+}
+export function createNotice(noticeRequest: NoticeRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: NoticeResponse;
+    }>("/api/v1/system/notices", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: noticeRequest
+    }));
+}
+export function getNoticeFeed(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: NoticeFeed;
+    }>("/api/v1/system/notices/feed", {
+        ...opts
+    });
+}
+export function markNoticesRead(noticeIdsRequest: NoticeIdsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/notices/read", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: noticeIdsRequest
+    }));
+}
+export function getNotice(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: NoticeResponse;
+    }>(`/api/v1/system/notices/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateNotice(id: string, noticeRequest: NoticeRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/notices/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: noticeRequest
+    }));
+}
+export function listNoticeReaders(id: string, { page, pageSize, search }: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseNoticeReader;
+    }>(`/api/v1/system/notices/${encodeURIComponent(id)}/readers${QS.query(QS.explode({
+        page,
+        pageSize,
+        search
+    }))}`, {
+        ...opts
+    });
 }
 export function deletePosts(deletePostsRequest: DeletePostsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/system/posts", oazapfts.json({

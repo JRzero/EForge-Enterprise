@@ -179,6 +179,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-menus-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-notices-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 
@@ -188,6 +189,14 @@ try {
     $commonLogin = (Request '/api/v1/auth/login' 'POST' '{"username":"ry","password":"admin123"}').Content | ConvertFrom-Json
     Assert-Check ([bool]$commonLogin.accessToken) 'Ordinary user login failed.'
     $commonHeaders = @{ Authorization = "Bearer $($commonLogin.accessToken)" }
+    Assert-Check ((Request '/api/v1/system/notices/feed' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Ordinary users retain notice feed reads.'
+    Assert-Check ((Request '/api/v1/system/notices/1' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Ordinary users retain original notice detail reads.'
+    Assert-Check ((Request '/api/v1/system/notices/read' 'POST' '{"ids":["1"]}' $commonHeaders).StatusCode -eq 204) 'Ordinary users must record their own notice read state.'
+    foreach ($path in @('/api/v1/system/notices','/api/v1/system/notices/1/readers')) { Assert-Problem (Request $path 'GET' '' $commonHeaders) 403 'ACCESS_DENIED' }
+    $deniedNotice='{"title":"Denied","type":"1","content":"","status":"0"}'
+    Assert-Problem (Request '/api/v1/system/notices' 'POST' $deniedNotice $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/notices/1' 'PUT' $deniedNotice $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/notices' 'DELETE' '{"ids":["1"]}' $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Check (((Request '/api/v1/system/configurations/lookup?key=sys.account.captchaEnabled' 'GET' '' $commonHeaders).Content | ConvertFrom-Json).value -eq 'false') 'Authenticated configuration consumers must not require management grants.'
     foreach ($path in @('/api/v1/system/configurations','/api/v1/system/configurations/1')) { Assert-Problem (Request $path 'GET' '' $commonHeaders) 403 'ACCESS_DENIED' }
     foreach ($path in @('/api/v1/system/configurations/export','/api/v1/system/configurations/cache/refresh')) { Assert-Problem (Request $path 'POST' '' $commonHeaders) 403 'ACCESS_DENIED' }

@@ -523,8 +523,15 @@
         "markNoticeRead",
         "markNoticeReadAll"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/NoticeController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/system/NoticeControllerTest.java",
+        "server/scripts/verify-notices-integration.ps1",
+        "docs/security-review-notices-v1.md",
+        "web/tests/unit/notice-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/system/post.js",
