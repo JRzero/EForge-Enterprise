@@ -37,7 +37,7 @@
 - [ ] initialize React application
 - [ ] consume pinned/versioned EForge packages
 - [x] add `/api/v1/auth/login`
-- [ ] add `/api/v1/app/bootstrap`
+- [x] add `/api/v1/app/bootstrap`
 - [ ] generate TypeScript client from OpenAPI
 - [ ] login/logout/session integration
 - [ ] route registry + backend navigation projection

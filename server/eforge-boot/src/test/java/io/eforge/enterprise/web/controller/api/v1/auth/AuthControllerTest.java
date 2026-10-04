@@ -35,6 +35,12 @@ import io.eforge.enterprise.framework.web.exception.ApiRoutingExceptionResolver;
 import io.eforge.enterprise.common.utils.spring.SpringUtils;
 import io.eforge.enterprise.framework.web.service.SysLoginService;
 import io.eforge.enterprise.framework.web.service.TokenService;
+import io.eforge.enterprise.web.controller.api.v1.app.BootstrapController;
+import io.eforge.enterprise.web.controller.api.v1.app.BootstrapService;
+import io.eforge.enterprise.web.controller.api.v1.app.BootstrapResponse;
+import io.eforge.enterprise.common.core.domain.model.LoginUser;
+import io.eforge.enterprise.common.core.domain.entity.SysUser;
+import java.util.Set;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Exercises the production security chain and both advice boundaries. */
 @WebMvcTest
-@ContextConfiguration(classes = {AuthController.class, AuthControllerTest.ProtectedController.class,
+@ContextConfiguration(classes = {AuthController.class, BootstrapController.class, AuthControllerTest.ProtectedController.class,
         ApiExceptionHandler.class, ApiRoutingExceptionResolver.class, GlobalExceptionHandler.class, SpringUtils.class, SecurityConfig.class,
         ApiSecurityProblemHandler.class, AuthenticationEntryPointImpl.class, JwtAuthenticationTokenFilter.class,
         AuthControllerTest.Configuration.class})
@@ -55,6 +61,22 @@ class AuthControllerTest
     @MockitoBean private SysLoginService loginService;
     @MockitoBean private TokenService tokenService;
     @MockitoBean private LogoutSuccessHandlerImpl logoutHandler;
+    @MockitoBean private BootstrapService bootstrapService;
+
+    @Test
+    void bootstrapUsesAuthenticatedSessionAndReturnsOnlyPublicFields() throws Exception
+    {
+        LoginUser session = new LoginUser(2L, 105L, new SysUser(), Set.of());
+        when(tokenService.getLoginUser(any())).thenReturn(session);
+        when(bootstrapService.bootstrap(session)).thenReturn(new BootstrapResponse(
+                new BootstrapResponse.UserSummary("2", "ry", "Display name"), Set.of("common"),
+                Set.of("system:user:list"), List.of()));
+        mvc.perform(get("/api/v1/app/bootstrap").header("Authorization", "Bearer session-token"))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.user.id").value("2")).andExpect(jsonPath("$.roles[0]").value("common"))
+                .andExpect(jsonPath("$.user.password").doesNotExist()).andExpect(jsonPath("$.code").doesNotExist());
+        verify(bootstrapService).bootstrap(session);
+    }
 
     @Test
     void anonymousLoginReturnsConcreteContractAndDoesNotCacheToken() throws Exception

@@ -109,14 +109,15 @@
 			 left join sys_role_menu rm on m.menu_id = rm.menu_id
 			 left join sys_user_role ur on rm.role_id = ur.role_id
 			 left join sys_role r on r.role_id = ur.role_id
-		where m.status = '0' and r.status = '0' and ur.user_id = #{userId}
+		where m.status = '0' and r.status = '0' and r.del_flag = '0' and ur.user_id = #{userId}
 	</select>
 	
 	<select id="selectMenuPermsByRoleId" parameterType="Long" resultType="String">
 		select distinct m.perms
 		from sys_menu m
 			 left join sys_role_menu rm on m.menu_id = rm.menu_id
-		where m.status = '0' and rm.role_id = #{roleId}
+			 join sys_role r on r.role_id = rm.role_id
+		where m.status = '0' and r.status = '0' and r.del_flag = '0' and rm.role_id = #{roleId}
 	</select>
 	
 	<select id="selectMenuById" parameterType="Long" resultMap="SysMenuResult">
@@ -212,4 +213,4 @@
 	    delete from sys_menu where menu_id = #{menuId}
 	</delete>
 
-</mapper> 
+</mapper>

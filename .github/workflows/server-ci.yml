@@ -18,6 +18,28 @@ permissions:
   contents: read
 
 jobs:
+  auth-runtime-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: server/pom.xml
+      - name: Package server
+        run: mvn -B -ntp -f server/pom.xml package -DskipTests
+      - name: Verify canonical auth against disposable MySQL and Redis
+        shell: pwsh
+        run: ./server/scripts/verify-auth-integration.ps1
+      - name: Upload integration logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-integration-logs
+          path: server/eforge-boot/target/auth-integration/*.log
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 30

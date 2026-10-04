@@ -29,6 +29,10 @@ mysql_root -e "SELECT 1" >/dev/null
 echo "Initializing MySQL schema..."
 mysql_root "$MYSQL_DATABASE" < "$ROOT/sql/upstream/ry_20260417.sql"
 mysql_root "$MYSQL_DATABASE" < "$ROOT/sql/upstream/quartz.sql"
+for migration in "$ROOT"/sql/migrations/*.sql; do
+  [[ -f "$migration" ]] || continue
+  mysql_root "$MYSQL_DATABASE" < "$migration"
+done
 mysql_root "$MYSQL_DATABASE" -e   "UPDATE sys_config SET config_value='false' WHERE config_key='sys.account.captchaEnabled';"
 
 TABLE_COUNT="$(mysql_root -N -s -e   "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${MYSQL_DATABASE}';")"

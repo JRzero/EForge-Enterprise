@@ -72,6 +72,36 @@ For production, set an explicit `EFORGE_DB_URL` with trusted TLS and do not rely
 
 ## Runtime integration verification
 
+Initialize the unchanged upstream schemas first, then apply files under
+`sql/migrations/` in filename order exactly once. Bootstrap requires these
+additional columns. There is no automatic production migration runner yet;
+the verification scripts initialize disposable databases and apply the
+migrations explicitly. Re-importing upstream schema drops existing data and
+is only appropriate for fresh disposable environments.
+
+Bootstrap and navigation security decisions, including shared permission-query
+hardening and session refresh behavior, are documented in
+`docs/bootstrap-security-review.md`.
+
+Canonical authentication can also be checked with PowerShell 7 on Windows or
+Linux after packaging the server:
+
+```powershell
+./server/scripts/verify-auth-integration.ps1
+```
+
+This requires Docker and creates isolated MySQL 8.4 and Redis 7.4 containers on
+localhost ports 13306 and 16380, with the test application on port 18081.
+Ports can be overridden with `-MysqlPort`, `-RedisPort`, and `-AppPort`.
+The script initializes only its own disposable database, verifies canonical
+and legacy login, `/getInfo`, Redis session TTL, captcha replay rejection, HTTP
+errors, and authenticated OpenAPI DTOs, then removes its containers and stops
+the test application. Logs remain under `eforge-boot/target/auth-integration/`.
+
+New applications use `POST /api/v1/auth/login` followed by
+`GET /api/v1/app/bootstrap`; see
+`contracts/bootstrap-contract.md` for the request and error contract.
+
 CI starts real MySQL 8.4 and Redis 7.4 service containers, imports the upstream schema, launches the packaged Spring Boot application, then verifies:
 
 - schema initialization

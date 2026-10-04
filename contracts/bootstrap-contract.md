@@ -108,6 +108,13 @@ For EForge Enterprise, one bootstrap request after authentication:
 
 ## Rules
 
+The implemented endpoint reads the current account, active roles, permissions,
+and granted menu rows in one read-only MySQL REPEATABLE READ transaction. It
+refreshes the existing Redis session with that snapshot, including role-level
+permissions and data-scope values. Disabled/deleted accounts invalidate the
+current session and return HTTP 401. Responses use `Cache-Control: no-store`.
+See `docs/bootstrap-security-review.md` for the freshness boundary and review.
+
 - bootstrap navigation is already filtered for the current user
 - frontend route guards still validate permissions from the same bootstrap snapshot
 - backend endpoint authorization remains authoritative

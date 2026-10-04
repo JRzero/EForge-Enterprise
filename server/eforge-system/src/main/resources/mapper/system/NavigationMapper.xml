@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.eforge.enterprise.system.mapper.NavigationMapper">
+  <resultMap id="ActiveRole" type="SysRole">
+    <id property="roleId" column="role_id" />
+    <result property="roleName" column="role_name" />
+    <result property="roleKey" column="role_key" />
+    <result property="roleSort" column="role_sort" />
+    <result property="dataScope" column="data_scope" />
+    <result property="menuCheckStrictly" column="menu_check_strictly" />
+    <result property="deptCheckStrictly" column="dept_check_strictly" />
+    <result property="status" column="status" />
+    <result property="delFlag" column="del_flag" />
+  </resultMap>
+  <select id="selectGrantedMenus" resultType="io.eforge.enterprise.system.domain.NavigationMenu">
+    SELECT m.menu_id, m.parent_id, m.menu_key, m.route_id, m.menu_name AS label,
+           m.order_num, m.menu_type, m.visible, m.status, m.perms, m.is_frame, m.path, m.icon
+    FROM sys_menu m
+    WHERE m.menu_type IN ('M', 'C') AND m.status = '0'
+    <if test="!administrator">
+      AND EXISTS (
+        SELECT 1 FROM sys_role_menu rm
+        JOIN sys_user_role ur ON ur.role_id = rm.role_id
+        JOIN sys_role r ON r.role_id = ur.role_id
+        WHERE rm.menu_id = m.menu_id AND ur.user_id = #{userId}
+          AND r.status = '0' AND r.del_flag = '0'
+      )
+    </if>
+    ORDER BY m.order_num, m.menu_key, m.menu_id
+  </select>
+  <select id="selectActiveRoles" resultMap="ActiveRole">
+    SELECT r.* FROM sys_role r
+    JOIN sys_user_role ur ON ur.role_id = r.role_id
+    WHERE ur.user_id = #{userId} AND r.status = '0' AND r.del_flag = '0'
+    ORDER BY r.role_sort, r.role_id
+  </select>
+</mapper>

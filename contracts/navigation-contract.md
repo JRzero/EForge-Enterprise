@@ -161,6 +161,25 @@ A navigation key and route ID may intentionally be the same for route leaves, bu
 
 ## Database migration
 
+Apply `sql/migrations/V001__navigation_identity.sql` once after the unchanged
+upstream schemas. It adds nullable, unique `menu_key` and `route_id` fields,
+identifier checks, and route eligibility checks. Seed identities are derived
+from explicit menu semantics and permission keys, not numeric IDs or labels.
+Legacy menu writes remain supported; unmigrated rows with null keys do not
+enter canonical navigation.
+
+No frontend routes exist at this milestone, so seed `route_id` values remain
+null. Internal pages without route bindings and empty groups are omitted.
+Later page implementations must add explicit bindings and frontend-registry
+contract validation; bootstrap never invents route IDs from component strings.
+External legacy links remain explicit EXTERNAL leaves. New external links
+must use HTTP(S), a host, and no URL-embedded credentials.
+
+The canonical mapper reads flat granted rows. Projection drops hidden/disabled
+subtrees and never promotes orphans. It validates duplicate identities, cycles
+and excessive depth. ROLE-grant filtering and permission checks use the same
+database snapshot as bootstrap. The legacy `getRouters` projection is unchanged.
+
 Do not reuse the legacy `component` field for React.
 
 Recommended schema additions:
