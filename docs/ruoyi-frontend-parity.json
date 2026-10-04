@@ -325,7 +325,7 @@
         "fixtureBrowser": 20,
         "liveBrowser": 21,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
@@ -355,18 +355,18 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Live editor CSS/style/default/sort boundaries and cancellation acceptance",
-        "Shared lookup removed/unknown-option and read-only-grant final audit"
+        "Real read-only dictionary grants and direct internal-route denial",
+        "Removed/unknown dictionary option display and final per-feature acceptance audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
-        "fixtureBrowser": 20,
+        "fixtureBrowser": 21,
         "liveBrowser": 21,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Dictionary pagination/dates/bulk/export/whole preview, shared dictionary mutation and all module regressions; remaining boundaries stay explicit."
+        "scope": "Adds real editor clearing/style/default/sort boundaries, actual cache-refresh UI and aborted preview request; remaining grants/removed-option acceptance stays explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -404,18 +404,18 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Live cache-refresh UI, read-only grants/internal-route denial and preview cancellation",
-        "Final full dictionary page acceptance audit"
+        "Real read-only dictionary grants and direct internal-route denial",
+        "Removed/unknown dictionary option display and final per-feature acceptance audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
-        "fixtureBrowser": 20,
+        "fixtureBrowser": 21,
         "liveBrowser": 21,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Dictionary pagination/dates/bulk/export/whole preview, shared dictionary mutation and all module regressions; remaining boundaries stay explicit."
+        "scope": "Adds real editor clearing/style/default/sort boundaries, actual cache-refresh UI and aborted preview request; remaining grants/removed-option acceptance stays explicit."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -498,7 +498,7 @@
         "fixtureBrowser": 20,
         "liveBrowser": 21,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
@@ -546,7 +546,7 @@
         "fixtureBrowser": 20,
         "liveBrowser": 21,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
@@ -615,7 +615,7 @@
         "fixtureBrowser": 20,
         "liveBrowser": 21,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },
@@ -693,7 +693,7 @@
         "fixtureBrowser": 20,
         "liveBrowser": 21,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical status/sex/visibility lookup, custom-label/style mutation/restoration, filter/editor choices, independent failure recovery and full existing browser regression."
       }
     },

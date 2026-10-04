@@ -492,7 +492,26 @@ Metadata failure and independent shared-lookup failure/recovery are covered.
 Local validation passes 188 backend tests, 42 web unit tests, lint/typecheck,
 build, 20 fixture and 21 live browser cases. All disposable module scripts,
 production-default checks, exact live OpenAPI and client reproducibility pass.
-Current implementation CI is pending. Further live editor CSS/style/default/sort
+Implementation `72955cbb22ab2423c3cab2592ecbd31bd5e82dfa` passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37217867739)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37217867731).
+Further live editor CSS/style/default/sort
 boundaries, cache refresh UI, read-only dictionary grants and preview cancellation
 remain in the dictionary acceptance audit. The full shell and other missing
 groups remain required; this checkpoint does not complete the overall objective.
+
+## Dictionary editor/cancellation boundary checkpoint (2026-10-05)
+
+The real CRUD browser test now rejects negative sort input and persists the
+maximum 32-bit sort value. Reopening the editor proves cleared CSS/remarks,
+DEFAULT style and a disabled default flag survive a fresh detail request.
+The type page's cache-refresh button completes against real MySQL/Redis.
+An intercepted pending preview proves close aborts the active browser request
+with ERR_ABORTED and leaves the list refreshable.
+
+Lint/typecheck, 21 fixture and 21 live browser tests pass, along with every
+disposable module integration script, including actual Redis fault/MySQL rollback.
+Product and backend source are unchanged from the verified 72955cb checkpoint.
+Read-only dictionary grants/internal-route denial and removed-option display
+remain explicit final acceptance items. Configuration, notices, logs, monitoring,
+jobs, generator/form builder and full shell capabilities are still required.

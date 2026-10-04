@@ -1,5 +1,5 @@
 import {test, expect} from './fixtures';
-import type {Page} from '@playwright/test';
+import type {Page, Request} from '@playwright/test';
 import type {DictionaryEntryResponse} from '../../generated/api';
 const id = '9007199254740993';
 const type = {id, name: '测试字典', code: 'test_dict', status: '0', remark: ''};
@@ -31,6 +31,19 @@ test('read-only dictionaries recover errors and preview all 205 records with dee
   await expect(page.getByRole('cell', {name: '数据标签0', exact: true})).toBeVisible(); await expect(page.getByLabel('选择字典', {exact: true})).toHaveValue(id);
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.reload(); await expect(page.getByRole('cell', {name: '数据标签0', exact: true})).toBeVisible();
+});
+
+test('closing a loading preview cancels its active network request and preserves the list', async ({page}) => {
+  await page.route('**/api/v1/system/dictionaries?*', route => route.fulfill({json: {items: [type], total: 1, page: 1, pageSize: 10}}));
+  let release: () => void = () => {}; const gate = new Promise<void>(resolve => {release = resolve;});
+  let latest: Request | undefined;
+  await page.route('**/api/v1/system/dictionary-entries?*', async route => {latest = route.request(); await gate; await route.fulfill({json: {items: [], total: 0, page: 1, pageSize: 100}}).catch(() => {});});
+  await authenticate(page, ['system:dict:list']); await page.getByRole('button', {name: '预览字典 测试字典'}).click();
+  const dialog = page.getByRole('dialog'); await expect(dialog.getByText('正在加载预览…')).toBeVisible();
+  await expect.poll(() => !!latest && !latest.failure()).toBe(true);
+  const failed = page.waitForEvent('requestfailed', request => request === latest);
+  await dialog.getByRole('button', {name: '关闭预览'}).click(); const cancelled = await failed; expect(cancelled.failure()?.errorText).toContain('ERR_ABORTED'); release();
+  await expect(dialog).toHaveCount(0); await expect(page.getByRole('cell', {name: id, exact: true})).toBeVisible(); await page.getByRole('button', {name: '刷新列表'}).click(); await expect(page.getByRole('cell', {name: id, exact: true})).toBeVisible();
 });
 
 test('dictionary type editing validates input, preserves failed drafts and retries cache refresh', async ({page}) => {
