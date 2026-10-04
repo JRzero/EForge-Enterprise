@@ -439,13 +439,20 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-core-api-awaiting-ci",
+      "state": "partial-core-api-verified",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
         "server/scripts/verify-users-integration.ps1",
         "docs/security-review-users-v1.md"
       ],
+      "lastVerifiedCoreApi": {
+        "implementationCommit": "fb8d9a0718f51e86fe7abdf2b33b3808a1c6c6e1",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809973",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809879",
+        "conclusion": "success",
+        "scope": "Core administration APIs and regression of existing pages; user frontend parity remains incomplete."
+      },
       "remaining": [
         "React administration page and complete live browser verification",
         "XLS/XLSX import, optional updates and template download",

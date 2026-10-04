@@ -156,7 +156,10 @@ Local Maven verification passes 90 tests including all ten data-scope parity
 cases. Frontend lint/typecheck/18 unit tests/build/generated-client check and
 seven fixture/five real-backend existing browser cases pass. These browser cases
 regress login, posts and departments; they do not prove a user page that has not
-yet been implemented. Current implementation CI is pending.
+yet been implemented. Implementation commit
+`fb8d9a0718f51e86fe7abdf2b33b3808a1c6c6e1` passed both
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809973)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809879).
 
 See [the core user security review](security-review-users-v1.md). User page,
 import/template and personal profile/avatar/password-change flows remain pending,
