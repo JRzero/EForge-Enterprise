@@ -439,7 +439,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-profile-api-awaiting-ci",
+      "state": "partial-profile-api-verified",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -471,6 +471,13 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37187426873",
         "conclusion": "success",
         "scope": "Administration page, canonical APIs and XLS/XLSX imports; personal profile and shared dictionary integration remain incomplete."
+      },
+      "lastVerifiedProfileApi": {
+        "implementationCommit": "f319bd7c5c83e47bd122c0bc52bada5dfd20baad",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564966",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564916",
+        "conclusion": "success",
+        "scope": "Self-service profile/password/avatar API; React profile/crop browser parity remains incomplete."
       }
     },
     {

@@ -68,5 +68,5 @@ deletion containment. These add 22 tests to the 101-test baseline.
 profile persistence without changing departments/grants/posts, uniqueness
 rollback, legacy session refresh, bootstrap, old/new login credentials, real
 served PNG bytes, replacement cleanup, fresh reads from another session and
-disabled-account token revocation. Exact CI evidence is added to the parity
-inventory after push. Profile page/crop browser parity remains incomplete.
+disabled-account token revocation. Implementation `f319bd7` passed all server and web CI jobs; exact run links
+are recorded in the parity inventory. Profile page/crop browser parity remains incomplete.

@@ -28,7 +28,7 @@ It is a work inventory, not executable proof of completion.
 | Login/account lifecycle | captcha, failed login, remember-account/credential UX, configurable registration, logout, lock/unlock, session expiry, initial/expired password change | Login/captcha/logout/expiry verified; other behaviors missing |
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
-| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs implemented; targeted and runtime verification in progress. React page/crop browser parity remains pending |
+| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs verified locally and in CI; React page/crop browser parity remains pending |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile remains separate and incomplete |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
@@ -215,4 +215,9 @@ See [the explicit profile security review](security-review-profile-v1.md).
 The React personal profile forms, avatar crop controls and their real browser
 tests remain pending. Existing eight fixture and eleven live browser cases
 regress the implemented pages; they do not prove profile page parity.
-Implementation CI is pending at this checkpoint. The full objective stays active.
+Implementation commit `f319bd7c5c83e47bd122c0bc52bada5dfd20baad` passed
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564966)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564916).
+All three server jobs passed, including concurrent password checks, real PNG
+replacement/404 verification, credential audit inspection and exact live OpenAPI
+snapshot comparison. The full objective stays active.
