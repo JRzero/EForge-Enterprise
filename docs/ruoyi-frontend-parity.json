@@ -530,6 +530,10 @@
         "server/scripts/verify-notices-integration.ps1",
         "docs/security-review-notices-v1.md",
         "web/tests/unit/notice-api.test.ts",
+        "web/features/notices/rich-text.ts",
+        "web/features/notices/RichTextEditor.tsx",
+        "web/tests/unit/notice-rich-text.test.ts",
+        "web/tests/e2e/notice-rich-text.spec.ts",
         "contracts/openapi/api-v1.json"
       ]
     },

@@ -41,11 +41,16 @@ does not strip original editor formatting or impose an invented two-megabyte
 HTML limit that would reject original base64 images. Create/update audit payloads
 are suppressed, and request stringification redacts content.
 
-Stored HTML is not a trusted DOM fragment. The forthcoming rich editor and
-consumer display must retain original formatting/link/image/video capabilities
-while preventing executable markup, dangerous URLs and unsafe embeds. Until
-those components and their security/browser tests exist, this API checkpoint
-does not establish rich-text frontend parity or safe HTML rendering. Upstream
+Stored HTML is not a trusted DOM fragment. The notice-local DOMPurify boundary
+now preserves the original text formats, list/indent classes, colors, typography,
+links and images; it removes scripts, events, clobbering attributes, unsafe URLs
+and layout/URL-bearing CSS. Inline SVG and SVG data URLs are forbidden; image
+URLs may still reference server-normalized SVG uploads. Video frames have a fixed
+sandbox without allow-same-origin, no srcdoc and no-referrer. SAFE_FOR_XML stays
+enabled for raw-text/mutation-XSS defenses. Every editor import/paste/export and
+consumer render must use this boundary. The editor and renderer are prepared
+components, not yet bound to the notice management/top-feed routes; that work
+and canonical image upload remain outstanding. Upstream
 MIT attribution, architectural baselines and all ten data-scope cases remain.
 
 ## Verification scope
@@ -59,3 +64,35 @@ checks actual MySQL feed limits/order/status, idempotence, compatibility feed,
 readers, CRUD/clearing, batch guards and deletion rollback. Its owned database
 trigger fails notice deletion after read-row deletion and must leave both
 records present. Final results and CI belong in the parity inventory.
+
+Dependency review uses pinned DOMPurify 3.4.16 and Quill 2.0.3. Quill currently
+has no published patched version for
+[CVE-2025-15056](https://github.com/advisories/GHSA-v3m3-f69x-jf25), an HTML export
+XSS issue: exports are untrusted and must be sanitized before storage/rendering.
+The audit's suggested downgrade is not an upstream security fix. Browser tests
+exercise hostile paste/export/rendering; the dependency advisory remains open.
+Vitest is updated to compatible 4.1.11 to fix
+[CVE-2026-84373](https://github.com/advisories/GHSA-82fw-gwwq-j7x9), without advancing
+either upstream architectural baseline. See the official
+[Quill toolbar contract](https://quilljs.com/docs/modules/toolbar) and
+[DOMPurify security model](https://github.com/cure53/DOMPurify/wiki/Security-Goals-%26-Threat-Model).
+
+Quill's video format is locally overridden: editing frames are sanitized before
+insertion and HTML export preserves the sandboxed iframe instead of converting
+it into a text link. The browser test loads an actual same-host video fixture
+whose script attempts to access the parent document; sandbox isolation blocks
+that access in the editor and the consumer preview preserves the same policy.
+The complete original toolbar, controlled refill, HTML paste, raster upload,
+invalid upload, read-only behavior, cancellation and StrictMode cleanup are
+covered in a dedicated browser harness. Uploads there are simulated; this is
+not evidence for the forthcoming canonical image endpoint.
+
+2026-10-05 local checkpoint: 229 backend tests (including 10 unchanged data-scope
+cases), 53 frontend unit tests, 26 fixture browser tests and 24 live browser
+tests passed, plus lint/typecheck/build, production security defaults, seeded
+navigation contracts, exact live OpenAPI and reproducible generated client.
+The complete owned MySQL/Redis script also passed notice transactional deletion
+rollback, per-user reads, permissions, login/getInfo and Redis sessions, and all
+previous module regressions. Logs: `rich-text-backend.log` and
+`rich-text-runtime.log` under the ignored boot target directory. No notice page
+or top feed is wired yet, so notice parity remains partial.

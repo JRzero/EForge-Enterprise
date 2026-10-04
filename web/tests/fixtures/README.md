@@ -16,3 +16,10 @@ authentication, permission or workbook-content assertions.
 `avatar.png` is a generated 4×2 RGB PNG with distinct quadrants, containing no
 personal image or metadata. Runtime tests inspect normalization, serving,
 database/Redis persistence and removal of the previous owned avatar file.
+
+`notice-rich-text.html`/`.tsx` mount the actual notice editor and renderer in
+React StrictMode, outside application login redirects. The simulated image
+upload uses the synthetic PNG, exposes cancellation and never contacts storage.
+Browser tests separately load an owned same-host video response to prove that
+its sandbox prevents parent-document access. This harness validates rich text
+behavior and HTML boundaries, not the unimplemented notice image endpoint.
