@@ -1,7 +1,7 @@
 import {test, expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {workbookXml} from '../helpers/user-workbook';
-import type {DictionaryResponse, DictionaryEntryResponse, DictionaryTypeOption, PageResponseDictionaryEntryResponse, EntryRequest} from '../../generated/api';
+import type {DictionaryResponse, DictionaryEntryResponse, DictionaryTypeOption, PageResponseDictionaryEntryResponse, EntryRequest, RoleMenuOption, RoleResponse, UserResponse, RoleWriteRequest} from '../../generated/api';
 
 test('real dictionary type/data CRUD, duplicate values, rename, styled comma keys, XLSX and deletion guards', async ({page}) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
@@ -31,6 +31,35 @@ test('real dictionary type/data CRUD, duplicate values, rename, styled comma key
   await page.getByRole('button', {name: '关闭字典数据'}).click(); await page.getByLabel('字典类型筛选').fill(code); await page.getByRole('button', {name: '查询', exact: true}).click(); await page.getByRole('button', {name: `删除字典 ${name}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无字典记录', {exact: true})).toBeVisible();
   await page.getByRole('button', {name: '刷新字典缓存'}).click(); await expect(page.getByText('字典缓存已刷新。', {exact: true})).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('real list-only dictionary account cannot mutate or inspect detail and loses internal-route access after revoke', async ({page}) => {
+  await page.goto('/dict'); await page.getByLabel('账号', {exact: true}).fill('admin'); await page.getByLabel('密码', {exact: true}).fill('admin123'); await page.getByRole('button', {name: '登录', exact: true}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible();
+  const token = await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string);
+  const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'}, username = `dr${Date.now()}`;
+  const menus: RoleMenuOption[] = await (await page.request.get('/api/v1/system/roles/menus', {headers})).json();
+  const request: RoleWriteRequest = {name: username, key: username, sort: 0, status: '0', menuLinked: false, menuKeys: menus.filter(menu => menu.permission === 'system:dict:list').map(menu => menu.key)};
+  expect(request.menuKeys.length).toBeGreaterThan(0);
+  const createdRole = await page.request.post('/api/v1/system/roles', {headers, data: request}); expect(createdRole.status()).toBe(201); const role: RoleResponse = await createdRole.json();
+  let account: UserResponse | undefined;
+  try {
+    const createdUser = await page.request.post('/api/v1/system/users', {headers, data: {password: 'Reader123', user: {username, displayName: username, departmentId: '103', sex: '2', status: '0', roleIds: [role.id], postIds: []}}}); expect(createdUser.status()).toBe(201); account = await createdUser.json();
+    const types: DictionaryTypeOption[] = await (await page.request.get('/api/v1/system/dictionaries/options', {headers})).json(); const type = types.find(type => type.code === 'sys_normal_disable')!;
+    await page.evaluate(() => sessionStorage.removeItem('eforge.enterprise.session.v1')); await page.goto('/dict'); await page.getByLabel('账号', {exact: true}).fill(username); await page.getByLabel('密码', {exact: true}).fill('Reader123'); await page.getByRole('button', {name: '登录', exact: true}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible();
+    for (const name of ['新增字典类型', '修改所选字典', '删除所选字典', '导出字典', '刷新字典缓存']) await expect(page.getByRole('button', {name, exact: true})).toHaveCount(0);
+    await page.getByRole('button', {name: type.name, exact: true}).click(); await expect(page).toHaveURL(new RegExp(`/dict/data/${type.id}$`)); await expect(page.getByRole('cell', {name: '正常', exact: true}).first()).toBeVisible();
+    const readerToken = await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string), readerHeaders = {Authorization: `Bearer ${readerToken}`};
+    expect((await page.request.get(`/api/v1/system/dictionaries/${type.id}`, {headers: readerHeaders})).status()).toBe(403);
+    expect((await page.request.post('/api/v1/system/dictionaries/cache/refresh', {headers: readerHeaders})).status()).toBe(403);
+    expect((await page.request.get('/api/v1/system/dictionaries/lookup/sys_normal_disable', {headers: readerHeaders})).status()).toBe(200);
+    expect((await page.request.put(`/api/v1/system/roles/${role.id}`, {headers, data: {...request, menuKeys: []}})).status()).toBe(204);
+    expect((await page.request.get(`/api/v1/system/dictionary-entries?dictionaryId=${type.id}`, {headers: readerHeaders})).status()).toBe(403);
+    await page.goto(`/dict/data/${type.id}`); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
+  } finally {
+    if (account) expect((await page.request.delete('/api/v1/system/users', {headers, data: {ids: [account.id]}})).status()).toBe(204);
+    expect((await page.request.delete('/api/v1/system/roles', {headers, data: {ids: [role.id]}})).status()).toBe(204);
+    await page.request.post('/logout', {headers});
+  }
 });
 
 test('real dictionary label/style changes reach all existing management pages and sex controls', async ({page}) => {

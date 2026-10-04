@@ -515,3 +515,25 @@ Product and backend source are unchanged from the verified 72955cb checkpoint.
 Read-only dictionary grants/internal-route denial and removed-option display
 remain explicit final acceptance items. Configuration, notices, logs, monitoring,
 jobs, generator/form builder and full shell capabilities are still required.
+
+## Dictionary reader and value compatibility checkpoint (2026-10-05)
+
+A real list-only role/account reads dictionary types/data and authenticated
+consumer lookup, while backend detail and cache-refresh requests return 403.
+Revoking its grant immediately denies the data endpoint with the same token;
+direct navigation to the internal data route then renders the 403 state.
+The temporary role/account are deleted after verification.
+
+Removed options display the raw unmatched value, and editor selects preserve
+their current code rather than switching to another value. Comparison with the
+immutable original DictTag exposed a scalar coercion mismatch: numbers/booleans
+use numeric comparison against string keys, while array members are stringified.
+The implementation now preserves this distinction, including false versus key
+0 and scalar 1 versus key 01. String keys still compare exactly.
+
+Validation passed 188 backend tests, 42 web unit tests, lint/typecheck/build,
+21 fixture and 22 live browser cases, all module runtime scripts, production
+defaults, exact live OpenAPI equality and generated-client reproducibility.
+Implementation CI for this checkpoint is pending. The preceding boundary
+checkpoint 3c81b1f passed all three server jobs and web CI. The full frontend
+objective remains active; parameter configuration is the next missing module.

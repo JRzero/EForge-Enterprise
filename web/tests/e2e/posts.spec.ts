@@ -41,4 +41,7 @@ test('shared dictionary labels recover independently and drive list, filter and 
   failed = false; await page.getByRole('button', {name: '重试字典标签'}).click(); await expect(page.getByRole('cell', {name: '自定义启用', exact: true})).toBeVisible(); await expect(page.locator('.tag-warning.custom-label')).toHaveText('自定义启用');
   await expect(page.getByLabel('状态筛选').getByRole('option', {name: '自定义停用', exact: true})).toHaveAttribute('value', '1');
   await page.getByRole('button', {name: '新增岗位'}).click(); await expect(page.getByRole('dialog').getByLabel('岗位状态').getByRole('option', {name: '自定义启用', exact: true})).toHaveAttribute('value', '0'); await page.keyboard.press('Escape');
+  await page.route('**/api/v1/system/dictionaries/lookup/sys_normal_disable', route => route.fulfill({json: [{value: '1', label: '仅剩停用', style: 'INFO', defaultEntry: false}]}));
+  await page.reload(); await expect(page.locator('.dictionary-tags')).toHaveText('0'); await page.getByRole('button', {name: '新增岗位'}).click();
+  const status = page.getByRole('dialog').getByLabel('岗位状态'); await expect(status).toHaveValue('0'); await expect(status.getByRole('option', {name: '0', exact: true})).toHaveAttribute('value', '0'); await page.keyboard.press('Escape');
 });

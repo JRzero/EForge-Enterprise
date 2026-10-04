@@ -16,7 +16,10 @@ const response = (items: DictionaryEntryResponse[], total: number, page = 1) => 
 
 it('dictionary tags preserve zero, false, arrays, duplicate labels and original option order', () => {
   expect(dictionaryTags(options, 0).matched).toEqual([options[0], options[2]]);
-  expect(dictionaryTags(options, false).matched).toEqual([options[1]]);
+  expect(dictionaryTags(options, false).matched).toEqual([options[0], options[2]]);
+  expect(dictionaryTags(options, [false]).matched).toEqual([options[1]]);
+  expect(dictionaryTags([{...options[0]!, value: '01'}], 1).matched).toHaveLength(1);
+  expect(dictionaryTags([{...options[0]!, value: '01'}], '1').matched).toHaveLength(0);
   expect(dictionaryTags(options, ['false', 0, 'unknown']).matched).toEqual(options);
   expect(dictionaryTags(options, 'false|0|unknown', '|').unmatched).toEqual(['unknown']);
   for (const value of [null, undefined, '']) expect(dictionaryTags(options, value)).toEqual({matched: [], unmatched: []});
@@ -28,7 +31,7 @@ it('dictionary rendering escapes labels, supports unknown-value visibility and r
   const html = renderToStaticMarkup(createElement(DictionaryTag, {options: [unsafe], value: '0,unknown'}));
   expect(html).toContain('&lt;正常&gt;'); expect(html).toContain('unknown'); expect(html).not.toContain('onclick');
   expect(renderToStaticMarkup(createElement(DictionaryTag, {options, value: 'unknown', showValue: false}))).not.toContain('unknown');
-  const styled = renderToStaticMarkup(createElement(DictionaryTag, {options: [{...options[1]!, cssClass: 'custom-label'}], value: false}));
+  const styled = renderToStaticMarkup(createElement(DictionaryTag, {options: [{...options[1]!, cssClass: 'custom-label'}], value: 'false'}));
   expect(styled).toContain('dictionary-tag tag-warning custom-label');
 });
 

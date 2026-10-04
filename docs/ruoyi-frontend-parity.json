@@ -339,7 +339,7 @@
         "updateData",
         "delData"
       ],
-      "state": "partial-ui",
+      "state": "verified-local",
       "evidence": [
         "DictionaryControllerTest",
         "server/scripts/verify-dictionaries-integration.ps1",
@@ -355,18 +355,17 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Real read-only dictionary grants and direct internal-route denial",
-        "Removed/unknown dictionary option display and final per-feature acceptance audit"
+        "Current dictionary compatibility/reader implementation CI and final source acceptance audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
         "fixtureBrowser": 21,
-        "liveBrowser": 21,
+        "liveBrowser": 22,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Adds real editor clearing/style/default/sort boundaries, actual cache-refresh UI and aborted preview request; remaining grants/removed-option acceptance stays explicit."
+        "scope": "Adds real list-only grants/detail-write denials, same-session revoke/internal-route 403, removed-option preservation and original scalar/array value coercion. Product CI pending."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
@@ -387,7 +386,7 @@
         "refreshCache",
         "optionselect"
       ],
-      "state": "partial-ui",
+      "state": "verified-local",
       "evidence": [
         "DictionaryControllerTest",
         "server/scripts/verify-dictionaries-integration.ps1",
@@ -404,18 +403,17 @@
         "sql/migrations/V014__dictionaries_route.sql"
       ],
       "remaining": [
-        "Real read-only dictionary grants and direct internal-route denial",
-        "Removed/unknown dictionary option display and final per-feature acceptance audit"
+        "Current dictionary compatibility/reader implementation CI and final source acceptance audit"
       ],
       "localValidation": {
         "backend": 188,
         "webUnit": 42,
         "fixtureBrowser": 21,
-        "liveBrowser": 21,
+        "liveBrowser": 22,
         "conclusion": "success",
         "apiCi": "success",
         "uiCi": "pending",
-        "scope": "Adds real editor clearing/style/default/sort boundaries, actual cache-refresh UI and aborted preview request; remaining grants/removed-option acceptance stays explicit."
+        "scope": "Adds real list-only grants/detail-write denials, same-session revoke/internal-route 403, removed-option preservation and original scalar/array value coercion. Product CI pending."
       },
       "lastVerifiedCoreApi": {
         "implementationCommit": "8d8cea038a1a7ecbd2269af9a055b6157bb9e231",
