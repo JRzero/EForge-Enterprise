@@ -296,6 +296,10 @@
         "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/system/ConfigurationControllerTest.java",
         "server/scripts/verify-configurations-integration.ps1",
         "docs/security-review-configurations-v1.md",
+        "web/features/configurations/ConfigurationsPage.tsx",
+        "web/tests/e2e/configurations.spec.ts",
+        "web/tests/live/configurations.spec.ts",
+        "sql/migrations/V016__configuration_route.sql",
         "web/tests/unit/configuration-api.test.ts",
         "contracts/openapi/api-v1.json"
       ]

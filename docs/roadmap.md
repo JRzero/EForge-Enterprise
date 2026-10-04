@@ -53,7 +53,7 @@
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
 - [ ] menu/permission management (canonical API/client and React tree/icons/scope/session refresh verified in CI; status/visibility dictionaries verified locally; query/cache shell behavior pending)
 - [ ] dictionary (type/data pages, paging/dates, whole preview, CRUD/bulk/export and shared integration verified locally; remaining field/abort/cache browser acceptance and current CI pending)
-- [ ] configuration (canonical API/client verified locally, including real cache fault/permission/captcha integration and existing browser regressions; implementation CI, React page and route still pending)
+- [ ] configuration (canonical API/client passed CI; React page, seeded route, filters/CRUD/bulk/XLSX/cache, permission/error/mobile and real persistence checks verified locally; page CI and final acceptance audit pending)
 - [ ] notices
 - [ ] operation/login logs
 - [ ] online session management

@@ -36,7 +36,7 @@ It is a work inventory, not executable proof of completion.
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared status/visibility dictionaries verified locally; query/cache shell behavior pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
-| Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Canonical API/client implemented and verified locally; React page, route and browser acceptance pending |
+| Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
 | Login logs | filters/date range/pagination, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
@@ -565,7 +565,41 @@ operation. Captcha is enabled through a canonical write before replay checks.
 Every preceding module runtime check and production-default check passed.
 The final actual OpenAPI snapshot matches the contract exactly.
 
-Implementation CI is pending. The configuration React page, static route,
+Implementation 4a20617 passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37220985702)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37220985737).
+The configuration React page, static route,
 dictionary-driven builtin labels, filters/selection/dialog/export/cache UX and
 their browser acceptance remain required. Notices, logs, monitoring, jobs,
 generator/form builder and full shell capabilities also remain in the objective.
+
+## Parameter configuration page checkpoint (2026-10-05)
+
+The lazy EForge page binds `/config` to system-configurations through V016 and
+the stable system-configuration menu key. Bootstrap now includes seven actual
+system routes, and the backend packages the exact eight-route public catalog.
+Unimplemented legacy menu compatibility checks use system-notices instead.
+
+The page covers name/key/builtin/date filtering, reset/search visibility,
+selection, single selected-row editing, create/update/delete/bulk deletion,
+dictionary-driven sys_yes_no labels, column visibility, XLSX download and cache
+refresh. Creation retains the original builtin Y default; edits preserve keys,
+multiline values and clearable remarks. Failed writes retain drafts; cache
+failures are retryable. List and detail requests cancel on unmount, exact string
+IDs drive selection, and deleting the last page returns to the remaining page.
+Exports use the applied filters rather than unsubmitted draft text.
+
+Validation passed 209 backend tests, 44 unit tests, lint/typecheck/build,
+24 fixture and 24 live browser cases, all disposable module runtime scripts,
+production defaults, exact live OpenAPI equality and generated-client
+reproducibility. New fixture coverage proves list-only access, raw escaped values,
+large IDs, retry, mobile bounds, required/length validation, preserved conflicts,
+selected edit, builtin labels/defaults, cache retry and applied export filters.
+Real browser coverage proves CRUD, builtin rejection then editable removal,
+Unicode rename/current lookup, remark clearing, XLSX contents, cache refresh,
+dates, pagination, last-page recovery and batch selection/deletion.
+
+Page implementation CI and final module acceptance audit remain pending. The
+full objective stays active; notices with rich text and per-user read state are
+the next missing module, followed by the remaining logs/monitoring/jobs,
+generator/form builder and complete shell/shared capabilities.

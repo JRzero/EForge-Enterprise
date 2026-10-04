@@ -11,6 +11,7 @@ const RolesPage = lazy(() => import('../features/roles/RolesPage').then(module =
 const RoleUsersPage = lazy(() => import('../features/roles/RoleUsersPage').then(module => ({default: module.RoleUsersPage})));
 const MenusPage = lazy(() => import('../features/menus/MenusPage').then(module => ({default: module.MenusPage})));
 const DictionariesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionariesPage})));
+const ConfigurationsPage = lazy(() => import('../features/configurations/ConfigurationsPage').then(module => ({default: module.ConfigurationsPage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
@@ -31,6 +32,8 @@ if (!menus) throw new Error('Missing menus route contract.');
 const dictionaries = contracts.find(route => route.id === 'system-dictionaries');
 if (!dictionaries) throw new Error('Missing dictionary route contract.');
 const dictionaryData = internalContracts.find(route => route.id === 'dictionary-data');
+const configurations = contracts.find(route => route.id === 'system-configurations');
+if (!configurations) throw new Error('Missing configuration route contract.');
 if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
 export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
@@ -53,6 +56,9 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: dictionaries.id, path: dictionaries.path, title: '字典管理',
   access: {permission: dictionaries.permission}, component: DictionariesPage
+}, {
+  id: configurations.id, path: configurations.path, title: '参数配置',
+  access: {permission: configurations.permission}, component: ConfigurationsPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

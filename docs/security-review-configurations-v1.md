@@ -68,4 +68,8 @@ exports, cancellation and session retention/expiration on 503/401.
 
 This document describes the API/client boundary. Final runtime and CI evidence
 belong in the parity inventory. The React configuration page, seeded route and
-its complete browser acceptance are still required before module parity.
+its complete browser acceptance are required before module parity. The page and
+V016 route now have a local checkpoint: 24 fixture and 24 live browser tests,
+including builtin guards, exact IDs, applied filters, retained drafts/cache
+retry, Unicode persistence, XLSX, pagination and batch deletion. Page CI and
+the final acceptance audit remain tracked in the parity inventory.
