@@ -29,7 +29,7 @@ It is a work inventory, not executable proof of completion.
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
-| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI pending. Personal profile remains separate and incomplete |
+| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile remains separate and incomplete |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
@@ -187,7 +187,11 @@ XLSX partial failures and overwrite, actual legacy XLS login, 220-row drag/drop,
 and a real committed import response delayed beyond the ordinary request deadline.
 The runtime script separately verifies import scope denial, permission revocation,
 admin protection, uniqueness, authentication and existing module regressions.
-Implementation CI is pending at this checkpoint.
+Implementation commit `7c0b3cd439ba7a063adc458f183bdf51f130ab35` passed
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37187426882)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37187426873).
+All three server jobs passed, including Linux live browser/runtime verification
+and exact exported OpenAPI snapshot comparison.
 
 Personal profile, self password change, avatar upload/crop, dictionary integration
 and every other missing capability group remain in scope. This checkpoint does

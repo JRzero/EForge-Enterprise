@@ -94,6 +94,6 @@ slow imports; read-only/error/mobile fixtures supplement them.
 
 Local validation: 101 backend tests, 20 frontend unit tests, eight fixture and
 eleven live browser cases, generated client, seeded routes and security defaults.
-All ten data-scope parity cases remain green. Implementation CI is recorded in
-the parity inventory after push. The review approves this administration/import
+All ten data-scope parity cases remain green. Implementation CI passed on `7c0b3cd`; exact run links are recorded in
+the parity inventory. The review approves this administration/import
 slice; personal profile and the remaining parity groups remain incomplete.

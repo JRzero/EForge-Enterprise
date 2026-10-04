@@ -439,7 +439,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-administration-implemented-awaiting-ci",
+      "state": "partial-administration-verified",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -460,7 +460,14 @@
       "remaining": [
         "Personal profile, password change and avatar upload",
         "Shared dictionary-driven controls when dictionary contracts are implemented"
-      ]
+      ],
+      "lastVerifiedAdministration": {
+        "implementationCommit": "7c0b3cd439ba7a063adc458f183bdf51f130ab35",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37187426882",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37187426873",
+        "conclusion": "success",
+        "scope": "Administration page, canonical APIs and XLS/XLSX imports; personal profile and shared dictionary integration remain incomplete."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/tool/gen.js",
