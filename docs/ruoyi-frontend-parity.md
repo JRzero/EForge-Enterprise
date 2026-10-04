@@ -28,7 +28,7 @@ It is a work inventory, not executable proof of completion.
 | Login/account lifecycle | captcha, failed login, remember-account/credential UX, configurable registration, logout, lock/unlock, session expiry, initial/expired password change | Login/captcha/logout/expiry verified; other behaviors missing |
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
-| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs verified locally and in CI; React page/crop browser parity remains pending |
+| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs verified locally and in CI. React page/crop implemented and real browser flow passed; final keyboard/mobile checks passed; implementation CI pending |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile remains separate and incomplete |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
@@ -212,12 +212,38 @@ covers real contact conflicts, database and Redis persistence, old/new
 credentials, served PNG bytes, previous-file cleanup and inactive-session denial.
 See [the explicit profile security review](security-review-profile-v1.md).
 
-The React personal profile forms, avatar crop controls and their real browser
-tests remain pending. Existing eight fixture and eleven live browser cases
-regress the implemented pages; they do not prove profile page parity.
+At that API-only checkpoint the React forms and crop controls were pending.
+The newer page evidence below supersedes that limitation.
 Implementation commit `f319bd7c5c83e47bd122c0bc52bada5dfd20baad` passed
 [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564966)
 and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564916).
 All three server jobs passed, including concurrent password checks, real PNG
 replacement/404 verification, credential audit inspection and exact live OpenAPI
 snapshot comparison. The full objective stays active.
+
+## Personal-center page verification checkpoint (2026-10-04)
+
+The authenticated internal `/user/profile` route and header entry implement
+account/department/role/post/date display, validated self-profile editing,
+password confirmation and visibility, old/unchanged password errors, close,
+loading/retry and mobile layout. Bootstrap refresh preserves the mounted page
+and prevents an obsolete response from restoring a logged-out session.
+Avatar selection, actual decode, square crop, pointer/keyboard pan, zoom,
+quarter-turn rotations, preview, reset, cancel and 200-pixel PNG upload are local
+to the feature. ADR-0011 documents the internal route/seed distinction.
+
+Local validation: lint, typecheck,
+23 unit tests, build, nine fixture browser cases. The complete disposable runtime
+then passed twelve live browser cases and all database/Redis integration scripts.
+The new profile case uses an actual account with no management grants and checks
+profile persistence, unchanged associations, wrong/unchanged/new passwords,
+old/new login, actual pointer drag, rotated/cropped output dimensions and the
+entire bitmap hash matching the preview, reload, cancel,
+replacement HTTP 404, close/reopen and logout. The generated-upload directory is
+unique per run and is removed within a checked path in fixture cleanup.
+
+Keyboard tab switching/focus, mobile profile overflow and crop-window bounds
+passed after quota recovered. Bootstrap refresh also has a targeted stale-session
+test. The live runtime and all existing module regressions passed on the final
+page version. Implementation CI is pending. Other missing groups and shared
+dictionary-driven controls remain in scope; full parity is not complete.

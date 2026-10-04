@@ -45,5 +45,5 @@ accessible to same-origin script; this does not introduce cookie authentication
 or redesign the existing server token implementation.
 
 Production must serve the SPA with history fallback and proxy `/api/v1`,
-`/captchaImage`, and `/logout` to the server under the same origin. The Vite
+`/captchaImage`, `/logout`, and uploaded `/profile/**` resources to the server under the same origin. The Vite
 proxy is only a local development convenience.

@@ -67,7 +67,7 @@ Assert-Check ((Request "/api/v1/system/users/$profileId/status" 'PUT' '{"status"
 Request '/logout' 'POST' '' $profileHeaders | Out-Null
 Assert-Check ((Request '/api/v1/system/users' 'DELETE' (@{ids=@($profileId,$collision.id)} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Profile fixture cleanup failed.'
 # Only the newly returned owned UUID filename is removed, beneath this run's log root.
-$avatarFile = Join-Path $logDirectory ($avatarSecondUrl.Substring('/profile/'.Length))
-Assert-Check ($avatarSecondUrl -match '^/profile/avatar/canonical/[0-9a-f-]+\.png$' -and [IO.Path]::GetFullPath($avatarFile).StartsWith([IO.Path]::GetFullPath($logDirectory)+[IO.Path]::DirectorySeparatorChar)) 'Unexpected avatar cleanup target.'
+$avatarFile = Join-Path $uploadDirectory ($avatarSecondUrl.Substring('/profile/'.Length))
+Assert-Check ($avatarSecondUrl -match '^/profile/avatar/canonical/[0-9a-f-]+\.png$' -and [IO.Path]::GetFullPath($avatarFile).StartsWith([IO.Path]::GetFullPath($uploadDirectory)+[IO.Path]::DirectorySeparatorChar)) 'Unexpected avatar cleanup target.'
 Remove-Item -LiteralPath $avatarFile
 Write-Output 'Self profile, unchanged associations, uniqueness rollback, password/login, Redis refresh and actual avatar replacement verification passed.'

@@ -8,6 +8,16 @@ const snapshot: BootstrapResponse = {user: {id: '1', username: 'admin', displayN
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
 afterEach(() => vi.unstubAllGlobals());
 describe('session lifecycle and asynchronous boundaries', () => {
+  it('refreshes the bootstrap without unmounting the authenticated workspace and discards results after logout', async () => {
+    const storage = createMemoryStorage({[key]: JSON.stringify({accessToken:'old'})});
+    let complete!: (value: Response) => void;
+    const transport = vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot))
+      .mockReturnValueOnce(new Promise(resolve => { complete = resolve; }));
+    const runtime = createSessionRuntime(storage,transport); await runtime.restore();
+    const update = runtime.refresh(); expect(runtime.getSnapshot().phase).toBe('authenticated');
+    runtime.forget(); complete(json({...snapshot,user:{...snapshot.user,displayName:'Changed'}})); await update;
+    expect(runtime.getSnapshot().phase).toBe('signed-out'); expect(storage.getItem(key)).toBeNull();
+  });
   it('restores token-only storage and clears it on an authenticated 401', async () => {
     const storage = createMemoryStorage({[key]: JSON.stringify({accessToken: 'old'})});
     const transport = vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot))

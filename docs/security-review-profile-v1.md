@@ -69,4 +69,23 @@ profile persistence without changing departments/grants/posts, uniqueness
 rollback, legacy session refresh, bootstrap, old/new login credentials, real
 served PNG bytes, replacement cleanup, fresh reads from another session and
 disabled-account token revocation. Implementation `f319bd7` passed all server and web CI jobs; exact run links
-are recorded in the parity inventory. Profile page/crop browser parity remains incomplete.
+are recorded in the parity inventory. The page was pending at that API-only checkpoint; current page evidence follows.
+
+## React implementation follow-up
+
+The locally implemented profile page uses the authenticated fixed internal
+route, generated APIs and original self-service access. No credentials or profile
+fields are added to tab storage. Password fields are masked by default; mismatch
+validation runs before submission, and success clears all three fields. Background
+bootstrap refresh keeps the current page and guards stale results after logout.
+Actual server checks remain authoritative for conflicts, old credentials and
+account state. Canvas output is bounded to 200×200 PNG, with byte/dimension checks
+and decoded preview, explicit cancel, and no copied EForge source.
+
+The real no-grant browser flow passed, including actual pointer drag and entire
+output bitmap hash/dimension inspection, login/association/session outcomes and
+old-avatar 404. Keyboard tab focus/switching, mobile overflow and crop-window
+bounds also passed. Runtime uploads use a unique owned directory that is removed
+only after validating its resolved absolute path beneath the fixture log root.
+Frontend lint/typecheck, 23 unit tests, build, generated client, nine fixture and
+twelve live browser cases passed. Implementation CI remains pending.

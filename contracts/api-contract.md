@@ -171,7 +171,8 @@ and returns 204. POST `/avatar` consumes multipart `file` and returns avatarUrl
 after decoded raster validation and normalization. All IDs come from the current
 authenticated session; administration permissions are unnecessary. Disabled or
 deleted accounts return 401 and revoke the current session. The React profile
-page and crop flow remain pending at this API checkpoint.
+page and crop flow have passed local fixture/live browser and keyboard/mobile
+validation; implementation CI is tracked in the parity inventory.
 
 User administration core contracts now live at `/api/v1/system/users`: typed
 page/filter results, scoped departments/editor options, concrete detail/role/post

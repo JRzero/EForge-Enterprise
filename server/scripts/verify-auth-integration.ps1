@@ -13,6 +13,7 @@ $createdContainers = [System.Collections.Generic.List[string]]::new()
 $previousEnv = @{}
 $appProcess = $null
 $logDirectory = Join-Path $repoRoot 'server/eforge-boot/target/auth-integration'
+$uploadDirectory = Join-Path $logDirectory "uploads-$runId"
 New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 
 function Invoke-Docker {
@@ -100,7 +101,7 @@ try {
         EFORGE_REDIS_HOST = '127.0.0.1'; EFORGE_REDIS_PORT = "$RedisPort"; EFORGE_REDIS_DATABASE = '0'; EFORGE_REDIS_PASSWORD = ''
         EFORGE_SERVER_PORT = "$AppPort"; EFORGE_TOKEN_SECRET = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
         EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = 'false'; EFORGE_DRUID_CONSOLE_ENABLED = 'false'
-        EFORGE_PROFILE = $logDirectory
+        EFORGE_PROFILE = $uploadDirectory
     }
     foreach ($key in $testEnv.Keys) {
         $previousEnv[$key] = [Environment]::GetEnvironmentVariable($key, 'Process')
@@ -231,4 +232,10 @@ finally {
     if ($appProcess -and !$appProcess.HasExited) { Stop-Process -Id $appProcess.Id -Force }
     foreach ($key in $previousEnv.Keys) { [Environment]::SetEnvironmentVariable($key, $previousEnv[$key], 'Process') }
     foreach ($container in $createdContainers) { & docker rm --force --volumes $container | Out-Null }
+    if (Test-Path -LiteralPath $uploadDirectory) {
+        $resolvedUpload = [IO.Path]::GetFullPath($uploadDirectory)
+        $resolvedLog = [IO.Path]::GetFullPath($logDirectory)
+        Assert-Check ($resolvedUpload.StartsWith($resolvedLog + [IO.Path]::DirectorySeparatorChar) -and [IO.Path]::GetFileName($resolvedUpload) -eq "uploads-$runId") 'Unsafe owned upload cleanup target.'
+        Remove-Item -LiteralPath $resolvedUpload -Recurse -Force
+    }
 }

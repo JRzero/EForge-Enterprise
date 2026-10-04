@@ -439,7 +439,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-profile-api-verified",
+      "state": "partial-profile-page-awaiting-ci",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -452,7 +452,11 @@
         "ProfileControllerTest",
         "AvatarStoreTest",
         "server/scripts/verify-profile-integration.ps1",
-        "docs/security-review-profile-v1.md"
+        "docs/security-review-profile-v1.md",
+        "web/tests/live/profile.spec.ts",
+        "web/tests/e2e/profile.spec.ts",
+        "web/tests/unit/profile-crop.test.ts",
+        "docs/adr/0011-authenticated-internal-routes.md"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "fb8d9a0718f51e86fe7abdf2b33b3808a1c6c6e1",
@@ -462,7 +466,7 @@
         "scope": "Core administration APIs and regression of existing pages; user frontend parity remains incomplete."
       },
       "remaining": [
-        "React personal profile/password forms and avatar crop/upload browser verification",
+        "Implementation CI for the personal-center and crop page",
         "Shared dictionary-driven controls when dictionary contracts are implemented"
       ],
       "lastVerifiedAdministration": {

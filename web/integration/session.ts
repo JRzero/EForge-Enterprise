@@ -63,6 +63,12 @@ export function createSessionRuntime(storage: StorageAdapter, fetcher: typeof fe
     getSnapshot: () => state,
     subscribe(listener: () => void) { listeners.add(listener); return () => listeners.delete(listener); },
     restore, forget,
+    async refresh() {
+      if (state.phase !== 'authenticated') return;
+      const operation = begin();
+      const snapshot = await api.bootstrap(operation.signal);
+      if (operation.id === generation) emit({phase: 'authenticated', bootstrap: snapshot});
+    },
     async login(request: LoginRequestWrite) {
       const operation = begin();
       const response = await api.login(request, operation.signal);

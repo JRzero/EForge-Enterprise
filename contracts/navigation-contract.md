@@ -220,6 +220,13 @@ The runtime must not trust a database-provided component or executable access ex
 
 Backend endpoint authorization remains authoritative.
 
+Authenticated internal routes, such as the original hidden `/user/profile`, are
+explicit in `web/app/internal-route-contract.json` and the static React registry.
+They are entered from the app header and have no seeded menu row or invented
+management permission. All pages still require successful session bootstrap.
+Unit checks validate the combined registry; seed checks validate every entry in
+the separate navigation route contract. See ADR-0011.
+
 ## Validation
 
 CI/integration tests must detect:
