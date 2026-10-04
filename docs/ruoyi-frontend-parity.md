@@ -38,8 +38,8 @@ It is a work inventory, not executable proof of completion.
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
-| Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
-| Login logs | filters/date range/pagination, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
+| Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Missing |
+| Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
@@ -676,7 +676,11 @@ read state using an owned account with no roles, authorized reader search,
 paging/columns/last-page recovery and batch deletion. The final runtime verifies
 all prior modules, real MySQL rollback/cache fault behavior, Redis sessions and
 captcha replay. Production defaults and exact live OpenAPI equality passed.
-Exact-commit CI remains pending until this stage is pushed.
+Implementation c7605fecf4fb387af57928dce66215c86ee4d5ce passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37237590148)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37237590166).
+Both workflows verify that exact implementation SHA; the Linux runtime also
+passes the 27 real browser tests and exact committed OpenAPI comparison.
 The final capability audit stays pending; operation/login logs are next, followed
 by online sessions, monitoring/jobs, generator/form builder and complete shell
 and shared capabilities. The full parity objective remains active.

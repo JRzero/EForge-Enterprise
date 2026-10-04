@@ -559,8 +559,15 @@
         "fixtureBrowser": 30,
         "liveBrowser": 27,
         "conclusion": "local-success",
-        "ci": "pending",
+        "ci": "success",
         "scope": "Canonical JPG/PNG/static-SVG multipart upload and resource/security budgets; management filters/CRUD/clearing/readers; newest-five header and no-role per-user read isolation; paging/batch/last-page behavior, hostile HTML, retry/cancellation/mobile and all prior module regressions. Full capability audit remains pending."
+      },
+      "lastVerifiedNoticePage": {
+        "implementationCommit": "c7605fecf4fb387af57928dce66215c86ee4d5ce",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37237590148",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37237590166",
+        "conclusion": "success",
+        "scope": "All three server jobs and web CI, including Linux real MySQL/Redis browser regressions and exact generated-contract validation. Full parity objective remains incomplete."
       }
     },
     {
