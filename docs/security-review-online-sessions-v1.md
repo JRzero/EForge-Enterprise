@@ -49,5 +49,6 @@ and survival of the other ten. Actual self-revocation returns the browser to
 login and removes its stored authentication. Fixture acceptance checks inert
 metadata, read-only controls/403, list/revoke errors and retry, cancellation,
 sequence numbers/paging, keyboard and mobile bounds. The existing monitor GROUP
-remains navigation-only, while V019 binds its online ROUTE. Exact page-commit
-cloud verification is tracked separately in the parity inventory.
+remains navigation-only, while V019 binds its online ROUTE. Page commit
+`1b29368aa22023b2330891ea5e4880ca290a4001` passes exact-head server CI
+`37243330173` (all three jobs) and web CI `37243330093`.

@@ -40,7 +40,7 @@ It is a work inventory, not executable proof of completion.
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
-| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally, including twelve-session paging, scoped/self force logout and isolation; API CI green, page CI and final capability audit pending |
+| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
@@ -810,7 +810,9 @@ backend 401. Bootstrap proves the monitor GROUP and its single implemented child
 all previously verified module/security/fault cases remain green.
 
 Evidence logs are `online-page-backend.log`, `online-page-all-fixtures.log` and
-`online-page-runtime.log` under the ignored boot target. Exact page-commit CI and
-the final original capability audit remain pending. Server/cache monitoring and
+`online-page-runtime.log` under the ignored boot target. Page commit
+`1b29368aa22023b2330891ea5e4880ca290a4001` passes exact-head server CI
+`37243330173` (all three jobs) and web CI `37243330093`.
+The final original capability audit remains pending. Server/cache monitoring and
 authenticated consoles, jobs/cron, generator/form builder and complete shell/
 shared capabilities remain required; the full objective is unfinished.
