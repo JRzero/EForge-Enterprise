@@ -57,8 +57,12 @@ Distinguishing provider outages from account rejection requires a later,
 isolated change to that compatibility boundary.
 
 The authenticated OpenAPI group `/v3/api-docs/api-v1` contains canonical APIs
-only. OpenAPI remains disabled by default. Client generation and bootstrap
-implementation are subsequent milestones.
+only. OpenAPI remains disabled by default. The authenticated integration run
+exports the canonical snapshot to `contracts/openapi/api-v1.json`; the pinned
+generator produces concrete TypeScript DTOs and request functions under
+`web/generated/`. Required response fields are explicit in the server schemas.
+Client generation is checked for reproducibility and CI compares a live export
+with the committed snapshot.
 
 ## Bootstrap response
 
@@ -120,3 +124,11 @@ See `docs/bootstrap-security-review.md` for the freshness boundary and review.
 - backend endpoint authorization remains authoritative
 - dictionaries and large reference datasets are not part of bootstrap
 - unknown route IDs are ignored and reported as configuration diagnostics
+
+The React shell persists only the token in tab session storage via EForge's
+auth store and restores bootstrap before rendering protected routes. It converts
+the preserved administrator marker `*:*:*` to EForge's `*` for UX only. A 401
+clears the current session; transient failures permit retry. Generation/abort
+guards prevent stale requests from restoring an earlier login. Captcha and
+POST logout remain isolated in `web/integration/legacy-auth.ts`; confirmed logout
+invalidates Redis before clearing the local token. See ADR-0010.

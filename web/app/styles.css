@@ -1,0 +1,41 @@
+@import url('@eforge/app/styles.css');
+:root {font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: #203b43; background: #f4f7f7; font-synthesis: none;}
+* {box-sizing: border-box;} body {margin: 0;} button, input {font: inherit;} a {color: inherit;}
+button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px solid #15857f; outline-offset: 4px;}
+.eyebrow {font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #49726e; margin: 0 0 16px;}
+.muted {color: #637780;} .brand-mark {display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #d9efe6; color: #0c474b; font-size: 25px; font-weight: 700; flex-shrink: 0;}
+.login-layout {min-height: 100dvh; display: grid; grid-template-columns: 48% 52%;}
+.login-story {padding: 48px 64px; color: #eef8f4; background: radial-gradient(ellipse at 90% 80%, #29665f, transparent 55%), #0c3440; display: flex; flex-direction: column;}
+.brand-name {font-size: 17px; font-weight: 600; margin-top: 15px;} .login-story-copy {margin: auto 0; padding: 60px 0;}
+.login-story .eyebrow {color: #b2d6c9;} .login-story h1 {color: #eef8f4; font-size: clamp(32px, 3.6vw, 54px); line-height: 1.35; font-weight: 500; margin: 0 0 28px;}
+.login-story-copy > p:last-child {color: #b8cece; line-height: 1.8;} .login-story-footer {color: #9fbdbe; font-size: 12px;}
+.login-panel {display: grid; place-items: center; padding: 48px 30px; background: #fafcfc;} .login-card {width: min(100%, 360px);}
+.login-card h2 {font-size: 28px; margin: 0 0 12px; font-weight: 600;} .login-card form {display: grid; gap: 22px; margin-top: 34px;}
+.login-card form > button {width: 100%;} .login-help {margin-top: 28px; color: #77888d; font-size: 12px; line-height: 1.7;}
+.form-error {color: #ae3644; font-size: 13px; margin: 0;} .captcha-row {display: grid; grid-template-columns: 1fr 112px; gap: 14px; align-items: end;}
+.captcha-image {padding: 0; border: 0; background: transparent; cursor: pointer; text-align: center;} .captcha-image img {width: 110px; height: 42px; border-radius: 6px; object-fit: contain;} .captcha-image span {display: block; font-size: 11px; color: #617980;}
+.ef-app-shell {min-height: 100dvh;} .ef-app-shell__sidebar {background: #0c3440; color: #eef8f4; border: 0; padding-top: 8px;}
+.ef-app-shell__brand {border-bottom: 1px solid #ffffff12; padding: 24px 22px;} .enterprise-brand {display: flex; gap: 12px; align-items: center; text-decoration: none; font-weight: 600; letter-spacing: .03em;}
+.brand-subtitle {display: block; font-size: 10px; color: #a9c3c5; letter-spacing: .14em; margin-top: 4px;}
+.enterprise-navigation {list-style: none; padding: 0; margin: 10px 0;} .enterprise-navigation .enterprise-navigation {margin-left: 16px;}
+.enterprise-navigation a {padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; color: #bdd2d3; font-size: 14px; text-decoration: none; margin-bottom: 4px;}
+.enterprise-navigation a:hover {background: #ffffff0a; color: white;} .enterprise-navigation a[aria-current="page"] {background: #cfe5dc; color: #153e43; font-weight: 600;}
+.navigation-group {font-size: 11px; color: #96b4b6; display: block; padding: 14px 16px 2px; letter-spacing: .08em;}
+.ef-app-shell__header {padding: 15px 32px; background: #fff; border-bottom: 1px solid #e3eaeb;} .enterprise-header, .enterprise-header > div {display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 13px;}
+.enterprise-header > span {color: #72868b;} .ef-app-shell__content {padding: 36px; background: #f4f7f7;}
+.dashboard {max-width: 1120px; margin: auto;} .dashboard .ef-page-header h1 {font-size: 28px; font-weight: 600;} .dashboard .ef-page-header p {color: #70838a; font-size: 13px;}
+.welcome-panel {margin: 26px 0 36px; padding: 32px; border-radius: 14px; background: #e4eee9; display: flex; justify-content: space-between; align-items: center; overflow: hidden;}
+.welcome-panel h2 {font-weight: 500; font-size: 26px; margin: 0 0 12px;} .welcome-panel p:last-child {color: #647e7b; font-size: 13px; margin: 0;}
+.welcome-emblem {font-size: 85px; font-weight: 600; color: #c2d6cc; padding: 0 30px; transform: rotate(-12deg);}
+.dashboard .ef-dashboard-page h1 {font-size: 17px;} .dashboard .ef-dashboard-page__grid {grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;}
+.summary-card {background: white; border: 1px solid #e1e9e8; border-radius: 12px; padding: 24px; min-width: 0;} .summary-card p {font-size: 12px; color: #687f85; margin: 0 0 18px;}
+.summary-card strong {font-size: 26px; font-weight: 600; display: block; overflow-wrap: anywhere;} .summary-card span {display: block; font-size: 11px; color: #7a8e93; margin-top: 14px; overflow-wrap: anywhere;}
+.workspace-note {margin-top: 30px; display: flex; align-items: flex-start; gap: 12px; padding: 24px; border: 1px solid #e2eae8; border-radius: 12px;}
+.workspace-note h3 {font-size: 14px; margin: 0 0 8px; font-weight: 500;} .workspace-note p {font-size: 12px; line-height: 1.8; margin: 0; color: #7a8b91;}
+.status-dot {width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; background: #318d6a; flex-shrink: 0;}
+.state-page {min-height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; gap: 16px;}
+.state-page h1 {font-size: 26px; font-weight: 500; margin: 0;} .state-page p {font-size: 14px; color: #758a8e; margin: 0 0 8px;} .state-page .eyebrow {font-size: 48px; margin: 0; color: #9ab8ac;}
+.state-actions {display: flex; gap: 12px;}
+@media (max-width: 760px) {.login-layout {grid-template-columns: 1fr;} .login-story {padding: 28px; min-height: 240px;} .login-story-copy {padding: 30px 0 0;} .login-story h1 {font-size: 28px;} .login-story-copy > p:last-child, .login-story-footer {display: none;}
+  .login-panel {padding: 36px 24px;} .ef-app-shell {display: block;} .ef-app-shell__sidebar {width: 100%;} .ef-app-shell__brand {padding: 18px;} .ef-app-shell__nav {padding: 0 16px;}
+  .ef-app-shell__content {padding: 24px 18px;} .ef-app-shell__header {padding: 12px 18px;} .dashboard .ef-dashboard-page__grid {grid-template-columns: 1fr;} .welcome-panel {padding: 24px;} .welcome-emblem {display: none;} .enterprise-header {flex-wrap: wrap;}}

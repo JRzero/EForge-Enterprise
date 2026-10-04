@@ -5,10 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record NavigationNode(String key, Type type, String label, int order, String icon,
+public record NavigationNode(
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String key,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Type type,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String label,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int order, String icon,
         @Schema(description = "Present only for ROUTE nodes") String routeId,
         @Schema(description = "Present only for EXTERNAL nodes") String externalUrl,
-        List<NavigationNode> children)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<NavigationNode> children)
 {
     public enum Type { GROUP, ROUTE, EXTERNAL }
 

@@ -34,16 +34,16 @@
 ## Phase 2 — Typed API and EForge web shell
 
 - [x] establish reproducible EForge package consumption
-- [ ] initialize React application
-- [ ] consume pinned/versioned EForge packages
+- [x] initialize React application
+- [x] consume pinned/versioned EForge packages
 - [x] add `/api/v1/auth/login`
 - [x] add `/api/v1/app/bootstrap`
-- [ ] generate TypeScript client from OpenAPI
-- [ ] login/logout/session integration
-- [ ] route registry + backend navigation projection
-- [ ] permission-aware navigation
-- [ ] 403/404
-- [ ] system dashboard
+- [x] generate TypeScript client from OpenAPI
+- [x] login/logout/session integration
+- [x] route registry + backend navigation projection
+- [x] permission-aware navigation
+- [x] 403/404
+- [x] system dashboard
 
 ## Phase 3 — Core enterprise modules
 
@@ -69,12 +69,12 @@
 
 ## Phase 5 — Full-stack verification
 
-- [ ] server unit/integration tests
-- [ ] frontend lint/typecheck/test/build
+- [x] server unit/integration tests
+- [x] frontend lint/typecheck/test/build
 - [ ] Playwright login/RBAC/CRUD E2E
 - [ ] Docker Compose local MySQL + Redis
-- [ ] CI verification
-- [ ] seeded route-contract validation
+- [x] CI verification
+- [x] seeded route-contract validation
 - [ ] reference CRUD module generated end to end
 
 ## Deferred until proven

@@ -90,13 +90,22 @@ Linux after packaging the server:
 ./server/scripts/verify-auth-integration.ps1
 ```
 
-This requires Docker and creates isolated MySQL 8.4 and Redis 7.4 containers on
+This requires Docker and Node 24.18.0 for seeded route contract validation,
+and creates isolated MySQL 8.4 and Redis 7.4 containers on
 localhost ports 13306 and 16380, with the test application on port 18081.
 Ports can be overridden with `-MysqlPort`, `-RedisPort`, and `-AppPort`.
 The script initializes only its own disposable database, verifies canonical
 and legacy login, `/getInfo`, Redis session TTL, captcha replay rejection, HTTP
 errors, and authenticated OpenAPI DTOs, then removes its containers and stops
 the test application. Logs remain under `eforge-boot/target/auth-integration/`.
+
+After installing web dependencies and Playwright Chromium, add `-VerifyWeb` to
+verify admin/common browser login, bootstrap, reload and server logout revocation.
+Use `-OpenApiOutputPath contracts/openapi/api-v1.json` to export the authenticated
+canonical schema snapshot. See `web/README.md` for frontend commands. Production
+Swagger/OpenAPI remains disabled by default; export only in the disposable test
+environment. Apply V002 on existing initialized databases to bind the implemented
+dashboard route; do not re-import the upstream schemas into a populated database.
 
 New applications use `POST /api/v1/auth/login` followed by
 `GET /api/v1/app/bootstrap`; see

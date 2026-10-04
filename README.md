@@ -1,5 +1,10 @@
 # EForge Enterprise
 
+The Phase 2 React shell is implemented under `web/`: login, captcha, session
+restore, bootstrap navigation, dashboard, 403/404 and confirmed logout. See
+[web setup and verification](web/README.md). EForge is consumed as pinned package
+artifacts; canonical API DTOs and functions are generated from Spring OpenAPI.
+
 EForge Enterprise is a full-stack enterprise application framework built on:
 
 - **EForge** for the React frontend foundation.

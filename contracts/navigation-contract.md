@@ -168,10 +168,13 @@ from explicit menu semantics and permission keys, not numeric IDs or labels.
 Legacy menu writes remain supported; unmigrated rows with null keys do not
 enter canonical navigation.
 
-No frontend routes exist at this milestone, so seed `route_id` values remain
-null. Internal pages without route bindings and empty groups are omitted.
-Later page implementations must add explicit bindings and frontend-registry
-contract validation; bootstrap never invents route IDs from component strings.
+`V002__dashboard_route.sql` adds the implemented dashboard route, grants it to
+the seeded active admin/common roles, and binds `route_id = dashboard`. Its UX
+permission is `app:dashboard:view`. Other internal pages remain unbound and empty
+groups are omitted. Runtime integration reads the seeded route identities, URLs
+and permissions and validates them against `web/app/route-contract.json`.
+Future pages must add explicit bindings and extend registry contract validation;
+bootstrap never invents route IDs from component strings.
 External legacy links remain explicit EXTERNAL leaves. New external links
 must use HTTP(S), a host, and no URL-embedded credentials.
 
@@ -181,6 +184,12 @@ and excessive depth. ROLE-grant filtering and permission checks use the same
 database snapshot as bootstrap. The legacy `getRouters` projection is unchanged.
 
 Do not reuse the legacy `component` field for React.
+
+The web integration renders GROUP headings without URLs, ROUTE links only from
+the local registry after permission checks, and safe EXTERNAL links in new tabs.
+The pinned EForge public layout/router/permission primitives are composed locally
+to preserve hierarchical navigation. No upstream source or dynamic database
+component resolver is introduced; see ADR-0010.
 
 Recommended schema additions:
 

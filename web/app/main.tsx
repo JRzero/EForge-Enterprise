@@ -1,0 +1,16 @@
+import {StrictMode} from 'react';
+import {createRoot} from 'react-dom/client';
+import {createBrowserRouterAdapter} from '@eforge/app';
+import {EForgeProvider} from '@eforge/ui';
+import '@eforge/tokens/styles.css';
+import '@eforge/ui/styles.css';
+import '@eforge/patterns/styles.css';
+import {Application} from './Application';
+import {browserSessionStorage, createSessionRuntime} from '../integration/session';
+import './styles.css';
+const runtime = createSessionRuntime(browserSessionStorage());
+const router = createBrowserRouterAdapter();
+void runtime.restore();
+const root = document.getElementById('root');
+if (!root) throw new Error('Missing application root.');
+createRoot(root).render(<StrictMode><EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider></StrictMode>);

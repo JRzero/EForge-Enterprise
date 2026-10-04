@@ -1,5 +1,6 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
-param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081)
+param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb)
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
@@ -67,7 +68,13 @@ try {
     Assert-Check ([int]$unidentified -eq 0) 'Every upstream seed must have a stable identity.'
     $prematureRoutes = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
         "SELECT COUNT(*) FROM sys_menu WHERE route_id IS NOT NULL;"
-    Assert-Check ([int]$prematureRoutes -eq 0) 'Seed routes must stay unbound before frontend pages exist.'
+    Assert-Check ([int]$prematureRoutes -eq 1) 'Only the implemented dashboard may have a seeded route binding.'
+    $seedRoutes = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
+        "SELECT JSON_OBJECT('key',menu_key,'routeId',route_id,'permission',perms,'path',path) FROM sys_menu WHERE route_id IS NOT NULL ORDER BY route_id;"
+    $seedPath = Join-Path $logDirectory 'seed-routes.json'
+    [IO.File]::WriteAllText($seedPath, '[' + ((@($seedRoutes) -join ',').Trim()) + ']', [Text.UTF8Encoding]::new($false))
+    & node (Join-Path $repoRoot 'web/scripts/verify-seeded-routes.mjs') $seedPath
+    Assert-Check ($LASTEXITCODE -eq 0) 'Seeded routes must match the frontend registry and permissions.'
     $unreachable = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
         "WITH RECURSIVE reached AS (SELECT menu_id FROM sys_menu WHERE parent_id=0 UNION ALL SELECT m.menu_id FROM sys_menu m JOIN reached p ON m.parent_id=p.menu_id) SELECT (SELECT COUNT(*) FROM sys_menu)-COUNT(DISTINCT menu_id) FROM reached;"
     Assert-Check ([int]$unreachable -eq 0) 'Seed hierarchy contains an orphan or disconnected cycle.'
@@ -134,13 +141,32 @@ try {
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'
-    Assert-Check ($bootstrap.navigation.Count -eq 1 -and $bootstrap.navigation[0].type -eq 'EXTERNAL' -and !$bootstrap.navigation[0].PSObject.Properties['routeId']) 'Unimplemented pages must not become navigation routes.'
+    Assert-Check ($bootstrap.navigation.Count -eq 2 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
     Assert-Problem (Request '/api/v1/auth/login' 'GET' '' $authorized) 405 'HTTP_405'
     $openapi = (Request '/v3/api-docs/api-v1' 'GET' '' $authorized).Content | ConvertFrom-Json -AsHashtable
     $operation = $openapi.paths['/api/v1/auth/login'].post
     Assert-Check ($operation.operationId -eq 'login' -and !$operation.security) 'Login must be public in OpenAPI.'
     Assert-Check ($openapi.components.schemas.LoginResponse.properties.accessToken -and $openapi.components.schemas.LoginRequest.properties.password.writeOnly) 'OpenAPI must describe concrete safe login DTOs.'
     Assert-Check ($openapi.paths['/api/v1/app/bootstrap'].get.operationId -eq 'bootstrap' -and $openapi.components.schemas.BootstrapResponse.properties.navigation) 'OpenAPI must describe concrete bootstrap DTOs.'
+    $snapshotPath = Join-Path $logDirectory 'api-v1.json'
+    [IO.File]::WriteAllText($snapshotPath, ($openapi | ConvertTo-Json -Depth 100), [Text.UTF8Encoding]::new($false))
+    if ($OpenApiOutputPath) {
+        & node (Join-Path $repoRoot 'web/scripts/normalize-openapi.mjs') $snapshotPath $OpenApiOutputPath
+        Assert-Check ($LASTEXITCODE -eq 0) 'Canonical OpenAPI export failed.'
+    }
+    if ($VerifyWeb) {
+        $previousBackendUrl = [Environment]::GetEnvironmentVariable('EFORGE_E2E_BACKEND_URL', 'Process')
+        [Environment]::SetEnvironmentVariable('EFORGE_E2E_BACKEND_URL', "http://127.0.0.1:$AppPort", 'Process')
+        Push-Location (Join-Path $repoRoot 'web')
+        try {
+            $npmCommand = if ($IsWindows) { 'npm.cmd' } else { 'npm' }
+            & $npmCommand run test:e2e:live
+            Assert-Check ($LASTEXITCODE -eq 0) 'Browser integration with real MySQL/Redis failed.'
+        } finally {
+            Pop-Location
+            [Environment]::SetEnvironmentVariable('EFORGE_E2E_BACKEND_URL', $previousBackendUrl, 'Process')
+        }
+    }
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 

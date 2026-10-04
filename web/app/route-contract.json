@@ -1,0 +1,3 @@
+[
+  {"id": "dashboard", "path": "/dashboard", "permission": "app:dashboard:view"}
+]
