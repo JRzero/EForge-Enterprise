@@ -34,7 +34,7 @@ It is a work inventory, not executable proof of completion.
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionary controls pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
-| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally; shared dictionary tags and query/cache shell behavior pending |
+| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared dictionary tags and query/cache shell behavior pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Missing |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
@@ -71,8 +71,12 @@ Full completion additionally requires all inventory groups and operations mapped
 frontend lint/typecheck/test/build, live contract/client reproducibility, seeded
 route validation, full runtime/E2E suites, and CI at the current pushed commit.
 
-Posts and departments have verified implementation checkpoints. The next slices
-cover users, roles and the remaining groups. All groups remain in scope.
+Posts, departments, users/profile, roles/allocation and menu administration have
+verified implementation checkpoints below. The next slice covers dictionary
+types/data, filtered paging, type detail preview, batch deletion, XLSX export,
+cache refresh and shared dictionary tags. It must verify rename/old-key cache
+invalidation, child-data deletion guards and existing pages after label/style
+changes. All remaining groups stay in scope.
 
 ## Posts verification evidence (2026-10-04)
 
@@ -392,5 +396,11 @@ data-scope cases; lint/typecheck, 35 unit tests, build, fifteen fixture and eigh
 live browser cases. All disposable MySQL/Redis module integration scripts passed,
 including initialization, login, `/getInfo`, session TTL, captcha replay and seeded
 routes. Exact live OpenAPI equality and generated-client reproducibility passed.
-Current page CI is pending. Shared dictionary tags, full shell icon/query/cache
-behavior and all other missing groups remain in scope.
+Final implementation `146915f96d7713539103cfd0349fb8525d8688ea` passed all
+three [server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236360)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236366),
+including Linux live browser/module regressions and exact exported OpenAPI equality.
+Pinned SVG hashes also survive Windows CRLF checkout settings; `.gitattributes`
+fixes their bytes and attribute changes trigger both verification workflows.
+Shared dictionary tags, full shell icon/query/cache behavior and all other
+missing groups remain in scope.

@@ -90,3 +90,12 @@ content rejection. Unknown legacy names have a neutral preview. Native dialogs,
 keyboard navigation and narrow-screen checks cover the controls; fixture checks
 decode and draw every icon. A committed mutation followed by a bootstrap failure
 offers a refresh-only retry, avoiding duplicate writes.
+
+Final implementation `146915f96d7713539103cfd0349fb8525d8688ea` passed all
+three [server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236360)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236366).
+Local validation passed 170 backend tests (ten unchanged data-scope cases),
+35 web unit tests, fifteen fixture and eighteen live browser cases, all disposable
+MySQL/Redis module checks, exact live OpenAPI equality and generated-client
+reproducibility. All 88 normalized hashes also survive Windows CRLF checkout
+settings; checkout-attribute changes now trigger both CI workflows.

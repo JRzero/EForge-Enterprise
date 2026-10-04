@@ -396,8 +396,15 @@
       },
       "localMenuPageValidation": {
         "backend": 170, "webUnit": 35, "fixtureBrowser": 15, "liveBrowser": 18,
-        "conclusion": "success", "pageCi": "pending",
+        "conclusion": "success", "pageCi": "success",
         "scope": "Menu tree CRUD, full 88-icon picker, scoped parent exclusions, route metadata, 105-row atomic sort, immediate existing-session permission checks, retry/keyboard/mobile checks and all prior module regressions."
+      },
+      "lastVerifiedMenuPage": {
+        "implementationCommit": "146915f96d7713539103cfd0349fb8525d8688ea",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236360",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37206236366",
+        "conclusion": "success",
+        "scope": "Menu React page, all 88 pinned SVG icons, cross-platform asset hashes, hierarchy/scope/route guards, atomic sorting, existing-session revocation and full module regressions. Shared dictionary tags and remaining shell behavior stay pending."
       }
     },
     {
