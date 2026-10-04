@@ -64,7 +64,7 @@ $badRoute=Menu-Patch $postRoute;$badRoute.routeId='account-profile'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
 $badRoute=Menu-Patch $postRoute;$badRoute.permission='system:user:list'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
-$pending=$menuRows | Where-Object key -eq 'monitor-online-sessions';$pendingPatch=Menu-Patch $pending
+$pending=$menuRows | Where-Object key -eq 'monitor-jobs';$pendingPatch=Menu-Patch $pending
 Assert-Check (!$pending.routeId -and (Menu-Update $pending.id $pendingPatch).StatusCode -eq 204) 'Existing pending legacy route must remain editable without inventing a React binding.'
 
 $menuRole=Create-Role 'menu-session' @('system','system-posts','system-post-query','system-menus','system-menu-query','system-menu-add','system-menu-edit','system-menu-remove')

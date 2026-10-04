@@ -146,6 +146,7 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .notice-meta {color: #72868b; font-size: 13px;}
 @media (max-width: 760px) {.enterprise-header > div {flex-wrap: wrap; gap: 8px;} .notice-popover {position: fixed; top: 90px; right: 18px;} .notice-content iframe {height: 210px;} .notices-page .post-dialog .ql-toolbar {padding: 8px 4px;}}
 .logs-page { min-width: 0; }
+.online-sessions-page { min-width: 0; }
 .log-metadata { display: grid; grid-template-columns: minmax(90px, 120px) minmax(0, 1fr); gap: 12px 16px; margin: 20px 0; }
 .log-metadata dt { color: var(--color-text-muted, #667085); }
 .log-metadata dd { margin: 0; overflow-wrap: anywhere; }

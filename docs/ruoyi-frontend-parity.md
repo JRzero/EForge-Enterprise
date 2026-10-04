@@ -40,7 +40,7 @@ It is a work inventory, not executable proof of completion.
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
-| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client prepared; actual Redis projection/filter/paging, permission/fault handling and targeted revocation verified; final regression/CI and React page pending |
+| Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally, including twelve-session paging, scoped/self force logout and isolation; API CI green, page CI and final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
@@ -779,8 +779,38 @@ Final live canonical OpenAPI exactly equals the committed snapshot; all 140
 previous path/schema entries are unchanged. Evidence is `online-backend.log`,
 `online-fixtures.log` and `online-final-runtime.log` in the ignored boot target.
 
-The security boundary is in `security-review-online-sessions-v1.md`. Exact API
-commit CI remains pending; no online React route is bound at this checkpoint.
+The security boundary is in `security-review-online-sessions-v1.md`. API commit
+`0cf759c9a6221ef82c896a133f6bd98f0b8cb3c5` passes exact-head server CI
+`37242586665` and web CI `37242586687`; no online React route was bound at this checkpoint.
 Its page, confirmations, errors/cancellation/mobile/keyboard and actual UI
 revocation remain next, followed by monitoring/jobs, generator/form builder and
 complete shell/shared capabilities. The full original goal remains unfinished.
+
+## Online-session page checkpoint (2026-10-05)
+
+The lazy EForge page retains original exact username/IP filters, reset, sequence
+numbers, all session metadata, paging and per-row force logout. Confirmations
+show both account and opaque session identity, support cancellation and retain
+errors for retry. Leaving the page aborts list requests; expired authentication
+returns to login. V019 binds only the existing online ROUTE; the monitor GROUP
+enters navigation because it now has a real child. Public catalog contains twelve
+routes. Legacy pending-route editing checks move to the unimplemented job node.
+
+Verification passes 294 backend cases, 58 unit cases, lint/typecheck/build,
+generated-client reproducibility, 38 fixture and 31 real browser cases plus the
+entire disposable MySQL/Redis module/runtime suite and exact live OpenAPI
+comparison. Four new fixture cases cover safe text, list/revoke failures,
+read-only/403 UX, encoded exact filters, sequence/paging, confirmations, last-page
+recovery, request cancellation, self expiry, keyboard and mobile bounds. A live
+case creates twelve sessions, proves exact filters, cancels without revoking,
+forces the two last-page sessions and checks their actual 401s, page-one recovery
+and ten surviving authenticated sessions. A second live case revokes its own
+browser session, removes stored authentication and returns to login with actual
+backend 401. Bootstrap proves the monitor GROUP and its single implemented child;
+all previously verified module/security/fault cases remain green.
+
+Evidence logs are `online-page-backend.log`, `online-page-all-fixtures.log` and
+`online-page-runtime.log` under the ignored boot target. Exact page-commit CI and
+the final original capability audit remain pending. Server/cache monitoring and
+authenticated consoles, jobs/cron, generator/form builder and complete shell/
+shared capabilities remain required; the full objective is unfinished.

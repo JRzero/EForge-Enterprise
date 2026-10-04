@@ -39,3 +39,15 @@ DEL/UNLINK ACL failures, then proves immediate target JWT invalidation and
 survival of its other sessions and caller. The parity inventory records final
 regression/client/CI results separately. API preparation does not establish
 completion of the online-session React page.
+
+API commit `0cf759c9a6221ef82c896a133f6bd98f0b8cb3c5` passes server CI
+`37242586665` (all three jobs) and web CI `37242586687`.
+Page verification passes 294 backend, 58 unit, 38 fixture and 31 live browser
+cases plus the full owned runtime suite. Twelve real sessions exercise exact
+filters, cancel without mutation, last-page force logout with two actual 401s,
+and survival of the other ten. Actual self-revocation returns the browser to
+login and removes its stored authentication. Fixture acceptance checks inert
+metadata, read-only controls/403, list/revoke errors and retry, cancellation,
+sequence numbers/paging, keyboard and mobile bounds. The existing monitor GROUP
+remains navigation-only, while V019 binds its online ROUTE. Exact page-commit
+cloud verification is tracked separately in the parity inventory.

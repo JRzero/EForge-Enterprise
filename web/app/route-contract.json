@@ -9,5 +9,6 @@
   {"id": "system-configurations", "path": "/config", "permission": "system:config:list"},
   {"id": "system-notices", "path": "/notice", "permission": "system:notice:list"},
   {"id": "monitor-operation-logs", "path": "/operlog", "permission": "monitor:operlog:list"},
-  {"id": "monitor-login-logs", "path": "/logininfor", "permission": "monitor:logininfor:list"}
+  {"id": "monitor-login-logs", "path": "/logininfor", "permission": "monitor:logininfor:list"},
+  {"id": "monitor-online-sessions", "path": "/online", "permission": "monitor:online:list"}
 ]

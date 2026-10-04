@@ -15,6 +15,7 @@ const ConfigurationsPage = lazy(() => import('../features/configurations/Configu
 const NoticesPage = lazy(() => import('../features/notices/NoticesPage').then(module => ({default: module.NoticesPage})));
 const OperationLogsPage = lazy(() => import('../features/logs/LogsPage').then(module => ({default: module.OperationLogsPage})));
 const LoginLogsPage = lazy(() => import('../features/logs/LogsPage').then(module => ({default: module.LoginLogsPage})));
+const OnlineSessionsPage = lazy(() => import('../features/online-sessions/OnlineSessionsPage').then(module => ({default: module.OnlineSessionsPage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
@@ -42,6 +43,8 @@ if (!notices) throw new Error('Missing notices route contract.');
 const operationLogs = contracts.find(route => route.id === 'monitor-operation-logs');
 const loginLogs = contracts.find(route => route.id === 'monitor-login-logs');
 if (!operationLogs || !loginLogs) throw new Error('Missing log route contracts.');
+const onlineSessions = contracts.find(route => route.id === 'monitor-online-sessions');
+if (!onlineSessions) throw new Error('Missing online session route contract.');
 if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
 export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
@@ -76,6 +79,9 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: loginLogs.id, path: loginLogs.path, title: '登录日志',
   access: {permission: loginLogs.permission}, component: LoginLogsPage
+}, {
+  id: onlineSessions.id, path: onlineSessions.path, title: '在线用户',
+  access: {permission: onlineSessions.permission}, component: OnlineSessionsPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

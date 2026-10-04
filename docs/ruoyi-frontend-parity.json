@@ -281,7 +281,11 @@
         "server/scripts/verify-online-sessions-integration.ps1",
         "docs/security-review-online-sessions-v1.md",
         "web/tests/unit/online-api.test.ts",
-        "contracts/openapi/api-v1.json"
+        "contracts/openapi/api-v1.json",
+        "web/features/online-sessions/OnlineSessionsPage.tsx",
+        "web/tests/e2e/online-sessions.spec.ts",
+        "web/tests/live/online-sessions.spec.ts",
+        "sql/migrations/V019__online_sessions_route.sql"
       ]
     },
     {
