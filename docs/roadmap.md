@@ -50,7 +50,7 @@
 - [ ] user management
 - [ ] role management
 - [ ] department management
-- [ ] post management
+- [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
 - [ ] menu/permission management
 - [ ] dictionary
 - [ ] configuration
@@ -86,3 +86,10 @@
 - distributed transactions
 - low-code renderer
 - business-domain packages
+
+## Full RuoYi frontend parity
+
+The phase checkboxes describe individual milestones, not completion of the full
+frontend. Track all original frontend operations, shared controls and remaining
+shell capabilities in [ruoyi-frontend-parity.md](ruoyi-frontend-parity.md) and its
+machine-readable inventory. The full parity objective remains active.

@@ -64,6 +64,31 @@ export type ProblemDetail = {
     title?: string | null;
     "type"?: string;
 };
+export type DeletePostsRequest = {
+    ids: string[];
+};
+export type PostResponse = {
+    code: string;
+    createdAt?: string;
+    id: string;
+    name: string;
+    remark?: string;
+    sort: number;
+    status: string;
+};
+export type PageResponsePostResponse = {
+    items: PostResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type PostRequest = {
+    code: string;
+    name: string;
+    remark?: string;
+    sort: number;
+    status: string;
+};
 /**
  * Get the current user and authorized application navigation
  */
@@ -95,5 +120,77 @@ export function login(loginRequest: LoginRequestWrite, opts?: Oazapfts.RequestOp
         ...opts,
         method: "POST",
         body: loginRequest
+    }));
+}
+export function deletePosts(deletePostsRequest: DeletePostsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/posts", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deletePostsRequest
+    }));
+}
+export function listPosts({ page, pageSize, code, name, status }: {
+    page?: number;
+    pageSize?: number;
+    code?: string;
+    name?: string;
+    status?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponsePostResponse;
+    }>(`/api/v1/system/posts${QS.query(QS.explode({
+        page,
+        pageSize,
+        code,
+        name,
+        status
+    }))}`, {
+        ...opts
+    });
+}
+export function createPost(postRequest: PostRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: PostResponse;
+    }>("/api/v1/system/posts", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: postRequest
+    }));
+}
+export function exportPosts({ code, name, status }: {
+    code?: string;
+    name?: string;
+    status?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/posts/export${QS.query(QS.explode({
+        code,
+        name,
+        status
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getPost(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PostResponse;
+    }>(`/api/v1/system/posts/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updatePost(id: string, postRequest: PostRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PostResponse;
+    }>(`/api/v1/system/posts/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: postRequest
     }));
 }

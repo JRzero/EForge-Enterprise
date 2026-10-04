@@ -1,4 +1,5 @@
-import {bootstrap, login, type LoginRequestWrite, type UserSummary} from '../generated/api';
+import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
+  type PostRequest, type LoginRequestWrite, type UserSummary} from '../generated/api';
 import type {AuthStore} from '@eforge/core';
 import {ApiError, record} from './errors';
 import {getCaptcha, revokeSession} from './legacy-auth';
@@ -22,6 +23,24 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listPosts(query: Parameters<typeof listPosts>[0], signal?: AbortSignal) {
+      return (await listPosts(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getPost(id: string, signal?: AbortSignal) {
+      return (await getPost(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createPost(request: PostRequest) {
+      return (await createPost(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updatePost(id: string, request: PostRequest) {
+      return (await updatePost(id, request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async deletePosts(ids: string[]) {
+      await deletePosts({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async exportPosts(query: Parameters<typeof exportPosts>[0]) {
+      return (await exportPosts(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async login(request: LoginRequestWrite, signal?: AbortSignal) {
       const response = await login(request, {baseUrl: '', fetch: transport(false), signal});
       if (response.status !== 200 || !response.data.accessToken || response.data.tokenType !== 'Bearer') {

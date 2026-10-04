@@ -1,4 +1,4 @@
-import {useMemo, useState, useSyncExternalStore} from 'react';
+import {Suspense, useMemo, useState, useSyncExternalStore} from 'react';
 import {AppShell, PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
 import {matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
@@ -6,7 +6,7 @@ import {LoginPage} from '../features/auth/LoginPage';
 import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
-import {BootstrapContext} from './context';
+import {BootstrapContext, ApiContext} from './context';
 import {Navigation} from './Navigation';
 import {routes} from './routes';
 import {toEForgePermissions} from '../integration/permissions';
@@ -43,7 +43,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const match = matchAppRoute(routes, pathname === '/' ? '/dashboard' : pathname);
   const allowed = match && canAccessRoute(match.route, permissions);
   const Page = match?.route.component;
-  return <BootstrapContext.Provider value={snapshot}><PermissionProvider permissions={permissions}>
+  return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><PermissionProvider permissions={permissions}>
     <AppShell brand={<a className="enterprise-brand" href="/dashboard" onClick={event => {
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); router.navigate('/dashboard');
@@ -54,7 +54,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
       {logoutError ? <p role="alert">{logoutError}</p> : null}
       {!match ? <StatePage code="404" router={router} /> : !allowed ? <StatePage code="403" router={router} />
-        : Page ? <Page params={match.params} /> : null}
+        : Page ? <Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params} /></Suspense> : null}
     </AppShell>
-  </PermissionProvider></BootstrapContext.Provider>;
+  </PermissionProvider></BootstrapContext.Provider></ApiContext.Provider>;
 }

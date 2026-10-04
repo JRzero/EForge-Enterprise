@@ -70,7 +70,8 @@ try {
     Assert-Check ([int]$unidentified -eq 0) 'Every upstream seed must have a stable identity.'
     $prematureRoutes = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
         "SELECT COUNT(*) FROM sys_menu WHERE route_id IS NOT NULL;"
-    Assert-Check ([int]$prematureRoutes -eq 1) 'Only the implemented dashboard may have a seeded route binding.'
+    $implementedRoutes = @(Get-Content -Raw (Join-Path $repoRoot 'web/app/route-contract.json') | ConvertFrom-Json)
+    Assert-Check ([int]$prematureRoutes -eq $implementedRoutes.Count) 'Only implemented React pages may have seeded route bindings.'
     $seedRoutes = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
         "SELECT JSON_OBJECT('key',menu_key,'routeId',route_id,'permission',perms,'path',path) FROM sys_menu WHERE route_id IS NOT NULL ORDER BY route_id;"
     $seedPath = Join-Path $logDirectory 'seed-routes.json'
@@ -143,7 +144,7 @@ try {
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'
-    Assert-Check ($bootstrap.navigation.Count -eq 2 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
+    Assert-Check ($bootstrap.navigation.Count -eq 3 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children[0].routeId -eq 'system-posts' -and $bootstrap.navigation[2].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
     Assert-Problem (Request '/api/v1/auth/login' 'GET' '' $authorized) 405 'HTTP_405'
     $openapi = (Request '/v3/api-docs/api-v1' 'GET' '' $authorized).Content | ConvertFrom-Json -AsHashtable
     $operation = $openapi.paths['/api/v1/auth/login'].post
@@ -169,6 +170,7 @@ try {
             [Environment]::SetEnvironmentVariable('EFORGE_E2E_BACKEND_URL', $previousBackendUrl, 'Process')
         }
     }
+    . (Join-Path $PSScriptRoot 'verify-posts-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 
@@ -178,6 +180,12 @@ try {
     $commonLogin = (Request '/api/v1/auth/login' 'POST' '{"username":"ry","password":"admin123"}').Content | ConvertFrom-Json
     Assert-Check ([bool]$commonLogin.accessToken) 'Ordinary user login failed.'
     $commonHeaders = @{ Authorization = "Bearer $($commonLogin.accessToken)" }
+    Assert-Problem (Request '/api/v1/system/posts' 'GET' '' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/posts/export' 'POST' '' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/posts/1' 'GET' '' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/posts' 'POST' '{"code":"denied","name":"Denied","sort":0,"status":"0"}' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/posts/1' 'PUT' '{"code":"denied","name":"Denied","sort":0,"status":"0"}' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/system/posts' 'DELETE' '{"ids":["1"]}' $commonHeaders) 403 'ACCESS_DENIED'
     $common = (Request '/api/v1/app/bootstrap' 'GET' '' $commonHeaders).Content | ConvertFrom-Json
     Assert-Check ($common.user.id -eq '2' -and $common.roles -contains 'common' -and $common.permissions -contains 'system:user:list' -and $common.permissions -notcontains 'system:role:list') 'Ordinary user permission snapshot is incorrect.'
     Assert-Check ($common.navigation.Count -eq 1 -and $common.navigation[0].key -eq 'system' -and !$common.navigation[0].PSObject.Properties['routeId']) 'Groups must not bind routes.'

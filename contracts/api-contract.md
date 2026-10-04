@@ -42,6 +42,16 @@ Create/update/delete endpoints should use standard HTTP statuses where practical
 
 ## Page response
 
+The first canonical resource is `/api/v1/system/posts`: GET lists typed pages,
+GET `/{id}` reads a post, POST returns 201 with Location, PUT `/{id}` updates,
+DELETE accepts `{ids: string[]}` and returns 204, and POST `/export` downloads a
+filtered XLSX workbook. Identifiers remain decimal strings in requests/responses
+to preserve 64-bit database identities. Pages are one-based (size 1–100), bulk
+deletion accepts 1–100 IDs, and filters are code/name/status. Ordering is stable
+by post sort and ID. Duplicate and assigned-user conflicts return 409, missing
+rows return 404, and invalid input returns 400 ProblemDetail. Existing backend
+permissions remain authoritative for every operation.
+
 Paged endpoints return:
 
 ```ts

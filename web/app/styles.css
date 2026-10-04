@@ -39,3 +39,27 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 @media (max-width: 760px) {.login-layout {grid-template-columns: 1fr;} .login-story {padding: 28px; min-height: 240px;} .login-story-copy {padding: 30px 0 0;} .login-story h1 {font-size: 28px;} .login-story-copy > p:last-child, .login-story-footer {display: none;}
   .login-panel {padding: 36px 24px;} .ef-app-shell {display: block;} .ef-app-shell__sidebar {width: 100%;} .ef-app-shell__brand {padding: 18px;} .ef-app-shell__nav {padding: 0 16px;}
   .ef-app-shell__content {padding: 24px 18px;} .ef-app-shell__header {padding: 12px 18px;} .dashboard .ef-dashboard-page__grid {grid-template-columns: 1fr;} .welcome-panel {padding: 24px;} .welcome-emblem {display: none;} .enterprise-header {flex-wrap: wrap;}}
+.posts-page {max-width: 1440px; margin: 0 auto;}
+.post-filters, .post-toolbar, .post-pagination, .post-row-actions {display: flex; align-items: center; flex-wrap: wrap; gap: 12px;}
+.post-filters {padding: 20px; background: white; border: 1px solid #e1e9e8; border-radius: 12px; margin: 24px 0 18px; align-items: flex-end;}
+.post-filters .ef-input {min-width: 180px;}
+.posts-page label {display: flex; flex-direction: column; gap: 8px; font-size: 13px;}
+.posts-page select, .posts-page textarea {font: inherit; padding: 9px 12px; border: 1px solid #ccdcd6; border-radius: 6px; background: white; color: #24443c;}
+.post-toolbar {margin-bottom: 16px;} .post-toolbar details {margin-left: auto; position: relative;}
+.post-toolbar summary {cursor: pointer; font-size: 13px; padding: 9px;}
+.post-columns {position: absolute; z-index: 2; right: 0; min-width: 160px; padding: 16px; border: 1px solid #d4e4df; border-radius: 8px; background: white; box-shadow: 0 8px 24px #12332115; display: grid; gap: 12px;}
+.post-columns label {flex-direction: row; align-items: center;}
+.post-table {overflow-x: auto; border: 1px solid #dfe9e5; border-radius: 10px; background: white;}
+.post-pagination {justify-content: flex-end; padding: 18px 0; font-size: 13px;}
+.post-pagination label {flex-direction: row; align-items: center;}
+.post-status {padding: 4px 9px; border-radius: 6px; font-size: 12px; white-space: nowrap;}
+.status-0 {background: #e4f5eb; color: #257448;} .status-1 {background: #f4eee3; color: #89662a;}
+.post-overlay {position: fixed; inset: 0; z-index: 20; background: #102e3560; display: flex; justify-content: center; align-items: center; padding: 24px;}
+.post-dialog {background: white; padding: 28px; border-radius: 12px; width: min(100%, 520px); max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 70px #102e3550;}
+.post-dialog h2 {font-size: 20px; margin: 0 0 20px;} .post-dialog form {display: grid; gap: 16px;} .post-dialog textarea {min-height: 80px; resize: vertical;}
+.posts-page [role=alert] {color: #a13f36; font-size: 14px;}
+@media (max-width: 760px) {.post-filters {align-items: stretch; flex-direction: column;} .post-pagination {justify-content: flex-start;} .post-overlay {padding: 16px;} .post-dialog {padding: 20px;}}
+.post-dialog::backdrop {background: #102e3560;} .post-dialog {border: 0; color: #24443c;}
+.post-dialog input[type=number] {font: inherit; padding: 9px 12px; border: 1px solid #ccdcd6; border-radius: 6px;}
+.post-filters[hidden] {display: none;}
+.post-table table {min-width: 850px;} .post-table th {white-space: nowrap;} .post-table .post-row-actions {flex-wrap: nowrap; gap: 4px;}

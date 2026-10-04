@@ -25,6 +25,13 @@ import io.eforge.enterprise.common.exception.user.UserException;
 @RestControllerAdvice(basePackages = "io.eforge.enterprise.web.controller.api.v1")
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler
 {
+    @ExceptionHandler(io.eforge.enterprise.common.exception.ApiFailure.class)
+    public ResponseEntity<Object> business(io.eforge.enterprise.common.exception.ApiFailure exception,
+            HttpServletRequest request)
+    {
+        return problem(HttpStatus.valueOf(exception.status()), exception.code(), exception.getMessage(), request);
+    }
+
     @ExceptionHandler({UserException.class, AuthenticationException.class})
     public ResponseEntity<Object> authentication(RuntimeException exception, HttpServletRequest request)
     {

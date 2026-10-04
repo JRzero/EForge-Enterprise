@@ -1,3 +1,4 @@
 [
-  {"id": "dashboard", "path": "/dashboard", "permission": "app:dashboard:view"}
+  {"id": "dashboard", "path": "/dashboard", "permission": "app:dashboard:view"},
+  {"id": "system-posts", "path": "/post", "permission": "system:post:list"}
 ]
