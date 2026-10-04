@@ -304,7 +304,7 @@
         "updateDeptSort",
         "delDept"
       ],
-      "state": "implemented-awaiting-current-commit-ci",
+      "state": "verified",
       "evidence": [
         "DepartmentControllerTest",
         "server/scripts/verify-departments-integration.ps1",
@@ -312,7 +312,13 @@
         "web/tests/e2e/departments.spec.ts",
         "web/tests/unit/department-tree.test.ts",
         "docs/security-review-departments-v1.md"
-      ]
+      ],
+      "lastVerified": {
+        "implementationCommit": "a0ef1f2141e9b09f5c6f38e923835ec2d690f091",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617317",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617309",
+        "conclusion": "success"
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/dict/data.js",

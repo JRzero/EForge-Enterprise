@@ -31,7 +31,7 @@ It is a work inventory, not executable proof of completion.
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Missing |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
-| Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Implemented; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; current-commit CI pending |
+| Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Missing |
@@ -70,8 +70,8 @@ Full completion additionally requires all inventory groups and operations mapped
 frontend lint/typecheck/test/build, live contract/client reproducibility, seeded
 route validation, full runtime/E2E suites, and CI at the current pushed commit.
 
-The next slices start with reusable typed paging and the complete posts module,
-then departments/users/roles and the remaining groups. All groups remain in scope.
+Posts and departments have verified implementation checkpoints. The next slices
+cover users, roles and the remaining groups. All groups remain in scope.
 
 ## Posts verification evidence (2026-10-04)
 
@@ -124,7 +124,12 @@ posts must resolve them before V004 can run; migration never silently deletes da
 
 See [the explicit security review](security-review-departments-v1.md). The
 data-scope algorithm remains unchanged and all ten parity cases remain required.
-Current-commit CI is the final gate for this implementation checkpoint; all other
-frontend capability groups stay in scope.
+Implementation commit `a0ef1f2141e9b09f5c6f38e923835ec2d690f091` passed both
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617317)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37183617309).
+Validation includes 67 backend tests (all ten data-scope parity cases), 18 frontend
+unit tests, seven fixture browser cases and five real-backend browser cases,
+lint/typecheck/build, seeded routes and live OpenAPI/client reproducibility.
+All other frontend capability groups stay in scope.
 V006 requires existing active sibling-name duplicates to be resolved before
 migration; it never removes data and permits duplicate names on deleted rows.
