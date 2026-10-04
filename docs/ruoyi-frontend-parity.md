@@ -42,7 +42,7 @@ It is a work inventory, not executable proof of completion.
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
-| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Missing |
+| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client prepared; actual OSHI groups/units/percentages, legacy compatibility and no-role permission verified; final regression/CI and React page pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
@@ -816,3 +816,34 @@ Evidence logs are `online-page-backend.log`, `online-page-all-fixtures.log` and
 The final original capability audit remains pending. Server/cache monitoring and
 authenticated consoles, jobs/cron, generator/form builder and complete shell/
 shared capabilities remain required; the full objective is unfinished.
+
+## Server-monitor API checkpoint (2026-10-05)
+
+The canonical server endpoint now returns concrete generated CPU/RAM/JVM/host/
+disk contracts and sampling time under the original monitor:server:list grant.
+It reuses the original OSHI collector behind a local projection boundary. RAM
+values explicitly use binary GiB and JVM values binary MiB. The original disk
+size strings, host/path fields and JVM start/uptime/arguments remain privileged
+diagnostics. The API neither enumerates environment variables nor returns full
+System properties. Sampling faults have fixed generic 503 semantics, and an
+interrupted sample preserves interruption. The compatibility endpoint is unchanged.
+
+Validation passes 300 backend cases (six new server cases and ten unchanged
+data-scope cases), 60 web unit cases, lint/typecheck/build, generated-client
+reproducibility, production defaults, 38 fixture and 31 real browser regressions.
+Actual OSHI sampling checks CPU core/percentage bounds, physical RAM, JVM, host
+and formatted disks; stable host identity/RAM units agree with the legacy
+endpoint. An owned no-role account receives 403, and anonymous access 401.
+All prior module, SQL/Redis-fault and captcha/runtime acceptance passes in the
+same owned MySQL/Redis run. The final live normalized OpenAPI exactly equals
+the committed snapshot; all 144 previous path/schema entries remain unchanged.
+Evidence logs are `server-monitor-backend.log`, `server-monitor-fixtures.log`
+and `server-monitor-final-runtime.log` under the ignored boot target directory.
+
+The security boundary is in `security-review-server-monitor-v1.md`. Exact API
+commit CI and the server-monitor React page remain pending. The page must retain
+all original groups, memory/JVM usage warnings above 80%, loading/error/retry,
+refresh, safe diagnostic text and actual platform browser acceptance. Cache
+monitoring/names/keys/values/clear, protected or disabled consoles, jobs/cron,
+generator/form builder and complete shell/shared capabilities remain required.
+No server React route is bound at this API checkpoint; the full goal continues.

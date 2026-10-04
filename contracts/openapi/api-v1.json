@@ -147,6 +147,31 @@
         ],
         "type": "object"
       },
+      "CpuMetrics": {
+        "properties": {
+          "coreCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "idlePercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "systemPercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "userPercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "waitPercent": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "CreateUserRequest": {
         "properties": {
           "password": {
@@ -570,6 +595,33 @@
         ],
         "type": "object"
       },
+      "DiskMetrics": {
+        "properties": {
+          "fileSystem": {
+            "type": "string"
+          },
+          "freeSize": {
+            "type": "string"
+          },
+          "mount": {
+            "type": "string"
+          },
+          "totalSize": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "usagePercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "usedSize": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "EntryRequest": {
         "properties": {
           "cssClass": {
@@ -634,6 +686,26 @@
         ],
         "type": "object"
       },
+      "HostMetrics": {
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operatingSystem": {
+            "type": "string"
+          },
+          "workingDirectory": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Item": {
         "properties": {
           "id": {
@@ -650,6 +722,49 @@
           "id",
           "sort"
         ],
+        "type": "object"
+      },
+      "JvmMetrics": {
+        "properties": {
+          "arguments": {
+            "type": "string"
+          },
+          "freeMiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "home": {
+            "type": "string"
+          },
+          "maxMiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "totalMiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "uptime": {
+            "type": "string"
+          },
+          "usagePercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "usedMiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "LoginLogResponse": {
@@ -731,6 +846,27 @@
           "accessToken",
           "tokenType"
         ],
+        "type": "object"
+      },
+      "MemoryMetrics": {
+        "properties": {
+          "freeGiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "totalGiB": {
+            "format": "double",
+            "type": "number"
+          },
+          "usagePercent": {
+            "format": "double",
+            "type": "number"
+          },
+          "usedGiB": {
+            "format": "double",
+            "type": "number"
+          }
+        },
         "type": "object"
       },
       "MenuResponse": {
@@ -2018,6 +2154,41 @@
           "name",
           "sort",
           "status"
+        ],
+        "type": "object"
+      },
+      "ServerMonitorResponse": {
+        "properties": {
+          "cpu": {
+            "$ref": "#/components/schemas/CpuMetrics"
+          },
+          "disks": {
+            "items": {
+              "$ref": "#/components/schemas/DiskMetrics"
+            },
+            "type": "array"
+          },
+          "host": {
+            "$ref": "#/components/schemas/HostMetrics"
+          },
+          "jvm": {
+            "$ref": "#/components/schemas/JvmMetrics"
+          },
+          "memory": {
+            "$ref": "#/components/schemas/MemoryMetrics"
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cpu",
+          "disks",
+          "host",
+          "jvm",
+          "memory",
+          "sampledAt"
         ],
         "type": "object"
       },
@@ -3310,6 +3481,26 @@
         },
         "tags": [
           "operation-log-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/server": {
+      "get": {
+        "operationId": "getServerMonitor",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerMonitorResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "server-monitor-controller"
         ]
       }
     },

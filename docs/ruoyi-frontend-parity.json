@@ -317,8 +317,17 @@
       "operations": [
         "getServer"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/ServerMonitorController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/ServerMonitorService.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/ServerMonitorResponse.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/ServerMonitorControllerTest.java",
+        "server/scripts/verify-server-monitor-integration.ps1",
+        "docs/security-review-server-monitor-v1.md",
+        "web/tests/unit/server-monitor-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/system/config.js",

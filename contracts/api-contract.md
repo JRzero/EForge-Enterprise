@@ -327,3 +327,14 @@ idempotent 204. Bearer tokens and cached credentials/grants are never exposed.
 Redis enumeration/deletion faults return generic 503 ONLINE_SESSIONS_UNAVAILABLE.
 The legacy endpoints remain isolated and unchanged. Security and revocation
 semantics are documented in `docs/security-review-online-sessions-v1.md`.
+
+### Server diagnostics
+
+GET `/api/v1/monitor/server` returns concrete CPU, RAM, JVM, host and disk records
+plus sampledAt, protected by the original monitor:server:list grant. The existing
+OSHI probe supplies actual measurements. RAM fields explicitly use GiB and JVM
+fields MiB; percentages, disk display sizes, host metadata and JVM diagnostic
+strings preserve original behavior. Sampling faults return generic 503
+SERVER_MONITOR_UNAVAILABLE. The legacy monitor endpoint stays unchanged.
+`docs/security-review-server-monitor-v1.md` describes the privileged diagnostic
+boundary. Page and browser acceptance remain tracked in the parity inventory.

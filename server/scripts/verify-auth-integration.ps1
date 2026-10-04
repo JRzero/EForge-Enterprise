@@ -183,6 +183,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-notice-images-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-logs-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-online-sessions-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-server-monitor-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 

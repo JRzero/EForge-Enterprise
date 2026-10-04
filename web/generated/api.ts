@@ -158,6 +158,56 @@ export type OperationLogDetail = {
     responseBody?: string;
     url?: string;
 };
+export type CpuMetrics = {
+    coreCount?: number;
+    idlePercent?: number;
+    systemPercent?: number;
+    userPercent?: number;
+    waitPercent?: number;
+};
+export type DiskMetrics = {
+    fileSystem?: string;
+    freeSize?: string;
+    mount?: string;
+    totalSize?: string;
+    "type"?: string;
+    usagePercent?: number;
+    usedSize?: string;
+};
+export type HostMetrics = {
+    architecture?: string;
+    ip?: string;
+    name?: string;
+    operatingSystem?: string;
+    workingDirectory?: string;
+};
+export type JvmMetrics = {
+    arguments?: string;
+    freeMiB?: number;
+    home?: string;
+    maxMiB?: number;
+    name?: string;
+    startedAt?: string;
+    totalMiB?: number;
+    uptime?: string;
+    usagePercent?: number;
+    usedMiB?: number;
+    version?: string;
+};
+export type MemoryMetrics = {
+    freeGiB?: number;
+    totalGiB?: number;
+    usagePercent?: number;
+    usedGiB?: number;
+};
+export type ServerMonitorResponse = {
+    cpu: CpuMetrics;
+    disks: DiskMetrics[];
+    host: HostMetrics;
+    jvm: JvmMetrics;
+    memory: MemoryMetrics;
+    sampledAt: string;
+};
 export type DeleteConfigurationsRequest = {
     ids: string[];
 };
@@ -810,6 +860,14 @@ export function getOperationLog(id: string, opts?: Oazapfts.RequestOpts) {
         status: 200;
         data: OperationLogDetail;
     }>(`/api/v1/monitor/operation-logs/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function getServerMonitor(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ServerMonitorResponse;
+    }>("/api/v1/monitor/server", {
         ...opts
     });
 }
