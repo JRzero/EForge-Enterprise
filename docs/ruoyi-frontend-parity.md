@@ -28,8 +28,8 @@ It is a work inventory, not executable proof of completion.
 | Login/account lifecycle | captcha, failed login, remember-account/credential UX, configurable registration, logout, lock/unlock, session expiry, initial/expired password change | Login/captcha/logout/expiry verified; other behaviors missing |
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
-| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs verified locally and in CI. React page/crop implemented and real browser flow passed; final keyboard/mobile checks passed; implementation CI pending |
-| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile remains separate and incomplete |
+| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
+| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionary controls remain pending |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
@@ -245,5 +245,8 @@ unique per run and is removed within a checked path in fixture cleanup.
 Keyboard tab switching/focus, mobile profile overflow and crop-window bounds
 passed after quota recovered. Bootstrap refresh also has a targeted stale-session
 test. The live runtime and all existing module regressions passed on the final
-page version. Implementation CI is pending. Other missing groups and shared
-dictionary-driven controls remain in scope; full parity is not complete.
+page version. Implementation commit `dbd131dd8ab9f89b5dae39e89ba2bb61d76c216c`
+passed [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064193)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064167).
+All three server jobs passed. Other missing groups and shared dictionary-driven
+controls remain in scope; full parity is not complete.

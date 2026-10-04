@@ -439,7 +439,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-profile-page-awaiting-ci",
+      "state": "partial-shared-controls",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -466,7 +466,6 @@
         "scope": "Core administration APIs and regression of existing pages; user frontend parity remains incomplete."
       },
       "remaining": [
-        "Implementation CI for the personal-center and crop page",
         "Shared dictionary-driven controls when dictionary contracts are implemented"
       ],
       "lastVerifiedAdministration": {
@@ -482,6 +481,13 @@
         "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37188564916",
         "conclusion": "success",
         "scope": "Self-service profile/password/avatar API; React profile/crop browser parity remains incomplete."
+      },
+      "lastVerifiedProfilePage": {
+        "implementationCommit": "dbd131dd8ab9f89b5dae39e89ba2bb61d76c216c",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064193",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064167",
+        "conclusion": "success",
+        "scope": "Personal profile/password forms, avatar crop/drag/zoom/rotation/preview/upload, internal authenticated route, keyboard/mobile and no-grant real browser validation."
       }
     },
     {

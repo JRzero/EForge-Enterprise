@@ -88,4 +88,5 @@ old-avatar 404. Keyboard tab focus/switching, mobile overflow and crop-window
 bounds also passed. Runtime uploads use a unique owned directory that is removed
 only after validating its resolved absolute path beneath the fixture log root.
 Frontend lint/typecheck, 23 unit tests, build, generated client, nine fixture and
-twelve live browser cases passed. Implementation CI remains pending.
+twelve live browser cases passed. Implementation `dbd131d` passed all server
+and web CI jobs; exact run links are recorded in the parity inventory.
