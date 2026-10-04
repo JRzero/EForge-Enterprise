@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes = {UserController.class, PermissionService.class, ApiExceptionHandler.class,
+@ContextConfiguration(classes = {UserController.class, UserImportController.class, PermissionService.class, ApiExceptionHandler.class,
         ApiRoutingExceptionResolver.class, SpringUtils.class, SecurityConfig.class, ApiSecurityProblemHandler.class,
         AuthenticationEntryPointImpl.class, JwtAuthenticationTokenFilter.class, UserControllerTest.Configuration.class})
 class UserControllerTest
@@ -48,6 +48,7 @@ class UserControllerTest
     @MockitoBean ISysRoleService roles;
     @MockitoBean ISysPostService posts;
     @MockitoBean ISysConfigService configuration;
+    @MockitoBean UserImportService importer;
     @MockitoBean io.eforge.enterprise.system.mapper.DepartmentMutationMapper mutations;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
@@ -229,8 +230,58 @@ class UserControllerTest
         mvc.perform(put(PATH + "/2/roles").contentType(MediaType.APPLICATION_JSON).content("{\"roleIds\":[]}")).andExpect(status().isForbidden());
         mvc.perform(delete(PATH).contentType(MediaType.APPLICATION_JSON).content("{\"ids\":[\"2\"]}")).andExpect(status().isForbidden());
         mvc.perform(post(PATH + "/export")).andExpect(status().isForbidden());
+        mvc.perform(post(PATH + "/import-template")).andExpect(status().isForbidden());
+        mvc.perform(multipart(PATH + "/import").file(new org.springframework.mock.web.MockMultipartFile("file", "users.xlsx", "application/octet-stream", new byte[]{1}))).andExpect(status().isForbidden());
         verify(users, never()).selectUserById(any()); verify(users, never()).selectUserList(any());
         verifyNoInteractions(mutations);
+    }
+    private byte[] workbook(boolean legacy, int lastRow) throws Exception
+    {
+        try (org.apache.poi.ss.usermodel.Workbook workbook = legacy ? new org.apache.poi.hssf.usermodel.HSSFWorkbook() : new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+                var output = new java.io.ByteArrayOutputStream())
+        {
+            var sheet = workbook.createSheet("Users"); var header = sheet.createRow(0);
+            String[] columns = {"部门编号", "登录名称", "用户名称", "用户性别", "账号状态", "用户序号", "password"};
+            for (int index = 0; index < columns.length; index++) header.createCell(index).setCellValue(columns[index]);
+            var row = sheet.createRow(lastRow); row.createCell(0).setCellValue(103); row.createCell(1).setCellValue("imported");
+            row.createCell(2).setCellValue("Imported"); row.createCell(3).setCellValue("未知"); row.createCell(4).setCellValue("正常");
+            row.createCell(5).setCellValue(1); row.createCell(6).setCellValue("forged"); workbook.write(output); return output.toByteArray();
+        }
+    }
+    @org.junit.jupiter.params.ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void importsBothRealWorkbookFormatsWithOriginalConvertersAndNoInternalFields(boolean legacy) throws Exception
+    {
+        SysUser account = row(2);
+        when(tokens.getLoginUser(any())).thenReturn(new LoginUser(2L, 103L, account, Set.of("system:user:import")));
+        when(importer.importUsers(any(), eq(true))).thenReturn(new UserImportController.UserImportResponse(1, 1, 0, 0,
+                List.of(new UserImportController.UserImportRow(1, "imported", "CREATED", null))));
+        var file = new org.springframework.mock.web.MockMultipartFile("file", legacy ? "users.xls" : "users.xlsx", "application/octet-stream", workbook(legacy, 1));
+        mvc.perform(multipart(PATH + "/import").file(file).param("updateExisting", "true")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.created").value(1)).andExpect(jsonPath("$.rows[0].outcome").value("CREATED"));
+        verify(importer).importUsers(argThat(rows -> rows.size() == 1 && "imported".equals(rows.get(0).getUserName())
+                && rows.get(0).getDeptId().equals(103L) && "2".equals(rows.get(0).getSex()) && "0".equals(rows.get(0).getStatus())
+                && rows.get(0).getUserId() == null && rows.get(0).getPassword() == null), eq(true));
+    }
+    @Test void corruptUnsupportedAndOversizedWorkbooksReturnSafeProblemsBeforeImport() throws Exception
+    {
+        mvc.perform(multipart(PATH + "/import").file(new org.springframework.mock.web.MockMultipartFile("file", "broken.xlsx", "application/octet-stream", new byte[]{1,2,3})))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("USER_IMPORT_FILE_INVALID"));
+        mvc.perform(multipart(PATH + "/import").file(new org.springframework.mock.web.MockMultipartFile("file", "users.csv", "application/octet-stream", workbook(false, 1))))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("USER_IMPORT_FILE_INVALID"));
+        mvc.perform(multipart(PATH + "/import").file(new org.springframework.mock.web.MockMultipartFile("file", "large.xlsx", "application/octet-stream", workbook(false, 1001))))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("USER_IMPORT_TOO_LARGE"));
+        verifyNoInteractions(importer);
+    }
+    @Test void importTemplateContainsOriginalImportColumnsAndNoCredentialColumn() throws Exception
+    {
+        var response = mvc.perform(post(PATH + "/import-template")).andExpect(status().isOk()).andReturn().getResponse();
+        try (var input = new java.io.ByteArrayInputStream(response.getContentAsByteArray()); var workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(input))
+        {
+            var columns = new java.util.ArrayList<String>();
+            for (var cell : workbook.getSheetAt(0).getRow(0)) columns.add(cell.getStringCellValue());
+            org.junit.jupiter.api.Assertions.assertTrue(columns.containsAll(List.of("部门编号", "登录名称", "用户名称", "用户性别", "账号状态")));
+            org.junit.jupiter.api.Assertions.assertFalse(columns.contains("password"));
+        }
     }
     @TestConfiguration static class Configuration
     {

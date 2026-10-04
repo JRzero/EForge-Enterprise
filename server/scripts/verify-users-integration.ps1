@@ -11,6 +11,21 @@ function Create-User([string]$username, [string]$department = '103', [string]$ph
     Assert-Check ($user.id -is [string] -and $response.Headers.Location -eq "$userBase/$($user.id)") 'User creation must return a string identity and Location.'
     return $user
 }
+function User-Workbook([string]$name, [object[]]$rows) {
+    $filePath = Join-Path $logDirectory "$name.xlsx"
+    $jsonPath = Join-Path $logDirectory "$name.json"
+    @{rows=$rows} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+    & node (Join-Path $repoRoot 'web/scripts/create-user-workbook-fixture.mjs') $filePath $jsonPath
+    Assert-Check ($LASTEXITCODE -eq 0) 'Preparing the real workbook fixture failed.'
+    return $filePath
+}
+function Import-Workbook([string]$filePath, [bool]$updateExisting, [hashtable]$headers) {
+    $value = $updateExisting.ToString().ToLowerInvariant()
+    $response = Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$userBase/import?updateExisting=$value" -Method POST -Form @{file=(Get-Item -LiteralPath $filePath)} -Headers $headers -SkipHttpErrorCheck
+    $content = $response.Content
+    if ($content -is [byte[]]) { $content = [Text.Encoding]::UTF8.GetString($content) }
+    return @{StatusCode=$response.StatusCode;Content=$content;Headers=$response.Headers;Result=($content | ConvertFrom-Json)}
+}
 Assert-Problem (Request $userBase) 401 'AUTHENTICATION_REQUIRED'
 Assert-Problem (Request "$userBase/999999" 'GET' '' $authorized) 404 'USER_NOT_FOUND'
 Assert-Problem (Request $userBase 'POST' '{}' $authorized) 400 'VALIDATION_ERROR'
@@ -79,6 +94,29 @@ try {
 } finally { $archive.Dispose(); $xlsxStream.Dispose() }
 
 # Independent department-only role proves scoped mutations and all permission gates.
+$importName = "f-$runId"
+$partialWorkbook = User-Workbook "partial-$runId" @(
+    @('103',$userName,'Imported existing','','','未知','正常'),
+    @('103',$importName,'Imported new','','','女','正常'),
+    @('103',"v-$runId",'Invalid phone','','bad','未知','正常'))
+$partialResult = Import-Workbook $partialWorkbook $false $authorized
+Assert-Check ($partialResult.StatusCode -eq 200 -and $partialResult.Result.created -eq 1 -and $partialResult.Result.failed -eq 2 -and $partialResult.Result.rows[0].code -eq 'USER_USERNAME_EXISTS' -and $partialResult.Result.rows[2].code -eq 'VALIDATION_ERROR') 'Partial import outcomes must identify committed and rejected records.'
+$importedDetails = (Request "$userBase`?username=$importName" 'GET' '' $authorized).Content | ConvertFrom-Json
+$importedId = $importedDetails.items[0].id
+$importedEditor = (Request "$userBase/$importedId" 'GET' '' $authorized).Content | ConvertFrom-Json
+Assert-Check ($importedEditor.roleIds.Count -eq 0 -and $importedEditor.postIds.Count -eq 0) 'Imported new users must not receive implicit role or post grants.'
+$importedLogin = Request '/api/v1/auth/login' 'POST' (@{username=$importName;password=$options.initialPassword} | ConvertTo-Json -Compress)
+Assert-Check ($importedLogin.StatusCode -eq 200) 'Imported user cannot authenticate with the configured initial password.'
+Request '/logout' 'POST' '' @{Authorization="Bearer $(($importedLogin.Content | ConvertFrom-Json).accessToken)"} | Out-Null
+$overwriteResult = Import-Workbook $partialWorkbook $true $authorized
+Assert-Check ($overwriteResult.Result.updated -eq 2 -and $overwriteResult.Result.failed -eq 1) 'Opt-in import updates must explicitly report retained partial failures.'
+$details = (Request "$userBase/$($managedUser.id)" 'GET' '' $authorized).Content | ConvertFrom-Json
+Assert-Check ($details.user.departmentId -eq '105' -and $details.roleIds[0] -eq '2' -and $details.postIds[0] -eq '3') 'Import updates must preserve existing department, role and post assignments.'
+Assert-Check ((Request '/api/v1/auth/login' 'POST' (@{username=$userName;password='Reset12345'} | ConvertTo-Json -Compress)).StatusCode -eq 200) 'Import update must retain the existing password.'
+$adminWorkbook = User-Workbook "admin-$runId" @(,@('103','admin','Do not change admin','','','未知','正常'))
+$adminImport = Import-Workbook $adminWorkbook $true $authorized
+Assert-Check ($adminImport.Result.failed -eq 1 -and $adminImport.Result.rows[0].code -eq 'USER_ADMIN_PROTECTED') 'Import must protect the super-administrator.'
+$scopeWorkbook = User-Workbook "scope-$runId" @(,@('103',"q-$runId",'Outside department','','','未知','正常'))
 $scopeName = "s-$runId"
 $scopeUser = Create-User $scopeName '105'
 Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e `
@@ -97,8 +135,14 @@ $unscopedBody.departmentId = $null; $unscopedBody.roleIds = @(); $unscopedBody.p
 Assert-Problem (Request $userBase 'POST' (@{user=$unscopedBody;password='User12345'} | ConvertTo-Json -Depth 5 -Compress) $scopeHeaders) 403 'ACCESS_DENIED'
 Assert-Problem (Request $userBase 'DELETE' (@{ids=@($managedUser.id,'1')} | ConvertTo-Json -Compress) $scopeHeaders) 403 'ACCESS_DENIED'
 Assert-Check ((Request "$userBase/$($managedUser.id)" 'GET' '' $authorized).StatusCode -eq 200) 'Denied mixed-scope deletion must leave all targets intact.'
+$deniedImport = Import-Workbook $scopeWorkbook $false $scopeHeaders
+Assert-Check ($deniedImport.StatusCode -eq 200 -and $deniedImport.Result.failed -eq 1 -and $deniedImport.Result.rows[0].code -eq 'ACCESS_DENIED') 'Each imported department must enforce the actual role data scope.'
+$hiddenAccountImport = Import-Workbook $adminWorkbook $true $scopeHeaders
+Assert-Check ($hiddenAccountImport.Result.failed -eq 1 -and $hiddenAccountImport.Result.rows[0].code -eq 'ACCESS_DENIED') 'Import updates cannot bypass target user data scope.'
 Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e "DELETE rm FROM sys_role_menu rm JOIN sys_role r ON r.role_id=rm.role_id WHERE r.role_key='$scopeName';" | Out-Null
 Request '/api/v1/app/bootstrap' 'GET' '' $scopeHeaders | Out-Null
+Assert-Problem (Import-Workbook $scopeWorkbook $false $scopeHeaders) 403 'ACCESS_DENIED'
+Assert-Problem (Request "$userBase/import-template" 'POST' '' $scopeHeaders) 403 'ACCESS_DENIED'
 foreach ($probe in @(
     @($userBase,'GET',''), @("$userBase/departments",'GET',''), @("$userBase/options",'GET',''), @("$userBase/$($managedUser.id)",'GET',''),
     @("$userBase/$($managedUser.id)/roles",'GET',''), @($userBase,'POST',(@{user=$outsideBody;password='User12345'} | ConvertTo-Json -Depth 5 -Compress)),
@@ -109,7 +153,7 @@ foreach ($probe in @(
 }
 Request '/logout' 'POST' '' $scopeHeaders | Out-Null
 Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e "DELETE ur FROM sys_user_role ur JOIN sys_role r ON r.role_id=ur.role_id WHERE r.role_key='$scopeName'; DELETE FROM sys_role WHERE role_key='$scopeName';" | Out-Null
-Assert-Check ((Request $userBase 'DELETE' (@{ids=@($managedUser.id,$scopeUser.id)} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'User fixture cleanup failed.'
+Assert-Check ((Request $userBase 'DELETE' (@{ids=@($managedUser.id,$scopeUser.id,$importedId)} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'User fixture cleanup failed.'
 Assert-Problem (Request "$userBase/$($managedUser.id)" 'GET' '' $authorized) 404 'USER_NOT_FOUND'
 $concurrentUserName = "c-$runId"
 $concurrentUserBody = @{user=(User-Body $concurrentUserName);password='User12345'} | ConvertTo-Json -Depth 5 -Compress

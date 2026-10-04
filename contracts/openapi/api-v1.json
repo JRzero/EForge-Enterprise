@@ -507,6 +507,69 @@
         ],
         "type": "object"
       },
+      "UserImportResponse": {
+        "properties": {
+          "created": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "failed": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/UserImportRow"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created",
+          "failed",
+          "rows",
+          "total",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "UserImportRow": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "CREATED",
+              "UPDATED",
+              "FAILED"
+            ],
+            "type": "string"
+          },
+          "row": {
+            "description": "One-based imported record ordinal",
+            "format": "int32",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "row",
+          "username"
+        ],
+        "type": "object"
+      },
       "UserOption": {
         "properties": {
           "id": {
@@ -1537,6 +1600,76 @@
         },
         "tags": [
           "user-controller"
+        ]
+      }
+    },
+    "/api/v1/system/users/import": {
+      "post": {
+        "operationId": "importUsers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "updateExisting",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserImportResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "user-import-controller"
+        ]
+      }
+    },
+    "/api/v1/system/users/import-template": {
+      "post": {
+        "operationId": "downloadUserImportTemplate",
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Original user import columns and converters"
+          }
+        },
+        "tags": [
+          "user-import-controller"
         ]
       }
     },

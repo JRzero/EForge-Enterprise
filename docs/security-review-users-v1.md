@@ -1,13 +1,13 @@
 # Canonical user administration security review
 
-Date: 2026-10-04. Scope: the new `/api/v1/system/users` core facade. Import,
-profile/avatar and the React administration page remain pending implementation
-and their own verification; this review does not assert full user feature parity.
+Date: 2026-10-04. Scope: the canonical user facade, XLS/XLSX import/template and React
+administration page. Personal profile/avatar remain pending; this review does
+not assert full user feature parity.
 
 ## Authority and data scope
 
 Every method requires the original `system:user:list/query/add/edit/remove/
-resetPwd/export` permission. Department filters and date ranges are mapped to a
+resetPwd/export/import` permission. Department filters and date ranges are mapped to a
 new `SysUser` filter; client data-scope expressions never enter service parameters.
 Reads retain the original proxied `selectUserList` and `checkUserDataScope`
 boundaries. Detail and role-allocation reads check target scope first, including
@@ -66,6 +66,34 @@ that old credentials stop authenticating and new credentials work.
   every operation after real menu permission revocation and bootstrap refresh.
 - All ten `DataScopeAspectParityTest` cases remain required.
 
-The review approves the core facade within these boundaries. Browser user
-administration parity, imports/templates and personal profile capabilities must
-remain incomplete in the parity inventory until their own evidence is available.
+## Import boundary and browser evidence
+
+Import and template require the original import permission independently of
+query/edit permissions. Files must be non-empty XLS/XLSX, at most 10 MB and
+1000 data rows, with the original login-name header. Original POI/Excel converters
+remain behind the boundary; parse errors and row failures return fixed safe codes.
+
+Each row has its own transaction and takes the shared canonical root lock before
+reading. Partial commits are explicit in typed ordinal/count/outcome results.
+A new sanitized SysUser copies only import columns; supplied IDs, credentials,
+grants, audit fields and SQL parameters cannot be mass-assigned. New passwords
+use the validated configured value and BCrypt; new rows receive no role/post
+grants. Existing target scope is checked before collisions or admin protection.
+Overwrite is opt-in and preserves password, department, roles/posts and other
+non-import fields. Declared departments still require scope/existence checks.
+Import request/response audit bodies are suppressed. React renders result cells
+as text, and only the import transport extends its response deadline.
+
+UserControllerTest includes real HSSF/XSSF parsing, template headers, corrupt
+files and row limits. Seven UserImportServiceTest cases cover sanitized fields,
+hashing, association preservation, per-row rollback, scope ordering, admin
+protection and safe failures. Runtime tests verify actual persisted partial
+results, login, retained associations and revoked import/template permissions.
+Six real user browser cases cover administration, both Excel formats, bulk and
+slow imports; read-only/error/mobile fixtures supplement them.
+
+Local validation: 101 backend tests, 20 frontend unit tests, eight fixture and
+eleven live browser cases, generated client, seeded routes and security defaults.
+All ten data-scope parity cases remain green. Implementation CI is recorded in
+the parity inventory after push. The review approves this administration/import
+slice; personal profile and the remaining parity groups remain incomplete.

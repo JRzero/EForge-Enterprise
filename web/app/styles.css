@@ -65,3 +65,15 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .post-table table {min-width: 850px;} .post-table th {white-space: nowrap;} .post-table .post-row-actions {flex-wrap: nowrap; gap: 4px;}
 .department-name {display: flex; align-items: center; gap: 7px; white-space: nowrap;} .department-name button {border: 0; border-radius: 4px; padding: 5px; background: #e8f1ed; color: #315c4d; cursor: pointer; width: 26px;} .department-leaf {width: 26px; flex-shrink: 0;}
 .department-sort {font: inherit; width: 82px; padding: 6px 8px; border: 1px solid #cdded7; border-radius: 5px;}
+.user-layout {display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 20px;} .user-content {min-width: 0;}
+.user-departments {background: white; border: 1px solid #dce7e2; border-radius: 12px; padding: 16px; align-self: start; overflow: hidden;}
+.user-departments ul {list-style: none; padding: 0; margin: 12px 0 0;} .user-departments li {display: flex; gap: 4px; align-items: center;}
+.user-departments li button {font: inherit; text-align: left; color: #315c4d; background: none; border: 0; padding: 7px 3px; cursor: pointer; overflow-wrap: anywhere;}
+.user-departments li button[aria-pressed=true] {font-weight: 700; background: #e4f1e9; border-radius: 4px;}
+.user-choices {display: flex; flex-wrap: wrap; gap: 12px; border: 1px solid #d4e2da; border-radius: 6px; padding: 12px;} .user-choices label {display: flex; flex-direction: row; align-items: center; gap: 5px;}
+.users-page .post-filters {flex-wrap: wrap;} .users-page input[type=date] {font: inherit; border: 1px solid #ccdcd6; padding: 9px; border-radius: 6px;}
+@media (max-width: 1000px) {.user-layout {grid-template-columns: minmax(0, 1fr);} .user-departments ul {max-height: 200px; overflow: auto;}}
+.user-dropzone {border: 1px dashed #9db6aa; padding: 16px; border-radius: 8px; margin: 16px 0; overflow-wrap: anywhere;}
+.user-dropzone input {max-width: 100%;} .user-import-update {display: flex; flex-direction: row; align-items: center; gap: 8px; margin-bottom: 16px;}
+.user-import-result {max-height: 280px; overflow: auto; margin: 16px 0; font-size: 14px;} .user-import-result th, .user-import-result td {padding: 6px; text-align: left; border-bottom: 1px solid #dce7e2; overflow-wrap: anywhere;}
+.users-page .ef-data-table__toolbar {display: none;} .user-selection {display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px;}

@@ -1,0 +1,12 @@
+import {test, expect} from '@playwright/test';
+test('read-only user permissions, scoped department roots, failure retry and mobile overflow', async ({page}) => {
+  await page.route('**/captchaImage', route => route.fulfill({json: {code: 200, captchaEnabled: false}}));
+  await page.route('**/api/v1/auth/login', route => route.fulfill({json: {accessToken: 'fixture-token', tokenType: 'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap', route => route.fulfill({json: {user: {id: '2', username: 'reader', displayName: '用户只读账号'}, roles: ['reader'], permissions: ['system:user:list'], navigation: [{key: 'system-users', type: 'ROUTE', routeId: 'system-users', label: '用户管理', order: 0, children: []}]}}));
+  await page.route('**/api/v1/system/users/departments', route => route.fulfill({json: [{id: '105', parentId: '101', name: '范围内部门', sort: 0, status: '0'}]}));
+  let rejects = true; await page.route('**/api/v1/system/users?*', route => route.fulfill(rejects ? {status: 503, json: {}} : {json: {items: [{id: '9007199254740993', username: 'visible', displayName: '只读用户', departmentId: '105', departmentName: '范围内部门', status: '0'}], total: 1, page: 1, pageSize: 10}}));
+  await page.goto('/user'); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('服务暂时不可用');
+  rejects = false; await page.getByRole('button', {name: '重试列表', exact: true}).click(); await expect(page.getByRole('cell', {name: '9007199254740993', exact: true})).toBeVisible(); await expect(page.getByRole('button', {name: '筛选部门 范围内部门', exact: true})).toBeVisible();
+  for (const action of ['新增用户', '修改所选用户', '删除所选用户', '导出用户', '导入用户', '修改用户 visible', '停用用户 visible', '重置密码 visible', '分配角色 visible']) await expect(page.getByRole('button', {name: action, exact: true})).toHaveCount(0);
+  await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

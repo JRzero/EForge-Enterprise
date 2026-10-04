@@ -4,6 +4,12 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'USER_IMPORT_FILE_INVALID') return '请选择有效的 XLS 或 XLSX 用户表格，并保留模板的登录名称列。';
+  if (code === 'USER_IMPORT_TOO_LARGE') return '一次最多导入 1000 条数据，请拆分表格后重试。';
+  if (code === 'USER_IMPORT_EMPTY') return '表格没有用户数据，请填写后重试。';
+  if (code === 'USER_IMPORT_FAILED') return '该条用户数据未能保存，请检查后重试。';
+  if (code === 'USER_INITIAL_PASSWORD_INVALID') return '初始密码配置无效，请联系管理员。';
+  if (code === 'ACCESS_DENIED') return '当前账号没有操作权限。';
   if (code === 'USER_NOT_FOUND') return '用户已不存在，请刷新后重试。';
   if (code === 'USER_USERNAME_EXISTS') return '登录账号已存在，请使用其他账号。';
   if (code === 'USER_PHONE_EXISTS') return '手机号码已被其他账号使用。';

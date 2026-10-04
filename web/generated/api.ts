@@ -157,6 +157,20 @@ export type CreateUserRequestWrite = {
     password: string;
     user: UserWriteRequest;
 };
+export type UserImportRow = {
+    code?: string;
+    outcome: "CREATED" | "UPDATED" | "FAILED";
+    /** One-based imported record ordinal */
+    row: number;
+    username: string;
+};
+export type UserImportResponse = {
+    created: number;
+    failed: number;
+    rows: UserImportRow[];
+    total: number;
+    updated: number;
+};
 export type UserOption = {
     id: string;
     name: string;
@@ -420,6 +434,31 @@ export function exportUsers({ username, phone, status, departmentId, beginDate, 
         beginDate,
         endDate
     }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function importUsers(body?: {
+    file: Blob;
+}, { updateExisting }: {
+    updateExisting?: boolean;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: UserImportResponse;
+    }>(`/api/v1/system/users/import${QS.query(QS.explode({
+        updateExisting
+    }))}`, oazapfts.multipart({
+        ...opts,
+        method: "POST",
+        body
+    }));
+}
+export function downloadUserImportTemplate(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>("/api/v1/system/users/import-template", {
         ...opts,
         method: "POST"
     });

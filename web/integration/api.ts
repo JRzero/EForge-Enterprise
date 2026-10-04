@@ -4,18 +4,18 @@ import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePost
 import type {AuthStore} from '@eforge/core';
 import {ApiError, record} from './errors';
 import {listUsers, listUserDepartments, getUserOptions, getUser, createUser, updateUser, deleteUsers,
-  setUserStatus, resetUserPassword, getUserRoles, setUserRoles, exportUsers,
+  setUserStatus, resetUserPassword, getUserRoles, setUserRoles, exportUsers, importUsers, downloadUserImportTemplate,
   type UserWriteRequest, type CreateUserRequestWrite} from '../generated/api';
 import {getCaptcha, revokeSession} from './legacy-auth';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
-  function transport(authenticated: boolean): typeof fetch {
+  function transport(authenticated: boolean, timeoutMs = 15000): typeof fetch {
     return async (input, init) => {
       const token = authenticated ? auth.getState().session?.accessToken : undefined;
       const headers = new Headers(init?.headers);
       if (token) headers.set('Authorization', `Bearer ${token}`);
-      const timeout = AbortSignal.timeout(15000);
+      const timeout = AbortSignal.timeout(timeoutMs);
       const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
       const response = await fetcher(input, {...init, headers, signal, cache: 'no-store', credentials: 'omit'});
       if (!response.ok) {
@@ -27,6 +27,12 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async importUsers(file: File, updateExisting: boolean) {
+      return (await importUsers({file}, {updateExisting}, {baseUrl: '', fetch: transport(true, 600000)})).data;
+    },
+    async downloadUserImportTemplate() {
+      return (await downloadUserImportTemplate({baseUrl: '', fetch: transport(true)})).data;
+    },
     async listUsers(query: Parameters<typeof listUsers>[0], signal?: AbortSignal) {
       return (await listUsers(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

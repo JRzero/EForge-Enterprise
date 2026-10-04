@@ -168,8 +168,16 @@ identifiers, create with separate write-only password, profile update, delete
 batch, status/password/role operations and filtered XLSX export. IDs remain
 decimal strings. Editor options use `Cache-Control: no-store` for the original
 configured initial-password behavior; account/detail responses contain no hash.
-The user React page, import/template and personal-profile contracts are still
-pending; endpoint presence does not establish full user capability parity.
+POST `/import` consumes multipart `file` and optional boolean
+`updateExisting` (default false), returning typed total/created/updated/failed
+counts and per-row ordinal, username, outcome and safe failure code. Non-empty
+XLS/XLSX files are limited to 10 MB and 1000 data rows. Successful rows commit
+independently; overwrite preserves existing department, grants and password.
+New rows use the configured initial password with BCrypt and receive no implicit
+role/post grants. POST `/import-template` returns the original binary XLSX
+template. Both operations require import permission. The React administration
+page consumes generated contracts. Personal-profile contracts remain pending;
+this administration checkpoint does not establish full user capability parity.
 
 Breaking changes to `/api/v1` require either:
 

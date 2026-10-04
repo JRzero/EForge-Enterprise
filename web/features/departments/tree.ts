@@ -32,3 +32,15 @@ export function departmentTree(rows: readonly DepartmentResponse[], collapsed: R
   for (const row of order([...rows])) if (!visited.has(row.id)) visit(row, 0);
   return result;
 }
+
+export function searchedDepartmentTree(rows: readonly DepartmentResponse[], search: string, collapsed: ReadonlySet<string> = new Set()) {
+  const query = search.trim().toLowerCase();
+  const tree = departmentTree(rows, query ? new Set() : collapsed);
+  if (!query) return tree;
+  const known = new Map(rows.map(row => [row.id, row])); const visible = new Set<string>();
+  for (const row of tree) if (row.path.toLowerCase().includes(query)) {
+    let current: DepartmentResponse | undefined = row.department;
+    while (current && !visible.has(current.id)) { visible.add(current.id); current = known.get(current.parentId); }
+  }
+  return tree.filter(row => visible.has(row.department.id));
+}

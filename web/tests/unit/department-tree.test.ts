@@ -1,5 +1,5 @@
 import {expect, it} from 'vitest';
-import {departmentTree} from '../../features/departments/tree';
+import {departmentTree, searchedDepartmentTree} from '../../features/departments/tree';
 import type {DepartmentResponse} from '../../generated/api';
 const row = (id: string, parentId: string, sort = 0): DepartmentResponse => ({id, parentId, sort, name: id, status: '0'});
 it('preserves scoped roots without inventing out-of-scope parents', () => {
@@ -21,4 +21,11 @@ it('collapsed descendants stay hidden instead of reappearing as orphan roots', (
 });
 it('malformed cycles terminate and retain each visible identity once', () => {
   expect(departmentTree([row('100', '101'), row('101', '100')]).map(item => item.department.id)).toEqual(['100', '101']);
+});
+it('search expands matched branches and retains their visible ancestors', () => {
+  const rows = [row('100', '0'), row('101', '100'), {...row('103', '101'), name: 'Engineering'}, row('102', '100')];
+  expect(searchedDepartmentTree(rows, 'engineering', new Set(['100'])).map(item => item.department.id)).toEqual(['100', '101', '103']);
+});
+it('search does not fabricate an inaccessible ancestor', () => {
+  expect(searchedDepartmentTree([{...row('105', '101'), name: 'Testing'}], 'testing').map(item => [item.department.id, item.depth])).toEqual([['105', 0]]);
 });

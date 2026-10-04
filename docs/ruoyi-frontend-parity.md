@@ -29,7 +29,7 @@ It is a work inventory, not executable proof of completion.
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
-| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | In progress: canonical core facade and targeted tests added; React page, import/template and browser verification pending |
+| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI pending. Personal profile remains separate and incomplete |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
@@ -134,7 +134,7 @@ All other frontend capability groups stay in scope.
 V006 requires existing active sibling-name duplicates to be resolved before
 migration; it never removes data and permits duplicate names on deleted rows.
 
-## User administration core API checkpoint (2026-10-04)
+## Historical user administration core API checkpoint (2026-10-04)
 
 The canonical user facade implements scoped list/date/department filters and
 paging, editor options/details, creation, profile editing, batch deletion,
@@ -161,6 +161,34 @@ yet been implemented. Implementation commit
 [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809973)
 and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37184809879).
 
-See [the core user security review](security-review-users-v1.md). User page,
-import/template and personal profile/avatar/password-change flows remain pending,
-so neither users nor full frontend parity is marked complete.
+At that core-only checkpoint, the page and import were pending. See the newer
+administration evidence below; personal profile remains incomplete.
+
+## User administration page and import checkpoint (2026-10-04)
+
+The lazy EForge user route now includes scoped department search/expand/collapse,
+filters/date ranges, paging/columns, localized select-all/mixed/clear selection,
+create/edit, single/batch delete, status confirmation, password reset, role/post
+allocation and filtered XLSX download. Read-only permission controls, retry,
+large IDs, dialog cancellation and mobile overflow are verified independently.
+
+Canonical multipart XLS/XLSX import and template download retain the original
+Excel annotations. Each row commits independently with typed success/failure
+results. Overwrite is opt-in, retains existing password/department/role/post
+associations, and checks target scope before disclosing account collisions.
+New imported users receive the configured BCrypt password and no implicit grants.
+The page safely renders partial results and supports file selection/drag-drop.
+
+Evidence: 101 backend tests including all ten data-scope parity cases; 20 frontend
+unit tests; lint/typecheck/build/generated-client reproducibility; eight fixture
+browser cases; eleven real MySQL/Redis browser cases. Six user browser cases
+cover CRUD and persisted associations, full/mixed selection and pagination,
+XLSX partial failures and overwrite, actual legacy XLS login, 220-row drag/drop,
+and a real committed import response delayed beyond the ordinary request deadline.
+The runtime script separately verifies import scope denial, permission revocation,
+admin protection, uniqueness, authentication and existing module regressions.
+Implementation CI is pending at this checkpoint.
+
+Personal profile, self password change, avatar upload/crop, dictionary integration
+and every other missing capability group remain in scope. This checkpoint does
+not assert full user or full frontend parity.
