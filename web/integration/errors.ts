@@ -4,6 +4,21 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'USER_NOT_FOUND') return '用户已不存在，请刷新后重试。';
+  if (code === 'USER_USERNAME_EXISTS') return '登录账号已存在，请使用其他账号。';
+  if (code === 'USER_PHONE_EXISTS') return '手机号码已被其他账号使用。';
+  if (code === 'USER_EMAIL_EXISTS') return '邮箱已被其他账号使用。';
+  if (code === 'USER_CONFLICT') return '登录账号、手机或邮箱已存在，请修改后重试。';
+  if (code === 'USER_USERNAME_IMMUTABLE') return '已有用户的登录账号不能修改。';
+  if (code === 'USER_ADMIN_PROTECTED') return '超级管理员账号不能修改。';
+  if (code === 'USER_SELF_DELETE') return '不能删除当前登录用户。';
+  if (code === 'USER_ADMIN_ROLE_PROTECTED') return '不能为普通用户分配超级管理员角色。';
+  if (code === 'USER_DEPARTMENT_NOT_FOUND') return '所选部门已不存在，请重新选择。';
+  if (code === 'USER_DEPARTMENT_DISABLED') return '所选部门已停用，不能新增分配。';
+  if (code === 'USER_ROLE_NOT_FOUND') return '所选角色已不存在，请重新选择。';
+  if (code === 'USER_ROLE_DISABLED') return '所选角色已停用，不能新增分配。';
+  if (code === 'USER_POST_NOT_FOUND') return '所选岗位已不存在，请重新选择。';
+  if (code === 'USER_POST_DISABLED') return '所选岗位已停用，不能新增分配。';
   if (code === 'DEPARTMENT_NOT_FOUND') return '部门已不存在，请刷新后重试。';
   if (code === 'DEPARTMENT_NAME_EXISTS') return '该上级部门下已存在同名部门。';
   if (code === 'DEPARTMENT_PARENT_INVALID') return '请选择有效的上级部门。';

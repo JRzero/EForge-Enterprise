@@ -162,6 +162,15 @@ The web integration layer supplies the authorization header from EForge auth sta
 
 ## Contract compatibility
 
+User administration core contracts now live at `/api/v1/system/users`: typed
+page/filter results, scoped departments/editor options, concrete detail/role/post
+identifiers, create with separate write-only password, profile update, delete
+batch, status/password/role operations and filtered XLSX export. IDs remain
+decimal strings. Editor options use `Cache-Control: no-store` for the original
+configured initial-password behavior; account/detail responses contain no hash.
+The user React page, import/template and personal-profile contracts are still
+pending; endpoint presence does not establish full user capability parity.
+
 Breaking changes to `/api/v1` require either:
 
 - an additive backward-compatible migration, or

@@ -439,8 +439,18 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial-core-api-awaiting-ci",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
+        "UserControllerTest",
+        "server/scripts/verify-users-integration.ps1",
+        "docs/security-review-users-v1.md"
+      ],
+      "remaining": [
+        "React administration page and complete live browser verification",
+        "XLS/XLSX import, optional updates and template download",
+        "Personal profile, password change and avatar upload"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/tool/gen.js",

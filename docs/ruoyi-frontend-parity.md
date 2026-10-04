@@ -29,7 +29,7 @@ It is a work inventory, not executable proof of completion.
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
-| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Missing |
+| Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | In progress: canonical core facade and targeted tests added; React page, import/template and browser verification pending |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
@@ -133,3 +133,31 @@ lint/typecheck/build, seeded routes and live OpenAPI/client reproducibility.
 All other frontend capability groups stay in scope.
 V006 requires existing active sibling-name duplicates to be resolved before
 migration; it never removes data and permits duplicate names on deleted rows.
+
+## User administration core API checkpoint (2026-10-04)
+
+The canonical user facade implements scoped list/date/department filters and
+paging, editor options/details, creation, profile editing, batch deletion,
+status, password reset, role allocation and XLSX export. The generated client
+and authenticated integration wrappers are available. The administrator's
+optional department can be cleared; ordinary accounts cannot bypass department
+scope with an absent identifier. Disabled existing associations can be retained
+while new disabled assignments are rejected.
+
+`UserControllerTest` covers 23 targeted cases with production permission filters.
+`verify-users-integration.ps1` verifies actual MySQL associations and cleared
+fields, BCrypt login/reset behavior, disabled-user Redis invalidation, filtered
+XLSX cells, scoped denial and permission revocation. Raw SQL duplicate inserts
+prove all three V007 unique indexes work even without service prechecks; eight
+concurrent API creates yield one creation and seven safe conflicts. Soft-deleted
+names can be reused repeatedly.
+
+Local Maven verification passes 90 tests including all ten data-scope parity
+cases. Frontend lint/typecheck/18 unit tests/build/generated-client check and
+seven fixture/five real-backend existing browser cases pass. These browser cases
+regress login, posts and departments; they do not prove a user page that has not
+yet been implemented. Current implementation CI is pending.
+
+See [the core user security review](security-review-users-v1.md). User page,
+import/template and personal profile/avatar/password-change flows remain pending,
+so neither users nor full frontend parity is marked complete.

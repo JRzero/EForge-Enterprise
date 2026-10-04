@@ -116,6 +116,78 @@ export type PostRequest = {
     sort: number;
     status: string;
 };
+export type DeleteUsersRequest = {
+    ids: string[];
+};
+export type UserResponse = {
+    createdAt?: string;
+    departmentId?: string;
+    departmentName?: string;
+    displayName: string;
+    email?: string;
+    id: string;
+    phone?: string;
+    remark?: string;
+    sex?: string;
+    status: string;
+    username: string;
+};
+export type PageResponseUserResponse = {
+    items: UserResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type UserWriteRequest = {
+    departmentId?: string;
+    displayName: string;
+    email?: string;
+    phone?: string;
+    postIds: string[];
+    remark?: string;
+    roleIds: string[];
+    sex: string;
+    status: string;
+    username: string;
+};
+export type CreateUserRequest = {
+    user: UserWriteRequest;
+};
+export type CreateUserRequestWrite = {
+    password: string;
+    user: UserWriteRequest;
+};
+export type UserOption = {
+    id: string;
+    name: string;
+    status: string;
+};
+export type UserOptionsResponse = {
+    departments: DepartmentResponse[];
+    posts: UserOption[];
+    roles: UserOption[];
+};
+export type UserOptionsResponseRead = {
+    departments: DepartmentResponse[];
+    initialPassword: string;
+    posts: UserOption[];
+    roles: UserOption[];
+};
+export type UserEditorResponse = {
+    postIds: string[];
+    roleIds: string[];
+    user: UserResponse;
+};
+export type ResetUserPasswordRequest = {};
+export type ResetUserPasswordRequestWrite = {
+    password: string;
+};
+export type UserRolesRequest = {
+    roleIds: string[];
+};
+export type UserStatusRequest = {
+    status: string;
+};
 /**
  * Get the current user and authorized application navigation
  */
@@ -276,5 +348,134 @@ export function updatePost(id: string, postRequest: PostRequest, opts?: Oazapfts
         ...opts,
         method: "PUT",
         body: postRequest
+    }));
+}
+export function deleteUsers(deleteUsersRequest: DeleteUsersRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/users", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteUsersRequest
+    }));
+}
+export function listUsers({ page, pageSize, username, phone, status, departmentId, beginDate, endDate }: {
+    page?: number;
+    pageSize?: number;
+    username?: string;
+    phone?: string;
+    status?: string;
+    departmentId?: string;
+    beginDate?: string;
+    endDate?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseUserResponse;
+    }>(`/api/v1/system/users${QS.query(QS.explode({
+        page,
+        pageSize,
+        username,
+        phone,
+        status,
+        departmentId,
+        beginDate,
+        endDate
+    }))}`, {
+        ...opts
+    });
+}
+export function createUser(createUserRequest: CreateUserRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: UserResponse;
+    }>("/api/v1/system/users", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: createUserRequest
+    }));
+}
+export function listUserDepartments(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DepartmentResponse[];
+    }>("/api/v1/system/users/departments", {
+        ...opts
+    });
+}
+export function exportUsers({ username, phone, status, departmentId, beginDate, endDate }: {
+    username?: string;
+    phone?: string;
+    status?: string;
+    departmentId?: string;
+    beginDate?: string;
+    endDate?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/users/export${QS.query(QS.explode({
+        username,
+        phone,
+        status,
+        departmentId,
+        beginDate,
+        endDate
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getUserOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: UserOptionsResponseRead;
+    }>("/api/v1/system/users/options", {
+        ...opts
+    });
+}
+export function getUser(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: UserEditorResponse;
+    }>(`/api/v1/system/users/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateUser(id: string, userWriteRequest: UserWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: UserResponse;
+    }>(`/api/v1/system/users/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: userWriteRequest
+    }));
+}
+export function resetUserPassword(id: string, resetUserPasswordRequest: ResetUserPasswordRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/users/${encodeURIComponent(id)}/password`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: resetUserPasswordRequest
+    }));
+}
+export function getUserRoles(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: UserEditorResponse;
+    }>(`/api/v1/system/users/${encodeURIComponent(id)}/roles`, {
+        ...opts
+    });
+}
+export function setUserRoles(id: string, userRolesRequest: UserRolesRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/users/${encodeURIComponent(id)}/roles`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: userRolesRequest
+    }));
+}
+export function setUserStatus(id: string, userStatusRequest: UserStatusRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/users/${encodeURIComponent(id)}/status`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: userStatusRequest
     }));
 }

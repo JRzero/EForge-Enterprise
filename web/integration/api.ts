@@ -3,6 +3,9 @@ import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePost
   type DepartmentRequest, type DepartmentSortRequest, type PostRequest, type LoginRequestWrite, type UserSummary} from '../generated/api';
 import type {AuthStore} from '@eforge/core';
 import {ApiError, record} from './errors';
+import {listUsers, listUserDepartments, getUserOptions, getUser, createUser, updateUser, deleteUsers,
+  setUserStatus, resetUserPassword, getUserRoles, setUserRoles, exportUsers,
+  type UserWriteRequest, type CreateUserRequestWrite} from '../generated/api';
 import {getCaptcha, revokeSession} from './legacy-auth';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
@@ -24,6 +27,42 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listUsers(query: Parameters<typeof listUsers>[0], signal?: AbortSignal) {
+      return (await listUsers(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async listUserDepartments(signal?: AbortSignal) {
+      return (await listUserDepartments({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getUserOptions(signal?: AbortSignal) {
+      return (await getUserOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getUser(id: string, signal?: AbortSignal) {
+      return (await getUser(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createUser(request: CreateUserRequestWrite) {
+      return (await createUser(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateUser(id: string, request: UserWriteRequest) {
+      return (await updateUser(id, request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async deleteUsers(ids: string[]) {
+      await deleteUsers({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async setUserStatus(id: string, status: string) {
+      await setUserStatus(id, {status}, {baseUrl: '', fetch: transport(true)});
+    },
+    async resetUserPassword(id: string, password: string) {
+      await resetUserPassword(id, {password}, {baseUrl: '', fetch: transport(true)});
+    },
+    async getUserRoles(id: string, signal?: AbortSignal) {
+      return (await getUserRoles(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async setUserRoles(id: string, roleIds: string[]) {
+      await setUserRoles(id, {roleIds}, {baseUrl: '', fetch: transport(true)});
+    },
+    async exportUsers(query: Parameters<typeof exportUsers>[0]) {
+      return (await exportUsers(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async listDepartments(query: Parameters<typeof listDepartments>[0], signal?: AbortSignal) {
       return (await listDepartments(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },
