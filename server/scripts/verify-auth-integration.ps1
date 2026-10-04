@@ -48,7 +48,9 @@ try {
     $createdContainers.Add($redisName)
     $ready = $false
     for ($attempt = 0; $attempt -lt 60; $attempt++) {
-        & docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -e 'SELECT 1' 2>$null | Out-Null
+        # Initialization uses a temporary socket-only server that later exits.
+        # A successful TCP query proves the final server is ready for schema import.
+        & docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --protocol=TCP --host '127.0.0.1' -uroot -e 'SELECT 1' 2>$null | Out-Null
         if ($LASTEXITCODE -eq 0) { $ready = $true; break }
         Start-Sleep -Seconds 2
     }
