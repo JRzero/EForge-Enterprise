@@ -19,3 +19,5 @@ export function useApplicationControls() {
   if (!value) throw new Error('Application controls are unavailable.');
   return value;
 }
+export const NoticeRefreshContext = createContext<() => void>(() => {});
+export function useNoticeRefresh() {return useContext(NoticeRefreshContext);}

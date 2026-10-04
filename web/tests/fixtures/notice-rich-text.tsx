@@ -1,6 +1,7 @@
 import {StrictMode, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {NoticeRichContent, RichTextEditor} from '../../features/notices/RichTextEditor';
+import {RichTextEditor} from '../../features/notices/RichTextEditor';
+import {NoticeRichContent} from '../../features/notices/NoticeRichContent';
 
 function Fixture() {
   const [value, setValue] = useState('<p>初始内容</p>'), [disabled, setDisabled] = useState(false), [mounted, setMounted] = useState(true), [busy, setBusy] = useState(false);

@@ -82,7 +82,7 @@ export function RichTextEditor(props: Props) {
       quill.clipboard.dangerouslyPasteHTML(range.index, sanitizeNoticeHtml(html!), 'user');
     }
     quill.root.addEventListener('paste', paste, true);
-    function change() {const clean = sanitizeNoticeHtml(quill.getSemanticHTML()); emitted.current = clean; latest.current.onChange(clean);}
+    function change() {const clean = quill.getLength() === 1 ? '' : sanitizeNoticeHtml(quill.getSemanticHTML()); emitted.current = clean; latest.current.onChange(clean);}
     quill.on('text-change', change);
     emitted.current = sanitizeNoticeHtml(latest.current.value); quill.clipboard.dangerouslyPasteHTML(emitted.current, 'silent');
     return () => {controller.abort(); latest.current.onBusyChange?.(false); quill.off('text-change', change); quill.root.removeEventListener('paste', paste, true); editor.current = null; host.replaceChildren();};
@@ -94,8 +94,4 @@ export function RichTextEditor(props: Props) {
     if (clean !== emitted.current) {emitted.current = clean; quill.clipboard.dangerouslyPasteHTML(clean, 'silent');}
   }, [props.value, props.disabled]);
   return <div><div ref={container} />{error && <p role="alert">{error}</p>}</div>;
-}
-
-export function NoticeRichContent({html}: {html: string}) {
-  return <div className="ql-editor" dangerouslySetInnerHTML={{__html: sanitizeNoticeHtml(html)}} />;
 }

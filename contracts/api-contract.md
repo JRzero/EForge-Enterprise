@@ -287,3 +287,16 @@ retain upstream validation; rich HTML is preserved as data. Safe editor/renderin
 and complete frontend acceptance remain required, as described in
 `docs/security-review-notices-v1.md`. No AjaxResult/TableDataInfo or database
 mapper maps cross the canonical boundary.
+
+`POST /api/v1/system/notices/images` accepts multipart `file` from notice:add OR
+notice:edit authors, returning typed 201 `{imageUrl}` and Location. Source JPG,
+PNG or SVG must be smaller than 5 MB. Raster contents are decoded with pixel
+bounds and normalized to PNG. SVG is securely parsed and reconstructed as inert
+local geometry/text/gradients/references; scripts, foreign content, animations,
+external resources, stylesheet instructions and DOCTYPE documents are excluded.
+SVG nodes/depth/attributes and expanded local references have explicit resource
+budgets before DOM allocation and storage. Files use UUID names in the existing
+public `/profile/upload/notices/` namespace. Malformed content returns 400
+NOTICE_IMAGE_INVALID; storage failure returns 503 NOTICE_IMAGE_STORAGE_UNAVAILABLE.
+Client cancellation does not imply server-side deletion of a committed upload.
+The API returns no legacy common-upload wrappers or caller-controlled paths.

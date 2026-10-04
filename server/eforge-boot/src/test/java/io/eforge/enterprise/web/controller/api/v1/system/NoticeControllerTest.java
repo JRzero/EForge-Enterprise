@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={NoticeController.class,NoticeService.class,PermissionService.class,ApiExceptionHandler.class,
+@ContextConfiguration(classes={NoticeController.class,NoticeImageController.class,NoticeService.class,PermissionService.class,ApiExceptionHandler.class,
         ApiRoutingExceptionResolver.class,SpringUtils.class,SecurityConfig.class,ApiSecurityProblemHandler.class,
         AuthenticationEntryPointImpl.class,JwtAuthenticationTokenFilter.class,NoticeControllerTest.Configuration.class})
 class NoticeControllerTest
@@ -49,6 +49,7 @@ class NoticeControllerTest
     @MockitoBean PlatformTransactionManager transactions;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
+    @MockitoBean NoticeImageStore images;
     SysNotice row;
     @BeforeEach void prepare()
     {
@@ -141,6 +142,25 @@ class NoticeControllerTest
         for(String invalid:List.of(BODY.replace("公告","<script>x</script>"),BODY.replace("\"2\"","\"3\""),BODY.replace("公告","x".repeat(51)),BODY.replace("\"0\"","null")))
             mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(invalid)).andExpect(status().isBadRequest());
         verifyNoInteractions(writes);
+    }
+    @ParameterizedTest @ValueSource(strings={"system:notice:add","system:notice:edit"})
+    void imageUploadRequiresAnAuthorGrantAndReturnsTypedLocation(String grant) throws Exception
+    {
+        actor(Set.of(grant));
+        when(images.upload(any())).thenReturn(new NoticeImageStore.StoredImage("/profile/upload/notices/test.png"));
+        mvc.perform(multipart(PATH+"/images").file("file",new byte[]{1,2})).andExpect(status().isCreated())
+                .andExpect(header().string("Location","/profile/upload/notices/test.png"))
+                .andExpect(header().string("Cache-Control","no-store"))
+                .andExpect(jsonPath("$.imageUrl").value("/profile/upload/notices/test.png"))
+                .andExpect(jsonPath("$.code").doesNotExist());
+    }
+    @Test void readOnlyAndUnauthenticatedImageUploadsNeverReachStorage() throws Exception
+    {
+        actor(Set.of("system:notice:list"));
+        mvc.perform(multipart(PATH+"/images").file("file",new byte[]{1})).andExpect(status().isForbidden());
+        when(tokens.getLoginUser(any())).thenReturn(null);
+        mvc.perform(multipart(PATH+"/images").file("file",new byte[]{1})).andExpect(status().isUnauthorized());
+        verifyNoInteractions(images);
     }
     @TestConfiguration static class Configuration
     { @Bean PermitAllUrlProperties permitAllUrlProperties(){return new PermitAllUrlProperties();}

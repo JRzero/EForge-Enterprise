@@ -5,6 +5,8 @@ export class ApiError extends Error {
 }
 function messageFor(status: number, code: string): string {
   if (code === 'NOTICE_NOT_FOUND') return '公告已不存在，请刷新后重试。';
+  if (code === 'NOTICE_IMAGE_INVALID') return '请选择小于 5 MB 的有效 JPG、PNG 或静态 SVG 图片。';
+  if (code === 'NOTICE_IMAGE_STORAGE_UNAVAILABLE') return '图片暂时无法保存，请稍后重试。';
   if (code === 'CONFIGURATION_NOT_FOUND') return '参数已不存在，请刷新后重试。';
   if (code === 'CONFIGURATION_KEY_EXISTS') return '参数键名已存在，请使用其他键名。';
   if (code === 'CONFIGURATION_BUILTIN') return '内置参数不能删除，请重新选择。';

@@ -22,7 +22,7 @@ import {listDictionaries, getDictionary, getDictionaryOptions, getDictionaryValu
 import {listConfigurations, getConfiguration, getConfigurationValue, createConfiguration, updateConfiguration,
   deleteConfigurations, refreshConfigurationCache, exportConfigurations, type ConfigurationRequest} from '../generated/api';
 import {listNotices, getNotice, createNotice, updateNotice, deleteNotices, getNoticeFeed,
-  markNoticesRead, listNoticeReaders, type NoticeRequest} from '../generated/api';
+  markNoticesRead, listNoticeReaders, uploadNoticeImage, type NoticeRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -61,8 +61,11 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async getNoticeFeed(signal?: AbortSignal) {
       return (await getNoticeFeed({baseUrl: '', fetch: transport(true), signal})).data;
     },
-    async markNoticesRead(ids: string[]) {
-      await markNoticesRead({ids}, {baseUrl: '', fetch: transport(true)});
+    async markNoticesRead(ids: string[], signal?: AbortSignal) {
+      await markNoticesRead({ids}, {baseUrl: '', fetch: transport(true), signal});
+    },
+    async uploadNoticeImage(file: File, signal?: AbortSignal) {
+      return (await uploadNoticeImage({file}, {baseUrl: '', fetch: transport(true), signal})).data;
     },
     async listNoticeReaders(id: string, query: Parameters<typeof listNoticeReaders>[1], signal?: AbortSignal) {
       return (await listNoticeReaders(id, query, {baseUrl: '', fetch: transport(true), signal})).data;

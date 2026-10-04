@@ -980,6 +980,17 @@
         ],
         "type": "object"
       },
+      "NoticeImageResponse": {
+        "properties": {
+          "imageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "imageUrl"
+        ],
+        "type": "object"
+      },
       "NoticeReader": {
         "properties": {
           "departmentName": {
@@ -3799,6 +3810,44 @@
         },
         "tags": [
           "notice-controller"
+        ]
+      }
+    },
+    "/api/v1/system/notices/images": {
+      "post": {
+        "operationId": "uploadNoticeImage",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeImageResponse"
+                }
+              }
+            },
+            "description": "Image stored"
+          }
+        },
+        "tags": [
+          "notice-image-controller"
         ]
       }
     },

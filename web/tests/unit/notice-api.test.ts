@@ -4,6 +4,18 @@ import {createSessionRuntime} from '../../integration/session';
 const storageKey = 'eforge.enterprise.session.v1';
 const snapshot = {user: {id: '7', username: 'reader', displayName: 'Reader'}, roles: [], permissions: [], navigation: []};
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), {status, headers: {'Content-Type': 'application/json'}});
+it('generated image upload uses multipart, authorization and caller cancellation without expiring the session on validation failure', async () => {
+  const storage = createMemoryStorage({[storageKey]: JSON.stringify({accessToken: 'token'})});
+  const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot)).mockResolvedValueOnce(json({imageUrl: '/profile/upload/notices/file.png'}, 201)).mockResolvedValueOnce(json({code: 'NOTICE_IMAGE_INVALID'}, 400));
+  const runtime = createSessionRuntime(storage, fetcher); await runtime.restore();
+  const controller = new AbortController(), file = new File(['image'], '中文.png', {type: 'image/png'});
+  expect(await runtime.api.uploadNoticeImage(file, controller.signal)).toEqual({imageUrl: '/profile/upload/notices/file.png'});
+  const [, request] = fetcher.mock.calls[1]!;
+  expect(request?.body).toBeInstanceOf(FormData); expect((request?.body as FormData).get('file')).toBe(file);
+  expect(new Headers(request?.headers).get('Content-Type')).toBeNull(); expect(new Headers(request?.headers).get('Authorization')).toBe('Bearer token');
+  controller.abort(); expect(request?.signal?.aborted).toBe(true);
+  await expect(runtime.api.uploadNoticeImage(file)).rejects.toMatchObject({status: 400, code: 'NOTICE_IMAGE_INVALID'}); expect(runtime.getSnapshot().phase).toBe('authenticated');
+});
 it('generated notice transport preserves HTML data, exact IDs, consumer reads and filtered readers', async () => {
   const id = '9007199254740993', request = {title: '公告 & 名称', type: '2', content: '<p><strong>中文</strong></p>', status: '0', remark: ''};
   const row = {id, ...request}, feed = {items: [{id, title: request.title, type: '2', read: false}], unreadCount: 1};

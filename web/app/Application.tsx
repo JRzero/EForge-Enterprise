@@ -1,4 +1,4 @@
-import {Suspense, useMemo, useState, useSyncExternalStore} from 'react';
+import {lazy, Suspense, useCallback, useMemo, useState, useSyncExternalStore} from 'react';
 import {AppShell, PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
 import {matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
@@ -6,10 +6,11 @@ import {LoginPage} from '../features/auth/LoginPage';
 import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
-import {BootstrapContext, ApiContext, ApplicationControlsContext} from './context';
+import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshContext} from './context';
 import {Navigation} from './Navigation';
 import {routes} from './routes';
 import {toEForgePermissions} from '../integration/permissions';
+const HeaderNotices = lazy(() => import('../features/notices/HeaderNotices').then(module => ({default: module.HeaderNotices})));
 
 function StatePage({code, router}: {code: '403' | '404'; router: AppRouterAdapter}) {
   return <section className="state-page"><span className="eyebrow">{code}</span>
@@ -22,6 +23,8 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const href = useSyncExternalStore(router.subscribe, router.getCurrentHref);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState('');
+  const [noticeVersion, setNoticeVersion] = useState(0);
+  const invalidateNotices = useCallback(() => setNoticeVersion(value => value + 1), []);
   const pathname = new URL(href, 'http://eforge.local').pathname;
   const bootstrap = session.phase === 'authenticated' ? session.bootstrap : null;
   const navigation = useMemo(() => bootstrap ? projectNavigation(bootstrap.navigation, routes, bootstrap.permissions) : [], [bootstrap]);
@@ -43,7 +46,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const match = matchAppRoute(routes, pathname === '/' ? '/dashboard' : pathname);
   const allowed = match && canAccessRoute(match.route, permissions);
   const Page = match?.route.component;
-  return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><ApplicationControlsContext.Provider value={{navigate: path => router.navigate(path), refresh: runtime.refresh}}><PermissionProvider permissions={permissions}>
+  return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><ApplicationControlsContext.Provider value={{navigate: path => router.navigate(path), refresh: runtime.refresh}}><NoticeRefreshContext.Provider value={invalidateNotices}><PermissionProvider permissions={permissions}>
     <AppShell brand={<a className="enterprise-brand" href="/dashboard" onClick={event => {
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); router.navigate('/dashboard');
@@ -51,11 +54,12 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
       navigation={<Navigation items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} router={router} />}
       header={<div className="enterprise-header"><span>企业工作空间</span><div><span className="account-name">{snapshot.user.displayName}</span>
+        <Suspense fallback={null}><HeaderNotices version={noticeVersion} /></Suspense>
         <a href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}>个人中心</a>
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
       {logoutError ? <p role="alert">{logoutError}</p> : null}
       {!match ? <StatePage code="404" router={router} /> : !allowed ? <StatePage code="403" router={router} />
         : Page ? <Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params} /></Suspense> : null}
     </AppShell>
-  </PermissionProvider></ApplicationControlsContext.Provider></BootstrapContext.Provider></ApiContext.Provider>;
+  </PermissionProvider></NoticeRefreshContext.Provider></ApplicationControlsContext.Provider></BootstrapContext.Provider></ApiContext.Provider>;
 }

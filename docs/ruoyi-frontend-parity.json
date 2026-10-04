@@ -534,8 +534,34 @@
         "web/features/notices/RichTextEditor.tsx",
         "web/tests/unit/notice-rich-text.test.ts",
         "web/tests/e2e/notice-rich-text.spec.ts",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/NoticeImageController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/NoticeImageStore.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/system/NoticeImageStoreTest.java",
+        "server/scripts/verify-notice-images-integration.ps1",
+        "sql/migrations/V017__notices_route.sql",
+        "web/features/notices/NoticesPage.tsx",
+        "web/features/notices/NoticeDialogs.tsx",
+        "web/features/notices/HeaderNotices.tsx",
+        "web/features/notices/NoticeRichContent.tsx",
+        "web/tests/e2e/notices.spec.ts",
+        "web/tests/live/notices.spec.ts",
         "contracts/openapi/api-v1.json"
-      ]
+      ],
+      "lastVerifiedRichEditor": {
+        "implementationCommit": "b2fb9e633808d206619c77b376b4883300b5069b",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37230909936",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37230909971",
+        "conclusion": "success"
+      },
+      "localNoticePageValidation": {
+        "backend": 248,
+        "webUnit": 54,
+        "fixtureBrowser": 30,
+        "liveBrowser": 27,
+        "conclusion": "local-success",
+        "ci": "pending",
+        "scope": "Canonical JPG/PNG/static-SVG multipart upload and resource/security budgets; management filters/CRUD/clearing/readers; newest-five header and no-role per-user read isolation; paging/batch/last-page behavior, hostile HTML, retry/cancellation/mobile and all prior module regressions. Full capability audit remains pending."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/post.js",

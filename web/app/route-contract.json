@@ -6,5 +6,6 @@
   {"id": "system-roles", "path": "/role", "permission": "system:role:list"},
   {"id": "system-menus", "path": "/menu", "permission": "system:menu:list"},
   {"id": "system-dictionaries", "path": "/dict", "permission": "system:dict:list"},
-  {"id": "system-configurations", "path": "/config", "permission": "system:config:list"}
+  {"id": "system-configurations", "path": "/config", "permission": "system:config:list"},
+  {"id": "system-notices", "path": "/notice", "permission": "system:notice:list"}
 ]

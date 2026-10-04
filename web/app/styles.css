@@ -127,3 +127,21 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .dictionary-tag.tag-warning {background: #fff3da; border-color: #e7ce95; color: #765016;}
 .dictionary-tag.tag-danger {background: #ffeded; border-color: #ecb9b9; color: #8b2e2e;}
 .dictionary-preview-items {max-height: 55vh; overflow: auto; margin: 12px 0;} .dictionary-preview-items > div {display: grid; grid-template-columns: 65px minmax(0,1fr); gap: 8px; padding: 12px; border-bottom: 1px solid #d4e2da;} .dictionary-preview-items dd {margin: 0; overflow-wrap: anywhere;}
+.notices-page .post-dialog, .header-notices .post-dialog {width: min(780px, calc(100vw - 32px));}
+.notices-page fieldset {display: flex; gap: 16px; flex-wrap: wrap;}
+.notices-page fieldset label {display: flex; flex-direction: row; align-items: center; gap: 6px;}
+.notice-content {white-space: normal; overflow-wrap: anywhere; padding: 12px 0;}
+.notice-content img, .notice-content iframe {max-width: 100%;}
+.notice-content iframe {width: 560px; height: 315px;}
+.header-notices {position: relative;}
+.notice-popover {position: absolute; right: 0; top: 100%; z-index: 30; width: min(360px, calc(100vw - 36px)); background: white; border: 1px solid #dfe9e5; border-radius: 10px; box-shadow: 0 12px 32px #102e3520; padding: 12px;}
+.notice-feed-toolbar {display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+.notice-feed-toolbar h2 {font-size: 15px; margin: 0;}
+.notice-popover ul {list-style: none; padding: 0; margin: 8px 0;}
+.notice-popover li > button {display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 4px; text-align: left; border: 0; background: transparent; cursor: pointer; border-bottom: 1px solid #e8eeea;}
+.notice-popover strong {flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px;}
+.notice-popover time {font-size: 11px; white-space: nowrap;}
+.notice-is-read {opacity: .55;}
+.notice-popover [role=alert] {color: #a13f36;}
+.notice-meta {color: #72868b; font-size: 13px;}
+@media (max-width: 760px) {.enterprise-header > div {flex-wrap: wrap; gap: 8px;} .notice-popover {position: fixed; top: 90px; right: 18px;} .notice-content iframe {height: 210px;} .notices-page .post-dialog .ql-toolbar {padding: 8px 4px;}}

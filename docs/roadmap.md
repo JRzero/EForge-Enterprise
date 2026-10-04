@@ -54,7 +54,7 @@
 - [ ] menu/permission management (canonical API/client and React tree/icons/scope/session refresh verified in CI; status/visibility dictionaries verified locally; query/cache shell behavior pending)
 - [ ] dictionary (type/data pages, paging/dates, whole preview, CRUD/bulk/export and shared integration verified locally; remaining field/abort/cache browser acceptance and current CI pending)
 - [ ] configuration (canonical API/client and page passed CI; filters/CRUD/bulk/XLSX/cache, permission/error/mobile and real persistence verified; final acceptance audit pending)
-- [ ] notices (canonical API/client verified locally and in CI at b3f2b00: server 37226906315 and web 37226906322; rich editor/rendering prepared with a notice-local HTML security boundary; administration/top-feed/readers UI, canonical image upload and final browser acceptance pending)
+- [ ] notices (canonical API/client and rich editor/rendering passed CI at b3f2b00 and b2fb9e6; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; final stage validation and full capability audit tracked in the parity inventory)
 - [ ] operation/login logs
 - [ ] online session management
 

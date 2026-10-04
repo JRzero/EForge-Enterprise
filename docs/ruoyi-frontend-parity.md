@@ -37,7 +37,7 @@ It is a work inventory, not executable proof of completion.
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | API/client and React tree page with complete icon picker verified locally and in CI; shared status/visibility dictionaries verified locally; query/cache shell behavior pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | API/client verified in CI; React type/data pages and shared tag component implemented, with local unit/fixture and real CRUD/export acceptance. Paging/dates/bulk/export/whole preview and shared integration verified locally; final field/cache/abort acceptance pending |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | API/client passed CI; React page and seeded route verified locally with real persistence, XLSX/cache, filters/paging/bulk and permission/error/mobile browser acceptance; page CI and final audit pending |
-| Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client verified locally with real read ownership/guards/rollback; CI, rich editor/display, administration/top-feed UI and browser acceptance pending |
+| Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Canonical API/client and rich editor/display passed CI; administration/top-feed/readers UI and canonical JPG/PNG/static-SVG upload implemented; current stage verification below, full acceptance audit pending |
 | Operation logs | filters/date range/pagination, detail request/response/status, selection/delete/clear/export | Missing |
 | Login logs | filters/date range/pagination, failure/success details, unlock locked login account, selection/delete/clear/export | Missing |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Missing |
@@ -631,8 +631,52 @@ trigger fails notice deletion after read-row cleanup; HTTP 500 preserves both
 actual notice and read records. Ordinary users can consume/mark their own notices
 and receive 403 for every management operation and reader lists.
 
-Implementation CI remains pending. No notice React route is bound until the
-page exists. Administration, rich editor formatting/upload/video, safe rich-text
-display, top-feed detail/read/all-read and reader modal/browser acceptance remain
-required. This checkpoint does not establish notice frontend parity. The full
-objective and all remaining modules stay active.
+API implementation b3f2b00 passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37226906315)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37226906322).
+At this historical checkpoint the notice page was not bound. The subsequent
+rich-editor/security implementation b2fb9e6 passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37230909936)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37230909971).
+Neither checkpoint alone establishes notice frontend parity. The full objective
+and all remaining modules stay active.
+
+## Notice page/image/read-state checkpoint (2026-10-05)
+
+V017 binds the lazy `/notice` page to the existing `system-notices` route/menu
+identity. Bootstrap now exposes eight system child routes and the public catalog
+contains nine routes. Legacy pending-menu checks use `monitor-operation-logs`.
+The page covers title/author/type filters, reset/search visibility, server paging,
+column visibility, selection/single edit/bulk deletion, last-page recovery,
+dictionary-driven type/status, required/length validation, drafts on failure,
+clearable rich content/remarks, preview and searchable paginated readers.
+
+The authenticated header independently loads the newest five active notices,
+opens safe details, marks a session-owned item or all five, and displays unread
+state only after server acknowledgment. Ordinary users need no management grants
+to consume notices. Account changes remount the feed; read state survives reload
+and remains isolated per user. Loading/failure/retry, request cancellation,
+keyboard dialogs and mobile bounds are covered by fixture browser cases.
+
+Canonical multipart image upload requires add OR edit permission and returns a
+typed 201/location through the generated client. JPG/PNG are decoded and stored as
+fresh PNG, while SVG keeps static geometry/text/gradients/local references and
+safe simple presentation styles. Scripts/events, external resources and active
+SVG are removed; XML, raster and reference-expansion budgets reject hostile
+inputs. The static policy and lack of image garbage collection are explicit in
+the notice security review. Header previews avoid loading the Quill editor chunk.
+
+Final local validation passed 248 backend tests, including 16 image-store cases,
+23 notice controller/permission cases and all ten unchanged data-scope cases.
+All 54 web unit, 30 fixture browser and 27 real browser tests passed, together
+with lint/typecheck/build and generated-client reproducibility. Actual browser
+checks prove JPG/PNG/static-SVG uploads, served image dimensions and gradient
+pixels, rich formatting/clearing, newest-five behavior, per-account persistent
+read state using an owned account with no roles, authorized reader search,
+paging/columns/last-page recovery and batch deletion. The final runtime verifies
+all prior modules, real MySQL rollback/cache fault behavior, Redis sessions and
+captcha replay. Production defaults and exact live OpenAPI equality passed.
+Exact-commit CI remains pending until this stage is pushed.
+The final capability audit stays pending; operation/login logs are next, followed
+by online sessions, monitoring/jobs, generator/form builder and complete shell
+and shared capabilities. The full parity objective remains active.

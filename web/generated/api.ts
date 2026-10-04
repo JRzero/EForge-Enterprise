@@ -302,6 +302,9 @@ export type NoticeFeed = {
     items: NoticeSummary[];
     unreadCount: number;
 };
+export type NoticeImageResponse = {
+    imageUrl: string;
+};
 export type NoticeReader = {
     departmentName?: string;
     displayName?: string;
@@ -990,6 +993,18 @@ export function getNoticeFeed(opts?: Oazapfts.RequestOpts) {
     }>("/api/v1/system/notices/feed", {
         ...opts
     });
+}
+export function uploadNoticeImage(body?: {
+    file: Blob;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: NoticeImageResponse;
+    }>("/api/v1/system/notices/images", oazapfts.multipart({
+        ...opts,
+        method: "POST",
+        body
+    }));
 }
 export function markNoticesRead(noticeIdsRequest: NoticeIdsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/system/notices/read", oazapfts.json({

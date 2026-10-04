@@ -1,9 +1,16 @@
 # Notice API security and compatibility review
 
-Eight canonical operations cover typed notice paging/detail, 201 creation,
+Nine canonical operations cover typed notice paging/detail, 201 creation,
 204 update/atomic batch deletion, the newest-five feed, per-user read marking
 and paginated reader lists. RuoYi persistence remains behind the facade; exact
 string IDs and concrete response records are generated into the web client.
+
+The ninth operation is notice-local `POST /api/v1/system/notices/images`:
+multipart field `file`, typed 201 `imageUrl` and Location, Cache-Control no-store.
+It requires notice:add OR notice:edit on the server; ordinary consumers and
+list-only readers cannot write files. This deliberately replaces the broadly
+authenticated legacy common upload for this authoring surface, without changing
+that compatibility endpoint or creating a new file-management framework.
 
 ## Original permission and visibility boundaries
 
@@ -48,9 +55,9 @@ and layout/URL-bearing CSS. Inline SVG and SVG data URLs are forbidden; image
 URLs may still reference server-normalized SVG uploads. Video frames have a fixed
 sandbox without allow-same-origin, no srcdoc and no-referrer. SAFE_FOR_XML stays
 enabled for raw-text/mutation-XSS defenses. Every editor import/paste/export and
-consumer render must use this boundary. The editor and renderer are prepared
-components, not yet bound to the notice management/top-feed routes; that work
-and canonical image upload remain outstanding. Upstream
+consumer render must use this boundary. The editor and renderer now bind to
+the notice management/top-feed surfaces; the page/image/read-state stage passes
+local real-environment validation below. Upstream
 MIT attribution, architectural baselines and all ten data-scope cases remain.
 
 ## Verification scope
@@ -94,5 +101,57 @@ navigation contracts, exact live OpenAPI and reproducible generated client.
 The complete owned MySQL/Redis script also passed notice transactional deletion
 rollback, per-user reads, permissions, login/getInfo and Redis sessions, and all
 previous module regressions. Logs: `rich-text-backend.log` and
-`rich-text-runtime.log` under the ignored boot target directory. No notice page
-or top feed is wired yet, so notice parity remains partial.
+`rich-text-runtime.log` under the ignored boot target directory. At that historical
+rich-editor checkpoint the notice page/top feed were not wired yet.
+
+## Canonical image boundary
+
+The upload path accepts actual decoded JPG/PNG and securely parsed SVG below
+the original strict 5 MB threshold. Rasters have a 4096-pixel per-side and
+16-million-pixel total decode bound, then become fresh PNG files without original
+metadata or trailing content. Original filenames never determine storage paths.
+SVG parsing explicitly disables DOCTYPE, entities, XInclude and external DTD/
+schema/stylesheet access. A SAX pass bounds 64 levels, 10,000 elements and 64
+attributes per element before a DOM can be allocated. A fresh SVG namespace
+document contains only allowed inert geometry, text, gradients, clipping/masks,
+patterns and local references. Inline presentation styles and simple tag/class/id
+stylesheet rules are compiled to validated presentation attributes; raw CSS and
+class attributes are removed. Class/inline style values and each rule body are
+bounded to 4096 characters, with at most 256 rules and 64 declarations per body.
+Each style element is limited to 1 MiB; comment/block scanning advances linearly,
+including malformed or unterminated text. Rule declarations and element classes
+are parsed once. Advanced CSS selectors
+and exact `!important` cascade semantics are outside this static-image policy.
+Scripts/events, foreign namespaces, animation, stylesheet
+instructions and external/file/data references are not copied. Internal cycles,
+duplicate IDs and an expanded-reference budget above 10,000 are rejected.
+These policies apply even when the public SVG URL is opened as a document.
+They follow the explicit external-access controls in the
+[JAXP security guide](https://docs.oracle.com/en/java/javase/13/security/java-api-xml-processing-jaxp-security-guide.html)
+and SVG's separation of active document and secure image processing in the
+[W3C processing model](https://www.w3.org/TR/SVG/conform.html).
+
+UUID output files stay under the configured upload/notices namespace. Invalid
+content produces a generic 400, storage errors a generic 503; no parser messages,
+paths or file bytes appear in API problems or audit payloads. Successful images
+remain publicly readable, matching the original common-upload image contract.
+Cancellation or notice deletion does not garbage-collect committed images; the
+original editor also leaves uploaded images, and a file lifecycle framework has
+not been introduced. No MySQL schema, data scope or Redis authorization semantics
+change for uploads. Image form permissions are UX; server author grants remain
+authoritative.
+
+## Page/image/read-state validation (2026-10-05)
+
+The final stage passes 248 backend cases (16 image security/resource cases,
+23 notice controller/authorization cases and all ten data-scope cases), 54 web
+unit cases, 30 fixture browser cases and 27 live browser cases. Real uploads
+cover PNG/JPG decoding and served static SVG gradients, including rendered pixel
+assertions. An owned account with no roles proves management denial and isolated,
+persistent per-user reads; authorized reader lists expose both account records.
+The full disposable MySQL/Redis scripts reprove transaction rollback, prior module
+behavior, session/captcha security and exact OpenAPI equality. Production defaults
+and generated-client reproducibility pass. Logs are under the ignored boot target
+as `notice-final-backend.log`, `notice-final-runtime.log` and
+`notice-final-fixtures.log`. Final parity auditing remains separate; unrestricted
+active SVG and arbitrary CSS are not claimed by the static-image security policy.

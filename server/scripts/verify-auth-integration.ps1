@@ -145,7 +145,7 @@ try {
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'
-    Assert-Check ($bootstrap.navigation.Count -eq 3 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children.Count -eq 7 -and $bootstrap.navigation[1].children[0].routeId -eq 'system-users' -and $bootstrap.navigation[1].children[1].routeId -eq 'system-roles' -and $bootstrap.navigation[1].children[2].routeId -eq 'system-menus' -and $bootstrap.navigation[1].children[3].routeId -eq 'system-departments' -and $bootstrap.navigation[1].children[4].routeId -eq 'system-posts' -and $bootstrap.navigation[1].children[5].routeId -eq 'system-dictionaries' -and $bootstrap.navigation[1].children[6].routeId -eq 'system-configurations' -and $bootstrap.navigation[2].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
+    Assert-Check ($bootstrap.navigation.Count -eq 3 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children.Count -eq 8 -and $bootstrap.navigation[1].children[0].routeId -eq 'system-users' -and $bootstrap.navigation[1].children[1].routeId -eq 'system-roles' -and $bootstrap.navigation[1].children[2].routeId -eq 'system-menus' -and $bootstrap.navigation[1].children[3].routeId -eq 'system-departments' -and $bootstrap.navigation[1].children[4].routeId -eq 'system-posts' -and $bootstrap.navigation[1].children[5].routeId -eq 'system-dictionaries' -and $bootstrap.navigation[1].children[6].routeId -eq 'system-configurations' -and $bootstrap.navigation[1].children[7].routeId -eq 'system-notices' -and $bootstrap.navigation[2].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
     Assert-Problem (Request '/api/v1/auth/login' 'GET' '' $authorized) 405 'HTTP_405'
     $openapi = (Request '/v3/api-docs/api-v1' 'GET' '' $authorized).Content | ConvertFrom-Json -AsHashtable
     $operation = $openapi.paths['/api/v1/auth/login'].post
@@ -180,6 +180,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notices-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-notice-images-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 
@@ -197,6 +198,7 @@ try {
     Assert-Problem (Request '/api/v1/system/notices' 'POST' $deniedNotice $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/system/notices/1' 'PUT' $deniedNotice $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/system/notices' 'DELETE' '{"ids":["1"]}' $commonHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Upload-NoticeImage (Join-Path $repoRoot 'web/tests/fixtures/avatar.png') $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Check (((Request '/api/v1/system/configurations/lookup?key=sys.account.captchaEnabled' 'GET' '' $commonHeaders).Content | ConvertFrom-Json).value -eq 'false') 'Authenticated configuration consumers must not require management grants.'
     foreach ($path in @('/api/v1/system/configurations','/api/v1/system/configurations/1')) { Assert-Problem (Request $path 'GET' '' $commonHeaders) 403 'ACCESS_DENIED' }
     foreach ($path in @('/api/v1/system/configurations/export','/api/v1/system/configurations/cache/refresh')) { Assert-Problem (Request $path 'POST' '' $commonHeaders) 403 'ACCESS_DENIED' }

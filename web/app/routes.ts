@@ -12,6 +12,7 @@ const RoleUsersPage = lazy(() => import('../features/roles/RoleUsersPage').then(
 const MenusPage = lazy(() => import('../features/menus/MenusPage').then(module => ({default: module.MenusPage})));
 const DictionariesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionariesPage})));
 const ConfigurationsPage = lazy(() => import('../features/configurations/ConfigurationsPage').then(module => ({default: module.ConfigurationsPage})));
+const NoticesPage = lazy(() => import('../features/notices/NoticesPage').then(module => ({default: module.NoticesPage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
@@ -34,6 +35,8 @@ if (!dictionaries) throw new Error('Missing dictionary route contract.');
 const dictionaryData = internalContracts.find(route => route.id === 'dictionary-data');
 const configurations = contracts.find(route => route.id === 'system-configurations');
 if (!configurations) throw new Error('Missing configuration route contract.');
+const notices = contracts.find(route => route.id === 'system-notices');
+if (!notices) throw new Error('Missing notices route contract.');
 if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
 export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
@@ -59,6 +62,9 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: configurations.id, path: configurations.path, title: '参数配置',
   access: {permission: configurations.permission}, component: ConfigurationsPage
+}, {
+  id: notices.id, path: notices.path, title: '通知公告',
+  access: {permission: notices.permission}, component: NoticesPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {
