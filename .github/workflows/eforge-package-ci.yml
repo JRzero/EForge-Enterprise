@@ -1,0 +1,34 @@
+name: EForge package verification
+
+on:
+  push:
+    branches: [main, 'codex/**']
+    paths:
+      - 'dependencies/eforge/**'
+      - 'verification/eforge-consumer/**'
+      - 'scripts/*eforge-packages.ps1'
+      - 'scripts/normalize-package-artifact.py'
+      - '.github/workflows/eforge-package-ci.yml'
+  pull_request:
+    paths:
+      - 'dependencies/eforge/**'
+      - 'verification/eforge-consumer/**'
+      - 'scripts/*eforge-packages.ps1'
+      - 'scripts/normalize-package-artifact.py'
+      - '.github/workflows/eforge-package-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Verify versioned EForge artifacts in a clean consumer
+        shell: pwsh
+        run: ./scripts/verify-eforge-packages.ps1

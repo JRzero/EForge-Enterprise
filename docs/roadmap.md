@@ -33,7 +33,7 @@
 
 ## Phase 2 — Typed API and EForge web shell
 
-- [ ] establish reproducible EForge package consumption
+- [x] establish reproducible EForge package consumption
 - [ ] initialize React application
 - [ ] consume pinned/versioned EForge packages
 - [x] add `/api/v1/auth/login`

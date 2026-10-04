@@ -1,0 +1,58 @@
+{
+  "repository": "https://github.com/JRzero/EForge",
+  "commit": "a7b644b724f4264c1ca015ce4c686ca94476d62f",
+  "packageManager": "pnpm@10.0.0",
+  "node": "v24.18.0",
+  "archiveFormat": "sorted-ustar-gzip9-mtime0-v1",
+  "upstreamLockSha256": "a7922e557f6c67348c38c0df7b5acf2018b5086ab172196f98b58311a43468c5",
+  "artifacts": [
+    {
+      "name": "@eforge/app",
+      "version": "0.1.0",
+      "file": "eforge-app-0.1.0.tgz",
+      "sha256": "db73513cd56d4acaf06a04e7d35378af54f8f92c92646330357546d415c579ed"
+    },
+    {
+      "name": "@eforge/core",
+      "version": "0.1.0",
+      "file": "eforge-core-0.1.0.tgz",
+      "sha256": "28c07ba539ec2a99dc4c368c162b9be58a4eb0c1129c8dcc7df9d5fe26289f44"
+    },
+    {
+      "name": "@eforge/data",
+      "version": "0.1.0",
+      "file": "eforge-data-0.1.0.tgz",
+      "sha256": "23956f3647bb5ec870d5ca45210d8f56eb96bf9455cb5b2770f550078badbe97"
+    },
+    {
+      "name": "@eforge/forms",
+      "version": "0.1.0",
+      "file": "eforge-forms-0.1.0.tgz",
+      "sha256": "575eea3bb17312e71755f66df160fefd511040af35c029f13c5d65a625ad4f14"
+    },
+    {
+      "name": "@eforge/patterns",
+      "version": "0.1.0",
+      "file": "eforge-patterns-0.1.0.tgz",
+      "sha256": "2b1d4f2129aa73b13e905e0d3e69f3af02e2f147fa656977505695f13b948d0c"
+    },
+    {
+      "name": "@eforge/schema-contract",
+      "version": "0.1.0",
+      "file": "eforge-schema-contract-0.1.0.tgz",
+      "sha256": "aa88f987b791dfa77a94be66cef43ce790cc7ec7b940d1334abeaed69a858f0f"
+    },
+    {
+      "name": "@eforge/tokens",
+      "version": "0.1.0",
+      "file": "eforge-tokens-0.1.0.tgz",
+      "sha256": "927ed696e8c48d688ff4c039660954bed0e267d898c7ca5fa4994d0e2d8d9544"
+    },
+    {
+      "name": "@eforge/ui",
+      "version": "0.1.0",
+      "file": "eforge-ui-0.1.0.tgz",
+      "sha256": "8507e16c9d126c50e825436f4905d5f27c0c842b1574ece24a125db4e8968bc3"
+    }
+  ]
+}

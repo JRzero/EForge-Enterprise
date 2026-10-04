@@ -1,0 +1,29 @@
+{
+  "name": "eforge-enterprise-package-verification",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "vite build",
+    "test": "node --test runtime.test.mjs"
+  },
+  "dependencies": {
+    "@eforge/app": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-app-0.1.0.tgz",
+    "@eforge/core": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-core-0.1.0.tgz",
+    "@eforge/data": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-data-0.1.0.tgz",
+    "@eforge/forms": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-forms-0.1.0.tgz",
+    "@eforge/patterns": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-patterns-0.1.0.tgz",
+    "@eforge/schema-contract": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-schema-contract-0.1.0.tgz",
+    "@eforge/tokens": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-tokens-0.1.0.tgz",
+    "@eforge/ui": "file:../../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-ui-0.1.0.tgz",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6"
+  }
+}
