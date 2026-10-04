@@ -4,6 +4,12 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'DICTIONARY_NOT_FOUND') return '字典类型已不存在，请刷新后重试。';
+  if (code === 'DICTIONARY_ENTRY_NOT_FOUND') return '字典数据已不存在，请刷新后重试。';
+  if (code === 'DICTIONARY_CODE_EXISTS') return '字典类型标识已存在，请使用其他标识。';
+  if (code === 'DICTIONARY_HAS_ENTRIES') return '该字典包含数据，请先删除数据再删除类型。';
+  if (code === 'DICTIONARY_ORPHAN_ENTRY') return '该数据的字典类型已不存在，请刷新后重试。';
+  if (code === 'DICTIONARY_CACHE_UNAVAILABLE') return '字典缓存暂时不可用，请稍后重试。';
   if (code === 'MENU_NOT_FOUND') return '菜单已不存在，请刷新后重试。';
   if (code === 'MENU_KEY_IMMUTABLE') return '已有菜单的稳定标识不能修改。';
   if (code === 'MENU_KEY_EXISTS') return '菜单标识已存在，请使用其他标识。';

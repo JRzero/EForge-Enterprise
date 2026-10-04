@@ -118,6 +118,76 @@ export type Item = {
 export type DepartmentSortRequest = {
     items: Item[];
 };
+export type DeleteDictionariesRequest = {
+    ids: string[];
+};
+export type DictionaryResponse = {
+    code: string;
+    createdAt?: string;
+    id: string;
+    name: string;
+    remark?: string;
+    status: string;
+};
+export type PageResponseDictionaryResponse = {
+    items: DictionaryResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type DictionaryRequest = {
+    code: string;
+    name: string;
+    remark?: string;
+    status: string;
+};
+export type DictionaryValueOption = {
+    cssClass?: string;
+    defaultEntry: boolean;
+    label: string;
+    style: "DEFAULT" | "PRIMARY" | "SUCCESS" | "INFO" | "WARNING" | "DANGER";
+    value: string;
+};
+export type DictionaryTypeOption = {
+    code: string;
+    id: string;
+    name: string;
+    status: string;
+};
+export type DeleteDictionaryEntriesRequest = {
+    ids: string[];
+};
+export type DictionaryEntryResponse = {
+    createdAt?: string;
+    cssClass?: string;
+    defaultEntry: boolean;
+    dictionaryCode: string;
+    dictionaryId: string;
+    id: string;
+    label: string;
+    remark?: string;
+    sort: number;
+    status: string;
+    style: "DEFAULT" | "PRIMARY" | "SUCCESS" | "INFO" | "WARNING" | "DANGER";
+    value: string;
+};
+export type PageResponseDictionaryEntryResponse = {
+    items: DictionaryEntryResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type EntryRequest = {
+    cssClass?: string;
+    defaultEntry: boolean;
+    dictionaryId: string;
+    label: string;
+    remark?: string;
+    sort: number;
+    status: string;
+    style: "DEFAULT" | "PRIMARY" | "SUCCESS" | "INFO" | "WARNING" | "DANGER";
+    value: string;
+};
 export type MenuResponse = {
     cached: boolean;
     createdAt?: string;
@@ -461,6 +531,172 @@ export function updateDepartment(id: string, departmentRequest: DepartmentReques
         ...opts,
         method: "PUT",
         body: departmentRequest
+    }));
+}
+export function deleteDictionaries(deleteDictionariesRequest: DeleteDictionariesRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/dictionaries", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteDictionariesRequest
+    }));
+}
+export function listDictionaries({ page, pageSize, name, code, status, $from, to }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    code?: string;
+    status?: string;
+    $from?: string;
+    to?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseDictionaryResponse;
+    }>(`/api/v1/system/dictionaries${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        code,
+        status,
+        "from": $from,
+        to
+    }))}`, {
+        ...opts
+    });
+}
+export function createDictionary(dictionaryRequest: DictionaryRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: DictionaryResponse;
+    }>("/api/v1/system/dictionaries", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: dictionaryRequest
+    }));
+}
+export function refreshDictionaryCache(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/dictionaries/cache/refresh", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function exportDictionaries({ name, code, status, $from, to }: {
+    name?: string;
+    code?: string;
+    status?: string;
+    $from?: string;
+    to?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/dictionaries/export${QS.query(QS.explode({
+        name,
+        code,
+        status,
+        "from": $from,
+        to
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getDictionaryValues(code: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DictionaryValueOption[];
+    }>(`/api/v1/system/dictionaries/lookup/${encodeURIComponent(code)}`, {
+        ...opts
+    });
+}
+export function getDictionaryOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DictionaryTypeOption[];
+    }>("/api/v1/system/dictionaries/options", {
+        ...opts
+    });
+}
+export function getDictionary(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DictionaryResponse;
+    }>(`/api/v1/system/dictionaries/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateDictionary(id: string, dictionaryRequest: DictionaryRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/dictionaries/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: dictionaryRequest
+    }));
+}
+export function deleteDictionaryEntries(deleteDictionaryEntriesRequest: DeleteDictionaryEntriesRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/dictionary-entries", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteDictionaryEntriesRequest
+    }));
+}
+export function listDictionaryEntries(dictionaryId: string, { page, pageSize, label, status }: {
+    page?: number;
+    pageSize?: number;
+    label?: string;
+    status?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseDictionaryEntryResponse;
+    }>(`/api/v1/system/dictionary-entries${QS.query(QS.explode({
+        page,
+        pageSize,
+        dictionaryId,
+        label,
+        status
+    }))}`, {
+        ...opts
+    });
+}
+export function createDictionaryEntry(entryRequest: EntryRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: DictionaryEntryResponse;
+    }>("/api/v1/system/dictionary-entries", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: entryRequest
+    }));
+}
+export function exportDictionaryEntries(dictionaryId: string, { label, status }: {
+    label?: string;
+    status?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/dictionary-entries/export${QS.query(QS.explode({
+        dictionaryId,
+        label,
+        status
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getDictionaryEntry(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DictionaryEntryResponse;
+    }>(`/api/v1/system/dictionary-entries/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateDictionaryEntry(id: string, entryRequest: EntryRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/dictionary-entries/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: entryRequest
     }));
 }
 export function listMenus({ name, status, visible }: {

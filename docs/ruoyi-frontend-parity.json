@@ -330,8 +330,10 @@
         "updateData",
         "delData"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial-api-client",
+      "evidence": ["DictionaryControllerTest", "server/scripts/verify-dictionaries-integration.ps1", "docs/security-review-dictionaries-v1.md", "web/generated/api.ts", "web/integration/api.ts", "web/tests/unit/dictionary-api.test.ts"],
+      "remaining": ["React data page, filtering/paging/selection/CRUD/batch deletion/export and keyboard/mobile acceptance", "Dictionary preview and shared tag/default controls"],
+      "localValidation": {"backend": 188, "webUnit": 37, "fixtureBrowser": 15, "liveBrowser": 18, "conclusion": "success", "apiCi": "pending"}
     },
     {
       "source": "ruoyi-ui/src/api/system/dict/type.js",
@@ -344,8 +346,10 @@
         "refreshCache",
         "optionselect"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial-api-client",
+      "evidence": ["DictionaryControllerTest", "server/scripts/verify-dictionaries-integration.ps1", "sql/migrations/V013__dictionary_type_uniqueness.sql", "docs/security-review-dictionaries-v1.md", "web/generated/api.ts", "web/integration/api.ts", "web/tests/unit/dictionary-api.test.ts"],
+      "remaining": ["React type page, filtering/dates/paging/selection/CRUD/batch deletion/export/cache refresh", "Preview/detail navigation, shared dictionary labels and keyboard/mobile browser acceptance"],
+      "localValidation": {"backend": 188, "webUnit": 37, "fixtureBrowser": 15, "liveBrowser": 18, "conclusion": "success", "apiCi": "pending"}
     },
     {
       "source": "ruoyi-ui/src/api/system/menu.js",

@@ -232,3 +232,21 @@ protection. Menu permission/status changes refresh affected existing sessions
 after commit with preserved TTL. See ADR-0013 and the explicit menu security
 review for privilege boundaries and the separate Redis consistency limitation.
 This API checkpoint does not establish React menu page or full shell parity.
+
+## Dictionaries
+
+`/api/v1/system/dictionaries` provides typed filtered paging, detail, create/update,
+atomic batch deletion, authenticated type options/consumer lookup, XLSX export
+and cache refresh. `/api/v1/system/dictionary-entries` provides typed paging for
+a concrete dictionary ID, detail, create/update, atomic batch deletion and XLSX.
+Management permissions match upstream; consumer option/value reads require a
+session without dictionary-management grants. Lookup exposes only presentation
+data, never management audit metadata. Values/default flags may repeat as upstream
+allows; active entries remain visible even for a disabled type.
+
+Type rename cascades data references and invalidates old/new Redis keys. Redis
+invalidation failure rolls back canonical database mutations. Canonical consumer
+reads use current DB rows rather than trusting a potentially stale legacy cache;
+compatibility concurrency and partial cache-refresh limits are documented in
+`docs/security-review-dictionaries-v1.md`. V013 enforces type-code uniqueness.
+The API/client checkpoint does not establish dictionary React/shared-control parity.

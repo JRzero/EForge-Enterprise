@@ -177,6 +177,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-profile-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-roles-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-menus-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 
@@ -186,6 +187,11 @@ try {
     $commonLogin = (Request '/api/v1/auth/login' 'POST' '{"username":"ry","password":"admin123"}').Content | ConvertFrom-Json
     Assert-Check ([bool]$commonLogin.accessToken) 'Ordinary user login failed.'
     $commonHeaders = @{ Authorization = "Bearer $($commonLogin.accessToken)" }
+    Assert-Check ((Request '/api/v1/system/dictionaries/options' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Authenticated dictionary options must not require management grants.'
+    $commonDictionaryValues=@((Request '/api/v1/system/dictionaries/lookup/sys_normal_disable' 'GET' '' $commonHeaders).Content | ConvertFrom-Json)
+    Assert-Check ($commonDictionaryValues.Count -eq 2) 'Ordinary users must retain original dictionary consumer reads.'
+    foreach ($path in @('/api/v1/system/dictionaries','/api/v1/system/dictionaries/1','/api/v1/system/dictionary-entries?dictionaryId=1','/api/v1/system/dictionary-entries/1')) { Assert-Problem (Request $path 'GET' '' $commonHeaders) 403 'ACCESS_DENIED' }
+    foreach ($path in @('/api/v1/system/dictionaries/export','/api/v1/system/dictionary-entries/export?dictionaryId=1','/api/v1/system/dictionaries/cache/refresh')) { Assert-Problem (Request $path 'POST' '' $commonHeaders) 403 'ACCESS_DENIED' }
     Assert-Problem (Request '/api/v1/system/posts' 'GET' '' $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/system/posts/export' 'POST' '' $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/system/posts/1' 'GET' '' $commonHeaders) 403 'ACCESS_DENIED'

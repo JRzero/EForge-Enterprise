@@ -15,6 +15,10 @@ import {listRoles, getRole, getRoleOptions, getRoleMenuOptions, getRoleDepartmen
   type RoleWriteRequest, type RoleScopeRequest} from '../generated/api';
 import {listMenus, getMenu, getMenuOptions, getMenuRouteOptions, createMenu, updateMenu, deleteMenu, sortMenus,
   type MenuWriteRequest, type MenuSortRequest} from '../generated/api';
+import {listDictionaries, getDictionary, getDictionaryOptions, getDictionaryValues, createDictionary,
+  updateDictionary, deleteDictionaries, refreshDictionaryCache, exportDictionaries,
+  listDictionaryEntries, getDictionaryEntry, createDictionaryEntry, updateDictionaryEntry,
+  deleteDictionaryEntries, exportDictionaryEntries, type DictionaryRequest, type EntryRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -35,6 +39,51 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listDictionaries(query: Parameters<typeof listDictionaries>[0], signal?: AbortSignal) {
+      return (await listDictionaries(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getDictionary(id: string, signal?: AbortSignal) {
+      return (await getDictionary(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getDictionaryOptions(signal?: AbortSignal) {
+      return (await getDictionaryOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getDictionaryValues(code: string, signal?: AbortSignal) {
+      return (await getDictionaryValues(code, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createDictionary(request: DictionaryRequest) {
+      return (await createDictionary(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateDictionary(id: string, request: DictionaryRequest) {
+      await updateDictionary(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteDictionaries(ids: string[]) {
+      await deleteDictionaries({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async refreshDictionaryCache() {
+      await refreshDictionaryCache({baseUrl: '', fetch: transport(true)});
+    },
+    async exportDictionaries(query: Parameters<typeof exportDictionaries>[0]) {
+      return (await exportDictionaries(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async listDictionaryEntries(id: string, query: Parameters<typeof listDictionaryEntries>[1], signal?: AbortSignal) {
+      return (await listDictionaryEntries(id, query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getDictionaryEntry(id: string, signal?: AbortSignal) {
+      return (await getDictionaryEntry(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createDictionaryEntry(request: EntryRequest) {
+      return (await createDictionaryEntry(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateDictionaryEntry(id: string, request: EntryRequest) {
+      await updateDictionaryEntry(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteDictionaryEntries(ids: string[]) {
+      await deleteDictionaryEntries({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async exportDictionaryEntries(id: string, query: Parameters<typeof exportDictionaryEntries>[1]) {
+      return (await exportDictionaryEntries(id, query, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async listMenus(query: Parameters<typeof listMenus>[0], signal?: AbortSignal) {
       return (await listMenus(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },
