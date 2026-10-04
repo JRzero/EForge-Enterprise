@@ -59,3 +59,12 @@ hierarchy/deletion guards, clearing fields, atomic sort and post-commit refresh.
 filters/sort/clearing, object scope, route constraints, live session revoke/grant,
 independent child permission semantics, real indexes and concurrent duplicates.
 Final validation and CI evidence are recorded in the parity inventory.
+
+Implementation `1cc8a539aa139e3f21bfa331f45ceadc1585d31f` passed all three
+[server CI jobs](https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983366)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983373).
+The final Linux runtime includes real menu verification, all fifteen existing
+live browser regressions and exact exported OpenAPI equality. Local Maven
+verification passed 168 tests; web validation passed lint/typecheck, thirty unit
+tests, build and twelve fixture cases. Menu React page, icon controls and its
+own live browser acceptance remain pending.

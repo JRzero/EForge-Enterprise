@@ -51,7 +51,7 @@
 - [ ] role management (canonical API/client, React administration/allocation pages and interactive menu/department trees verified locally and in CI; shared dictionary integration pending; verification evidence in the parity inventory)
 - [x] department management (canonical hierarchy API, EForge page, live CRUD/sort/data-scope verification)
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
-- [ ] menu/permission management (canonical API/client, hierarchy/object/route guards and existing-session refresh implemented; React tree page and icon/browser acceptance pending)
+- [ ] menu/permission management (canonical API/client, hierarchy/object/route guards and existing-session refresh verified locally and in CI; React tree page and icon/browser acceptance pending)
 - [ ] dictionary
 - [ ] configuration
 - [ ] notices

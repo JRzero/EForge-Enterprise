@@ -351,7 +351,11 @@ browser cases. Fifteen live browser cases and every prior module integration
 script passed; final filter changes additionally passed the complete API/runtime
 suite. Generated clients reproduce and the live OpenAPI equals the snapshot.
 See ADR-0013 and the menu security review for the canonical/legacy and
-MySQL/Redis boundaries. Implementation CI evidence follows the pushed revision.
+MySQL/Redis boundaries. Implementation `1cc8a539aa139e3f21bfa331f45ceadc1585d31f`
+passed [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983366)
+and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983373).
+All three server jobs passed, including Linux menu/API and live browser
+integration and exact live OpenAPI equality on the final implementation.
 
 The React menu tree page, parent/icon controls, actual menu-page browser
 acceptance, query/cache shell behavior and other missing groups remain required.

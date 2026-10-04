@@ -378,7 +378,15 @@
         "Icon selection and shared dictionary-driven tags",
         "Actual menu-page live browser, permission, failure/retry, keyboard and mobile validation",
         "Shell behavior for query/cache metadata and remaining embedded-route capabilities"
-      ]
+      ],
+      "lastVerifiedCoreApi": {
+        "implementationCommit": "1cc8a539aa139e3f21bfa331f45ceadc1585d31f",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983366",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37202983373",
+        "conclusion": "success",
+        "scope": "Canonical menu API/generated client, actual packaged navigation catalog, hierarchy/object/permission guards, atomic sorting, database uniqueness, immediate session refresh and all existing page regressions; React menu page remains pending.",
+        "localTests": {"backend": 168, "webUnit": 30, "fixtureBrowser": 12, "liveBrowser": 15}
+      }
     },
     {
       "source": "ruoyi-ui/src/api/system/notice.js",
