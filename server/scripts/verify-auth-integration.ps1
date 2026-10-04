@@ -144,7 +144,7 @@ try {
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'
-    Assert-Check ($bootstrap.navigation.Count -eq 3 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children[0].routeId -eq 'system-posts' -and $bootstrap.navigation[2].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
+    Assert-Check ($bootstrap.navigation.Count -eq 3 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children.Count -eq 2 -and $bootstrap.navigation[1].children[0].routeId -eq 'system-departments' -and $bootstrap.navigation[1].children[1].routeId -eq 'system-posts' -and $bootstrap.navigation[2].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
     Assert-Problem (Request '/api/v1/auth/login' 'GET' '' $authorized) 405 'HTTP_405'
     $openapi = (Request '/v3/api-docs/api-v1' 'GET' '' $authorized).Content | ConvertFrom-Json -AsHashtable
     $operation = $openapi.paths['/api/v1/auth/login'].post
@@ -171,6 +171,7 @@ try {
         }
     }
     . (Join-Path $PSScriptRoot 'verify-posts-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-departments-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'
 

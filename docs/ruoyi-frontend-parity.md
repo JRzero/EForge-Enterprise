@@ -31,7 +31,7 @@ It is a work inventory, not executable proof of completion.
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Missing |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
-| Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Missing |
+| Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Implemented; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; current-commit CI pending |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Missing |
@@ -99,3 +99,32 @@ Posts now use only generated canonical API functions; legacy service entities an
 Excel annotations remain behind the server facade. V003 binds the actual React
 route; V004 adds database code/name uniqueness. A database with existing duplicate
 posts must resolve them before V004 can run; migration never silently deletes data.
+
+## Departments verification evidence (2026-10-04)
+
+- `DepartmentControllerTest`: production permissions, validation, scoped parent
+  checks, descendant exclusion, self/descendant cycles, unchanged-parent behavior,
+  active-child/delete protection, distinct sort IDs and complete batch prechecks.
+- `verify-departments-integration.ps1`: actual hierarchy CRUD, generated identities,
+  descendant ancestor-chain persistence, parent name uniqueness, sort persistence,
+  soft-deleted 404s, disabled-parent creation and implicit ancestor enable behavior.
+  Root deletion, concurrent mutual reparenting, eight duplicate creates and repeated
+  name reuse after soft-delete are verified with the actual row lock and unique index.
+  An independent account/department-only role proves real allowed and denied
+  operations and that a denied mixed-scope sort changes no rows.
+- `web/tests/live/departments.spec.ts`: actual tree expand/collapse, forms, duplicate
+  error/recovery, searchable parent options excluding descendants, reparenting,
+  cleared contact persistence after reload, inline ordering, filters/show-hide,
+  cancel/confirm and protected deletion. Existing login and posts suites also pass.
+  Same-name parent choices show their permitted ancestor paths so branches remain
+  distinguishable when searched.
+- `web/tests/unit/department-tree.test.ts`: scoped roots, exact large IDs, hidden
+  descendant behavior and cycle termination. Fixture browser tests cover read-only
+  actions, network retry and mobile overflow.
+
+See [the explicit security review](security-review-departments-v1.md). The
+data-scope algorithm remains unchanged and all ten parity cases remain required.
+Current-commit CI is the final gate for this implementation checkpoint; all other
+frontend capability groups stay in scope.
+V006 requires existing active sibling-name duplicates to be resolved before
+migration; it never removes data and permits duplicate names on deleted rows.

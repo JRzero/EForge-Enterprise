@@ -304,8 +304,15 @@
         "updateDeptSort",
         "delDept"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "implemented-awaiting-current-commit-ci",
+      "evidence": [
+        "DepartmentControllerTest",
+        "server/scripts/verify-departments-integration.ps1",
+        "web/tests/live/departments.spec.ts",
+        "web/tests/e2e/departments.spec.ts",
+        "web/tests/unit/department-tree.test.ts",
+        "docs/security-review-departments-v1.md"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/system/dict/data.js",

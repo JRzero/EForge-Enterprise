@@ -1,27 +1,15 @@
-import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode} from 'react';
+import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {PostRequest, PostResponse, PageResponsePostResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
+import {ResourceDialog as PostDialog} from '../../app/components/ResourceDialog';
 
 const emptyForm: PostRequest = {code: '', name: '', sort: 0, status: '0', remark: ''};
 const emptyFilters = {code: '', name: '', status: ''};
 const columnLabels = {id: '岗位编号', code: '岗位编码', name: '岗位名称', sort: '显示顺序', status: '状态', createdAt: '创建时间'};
-
-function PostDialog({titleId, alert = false, busy, onCancel, children}: {
-  titleId: string; alert?: boolean; busy: boolean; onCancel: () => void; children: ReactNode;
-}) {
-  const element = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = element.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  return <dialog ref={element} className="post-dialog" role={alert ? 'alertdialog' : 'dialog'} aria-labelledby={titleId}
-    onCancel={event => { event.preventDefault(); if (!busy) onCancel(); }}>{children}</dialog>;
-}
 
 export function PostsPage() {
   const api = useApi();

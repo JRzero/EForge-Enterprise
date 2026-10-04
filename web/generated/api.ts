@@ -64,6 +64,33 @@ export type ProblemDetail = {
     title?: string | null;
     "type"?: string;
 };
+export type DepartmentResponse = {
+    createdAt?: string;
+    email?: string;
+    id: string;
+    leader?: string;
+    name: string;
+    parentId: string;
+    phone?: string;
+    sort: number;
+    status: string;
+};
+export type DepartmentRequest = {
+    email?: string;
+    leader?: string;
+    name: string;
+    parentId: string;
+    phone?: string;
+    sort: number;
+    status: string;
+};
+export type Item = {
+    id: string;
+    sort: number;
+};
+export type DepartmentSortRequest = {
+    items: Item[];
+};
 export type DeletePostsRequest = {
     ids: string[];
 };
@@ -120,6 +147,63 @@ export function login(loginRequest: LoginRequestWrite, opts?: Oazapfts.RequestOp
         ...opts,
         method: "POST",
         body: loginRequest
+    }));
+}
+export function listDepartments({ name, status, excludeId }: {
+    name?: string;
+    status?: string;
+    excludeId?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DepartmentResponse[];
+    }>(`/api/v1/system/departments${QS.query(QS.explode({
+        name,
+        status,
+        excludeId
+    }))}`, {
+        ...opts
+    });
+}
+export function createDepartment(departmentRequest: DepartmentRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: DepartmentResponse;
+    }>("/api/v1/system/departments", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: departmentRequest
+    }));
+}
+export function sortDepartments(departmentSortRequest: DepartmentSortRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/departments/sort", oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: departmentSortRequest
+    }));
+}
+export function deleteDepartment(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/departments/${encodeURIComponent(id)}`, {
+        ...opts,
+        method: "DELETE"
+    });
+}
+export function getDepartment(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DepartmentResponse;
+    }>(`/api/v1/system/departments/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateDepartment(id: string, departmentRequest: DepartmentRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DepartmentResponse;
+    }>(`/api/v1/system/departments/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: departmentRequest
     }));
 }
 export function deletePosts(deletePostsRequest: DeletePostsRequest, opts?: Oazapfts.RequestOpts) {

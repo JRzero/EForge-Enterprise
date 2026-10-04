@@ -49,7 +49,7 @@
 
 - [ ] user management
 - [ ] role management
-- [ ] department management
+- [x] department management (canonical hierarchy API, EForge page, live CRUD/sort/data-scope verification)
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
 - [ ] menu/permission management
 - [ ] dictionary

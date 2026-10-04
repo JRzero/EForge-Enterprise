@@ -1,5 +1,6 @@
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
-  type PostRequest, type LoginRequestWrite, type UserSummary} from '../generated/api';
+  listDepartments, getDepartment, createDepartment, updateDepartment, deleteDepartment, sortDepartments,
+  type DepartmentRequest, type DepartmentSortRequest, type PostRequest, type LoginRequestWrite, type UserSummary} from '../generated/api';
 import type {AuthStore} from '@eforge/core';
 import {ApiError, record} from './errors';
 import {getCaptcha, revokeSession} from './legacy-auth';
@@ -23,6 +24,24 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listDepartments(query: Parameters<typeof listDepartments>[0], signal?: AbortSignal) {
+      return (await listDepartments(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getDepartment(id: string, signal?: AbortSignal) {
+      return (await getDepartment(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createDepartment(request: DepartmentRequest) {
+      return (await createDepartment(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateDepartment(id: string, request: DepartmentRequest) {
+      return (await updateDepartment(id, request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async deleteDepartment(id: string) {
+      await deleteDepartment(id, {baseUrl: '', fetch: transport(true)});
+    },
+    async sortDepartments(request: DepartmentSortRequest) {
+      await sortDepartments(request, {baseUrl: '', fetch: transport(true)});
+    },
     async listPosts(query: Parameters<typeof listPosts>[0], signal?: AbortSignal) {
       return (await listPosts(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

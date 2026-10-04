@@ -42,6 +42,15 @@ Create/update/delete endpoints should use standard HTTP statuses where practical
 
 ## Page response
 
+`/api/v1/system/departments` returns scoped flat `DepartmentResponse[]` for the
+client's hierarchy projection. Name/status filters and optional `excludeId`
+preserve scoped roots while excluding an edited subtree from parent choices.
+GET `/{id}`, POST (201/Location), PUT `/{id}`, DELETE `/{id}` (204), and PUT `/sort`
+(`{items: [{id, sort}]}`, 204) reuse the original department permissions and data
+scope. Sort batches contain 1–1000 distinct string IDs and are checked completely
+before mutation. Parent cycles and protected/duplicate/disabled-parent operations
+return explicit 409 problems; missing resources return 404 and scope denial 403.
+
 The first canonical resource is `/api/v1/system/posts`: GET lists typed pages,
 GET `/{id}` reads a post, POST returns 201 with Location, PUT `/{id}` updates,
 DELETE accepts `{ids: string[]}` and returns 204, and POST `/export` downloads a

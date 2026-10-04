@@ -4,6 +4,16 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'DEPARTMENT_NOT_FOUND') return '部门已不存在，请刷新后重试。';
+  if (code === 'DEPARTMENT_NAME_EXISTS') return '该上级部门下已存在同名部门。';
+  if (code === 'DEPARTMENT_PARENT_INVALID') return '请选择有效的上级部门。';
+  if (code === 'DEPARTMENT_PARENT_DISABLED') return '上级部门已停用，无法新增子部门。';
+  if (code === 'DEPARTMENT_CYCLE') return '上级部门不能是当前部门或其下级部门。';
+  if (code === 'DEPARTMENT_ACTIVE_CHILDREN') return '该部门包含正常状态的下级部门，无法停用。';
+  if (code === 'DEPARTMENT_HAS_CHILDREN') return '该部门仍有下级部门，无法删除。';
+  if (code === 'DEPARTMENT_HAS_USERS') return '该部门仍有用户，无法删除。';
+  if (code === 'DEPARTMENT_ROOT_PROTECTED') return '组织根部门无法删除。';
+  if (code === 'DEPARTMENT_ROOT_MISSING') return '组织结构暂时无法修改，请联系管理员。';
   if (code === 'POST_CODE_EXISTS') return '岗位编码已存在，请使用其他编码。';
   if (code === 'POST_NAME_EXISTS') return '岗位名称已存在，请使用其他名称。';
   if (code === 'POST_CONFLICT') return '岗位编码或名称已存在，请修改后重试。';

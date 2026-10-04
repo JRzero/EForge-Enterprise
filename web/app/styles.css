@@ -63,3 +63,5 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .post-dialog input[type=number] {font: inherit; padding: 9px 12px; border: 1px solid #ccdcd6; border-radius: 6px;}
 .post-filters[hidden] {display: none;}
 .post-table table {min-width: 850px;} .post-table th {white-space: nowrap;} .post-table .post-row-actions {flex-wrap: nowrap; gap: 4px;}
+.department-name {display: flex; align-items: center; gap: 7px; white-space: nowrap;} .department-name button {border: 0; border-radius: 4px; padding: 5px; background: #e8f1ed; color: #315c4d; cursor: pointer; width: 26px;} .department-leaf {width: 26px; flex-shrink: 0;}
+.department-sort {font: inherit; width: 82px; padding: 6px 8px; border: 1px solid #cdded7; border-radius: 5px;}
