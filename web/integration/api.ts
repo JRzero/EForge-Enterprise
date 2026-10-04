@@ -7,6 +7,8 @@ import {listUsers, listUserDepartments, getUserOptions, getUser, createUser, upd
   setUserStatus, resetUserPassword, getUserRoles, setUserRoles, exportUsers, importUsers, downloadUserImportTemplate,
   type UserWriteRequest, type CreateUserRequestWrite} from '../generated/api';
 import {getCaptcha, revokeSession} from './legacy-auth';
+import {getMyProfile, updateMyProfile, changeMyPassword, uploadMyAvatar,
+  type UpdateProfileRequest, type ChangePasswordRequestWrite} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -27,6 +29,18 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async getMyProfile(signal?: AbortSignal) {
+      return (await getMyProfile({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async updateMyProfile(request: UpdateProfileRequest) {
+      await updateMyProfile(request, {baseUrl: '', fetch: transport(true)});
+    },
+    async changeMyPassword(request: ChangePasswordRequestWrite) {
+      await changeMyPassword(request, {baseUrl: '', fetch: transport(true)});
+    },
+    async uploadMyAvatar(file: File) {
+      return (await uploadMyAvatar({file}, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async importUsers(file: File, updateExisting: boolean) {
       return (await importUsers({file}, {updateExisting}, {baseUrl: '', fetch: transport(true, 600000)})).data;
     },

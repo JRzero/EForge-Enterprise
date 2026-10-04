@@ -439,7 +439,7 @@
         "updateAuthRole",
         "deptTreeSelect"
       ],
-      "state": "partial-administration-verified",
+      "state": "partial-profile-api-awaiting-ci",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserController.java",
         "UserControllerTest",
@@ -448,7 +448,11 @@
         "UserImportServiceTest",
         "web/tests/live/users.spec.ts",
         "web/tests/e2e/users.spec.ts",
-        "web/tests/fixtures/users.xls"
+        "web/tests/fixtures/users.xls",
+        "ProfileControllerTest",
+        "AvatarStoreTest",
+        "server/scripts/verify-profile-integration.ps1",
+        "docs/security-review-profile-v1.md"
       ],
       "lastVerifiedCoreApi": {
         "implementationCommit": "fb8d9a0718f51e86fe7abdf2b33b3808a1c6c6e1",
@@ -458,7 +462,7 @@
         "scope": "Core administration APIs and regression of existing pages; user frontend parity remains incomplete."
       },
       "remaining": [
-        "Personal profile, password change and avatar upload",
+        "React personal profile/password forms and avatar crop/upload browser verification",
         "Shared dictionary-driven controls when dictionary contracts are implemented"
       ],
       "lastVerifiedAdministration": {

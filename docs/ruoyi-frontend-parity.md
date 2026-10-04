@@ -28,7 +28,7 @@ It is a work inventory, not executable proof of completion.
 | Login/account lifecycle | captcha, failed login, remember-account/credential UX, configurable registration, logout, lock/unlock, session expiry, initial/expired password change | Login/captcha/logout/expiry verified; other behaviors missing |
 | Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | Initial shell/RBAC/navigation/403/404 verified; full shell parity missing |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
-| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Missing |
+| Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Canonical APIs implemented; targeted and runtime verification in progress. React page/crop browser parity remains pending |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile remains separate and incomplete |
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
@@ -196,3 +196,23 @@ and exact exported OpenAPI snapshot comparison.
 Personal profile, self password change, avatar upload/crop, dictionary integration
 and every other missing capability group remain in scope. This checkpoint does
 not assert full user or full frontend parity.
+
+## Self-service profile API checkpoint (2026-10-04)
+
+Canonical authenticated `/api/v1/me` reads/updates the current user's profile,
+changes the password with old-password verification, and uploads a decoded,
+bounded raster avatar normalized to PNG. Concrete generated clients isolate
+legacy service entities. Self-service does not require management grants.
+Mutations commit before updating Redis; department/role/post associations are
+preserved. Avatar rollback/replacement only removes owned canonical UUID paths.
+
+Twenty-two targeted tests supplement the administration baseline, giving
+123 backend tests including all ten data-scope cases. Runtime verification
+covers real contact conflicts, database and Redis persistence, old/new
+credentials, served PNG bytes, previous-file cleanup and inactive-session denial.
+See [the explicit profile security review](security-review-profile-v1.md).
+
+The React personal profile forms, avatar crop controls and their real browser
+tests remain pending. Existing eight fixture and eleven live browser cases
+regress the implemented pages; they do not prove profile page parity.
+Implementation CI is pending at this checkpoint. The full objective stays active.

@@ -162,6 +162,17 @@ The web integration layer supplies the authorization header from EForge auth sta
 
 ## Contract compatibility
 
+Authenticated self-service contracts live under `/api/v1/me`: GET returns a
+safe concrete profile with department, role/post labels, creation date and local
+avatar URL; PUT accepts only displayName, required phone/email and sex and returns
+204. PUT `/password` accepts write-only oldPassword/newPassword, checks the fresh
+database hash, rejects an unchanged password (409) or wrong old password (400),
+and returns 204. POST `/avatar` consumes multipart `file` and returns avatarUrl
+after decoded raster validation and normalization. All IDs come from the current
+authenticated session; administration permissions are unnecessary. Disabled or
+deleted accounts return 401 and revoke the current session. The React profile
+page and crop flow remain pending at this API checkpoint.
+
 User administration core contracts now live at `/api/v1/system/users`: typed
 page/filter results, scoped departments/editor options, concrete detail/role/post
 identifiers, create with separate write-only password, profile update, delete
@@ -176,7 +187,7 @@ independently; overwrite preserves existing department, grants and password.
 New rows use the configured initial password with BCrypt and receive no implicit
 role/post grants. POST `/import-template` returns the original binary XLSX
 template. Both operations require import permission. The React administration
-page consumes generated contracts. Personal-profile contracts remain pending;
+page consumes generated contracts. Personal-profile APIs now have a separate checkpoint;
 this administration checkpoint does not establish full user capability parity.
 
 Breaking changes to `/api/v1` require either:

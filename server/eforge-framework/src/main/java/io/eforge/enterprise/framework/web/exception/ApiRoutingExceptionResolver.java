@@ -30,7 +30,9 @@ public class ApiRoutingExceptionResolver implements HandlerExceptionResolver
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
             Object handler, Exception exception)
     {
-        if (!ApiSecurityProblemHandler.isApiRequest(request)
+        // Newly owned avatar resources need real HTTP errors when replacement removes a file.
+        boolean canonicalAvatar = request.getRequestURI().startsWith(request.getContextPath() + "/profile/avatar/canonical/");
+        if (!(ApiSecurityProblemHandler.isApiRequest(request) || canonicalAvatar)
                 || !(exception instanceof ErrorResponse error))
             return null;
         HttpStatus status = HttpStatus.valueOf(error.getStatusCode().value());

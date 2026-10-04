@@ -4,6 +4,11 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'OLD_PASSWORD_INVALID') return '旧密码不正确，请重新输入。';
+  if (code === 'PASSWORD_UNCHANGED') return '新密码不能与旧密码相同。';
+  if (code === 'PROFILE_WRITE_CONFLICT') return '个人资料未能保存，请刷新后重试。';
+  if (code === 'AVATAR_INVALID') return '请选择有效的 JPG、PNG、GIF 或 BMP 图片，大小不超过 10 MB，每边不超过 4096 像素。';
+  if (code === 'AVATAR_STORAGE_UNAVAILABLE') return '头像暂时无法保存，请稍后重试。';
   if (code === 'USER_IMPORT_FILE_INVALID') return '请选择有效的 XLS 或 XLSX 用户表格，并保留模板的登录名称列。';
   if (code === 'USER_IMPORT_TOO_LARGE') return '一次最多导入 1000 条数据，请拆分表格后重试。';
   if (code === 'USER_IMPORT_EMPTY') return '表格没有用户数据，请填写后重试。';

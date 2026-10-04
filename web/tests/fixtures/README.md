@@ -12,3 +12,7 @@ with that database's configured initial password and deletes the account.
 Dynamic XLSX fixtures use the test helper's real OpenXML workbook writer and
 exercise the same server parser. Neither fixture replaces actual persistence,
 authentication, permission or workbook-content assertions.
+
+`avatar.png` is a generated 4×2 RGB PNG with distinct quadrants, containing no
+personal image or metadata. Runtime tests inspect normalization, serving,
+database/Redis persistence and removal of the previous owned avatar file.

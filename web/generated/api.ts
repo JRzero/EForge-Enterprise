@@ -64,6 +64,33 @@ export type ProblemDetail = {
     title?: string | null;
     "type"?: string;
 };
+export type ProfileResponse = {
+    avatarUrl?: string;
+    createdAt?: string;
+    departmentName?: string;
+    displayName: string;
+    email?: string;
+    id: string;
+    phone?: string;
+    postNames: string;
+    roleNames: string;
+    sex?: string;
+    username: string;
+};
+export type UpdateProfileRequest = {
+    displayName: string;
+    email: string;
+    phone: string;
+    sex: string;
+};
+export type AvatarResponse = {
+    avatarUrl: string;
+};
+export type ChangePasswordRequest = {};
+export type ChangePasswordRequestWrite = {
+    newPassword: string;
+    oldPassword: string;
+};
 export type DepartmentResponse = {
     createdAt?: string;
     email?: string;
@@ -233,6 +260,40 @@ export function login(loginRequest: LoginRequestWrite, opts?: Oazapfts.RequestOp
         ...opts,
         method: "POST",
         body: loginRequest
+    }));
+}
+export function getMyProfile(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ProfileResponse;
+    }>("/api/v1/me", {
+        ...opts
+    });
+}
+export function updateMyProfile(updateProfileRequest: UpdateProfileRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/me", oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: updateProfileRequest
+    }));
+}
+export function uploadMyAvatar(body?: {
+    file: Blob;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AvatarResponse;
+    }>("/api/v1/me/avatar", oazapfts.multipart({
+        ...opts,
+        method: "POST",
+        body
+    }));
+}
+export function changeMyPassword(changePasswordRequest: ChangePasswordRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/me/password", oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: changePasswordRequest
     }));
 }
 export function listDepartments({ name, status, excludeId }: {
