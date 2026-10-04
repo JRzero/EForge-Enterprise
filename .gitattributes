@@ -1,0 +1,2 @@
+# Pinned normalized icon hashes must survive Windows/Linux checkouts unchanged.
+web/public/ruoyi-icons/v3.9.2/*.svg text eol=lf
