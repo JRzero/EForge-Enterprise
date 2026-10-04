@@ -30,7 +30,7 @@ It is a work inventory, not executable proof of completion.
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionary controls remain pending |
-| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Missing |
+| Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API/generated client verified locally, including five real scope modes and immediate session revocation; React page and interactive trees pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
 | Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
@@ -250,3 +250,32 @@ passed [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/3719
 and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37196064167).
 All three server jobs passed. Other missing groups and shared dictionary-driven
 controls remain in scope; full parity is not complete.
+
+## Role API/client verification checkpoint (2026-10-04)
+
+Fifteen canonical operations cover scoped filtered/date-ranged role pages,
+options, menu/departments, concrete detail/raw/checked keys, creation, edit,
+status, all five data-scope modes, batch deletion, allocated/unallocated users,
+idempotent batch assignment/cancellation and real XLSX export. The original
+services remain behind the facade; no React route is seeded before its page
+exists. V009 enforces active name/key uniqueness and deleted-identity reuse.
+See [the role security review](security-review-roles-v1.md) for additive object
+guards, bounded new menu grants and separate MySQL/Redis consistency limits.
+
+`RoleControllerTest` adds 18 security/contract cases and
+`RoleSessionRefresherTest` adds seven cache/expiry cases. All 148 backend tests
+pass, including ten unchanged data-scope parity cases. Final local runtime
+verification passes `verify-roles-integration.ps1` and every earlier module's
+database/Redis verification. Scope tests use accounts in department 101, its
+child 105 and an unrelated branch 108 to distinguish all five actual outcomes.
+Existing-session assignment, menu removal and status changes are checked through
+protected endpoints without an intervening bootstrap. Mixed-scope/admin batches
+do not write associations, and eight duplicate creates yield one 201/seven 409.
+Workbook XML, real unique indexes, soft deletion/reuse and safe projections pass.
+
+The stable frontend also passes lint/typecheck, 23 unit tests, build, nine fixture
+browser cases and twelve live browser cases. The final live OpenAPI snapshot
+matches the contract exactly and generated clients are reproducible. CI results
+will be recorded after pushing this checkpoint. React role forms, linked tree
+controls, scope dialog, user-allocation page and their browser tests remain
+pending; neither role frontend parity nor the full objective is complete.

@@ -418,8 +418,24 @@
         "authUserSelectAll",
         "deptTreeSelect"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial-api-client",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/RoleController.java",
+        "RoleControllerTest",
+        "RoleSessionRefresherTest",
+        "server/scripts/verify-roles-integration.ps1",
+        "docs/security-review-roles-v1.md",
+        "sql/migrations/V009__role_uniqueness.sql",
+        "web/generated/api.ts",
+        "web/integration/api.ts"
+      ],
+      "remaining": [
+        "React role CRUD/filter/date-range/status/export page",
+        "Linked and independent menu/button grant tree controls",
+        "Five-mode data-scope dialog and department selection tree",
+        "Allocated/unallocated user pages and batch assignment/cancellation",
+        "Strict live browser, failure/retry, keyboard/mobile and implementation CI evidence"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/system/user.js",

@@ -4,6 +4,16 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'ROLE_NOT_FOUND') return '角色已不存在，请刷新后重试。';
+  if (code === 'ROLE_NAME_EXISTS') return '角色名称已存在，请使用其他名称。';
+  if (code === 'ROLE_KEY_EXISTS') return '角色权限字符已存在，请使用其他字符。';
+  if (code === 'ROLE_CONFLICT') return '角色名称或权限字符已存在，请修改后重试。';
+  if (code === 'ROLE_ADMIN_PROTECTED') return '超级管理员角色不能修改。';
+  if (code === 'ROLE_IN_USE') return '该角色已分配给用户，请先取消授权。';
+  if (code === 'ROLE_DISABLED') return '该角色已停用，不能新增用户授权。';
+  if (code === 'ROLE_MENU_NOT_FOUND') return '所选菜单已不存在，请重新选择。';
+  if (code === 'ROLE_DEPARTMENT_NOT_FOUND') return '所选部门已不存在，请重新选择。';
+  if (code === 'ROLE_WRITE_CONFLICT') return '角色状态已变更，请刷新后重试。';
   if (code === 'OLD_PASSWORD_INVALID') return '旧密码不正确，请重新输入。';
   if (code === 'PASSWORD_UNCHANGED') return '新密码不能与旧密码相同。';
   if (code === 'PROFILE_WRITE_CONFLICT') return '个人资料未能保存，请刷新后重试。';

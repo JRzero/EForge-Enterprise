@@ -9,6 +9,10 @@ import {listUsers, listUserDepartments, getUserOptions, getUser, createUser, upd
 import {getCaptcha, revokeSession} from './legacy-auth';
 import {getMyProfile, updateMyProfile, changeMyPassword, uploadMyAvatar,
   type UpdateProfileRequest, type ChangePasswordRequestWrite} from '../generated/api';
+import {listRoles, getRole, getRoleOptions, getRoleMenuOptions, getRoleDepartmentOptions,
+  createRole, updateRole, deleteRoles, setRoleStatus, getRoleDataScope, setRoleDataScope,
+  listRoleUsers, assignRoleUsers, cancelRoleUsers, exportRoles,
+  type RoleWriteRequest, type RoleScopeRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -29,6 +33,51 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listRoles(query: Parameters<typeof listRoles>[0], signal?: AbortSignal) {
+      return (await listRoles(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getRole(id: string, signal?: AbortSignal) {
+      return (await getRole(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getRoleOptions(signal?: AbortSignal) {
+      return (await getRoleOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getRoleMenuOptions(signal?: AbortSignal) {
+      return (await getRoleMenuOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getRoleDepartmentOptions(signal?: AbortSignal) {
+      return (await getRoleDepartmentOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createRole(request: RoleWriteRequest) {
+      return (await createRole(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateRole(id: string, request: RoleWriteRequest) {
+      await updateRole(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteRoles(ids: string[]) {
+      await deleteRoles({ids}, {baseUrl: '', fetch: transport(true)});
+    },
+    async setRoleStatus(id: string, status: string) {
+      await setRoleStatus(id, {status}, {baseUrl: '', fetch: transport(true)});
+    },
+    async getRoleDataScope(id: string, signal?: AbortSignal) {
+      return (await getRoleDataScope(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async setRoleDataScope(id: string, request: RoleScopeRequest) {
+      await setRoleDataScope(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async listRoleUsers(id: string, query: Parameters<typeof listRoleUsers>[1], signal?: AbortSignal) {
+      return (await listRoleUsers(id, query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async assignRoleUsers(id: string, userIds: string[]) {
+      await assignRoleUsers(id, {userIds}, {baseUrl: '', fetch: transport(true)});
+    },
+    async cancelRoleUsers(id: string, userIds: string[]) {
+      await cancelRoleUsers(id, {userIds}, {baseUrl: '', fetch: transport(true)});
+    },
+    async exportRoles(query: Parameters<typeof exportRoles>[0]) {
+      return (await exportRoles(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
     async getMyProfile(signal?: AbortSignal) {
       return (await getMyProfile({baseUrl: '', fetch: transport(true), signal})).data;
     },

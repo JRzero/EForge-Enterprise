@@ -143,8 +143,67 @@ export type PostRequest = {
     sort: number;
     status: string;
 };
-export type DeleteUsersRequest = {
+export type DeleteRolesRequest = {
     ids: string[];
+};
+export type RoleResponse = {
+    createdAt?: string;
+    dataScope: string;
+    departmentLinked: boolean;
+    id: string;
+    key: string;
+    menuLinked: boolean;
+    name: string;
+    remark?: string;
+    sort: number;
+    status: string;
+};
+export type PageResponseRoleResponse = {
+    items: RoleResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type RoleWriteRequest = {
+    key: string;
+    menuKeys: string[];
+    menuLinked: boolean;
+    name: string;
+    remark?: string;
+    sort: number;
+    status: string;
+};
+export type RoleMenuOption = {
+    key: string;
+    label: string;
+    parentKey?: string;
+    permission?: string;
+    sort: number;
+    status: string;
+    "type": "M" | "C" | "F";
+};
+export type RoleEditorResponse = {
+    checkedMenuKeys: string[];
+    menuKeys: string[];
+    role: RoleResponse;
+};
+export type RoleScopeResponse = {
+    checkedDepartmentIds: string[];
+    departmentIds: string[];
+    departmentLinked: boolean;
+    departments: DepartmentResponse[];
+    mode: string;
+};
+export type RoleScopeRequest = {
+    departmentIds: string[];
+    departmentLinked: boolean;
+    mode: string;
+};
+export type RoleStatusRequest = {
+    status: string;
+};
+export type RoleUsersRequest = {
+    userIds: string[];
 };
 export type UserResponse = {
     createdAt?: string;
@@ -164,6 +223,9 @@ export type PageResponseUserResponse = {
     page: number;
     pageSize: number;
     total: number;
+};
+export type DeleteUsersRequest = {
+    ids: string[];
 };
 export type UserWriteRequest = {
     departmentId?: string;
@@ -423,6 +485,163 @@ export function updatePost(id: string, postRequest: PostRequest, opts?: Oazapfts
         ...opts,
         method: "PUT",
         body: postRequest
+    }));
+}
+export function deleteRoles(deleteRolesRequest: DeleteRolesRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/roles", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteRolesRequest
+    }));
+}
+export function listRoles({ page, pageSize, name, key, status, beginDate, endDate }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    key?: string;
+    status?: string;
+    beginDate?: string;
+    endDate?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseRoleResponse;
+    }>(`/api/v1/system/roles${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        key,
+        status,
+        beginDate,
+        endDate
+    }))}`, {
+        ...opts
+    });
+}
+export function createRole(roleWriteRequest: RoleWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RoleResponse;
+    }>("/api/v1/system/roles", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: roleWriteRequest
+    }));
+}
+export function getRoleDepartmentOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: DepartmentResponse[];
+    }>("/api/v1/system/roles/departments", {
+        ...opts
+    });
+}
+export function exportRoles({ name, key, status, beginDate, endDate }: {
+    name?: string;
+    key?: string;
+    status?: string;
+    beginDate?: string;
+    endDate?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/system/roles/export${QS.query(QS.explode({
+        name,
+        key,
+        status,
+        beginDate,
+        endDate
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getRoleMenuOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RoleMenuOption[];
+    }>("/api/v1/system/roles/menus", {
+        ...opts
+    });
+}
+export function getRoleOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RoleResponse[];
+    }>("/api/v1/system/roles/options", {
+        ...opts
+    });
+}
+export function getRole(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RoleEditorResponse;
+    }>(`/api/v1/system/roles/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateRole(id: string, roleWriteRequest: RoleWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/roles/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: roleWriteRequest
+    }));
+}
+export function getRoleDataScope(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RoleScopeResponse;
+    }>(`/api/v1/system/roles/${encodeURIComponent(id)}/data-scope`, {
+        ...opts
+    });
+}
+export function setRoleDataScope(id: string, roleScopeRequest: RoleScopeRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/roles/${encodeURIComponent(id)}/data-scope`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: roleScopeRequest
+    }));
+}
+export function setRoleStatus(id: string, roleStatusRequest: RoleStatusRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/roles/${encodeURIComponent(id)}/status`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: roleStatusRequest
+    }));
+}
+export function cancelRoleUsers(id: string, roleUsersRequest: RoleUsersRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/roles/${encodeURIComponent(id)}/users`, oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: roleUsersRequest
+    }));
+}
+export function listRoleUsers(id: string, { assigned, page, pageSize, username, phone }: {
+    assigned?: boolean;
+    page?: number;
+    pageSize?: number;
+    username?: string;
+    phone?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseUserResponse;
+    }>(`/api/v1/system/roles/${encodeURIComponent(id)}/users${QS.query(QS.explode({
+        assigned,
+        page,
+        pageSize,
+        username,
+        phone
+    }))}`, {
+        ...opts
+    });
+}
+export function assignRoleUsers(id: string, roleUsersRequest: RoleUsersRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/roles/${encodeURIComponent(id)}/users`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: roleUsersRequest
     }));
 }
 export function deleteUsers(deleteUsersRequest: DeleteUsersRequest, opts?: Oazapfts.RequestOpts) {

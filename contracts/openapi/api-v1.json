@@ -104,6 +104,23 @@
         ],
         "type": "object"
       },
+      "DeleteRolesRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
       "DeleteUsersRequest": {
         "properties": {
           "ids": {
@@ -362,6 +379,35 @@
         ],
         "type": "object"
       },
+      "PageResponseRoleResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RoleResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
       "PageResponseUserResponse": {
         "properties": {
           "items": {
@@ -558,6 +604,259 @@
         },
         "required": [
           "password"
+        ],
+        "type": "object"
+      },
+      "RoleEditorResponse": {
+        "properties": {
+          "checkedMenuKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "menuKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleResponse"
+          }
+        },
+        "required": [
+          "checkedMenuKeys",
+          "menuKeys",
+          "role"
+        ],
+        "type": "object"
+      },
+      "RoleMenuOption": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "parentKey": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "M",
+              "C",
+              "F"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "sort",
+          "status",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RoleResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "departmentLinked": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "menuLinked": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataScope",
+          "departmentLinked",
+          "id",
+          "key",
+          "menuLinked",
+          "name",
+          "sort",
+          "status"
+        ],
+        "type": "object"
+      },
+      "RoleScopeRequest": {
+        "properties": {
+          "departmentIds": {
+            "items": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "departmentLinked": {
+            "type": "boolean"
+          },
+          "mode": {
+            "pattern": "[1-5]",
+            "type": "string"
+          }
+        },
+        "required": [
+          "departmentIds",
+          "departmentLinked",
+          "mode"
+        ],
+        "type": "object"
+      },
+      "RoleScopeResponse": {
+        "properties": {
+          "checkedDepartmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "departmentIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "departmentLinked": {
+            "type": "boolean"
+          },
+          "departments": {
+            "items": {
+              "$ref": "#/components/schemas/DepartmentResponse"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checkedDepartmentIds",
+          "departmentIds",
+          "departmentLinked",
+          "departments",
+          "mode"
+        ],
+        "type": "object"
+      },
+      "RoleStatusRequest": {
+        "properties": {
+          "status": {
+            "pattern": "[01]",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "RoleUsersRequest": {
+        "properties": {
+          "userIds": {
+            "items": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "userIds"
+        ],
+        "type": "object"
+      },
+      "RoleWriteRequest": {
+        "properties": {
+          "key": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "menuKeys": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 0,
+              "type": "string"
+            },
+            "maxItems": 2000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "menuLinked": {
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "status": {
+            "pattern": "[01]",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "menuKeys",
+          "menuLinked",
+          "name",
+          "sort",
+          "status"
         ],
         "type": "object"
       },
@@ -1545,6 +1844,611 @@
         },
         "tags": [
           "post-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles": {
+      "delete": {
+        "operationId": "deleteRoles",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRolesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "get": {
+        "operationId": "listRoles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 30,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "",
+              "pattern": "[01]?",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "beginDate",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 10,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 10,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseRoleResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/departments": {
+      "get": {
+        "operationId": "getRoleDepartmentOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DepartmentResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/export": {
+      "post": {
+        "operationId": "exportRoles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 30,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "",
+              "pattern": "[01]?",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "beginDate",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 10,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 10,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/menus": {
+      "get": {
+        "operationId": "getRoleMenuOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoleMenuOption"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/options": {
+      "get": {
+        "operationId": "getRoleOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoleResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/{id}": {
+      "get": {
+        "operationId": "getRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleEditorResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "put": {
+        "operationId": "updateRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/{id}/data-scope": {
+      "get": {
+        "operationId": "getRoleDataScope",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleScopeResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "put": {
+        "operationId": "setRoleDataScope",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleScopeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/{id}/status": {
+      "put": {
+        "operationId": "setRoleStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      }
+    },
+    "/api/v1/system/roles/{id}/users": {
+      "delete": {
+        "operationId": "cancelRoleUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUsersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "get": {
+        "operationId": "listRoleUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigned",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 30,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "phone",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 11,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseUserResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
+        ]
+      },
+      "put": {
+        "operationId": "assignRoleUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUsersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "role-controller"
         ]
       }
     },

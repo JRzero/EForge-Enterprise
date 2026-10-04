@@ -162,6 +162,20 @@ The web integration layer supplies the authorization header from EForge auth sta
 
 ## Contract compatibility
 
+Role administration uses `/api/v1/system/roles`: typed filtered/date-ranged
+pages, detail with raw and linked-tree checked menu keys, scoped menu/department
+options, create (201), edit/status/data-scope (204), delete batch (204), scoped
+assigned/unassigned user pages, idempotent user assignment/cancellation (204),
+and filtered binary XLSX export. Menu grant identities are stable `menu_key`
+values; no database component strings or fictitious routes cross the boundary.
+Scope modes 1–5 reuse the original data-scope algorithm; only custom mode 2
+accepts selected department IDs. All target objects in a batch are checked
+before writes. Role changes refresh affected existing Redis sessions after
+commit, including fresh scope metadata and active permissions. See
+`docs/security-review-roles-v1.md` for guards and consistency limitations.
+The generated TypeScript client includes these contracts; the React role page
+and interactive tree controls remain pending at this API checkpoint.
+
 Authenticated self-service contracts live under `/api/v1/me`: GET returns a
 safe concrete profile with department, role/post labels, creation date and local
 avatar URL; PUT accepts only displayName, required phone/email and sex and returns

@@ -48,7 +48,7 @@
 ## Phase 3 — Core enterprise modules
 
 - [ ] user management (administration/import and profile APIs verified in CI; React profile/crop, keyboard/mobile and real browser checks verified in CI; shared dictionary integration pending)
-- [ ] role management
+- [ ] role management (canonical API/client, five scopes and existing-session grant refresh verified locally; React page and interactive grant/department trees pending)
 - [x] department management (canonical hierarchy API, EForge page, live CRUD/sort/data-scope verification)
 - [x] post management (canonical API, EForge page, live CRUD/permissions/download verification)
 - [ ] menu/permission management
