@@ -33,7 +33,7 @@ It is a work inventory, not executable proof of completion.
 | Roles | filtering, CRUD, status, menu/button grants with parent/child selection, data-scope modes and department selection, allocated/unallocated users and batch assignment/cancellation, export | Canonical API and React administration/allocation pages implemented with interactive grant/department trees; verification checkpoint below; shared dictionary controls pending |
 | Departments | hierarchical CRUD, hide/expand rows, parent selection excluding descendants, sort updates, deletion protection, data-scope enforcement | Verified; controller/security tests, real hierarchy/data-scope fixture and live browser tree/CRUD/sort tests; implementation CI passed (see evidence below) |
 | Posts | filters, pagination, columns, selection, create/edit/delete/bulk delete, uniqueness, assigned-user deletion protection, export | Implemented; Maven controller/security tests, live browser CRUD/paging/download tests and disposable database checks; see evidence below |
-| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Missing |
+| Navigation/menu administration | tree CRUD, GROUP/ROUTE/EXTERNAL/function identities, permission and icon selection, parent selection, visibility/status/sort, route binding validation, role menu tree | Canonical API/client groundwork implemented; role grant trees already verified; React menu page/icon selection and browser acceptance pending |
 | Dictionaries | type and data CRUD, type options, detail navigation, filters/pagination, sort/default/status/style tags, cache refresh, exports | Missing |
 | Configuration | filters/CRUD, built-in entry protection, typed key lookup, cache refresh, export | Missing |
 | Notices | rich text, type/status/CRUD, pagination/filtering, top notice feed, unread/read/all-read behavior | Missing |
@@ -324,3 +324,36 @@ and [web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/3720126988
 All three server jobs passed, including Linux live browser/role integration and
 exact live OpenAPI comparison. Shared dictionary controls and all other missing
 groups remain in scope; the full objective is not complete.
+
+## Menu API/client checkpoint (2026-10-04)
+
+Eight concrete operations provide filtered flat menu reads, parent options,
+registered route options, detail, create/edit/delete and atomic batch sorting.
+GROUP/ROUTE/EXTERNAL/FUNCTION identities do not expose database components.
+The boot artifact packages the same static navigation contract consumed by web;
+route bindings require actual registered IDs and matching endpoint permissions.
+Hidden/internal routes are excluded. Existing unbound legacy route rows can
+remain pending rather than inventing React pages. Keys remain stable, and V011
+enforces original sibling-name uniqueness in the database.
+
+`MenuControllerTest` adds nineteen targeted contract/security cases and
+`MenuRouteCatalogTest` checks packaging. All 168 backend tests passed, including
+the unchanged ten data-scope cases. The disposable MySQL/Redis menu verifier
+passed actual CRUD, Unicode and clearing, original database-collation filtering,
+sort, parent/cycle/deletion/object guards, route/external safety, bounded new
+permissions, real unique indexes and eight concurrent duplicate creates (one
+201/seven 409). Existing-session query permission is revoked/replaced/restored
+without an intervening bootstrap. Disabling a route preserves the original
+independently active child-button permission semantics.
+
+The stable web passes lint/typecheck, thirty unit tests, build and twelve fixture
+browser cases. Fifteen live browser cases and every prior module integration
+script passed; final filter changes additionally passed the complete API/runtime
+suite. Generated clients reproduce and the live OpenAPI equals the snapshot.
+See ADR-0013 and the menu security review for the canonical/legacy and
+MySQL/Redis boundaries. Implementation CI evidence follows the pushed revision.
+
+The React menu tree page, parent/icon controls, actual menu-page browser
+acceptance, query/cache shell behavior and other missing groups remain required.
+No menu navigation route is seeded before an actual page exists. The full
+frontend parity objective stays active.

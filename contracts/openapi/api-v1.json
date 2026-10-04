@@ -303,6 +303,223 @@
         ],
         "type": "object"
       },
+      "MenuResponse": {
+        "properties": {
+          "cached": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "externalUrl": {
+            "type": "string"
+          },
+          "groupPath": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "queryText": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "routeId": {
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "GROUP",
+              "ROUTE",
+              "EXTERNAL",
+              "FUNCTION"
+            ],
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cached",
+          "id",
+          "name",
+          "parentId",
+          "sort",
+          "status",
+          "type",
+          "visible"
+        ],
+        "type": "object"
+      },
+      "MenuRouteOption": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "path"
+        ],
+        "type": "object"
+      },
+      "MenuSortItem": {
+        "properties": {
+          "id": {
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "sort"
+        ],
+        "type": "object"
+      },
+      "MenuSortRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MenuSortItem"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "MenuWriteRequest": {
+        "properties": {
+          "cached": {
+            "type": "boolean"
+          },
+          "externalUrl": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "groupPath": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "icon": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 100,
+            "minLength": 0,
+            "pattern": "[a-z][a-z0-9]*(-[a-z0-9]+)*",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "parentId": {
+            "pattern": "0|[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "permission": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "queryText": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "routeId": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sort": {
+            "format": "int32",
+            "maximum": 9999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "status": {
+            "pattern": "[01]",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "GROUP",
+              "ROUTE",
+              "EXTERNAL",
+              "FUNCTION"
+            ],
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cached",
+          "key",
+          "name",
+          "parentId",
+          "sort",
+          "status",
+          "type",
+          "visible"
+        ],
+        "type": "object"
+      },
       "NavigationNode": {
         "properties": {
           "children": {
@@ -1592,6 +1809,240 @@
         },
         "tags": [
           "department-controller"
+        ]
+      }
+    },
+    "/api/v1/system/menus": {
+      "get": {
+        "operationId": "listMenus",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "pattern": "[01]?",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "visible",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MenuResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createMenu",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      }
+    },
+    "/api/v1/system/menus/options": {
+      "get": {
+        "operationId": "getMenuOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MenuResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      }
+    },
+    "/api/v1/system/menus/routes": {
+      "get": {
+        "operationId": "getMenuRouteOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MenuRouteOption"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      }
+    },
+    "/api/v1/system/menus/sort": {
+      "put": {
+        "operationId": "sortMenus",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuSortRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      }
+    },
+    "/api/v1/system/menus/{id}": {
+      "delete": {
+        "operationId": "deleteMenu",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      },
+      "get": {
+        "operationId": "getMenu",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
+        ]
+      },
+      "put": {
+        "operationId": "updateMenu",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "menu-controller"
         ]
       }
     },

@@ -69,6 +69,15 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <!-- Package the same navigation-route contract consumed by the web registry. -->
+            <resource>
+                <directory>${project.basedir}/../../web/app</directory>
+                <targetPath>contracts</targetPath>
+                <includes><include>route-contract.json</include></includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

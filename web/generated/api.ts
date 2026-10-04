@@ -118,6 +118,54 @@ export type Item = {
 export type DepartmentSortRequest = {
     items: Item[];
 };
+export type MenuResponse = {
+    cached: boolean;
+    createdAt?: string;
+    externalUrl?: string;
+    groupPath?: string;
+    icon?: string;
+    id: string;
+    key?: string;
+    name: string;
+    parentId: string;
+    permission?: string;
+    queryText?: string;
+    remark?: string;
+    routeId?: string;
+    sort: number;
+    status: string;
+    "type": "GROUP" | "ROUTE" | "EXTERNAL" | "FUNCTION";
+    visible: boolean;
+};
+export type MenuWriteRequest = {
+    cached: boolean;
+    externalUrl?: string;
+    groupPath?: string;
+    icon?: string;
+    key: string;
+    name: string;
+    parentId: string;
+    permission?: string;
+    queryText?: string;
+    remark?: string;
+    routeId?: string;
+    sort: number;
+    status: string;
+    "type": "GROUP" | "ROUTE" | "EXTERNAL" | "FUNCTION";
+    visible: boolean;
+};
+export type MenuRouteOption = {
+    id: string;
+    path: string;
+    permission?: string;
+};
+export type MenuSortItem = {
+    id: string;
+    sort: number;
+};
+export type MenuSortRequest = {
+    items: MenuSortItem[];
+};
 export type DeletePostsRequest = {
     ids: string[];
 };
@@ -413,6 +461,76 @@ export function updateDepartment(id: string, departmentRequest: DepartmentReques
         ...opts,
         method: "PUT",
         body: departmentRequest
+    }));
+}
+export function listMenus({ name, status, visible }: {
+    name?: string;
+    status?: string;
+    visible?: boolean;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuResponse[];
+    }>(`/api/v1/system/menus${QS.query(QS.explode({
+        name,
+        status,
+        visible
+    }))}`, {
+        ...opts
+    });
+}
+export function createMenu(menuWriteRequest: MenuWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuResponse;
+    }>("/api/v1/system/menus", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: menuWriteRequest
+    }));
+}
+export function getMenuOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuResponse[];
+    }>("/api/v1/system/menus/options", {
+        ...opts
+    });
+}
+export function getMenuRouteOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuRouteOption[];
+    }>("/api/v1/system/menus/routes", {
+        ...opts
+    });
+}
+export function sortMenus(menuSortRequest: MenuSortRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/system/menus/sort", oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: menuSortRequest
+    }));
+}
+export function deleteMenu(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/menus/${encodeURIComponent(id)}`, {
+        ...opts,
+        method: "DELETE"
+    });
+}
+export function getMenu(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuResponse;
+    }>(`/api/v1/system/menus/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateMenu(id: string, menuWriteRequest: MenuWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/system/menus/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: menuWriteRequest
     }));
 }
 export function deletePosts(deletePostsRequest: DeletePostsRequest, opts?: Oazapfts.RequestOpts) {

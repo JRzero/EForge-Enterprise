@@ -13,6 +13,8 @@ import {listRoles, getRole, getRoleOptions, getRoleMenuOptions, getRoleDepartmen
   createRole, updateRole, deleteRoles, setRoleStatus, getRoleDataScope, setRoleDataScope,
   listRoleUsers, assignRoleUsers, cancelRoleUsers, exportRoles,
   type RoleWriteRequest, type RoleScopeRequest} from '../generated/api';
+import {listMenus, getMenu, getMenuOptions, getMenuRouteOptions, createMenu, updateMenu, deleteMenu, sortMenus,
+  type MenuWriteRequest, type MenuSortRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -33,6 +35,30 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async listMenus(query: Parameters<typeof listMenus>[0], signal?: AbortSignal) {
+      return (await listMenus(query, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getMenu(id: string, signal?: AbortSignal) {
+      return (await getMenu(id, {baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getMenuOptions(signal?: AbortSignal) {
+      return (await getMenuOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async getMenuRouteOptions(signal?: AbortSignal) {
+      return (await getMenuRouteOptions({baseUrl: '', fetch: transport(true), signal})).data;
+    },
+    async createMenu(request: MenuWriteRequest) {
+      return (await createMenu(request, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async updateMenu(id: string, request: MenuWriteRequest) {
+      await updateMenu(id, request, {baseUrl: '', fetch: transport(true)});
+    },
+    async deleteMenu(id: string) {
+      await deleteMenu(id, {baseUrl: '', fetch: transport(true)});
+    },
+    async sortMenus(request: MenuSortRequest) {
+      await sortMenus(request, {baseUrl: '', fetch: transport(true)});
+    },
     async listRoles(query: Parameters<typeof listRoles>[0], signal?: AbortSignal) {
       return (await listRoles(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

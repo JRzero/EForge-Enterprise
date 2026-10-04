@@ -214,3 +214,21 @@ Breaking changes to `/api/v1` require either:
 - a new versioned endpoint/namespace
 
 Do not silently change generated-client contracts.
+
+## Menu administration
+
+`/api/v1/system/menus` provides concrete flat menu reads with name/status/visibility
+filters, scoped parent options, registered navigation-route options, detail,
+201 creation, 204 update/delete and atomic batch sort. GROUP/ROUTE/EXTERNAL/FUNCTION
+are explicit types; IDs are strings and stable keys cannot be silently renamed.
+Only ROUTE nodes bind actual registered IDs with matching backend permissions.
+Existing unimplemented legacy route rows may retain null bindings. The boot
+artifact packages the exact web navigation route contract; internal profile and
+allocation routes are excluded. No database component expressions are accepted
+or returned. Query/cache metadata stays data behind the compatibility boundary.
+Writes enforce original operation permissions, active-role object grants,
+hierarchy/depth constraints, identity/name uniqueness and child/role deletion
+protection. Menu permission/status changes refresh affected existing sessions
+after commit with preserved TTL. See ADR-0013 and the explicit menu security
+review for privilege boundaries and the separate Redis consistency limitation.
+This API checkpoint does not establish React menu page or full shell parity.
