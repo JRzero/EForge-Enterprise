@@ -878,7 +878,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "e0b4f9770de86381a8a5134317dfe01cc68ebc36",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37280882240",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37280882307",
     "scope": "Task logs and actual Quartz Cron preview only: real dispatched success/failure logs, filtered details/XLSX, calendar bounds and paging/sorting, all permissions, SQL fault preservation and monotonic clearing. Regression fixes repeated stateless session identity rotation and checks actual Druid native cookie continuity. Task CRUD, scheduler/SQL consistency, all task/log pages and final capability audit remain pending."
   },
   "diagnosticConsoleValidation": {

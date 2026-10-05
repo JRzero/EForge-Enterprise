@@ -1062,12 +1062,19 @@ enabled/default-disabled console configuration. Lint/typecheck/build, hardened
 defaults, seeded routes, full runtime regression and generated-client
 reproducibility pass. Both live OpenAPI snapshots exactly match the committed
 contract. Evidence logs in boot target use the job-api-backend/unit/build/
-fixtures/enabled-runtime/disabled-runtime prefixes; cloud validation is pending.
+fixtures/enabled-runtime/disabled-runtime prefixes.
 The initial cloud fixture run exposed a separate retry-test race: consecutive
 failures reused the same alert text, so the assertion could accept the preceding
 phase and click a disappearing button. The fixture now holds each new response
 until the loading state is visible and the previous alert is removed. All 57
 local browser cases pass with that deterministic gate; production page behavior
 is unchanged.
+Final exact commit `e0b4f9770de86381a8a5134317dfe01cc68ebc36` passes
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37280882240)
+in all three jobs, including both console configurations' full real browsers and
+live OpenAPI equality, and
+[web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37280882307),
+confirmed on 2026-10-05. Implementation was introduced by `de82188`; the final
+commit also contains the verified retry-fixture correction.
 The complete original frontend objective and all final capability audits remain
 active.
