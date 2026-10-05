@@ -1355,3 +1355,10 @@ This prerequisite does not complete mutation integrity. Shared legacy ownership,
 checked writes, reference-preserving rename and guarded atomic delete/sync and
 concurrent outcomes remain required before generator output/templates/full pages
 and generated-module end-to-end proof. Full original parity remains active.
+
+Exact metadata serialization implementation ef2ba15041be3954b3f28f53cae7286a4ec695ce
+passes server 37347737857 all three jobs, confirmed 2026-10-06, including both
+configurations' complete real browsers/runtime and exact OpenAPI. Its frontend
+and contracts trees are identical to accepted 66158a6; web-ci's path filter does
+not trigger for this backend-only change. This accepts serialization only; all
+stated remaining integrity, generator outputs/pages and full-parity work remains.

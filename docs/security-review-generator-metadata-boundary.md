@@ -42,3 +42,10 @@ claimed consistent snapshots by this writer-only checkpoint.
 Evidence: generator-boundary-backend-final.log, generator-boundary-disabled-runtime.log,
 generator-boundary-enabled-runtime.log, GeneratorMetadataBoundaryTest and the
 observed SQL waiting barrier in verify-generator-configuration-integration.ps1.
+
+Exact metadata serialization implementation ef2ba15041be3954b3f28f53cae7286a4ec695ce
+passes server 37347737857 all three jobs, confirmed 2026-10-06, including both
+configurations' complete real browsers/runtime and exact OpenAPI. Its frontend
+and contracts trees are identical to accepted 66158a6; web-ci's path filter does
+not trigger for this backend-only change. This accepts serialization only; all
+stated remaining integrity, generator outputs/pages and full-parity work remains.

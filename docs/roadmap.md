@@ -165,3 +165,5 @@ checks. No approval-rejected task mutation scheme is implemented.
 Configuration API/calendar repair exact 66158a6 passes server 37345364383 all three jobs and web 37345364385; remaining generator and complete frontend parity work stays active.
 
 Generator metadata serialization: V025 shared SQL transaction guard, actual canonical/original wait and rollback resumption, 418 backend and both complete API regressions pass; exact contract unchanged, cloud pending. Next enforce legacy ownership/checked writes and rename/reference/delete/sync consistency, add canonical delete/sync, then remaining generator/output/UI and full original parity deliverables.
+
+Metadata serialization exact ef2ba15 passes server 37347737857 all three jobs and both full browser/runtime configurations; remaining reference/legacy ownership/delete/sync/output/UI acceptance stays required.
