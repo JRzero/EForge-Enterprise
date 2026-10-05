@@ -1097,11 +1097,14 @@
     "backendTests": 428,
     "enabledRuntime": "success",
     "unitTests": 73,
-    "scope": "Canonical bounded metadata-only deletion with original remove grant, exact IDs and generated client; shared original reference guards and atomic canonical/original rename. Complete legacy owned field set/type/category/tree/subtable validation and checked saves. Real SQL faults prove complete rename/deletion/audit rollback and retry; two actual HTTP reference/delete SQL waiters prove consistent serial outcomes. Physical tables and seeded original row identity/content remain retained. Both configurations pass final complete APIs including five additional legacy semantic refusals. Their 43 existing browsers passed before those final Java-only checks; frontend lint/typecheck/reproduction/build, 73 units and 64 fixture browsers pass. Exact-head cloud awaits acceptance. Canonical sync/schema/key changes, physical DDL, safe React/EForge templates/output/pages/generated modules and full original parity remain required. No rejected task runtime proposal is implemented.",
+    "scope": "Canonical bounded metadata-only deletion with original remove grant, exact IDs and generated client; shared original reference guards and atomic canonical/original rename. Complete legacy owned field set/type/category/tree/subtable validation and checked saves. Real SQL faults prove complete rename/deletion/audit rollback and retry; two actual HTTP reference/delete SQL waiters prove consistent serial outcomes. Physical tables and seeded original row identity/content remain retained. Both configurations pass final complete APIs including five additional legacy semantic refusals. Their 43 existing browsers passed before those final Java-only checks; frontend lint/typecheck/reproduction/build, 73 units and 64 fixture browsers pass. Exact-head cloud awaits acceptance. Canonical sync/schema/key changes, physical DDL, safe React/EForge templates/output/pages/generated modules and full original parity remain required. No rejected task runtime proposal is implemented. Exact-head server all three jobs and web pass; server proves both final complete real API/43-browser configurations, superseding the earlier local evidence timing limitation.",
     "fixtureBrowserTests": 64,
-    "state": "local-deletion-and-reference-verified",
-    "ci": "pending",
+    "state": "deletion-and-reference-verified",
+    "ci": "success",
     "existingLiveBrowserTestsPerConfiguration": 43,
-    "disabledRuntime": "success"
+    "disabledRuntime": "success",
+    "implementationCommit": "5c843569a12758e180a8b8111ab3b037bc665b8c",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37357189557",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37357189811"
   }
 }

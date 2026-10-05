@@ -186,3 +186,11 @@ Canonical sync and physical schema/key/type changes, physical DDL, safe React/EF
 output/templates, preview/download/custom output and full generator pages/generated
 module proof remain required. Form builder, shell/shared features and final full
 original-capability acceptance remain active; task approval restrictions stay intact.
+
+Exact deletion/reference implementation 5c843569a12758e180a8b8111ab3b037bc665b8c
+passes server 37357189557 all three jobs and web 37357189811, confirmed 2026-10-06.
+The final server cloud job executes both complete real API configurations and
+43 real browsers per configuration from this exact source, including the five
+final original-save semantic checks. This supersedes earlier pending-cloud and
+browser-timing limitations for this implementation. Generator synchronization,
+physical DDL, safe React/EForge outputs/pages and full original parity remain active.
