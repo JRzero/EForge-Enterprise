@@ -62,7 +62,8 @@
 Diagnostic console canonical APIs, generated client and scoped authentication
 transport pass local 336 backend/67 unit/52 fixture/37 real browser regression,
 including actual enabled servlet resources, grant/logout revocation, ACL faults
-and expiry. Exact-commit CI and both React console pages remain pending.
+and expiry. Exact commit 3a77fda passes server 37267216665 all three jobs and web
+37267216628. Both React console pages remain pending.
 
 ## Phase 4 — Generator
 

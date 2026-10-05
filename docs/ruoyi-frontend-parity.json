@@ -860,7 +860,7 @@
     }
   ],
   "diagnosticConsoleValidation": {
-    "state": "api-authentication-local-verified",
+    "state": "api-authentication-verified",
     "backendTests": 336,
     "unitTests": 67,
     "fixtureBrowserTests": 52,
@@ -868,7 +868,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
-    "scope": "Canonical status/session API, generated client, actual scoped cookie servlet/assets/schema authentication, current grants/logout, ACL faults, expiry and no login renewal. Both React pages and console browser controls remain pending."
+    "ci": "success",
+    "scope": "Canonical status/session API, generated client, actual scoped cookie servlet/assets/schema authentication, current grants/logout, ACL faults, expiry and no login renewal. Both React pages and console browser controls remain pending.",
+    "implementationCommit": "3a77fdaffed522db278260fae6acd809273dd4d1",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37267216665",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37267216628"
   }
 }

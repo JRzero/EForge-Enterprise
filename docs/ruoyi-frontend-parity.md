@@ -987,5 +987,9 @@ logout, Redis ACL failures and ticket expiry, and proves login TTL does not grow
 Default-disabled verification retains authenticated schema export. Both live
 OpenAPI snapshots exactly match the generated contract. Evidence lives in boot
 target's console-access-backend/web/fixtures/disabled-runtime/final-enabled-runtime
-logs. Exact-commit CI is pending. Console React pages, authenticated iframe
+logs. Implementation commit `3a77fdaffed522db278260fae6acd809273dd4d1`
+passes exact-head server CI `37267216665` (all three jobs, including disabled
+real browser regression and explicitly enabled console integration) and web
+CI `37267216628`, confirmed on 2026-10-05. Both cloud live OpenAPI comparisons
+pass. Console React pages, authenticated iframe
 browser acceptance and all remaining original capabilities remain required.
