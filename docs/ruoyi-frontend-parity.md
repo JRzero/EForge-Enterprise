@@ -44,7 +44,7 @@ It is a work inventory, not executable proof of completion.
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
-| Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; exact-head page CI and final capability audit pending |
+| Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
 | Shared controls | dictionary tags, paging, reset/date ranges, toolbar column/search toggle, image/file upload and preview, rich editor, icon picker, cron editor, keyboard/focus and empty/loading/error/retry states | Missing complete parity |
@@ -1024,7 +1024,11 @@ retention and cache clearing/session invalidation. The two earlier monitor
 loading fixtures now gate responses explicitly instead of relying on 300ms
 timing. Evidence logs under boot target are console-pages-backend,
 console-pages-final-static, console-pages-fixtures, console-pages-enabled-runtime
-and console-pages-disabled-runtime. Exact-commit CI is pending. Jobs/cron and
+and console-pages-disabled-runtime. Implementation commit
+`cb3a25033a2e5a7724ce4c4f358a43e8499a2d0b` passes exact-head server CI
+`37273703241` (all three jobs, including both configurations' complete real
+browser regression and live OpenAPI equality) and web CI `37273703194`,
+confirmed on 2026-10-05. Jobs/cron and
 task logs, generator/form builder, complete shell/shared capabilities and the
 final original-capability audit remain required; this checkpoint is not full
 goal completion.

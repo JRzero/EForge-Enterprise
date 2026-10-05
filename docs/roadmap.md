@@ -66,8 +66,9 @@ and expiry. Exact commit 3a77fda passes server 37267216665 all three jobs and we
 37267216628. Both embedded React console pages now pass local 338 backend/67
 unit/57 fixture/40 real browser cases in enabled and default-disabled runtime,
 including original Druid login/SQL/JSON windows, Swagger authorization and actual
-execution, scoped caching/logout/revocation and error recovery. Page exact-head
-CI and final capability audit remain pending.
+execution, scoped caching/logout/revocation and error recovery. Page cb3a250
+passes exact-head server 37273703241 all three jobs (both configurations' full
+real browsers/OpenAPI) and web 37273703194. Final capability audit remains pending.
 
 ## Phase 4 — Generator
 

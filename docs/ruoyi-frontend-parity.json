@@ -875,7 +875,7 @@
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37267216628"
   },
   "diagnosticConsolePageValidation": {
-    "state": "page-local-verified",
+    "state": "page-verified",
     "backendTests": 338,
     "unitTests": 67,
     "fixtureBrowserTests": 57,
@@ -883,7 +883,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
-    "scope": "Both original embedded routes, disabled/loading/retry/refresh/expiry/abort behavior, actual Druid login/basic/SQL/JSON popup, Swagger authorization/Try it out execution, cookie scope, no-role guards, live grant revocation/logout and enforced diagnostic no-store. Full original-capability audit remains pending."
+    "ci": "success",
+    "scope": "Both original embedded routes, disabled/loading/retry/refresh/expiry/abort behavior, actual Druid login/basic/SQL/JSON popup, Swagger authorization/Try it out execution, cookie scope, no-role guards, live grant revocation/logout and enforced diagnostic no-store. Full original-capability audit remains pending.",
+    "implementationCommit": "cb3a25033a2e5a7724ce4c4f358a43e8499a2d0b",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37273703241",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37273703194"
   }
 }
