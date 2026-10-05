@@ -57,7 +57,7 @@ class JobLogControllerTest
         actor(Set.of("monitor:job:query"));mvc.perform(get(PATH+"/9007199254740993")).andExpect(status().isOk()).andExpect(jsonPath("$.exceptionInfo").value("<script>failure text</script>"));
         assertNull(com.github.pagehelper.PageHelper.getLocalPage());
     }
-    @ParameterizedTest @ValueSource(strings={"page=0","pageSize=101","status=2","direction=drop","from=2026-10-06&to=2026-10-05","from=invalid"})
+    @ParameterizedTest @ValueSource(strings={"page=0","pageSize=101","status=2","direction=drop","from=2026-10-06&to=2026-10-05","from=invalid","timeZone=Invalid/Zone"})
     void rejectsInvalidQueryWithoutSql(String query) throws Exception {
         mvc.perform(get(PATH+"?"+query)).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));verifyNoInteractions(mapper);
     }
@@ -90,6 +90,24 @@ class JobLogControllerTest
         var preview=controller.preview(new CronPreviewController.CronPreviewQuery("0 0 9 ? * MON#2"));assertEquals("Asia/Shanghai",preview.zone());assertEquals(Instant.parse("2026-10-12T01:00:00Z"),preview.times().get(0));
         assertEquals(5,controller.preview(new CronPreviewController.CronPreviewQuery("0 0 0 L * ?")).times().size());
         assertTrue(controller.preview(new CronPreviewController.CronPreviewQuery("0 0 0 1 1 ? 2020")).times().isEmpty());
+    }
+    @Test void calendarBoundsFollowViewerTimezoneIncludingDaylightSavingAndLegacyFallback() throws Exception {
+        mvc.perform(get(PATH).param("from","2026-10-06").param("to","2026-10-06").param("timeZone","Asia/Shanghai")).andExpect(status().isOk());
+        var capture=org.mockito.ArgumentCaptor.forClass(SysJobLog.class);
+        verify(mapper).selectJobLogList(capture.capture());
+        assertEquals(Date.from(Instant.parse("2026-10-05T16:00:00Z")),capture.getValue().getParams().get("calendarBegin"));
+        assertEquals(Date.from(Instant.parse("2026-10-06T15:59:59.999Z")),capture.getValue().getParams().get("calendarEnd"));
+        assertFalse(capture.getValue().getParams().containsKey("beginTime"));
+        clearInvocations(mapper);
+        mvc.perform(post(PATH+"/export").param("from","2026-11-01").param("to","2026-11-01").param("timeZone","America/New_York")).andExpect(status().isOk());
+        verify(mapper).selectJobLogList(capture.capture());
+        assertEquals(Date.from(Instant.parse("2026-11-01T04:00:00Z")),capture.getValue().getParams().get("calendarBegin"));
+        assertEquals(Date.from(Instant.parse("2026-11-02T04:59:59.999Z")),capture.getValue().getParams().get("calendarEnd"));
+        clearInvocations(mapper);
+        mvc.perform(get(PATH).param("from","2026-10-06").param("to","2026-10-06")).andExpect(status().isOk());
+        verify(mapper).selectJobLogList(capture.capture());
+        assertEquals("2026-10-06 00:00:00",capture.getValue().getParams().get("beginTime"));
+        assertFalse(capture.getValue().getParams().containsKey("calendarBegin"));
     }
     @TestConfiguration static class Configuration {
         @Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}

@@ -791,6 +791,47 @@ export type TableDetail = {
     table: TableSummary;
     tables: TableChoice[];
 };
+export type GeneratorFieldUpdate = {
+    comment?: string;
+    controlType: "input" | "textarea" | "select" | "radio" | "checkbox" | "datetime" | "imageUpload" | "fileUpload" | "editor";
+    dictionaryType?: string;
+    editable: boolean;
+    id: string;
+    insertable: boolean;
+    javaField: string;
+    javaType: "Long" | "String" | "Integer" | "Double" | "BigDecimal" | "Date" | "Boolean";
+    listed: boolean;
+    order: number;
+    queryType: "EQ" | "NE" | "GT" | "GTE" | "LT" | "LTE" | "LIKE" | "BETWEEN";
+    queryable: boolean;
+    required: boolean;
+};
+export type GeneratorConfigurationOptions = {
+    generateDetail: boolean;
+    parentMenuId?: string;
+    treeCode?: string;
+    treeName?: string;
+    treeParentCode?: string;
+};
+export type GeneratorConfigurationUpdate = {
+    author: string;
+    businessName: string;
+    category: "crud" | "tree" | "sub";
+    className: string;
+    columns: GeneratorFieldUpdate[];
+    comment: string;
+    formColumns: number;
+    functionName: string;
+    moduleName: string;
+    name: string;
+    options: GeneratorConfigurationOptions;
+    outputPath?: string;
+    outputType: string;
+    packageName: string;
+    remark?: string;
+    subTableForeignKey?: string;
+    subTableName?: string;
+};
 /**
  * Get the current user and authorized application navigation
  */
@@ -955,7 +996,7 @@ export function deleteJobLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazap
         body: deleteLogsRequest
     }));
 }
-export function listJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction }: {
+export function listJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction, timeZone }: {
     page?: number;
     pageSize?: number;
     name?: string;
@@ -965,6 +1006,7 @@ export function listJobLogs({ page, pageSize, name, group, invokeTarget, status,
     $from?: string;
     to?: string;
     direction?: "asc" | "desc";
+    timeZone?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
@@ -978,7 +1020,8 @@ export function listJobLogs({ page, pageSize, name, group, invokeTarget, status,
         status,
         "from": $from,
         to,
-        direction
+        direction,
+        timeZone
     }))}`, {
         ...opts
     });
@@ -989,7 +1032,7 @@ export function clearJobLogs(opts?: Oazapfts.RequestOpts) {
         method: "POST"
     });
 }
-export function exportJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction }: {
+export function exportJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction, timeZone }: {
     page?: number;
     pageSize?: number;
     name?: string;
@@ -999,6 +1042,7 @@ export function exportJobLogs({ page, pageSize, name, group, invokeTarget, statu
     $from?: string;
     to?: string;
     direction?: "asc" | "desc";
+    timeZone?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchBlob<{
         status: 200;
@@ -1012,7 +1056,8 @@ export function exportJobLogs({ page, pageSize, name, group, invokeTarget, statu
         status,
         "from": $from,
         to,
-        direction
+        direction,
+        timeZone
     }))}`, {
         ...opts,
         method: "POST"
@@ -2229,6 +2274,13 @@ export function getGeneratorTable(id: string, opts?: Oazapfts.RequestOpts) {
     }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}`, {
         ...opts
     });
+}
+export function updateGeneratorTable(id: string, generatorConfigurationUpdate: GeneratorConfigurationUpdate, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: generatorConfigurationUpdate
+    }));
 }
 export function listGeneratorColumns(id: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{

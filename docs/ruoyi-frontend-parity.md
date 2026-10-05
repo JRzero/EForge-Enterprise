@@ -1298,3 +1298,38 @@ Both live OpenAPI snapshots exactly match the contract. Exact-head implementatio
 three jobs and web 37333746012, confirmed on 2026-10-05. No generator UI or
 React/EForge output completion is claimed; all remaining original capabilities,
 full task mutation consistency and its pending approval remain in scope.
+
+## Generator configuration API and job-log calendar checkpoint (2026-10-06)
+
+Canonical `PUT /api/v1/tool/generator/tables/{id}` and its generated client retain
+original configuration and all field controls through concrete validated input.
+The original edit grant and authenticated actor remain authoritative. A complete
+owned field set is required; physical identities stay server-owned, duplicate/
+foreign/incomplete fields fail before writes, and parent metadata plus every
+field update share one transaction. Actual MySQL update failure proves full
+rollback and retry. Tree/subtable/menu settings, clearing/order, exact long IDs,
+Boolean/query/control choices and legal hyphenated route names are verified.
+Explicit write-schema names preserve the complete independent read contract.
+
+The enabled real browser regression exposed a job-log UTC database/Shanghai
+calendar mismatch. The product now sends its viewer zone for both list and XLSX
+and binds prepared instant boundaries; omitted zones preserve legacy semantics.
+Actual SQL proves Shanghai boundaries, the New York 25-hour DST day, exact rows
+and matching full export selection. The original failing Quartz browser test
+passes after the repair, without replacing browser dates with UTC dates.
+
+416 backend tests (including 14 configuration MVC and ten data-scope cases),
+73 units, 64 fixture browsers, both configurations' 43 real browsers and full
+MySQL/Redis/Quartz/OSHI/ACL/captcha regressions pass. Lint/typecheck/build,
+security defaults, generated-client reproduction and both live OpenAPI snapshots
+match exactly. Exact-head cloud verification is pending until its runs succeed.
+See `docs/security-review-generator-configuration-v1.md` and
+`docs/security-review-job-log-calendar.md` and generator-configuration-calendar-*
+logs under boot target.
+
+This completes a local API checkpoint. Shared legacy/sync/reference mutation
+coordination, remaining generator writes, React/EForge templates and full pages,
+runnable generated CRUD/tree/subtable proof, form builder, shell/shared features,
+other modules' calendar/export-time audit and final original-capability acceptance
+remain required. The rejected task runtime proposal still requires explicit
+approval; no equivalent scheduler mutation change is included here.

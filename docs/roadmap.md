@@ -150,3 +150,14 @@ Exact implementation 15d7bce passes server 37333745938 all three jobs and web
 37333746012. All other generator writes, React/EForge
 output/templates/UI and runnable generated module proof remain required. No
 physical table creation or custom filesystem output is implemented in this stage.
+
+Generator configuration API checkpoint: atomic complete-field configuration save,
+original grants, server-owned physical identity, all original field/settings
+choices, exact IDs, SQL rollback/retry and distinct read/write schemas pass 416
+backend/73 unit/64 fixture and both configurations' 43 real browsers/full runtime.
+The actual browser-calendar failure is repaired in job-log list/export and proven
+with Shanghai/DST SQL boundaries; both live OpenAPI snapshots match. Exact-head
+cloud acceptance is pending. Shared legacy/sync/reference concurrency, remaining
+generator writes/output/templates/full pages and runnable generation proof remain
+required, followed by form builder, shell/shared and final capability/calendar
+checks. No approval-rejected task mutation scheme is implemented.

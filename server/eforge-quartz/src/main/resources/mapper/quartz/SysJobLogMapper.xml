@@ -43,6 +43,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
 				and date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 			</if>
+			<if test="params.calendarBegin != null">and create_time &gt;= #{params.calendarBegin}</if>
+			<if test="params.calendarEnd != null">and create_time &lt;= #{params.calendarEnd}</if>
 		</where>
 		order by create_time desc
 	</select>

@@ -1009,5 +1009,18 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37333745938",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37333746012",
     "scope": "Canonical batch metadata import with original import grant and authenticated audit actor, requested-order string IDs, original field initialization and eforge-react target. Twelve MVC cases and actual MySQL preflight, metadata/field rollback under insert fault, successful retry, duplicate/conflicting concurrent HTTP imports and no-role denial pass in both configurations. First harness trigger syntax was corrected and database regression rerun successfully; 43 unchanged real browsers passed before that harness fault. Both configurations pass their complete runtime regressions and 43 existing real browsers; exact-head server (all three jobs) and web cloud acceptance pass. Configuration writes, physical table create, deletion/sync, preview/archive/custom outputs, React/EForge templates/pages, generated module end-to-end and final original-capability audits remain required."
+  },
+  "generatorConfigurationApiValidation": {
+    "state": "configuration-api-locally-verified",
+    "backendTests": 416,
+    "configurationMvcTests": 14,
+    "unitTests": 73,
+    "fixtureBrowserTests": 64,
+    "existingLiveBrowserTestsPerConfiguration": 43,
+    "disabledRuntime": "success",
+    "enabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Canonical atomic configuration save with original edit grant and authenticated audit, exact parent/column IDs, complete owned field set, physical identities retained, original types/queries/controls/flags/clearing/order, tree/subtable/menu settings and compatible route names. Real SQL update failure proves full table/field rollback and retry; read/write OpenAPI schemas stay distinct. The real browser date failure was fixed in job-log list/export using viewer-zone prepared boundaries, verified against actual Shanghai and New York DST SQL boundaries, legacy omission and XLSX agreement. Both complete runtime/browser regressions pass. Shared legacy/sync/reference concurrency, remaining generator writes, React/EForge outputs/pages, runnable generated modules, other modules calendar/export-time audit and final original-capability acceptance remain required. No scheduler mutation proposal was implemented."
   }
 }

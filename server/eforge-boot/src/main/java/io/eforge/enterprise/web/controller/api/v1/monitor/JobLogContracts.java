@@ -18,7 +18,8 @@ public final class JobLogContracts
             @Min(0) @Max(1) Integer status,
             @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,
             @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to,
-            @Schema(defaultValue="desc") LogContracts.Direction direction) {}
+            @Schema(defaultValue="desc") LogContracts.Direction direction,
+            @Size(max=64) String timeZone) {}
     public record JobLogResponse(@Schema(requiredMode=REQUIRED) String id,String name,String group,
             String invokeTarget,String message,String status,Instant startedAt,Instant endedAt,Instant createdAt)
     {

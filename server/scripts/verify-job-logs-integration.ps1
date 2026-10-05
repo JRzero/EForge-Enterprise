@@ -101,6 +101,28 @@ try {
         $first=if($direction -eq 'asc'){'939998'}else{'939999'}
         Assert-Check ($calendar.total -eq 2 -and $calendar.items.Count -eq 1 -and $calendar.items[0].id -eq $first) 'Calendar bounds and time ordering must be applied before pagination.'
     }
+    # UTC JDBC fixture: browser-calendar bounds must match displayed instants, including a 25-hour DST day.
+    foreach($case in @(
+        @{zone='Asia%2FShanghai';day='2026-10-01';times=@('2026-09-30 15:59:59','2026-09-30 16:00:00','2026-10-01 15:59:59','2026-10-01 16:00:00')},
+        @{zone='America%2FNew_York';day='2026-11-01';times=@('2026-11-01 03:59:59','2026-11-01 04:00:00','2026-11-02 04:59:59','2026-11-02 05:00:00')}
+    )) {
+        Log-Sql "DELETE FROM sys_job_log WHERE job_name='$jobMarker-zone';"|Out-Null
+        for($boundary=0;$boundary -lt 4;$boundary++) {
+            $boundaryId=939990+$boundary
+            Log-Sql "INSERT INTO sys_job_log(job_log_id,job_name,job_group,invoke_target,status,create_time) VALUES($boundaryId,'$jobMarker-zone','SYSTEM','ryTask.ryNoParams()','0','$($case.times[$boundary])');"|Out-Null
+        }
+        $zoneQuery="name=$jobMarker-zone&from=$($case.day)&to=$($case.day)&timeZone=$($case.zone)"
+        $zoned=(Request "$jobLogBase`?$zoneQuery&direction=asc&pageSize=100" 'GET' '' $authorized).Content|ConvertFrom-Json
+        Assert-Check ($zoned.total -eq 2 -and ($zoned.items.id -join ',') -eq '939991,939992') 'Viewer calendar must include exactly the two boundary instants, including DST.'
+        Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$jobLogBase/export?$zoneQuery&pageSize=1" -Method POST -Headers $authorized -OutFile $file|Out-Null
+        $zoneArchive=[IO.Compression.ZipFile]::OpenRead($file)
+        try {
+            $zoneReader=[IO.StreamReader]::new($zoneArchive.GetEntry('xl/worksheets/sheet1.xml').Open());try{[xml]$zoneXml=$zoneReader.ReadToEnd()}finally{$zoneReader.Dispose()}
+            Assert-Check (@($zoneXml.SelectNodes("//*[local-name()='sheetData']/*[local-name()='row']")).Count -eq 3) 'Zoned XLSX must use the same full filtered set as the list.'
+        } finally {$zoneArchive.Dispose()}
+    }
+    Assert-Problem (Request "$jobLogBase`?timeZone=Invalid%2FZone" 'GET' '' $authorized) 400 'VALIDATION_ERROR'
+    Write-Output 'Job log calendar: actual UTC SQL boundary selection, Shanghai browser day, New York 25-hour DST day, XLSX agreement and invalid zone rejection passed.'
     Log-Sql "INSERT INTO sys_job_log(job_log_id,job_name,job_group,invoke_target,status,create_time) VALUES(940001,'$jobMarker-clear','SYSTEM','ryTask.ryNoParams()','0',sysdate());"|Out-Null
     Assert-Check ((Request "$jobLogBase/clear" 'POST' '' $authorized).StatusCode -eq 204) 'Canonical clear failed.'
     Log-Sql "INSERT INTO sys_job_log(job_name,job_group,invoke_target,status,create_time) VALUES('$jobMarker-after','SYSTEM','ryTask.ryNoParams()','0',sysdate());"|Out-Null

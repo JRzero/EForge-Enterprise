@@ -36,8 +36,15 @@ public class JobLogService
     private static SysJobLog filter(JobLogQuery query) {
         if(query.from()!=null&&query.to()!=null&&query.from().isAfter(query.to()))throw new ApiFailure(400,"VALIDATION_ERROR","Invalid date range.");
         var row=new SysJobLog();row.setJobName(query.name());row.setJobGroup(query.group());row.setInvokeTarget(query.invokeTarget());row.setStatus(query.status()==null?null:query.status().toString());
-        if(query.from()!=null)row.getParams().put("beginTime",query.from()+" 00:00:00");
-        if(query.to()!=null)row.getParams().put("endTime",query.to()+" 23:59:59");
+        if(query.timeZone()!=null) {
+            final java.time.ZoneId zone;
+            try {zone=java.time.ZoneId.of(query.timeZone());}catch(java.time.DateTimeException invalid){throw new ApiFailure(400,"VALIDATION_ERROR","Invalid calendar time zone.");}
+            if(query.from()!=null)row.getParams().put("calendarBegin",java.util.Date.from(query.from().atStartOfDay(zone).toInstant()));
+            if(query.to()!=null)row.getParams().put("calendarEnd",java.util.Date.from(query.to().atTime(23,59,59,999000000).atZone(zone).toInstant()));
+        } else {
+            if(query.from()!=null)row.getParams().put("beginTime",query.from()+" 00:00:00");
+            if(query.to()!=null)row.getParams().put("endTime",query.to()+" 23:59:59");
+        }
         return row;
     }
     private static Long identifier(String id) {

@@ -41,7 +41,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   const query = useMemo(() => ({name: filters.name, group: filters.group, invokeTarget: filters.target, status: filters.status ? Number(filters.status) : undefined,
     direction: sorting[0]?.desc ? 'desc' as const : 'asc' as const}), [filters, sorting]);
   const jobQuery = useMemo(() => ({...query, sort: sorting[0]?.id === 'name' ? 'name' as const : sorting[0]?.id === 'createdAt' ? 'createdAt' as const : 'id' as const}), [query, sorting]);
-  const logQuery = useMemo(() => ({...query, $from: filters.from || undefined, to: filters.to || undefined}), [query, filters.from, filters.to]);
+  const logQuery = useMemo(() => ({...query, $from: filters.from || undefined, to: filters.to || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone}), [query, filters.from, filters.to]);
   useEffect(() => {
     if (!ready) return;
     const controller = new AbortController(); setData(null); setLoading(true); setError(''); setSelection({});

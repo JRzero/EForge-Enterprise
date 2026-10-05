@@ -952,6 +952,243 @@
         ],
         "type": "object"
       },
+      "GeneratorConfigurationOptions": {
+        "properties": {
+          "generateDetail": {
+            "type": "boolean"
+          },
+          "parentMenuId": {
+            "pattern": "0|[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "treeCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "treeName": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "treeParentCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "generateDetail"
+        ],
+        "type": "object"
+      },
+      "GeneratorConfigurationUpdate": {
+        "properties": {
+          "author": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "businessName": {
+            "maxLength": 30,
+            "minLength": 0,
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "crud",
+              "tree",
+              "sub"
+            ],
+            "type": "string"
+          },
+          "className": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/GeneratorFieldUpdate"
+            },
+            "maxItems": 4096,
+            "minItems": 1,
+            "type": "array"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "formColumns": {
+            "format": "int32",
+            "maximum": 3,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "functionName": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "moduleName": {
+            "maxLength": 30,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/GeneratorConfigurationOptions"
+          },
+          "outputPath": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outputType": {
+            "pattern": "[01]",
+            "type": "string"
+          },
+          "packageName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subTableForeignKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "subTableName": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "author",
+          "businessName",
+          "category",
+          "className",
+          "columns",
+          "comment",
+          "formColumns",
+          "functionName",
+          "moduleName",
+          "name",
+          "options",
+          "outputType",
+          "packageName"
+        ],
+        "type": "object"
+      },
+      "GeneratorFieldUpdate": {
+        "properties": {
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "controlType": {
+            "enum": [
+              "input",
+              "textarea",
+              "select",
+              "radio",
+              "checkbox",
+              "datetime",
+              "imageUpload",
+              "fileUpload",
+              "editor"
+            ],
+            "type": "string"
+          },
+          "dictionaryType": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "id": {
+            "minLength": 1,
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "insertable": {
+            "type": "boolean"
+          },
+          "javaField": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "javaType": {
+            "enum": [
+              "Long",
+              "String",
+              "Integer",
+              "Double",
+              "BigDecimal",
+              "Date",
+              "Boolean"
+            ],
+            "type": "string"
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "order": {
+            "format": "int32",
+            "maximum": 1000000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "queryType": {
+            "enum": [
+              "EQ",
+              "NE",
+              "GT",
+              "GTE",
+              "LT",
+              "LTE",
+              "LIKE",
+              "BETWEEN"
+            ],
+            "type": "string"
+          },
+          "queryable": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "controlType",
+          "editable",
+          "id",
+          "insertable",
+          "javaField",
+          "javaType",
+          "listed",
+          "order",
+          "queryType",
+          "queryable",
+          "required"
+        ],
+        "type": "object"
+      },
       "HostMetrics": {
         "properties": {
           "architecture": {
@@ -3802,6 +4039,16 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "timeZone",
+            "required": false,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3931,6 +4178,16 @@
                 "asc",
                 "desc"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeZone",
+            "required": false,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 0,
               "type": "string"
             }
           }
@@ -8419,6 +8676,37 @@
         },
         "tags": [
           "generator-read-controller"
+        ]
+      },
+      "put": {
+        "operationId": "updateGeneratorTable",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratorConfigurationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "generator-configuration-controller"
         ]
       }
     },
