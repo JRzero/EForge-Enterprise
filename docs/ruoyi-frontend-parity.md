@@ -1240,3 +1240,34 @@ confirmed on 2026-10-05. Both configurations' complete Linux real browsers,
 runtime regressions and exact live OpenAPI equality pass. This accepts the
 editor/read tool/detail handoff only; task create/edit integration, all canonical
 task mutations/full consistency and final capability audit remain incomplete.
+
+### Generator canonical read checkpoint — 2026-10-05
+
+Imported table lists, database discovery, configuration/table-choice detail and
+fields now use concrete canonical DTOs under the original list/query grants.
+Compatibility objects and raw options JSON remain behind the projection boundary.
+String long IDs include parent/column ownership, configuration retains tree/sub/
+layout/output/author/detail choices, and fields retain every original flag/type.
+The unchanged mappers preserve current-schema/import/Quartz/generator exclusions,
+bound name/comment/inclusive-date filters and fixed ordering before pagination.
+Paging state always clears. Missing imported tables are typed 404; malformed
+stored options and SQL failures are sanitized. Reads never execute generation,
+DDL, metadata writes or filesystem output. See security-review-generator-read-v1.md.
+
+Seventeen new MVC cases pass. Full validation passes 388 backend tests including
+ten unchanged data-scope cases, 73 units, 64 fixture browsers and both console
+configurations' 43 existing real browsers/full MySQL/Redis/Quartz/OSHI/ACL/captcha
+regressions. Owned real-schema/metadata fixtures prove discovery/import exclusion,
+configuration/fields/choices/exact IDs, combined filters and calendar, sort before
+page, injection as data, anonymous/no-role denial and actual SQL fault recovery
+without metadata loss. Both live OpenAPI snapshots exactly match the new contract;
+generated client reproduction, lint/typecheck/build and hardened defaults pass.
+Evidence logs use generator-read-backend/unit/build/fixtures/disabled-runtime/
+enabled-runtime under boot target. Exact-head cloud acceptance is pending.
+
+Import/create/edit/delete/sync/preview/download/custom-path APIs, React/EForge
+outputs with canonical contracts and static route/page generation, complete
+metadata/import/preview/output UI and actual generated-code end-to-end acceptance
+remain required. Form builder, shell/shared capabilities, complete task writes/
+consistency and final original-capability audits remain active. This read stage
+does not complete the generator module or change the pending task-boundary approval.

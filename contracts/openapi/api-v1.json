@@ -143,6 +143,69 @@
         ],
         "type": "object"
       },
+      "ColumnResponse": {
+        "properties": {
+          "autoIncrement": {
+            "type": "boolean"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "controlType": {
+            "type": "string"
+          },
+          "databaseType": {
+            "type": "string"
+          },
+          "dictionaryType": {
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "insertable": {
+            "type": "boolean"
+          },
+          "javaField": {
+            "type": "string"
+          },
+          "javaType": {
+            "type": "string"
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "order": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "primaryKey": {
+            "type": "boolean"
+          },
+          "queryType": {
+            "type": "string"
+          },
+          "queryable": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "tableId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "CommandStatistic": {
         "properties": {
           "calls": {
@@ -155,6 +218,51 @@
         "required": [
           "calls",
           "name"
+        ],
+        "type": "object"
+      },
+      "Configuration": {
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "formColumns": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "functionName": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/Options"
+          },
+          "outputPath": {
+            "type": "string"
+          },
+          "outputType": {
+            "type": "string"
+          },
+          "packageName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "subTableForeignKey": {
+            "type": "string"
+          },
+          "subTableName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "options"
         ],
         "type": "object"
       },
@@ -324,6 +432,28 @@
         "required": [
           "times",
           "zone"
+        ],
+        "type": "object"
+      },
+      "DatabaseTable": {
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
         ],
         "type": "object"
       },
@@ -1650,11 +1780,63 @@
         ],
         "type": "object"
       },
+      "Options": {
+        "properties": {
+          "generateDetail": {
+            "type": "boolean"
+          },
+          "parentMenuId": {
+            "type": "string"
+          },
+          "parentMenuName": {
+            "type": "string"
+          },
+          "treeCode": {
+            "type": "string"
+          },
+          "treeName": {
+            "type": "string"
+          },
+          "treeParentCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PageResponseConfigurationResponse": {
         "properties": {
           "items": {
             "items": {
               "$ref": "#/components/schemas/ConfigurationResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
+      "PageResponseDatabaseTable": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DatabaseTable"
             },
             "type": "array"
           },
@@ -1974,6 +2156,35 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/RoleResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
+      "PageResponseTableSummary": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TableSummary"
             },
             "type": "array"
           },
@@ -2526,6 +2737,93 @@
           "jvm",
           "memory",
           "sampledAt"
+        ],
+        "type": "object"
+      },
+      "TableChoice": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnResponse"
+            },
+            "type": "array"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "columns",
+          "id"
+        ],
+        "type": "object"
+      },
+      "TableDetail": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnResponse"
+            },
+            "type": "array"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/Configuration"
+          },
+          "table": {
+            "$ref": "#/components/schemas/TableSummary"
+          },
+          "tables": {
+            "items": {
+              "$ref": "#/components/schemas/TableChoice"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "columns",
+          "configuration",
+          "table",
+          "tables"
+        ],
+        "type": "object"
+      },
+      "TableSummary": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "className": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "webType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -7790,6 +8088,289 @@
         },
         "tags": [
           "user-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/database-tables": {
+      "get": {
+        "operationId": "listGeneratorDatabaseTables",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comment",
+            "required": false,
+            "schema": {
+              "maxLength": 500,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "enum": [
+                "name",
+                "comment",
+                "createdAt",
+                "updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseDatabaseTable"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "generator-read-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/tables": {
+      "get": {
+        "operationId": "listGeneratorTables",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": false,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "comment",
+            "required": false,
+            "schema": {
+              "maxLength": 500,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "enum": [
+                "name",
+                "comment",
+                "createdAt",
+                "updatedAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseTableSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "generator-read-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/tables/{id}": {
+      "get": {
+        "operationId": "getGeneratorTable",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableDetail"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "generator-read-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/tables/{id}/columns": {
+      "get": {
+        "operationId": "listGeneratorColumns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ColumnResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "generator-read-controller"
         ]
       }
     }

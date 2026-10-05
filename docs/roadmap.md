@@ -136,3 +136,8 @@ create/edit integration and all canonical mutations/full consistency remain
 required. Pending explicit approval still applies only to the rejected mutation
 boundary. Independent generator React/EForge output/UI, form builder, shell/
 shared capabilities and final original-capability audits continue next.
+Generator read checkpoint: canonical imported/database lists, configuration/detail
+choices and fields plus generated client pass 388 backend/73 unit/64 fixture and
+both configurations' 43 existing real browsers/full runtime, exact live OpenAPI.
+Exact-head CI is pending. All generator mutations/output/templates/UI and generated
+reference module end-to-end proof remain required; full original parity stays active.

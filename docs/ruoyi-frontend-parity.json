@@ -867,8 +867,9 @@
         "genCode",
         "synchDb"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadControllerTest.java", "server/scripts/verify-generator-read-integration.ps1", "web/generated/api.ts", "docs/security-review-generator-read-v1.md"],
+      "remaining": ["Canonical import/create/update/delete/sync/preview/download/custom-output endpoints", "React/EForge generated contracts/routes/pages and generator metadata/import/preview/output UI with end-to-end validation", "Final original-capability audit"]
     }
   ],
   "jobLogApiValidation": {
@@ -978,5 +979,17 @@
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528660",
     "scope": "Feature-local seven-field editor, original reset/refill/cancel/confirmation and task read/detail handoff. Range/interval/specified values, omitted/expired years, day/week exclusion, W/L/# and preserved named/advanced raw fields use actual protected Quartz five-instant/server-zone preview. Invalid/stale/failed previews cannot confirm; whitespace-only edits revalidate. Original grants, retry/cancel/focus/keyboard/mobile, actual no-role preview denial and unchanged persisted task fields pass. Task create/edit integration, task mutations, full scheduler/SQL consistency and final original-capability audits remain pending; neither approval-rejected runtime mutation proposal is implemented.",
     "evidence": ["docs/security-review-cron-editor.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/unit/cron-model.test.ts", "web/tests/unit/job-api.test.ts", "web/tests/e2e/cron-editor.spec.ts", "web/tests/live/jobs.spec.ts"]
+  },
+  "generatorReadApiValidation": {
+    "state": "read-api-locally-verified",
+    "backendTests": 388,
+    "unitTests": 73,
+    "fixtureBrowserTests": 64,
+    "existingLiveBrowserTestsPerConfiguration": 43,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Canonical imported/database table lists, detailed configuration/table choices and columns with original split list/query grants and generated client. Seventeen MVC cases plus actual MySQL schema/import exclusion, exact long IDs/flags/tree/subtable settings, filters/calendar/order before paging, injection-as-data, no-role/anonymous denial, malformed stored JSON and recoverable SQL faults pass. All generator mutations, React/EForge outputs and UI, end-to-end generation and final capability audit remain pending."
   }
 }

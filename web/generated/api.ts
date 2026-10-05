@@ -698,6 +698,88 @@ export type UserRolesRequest = {
 export type UserStatusRequest = {
     status: string;
 };
+export type DatabaseTable = {
+    comment?: string;
+    createdAt?: string;
+    name: string;
+    updatedAt?: string;
+};
+export type PageResponseDatabaseTable = {
+    items: DatabaseTable[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type TableSummary = {
+    category?: string;
+    className?: string;
+    comment?: string;
+    createdAt?: string;
+    id: string;
+    name?: string;
+    updatedAt?: string;
+    webType?: string;
+};
+export type PageResponseTableSummary = {
+    items: TableSummary[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type ColumnResponse = {
+    autoIncrement?: boolean;
+    comment?: string;
+    controlType?: string;
+    databaseType?: string;
+    dictionaryType?: string;
+    editable?: boolean;
+    id: string;
+    insertable?: boolean;
+    javaField?: string;
+    javaType?: string;
+    listed?: boolean;
+    name?: string;
+    order?: number;
+    primaryKey?: boolean;
+    queryType?: string;
+    queryable?: boolean;
+    required?: boolean;
+    tableId?: string;
+};
+export type Options = {
+    generateDetail?: boolean;
+    parentMenuId?: string;
+    parentMenuName?: string;
+    treeCode?: string;
+    treeName?: string;
+    treeParentCode?: string;
+};
+export type Configuration = {
+    author?: string;
+    businessName?: string;
+    formColumns?: number;
+    functionName?: string;
+    moduleName?: string;
+    options: Options;
+    outputPath?: string;
+    outputType?: string;
+    packageName?: string;
+    remark?: string;
+    subTableForeignKey?: string;
+    subTableName?: string;
+};
+export type TableChoice = {
+    columns: ColumnResponse[];
+    comment?: string;
+    id: string;
+    name?: string;
+};
+export type TableDetail = {
+    columns: ColumnResponse[];
+    configuration: Configuration;
+    table: TableSummary;
+    tables: TableChoice[];
+};
 /**
  * Get the current user and authorized application navigation
  */
@@ -2066,4 +2148,72 @@ export function setUserStatus(id: string, userStatusRequest: UserStatusRequest, 
         method: "PUT",
         body: userStatusRequest
     }));
+}
+export function listGeneratorDatabaseTables({ page, pageSize, name, comment, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    comment?: string;
+    $from?: string;
+    to?: string;
+    sort?: "name" | "comment" | "createdAt" | "updatedAt";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseDatabaseTable;
+    }>(`/api/v1/tool/generator/database-tables${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        comment,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
+export function listGeneratorTables({ page, pageSize, name, comment, $from, to, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    comment?: string;
+    $from?: string;
+    to?: string;
+    sort?: "name" | "comment" | "createdAt" | "updatedAt";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseTableSummary;
+    }>(`/api/v1/tool/generator/tables${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        comment,
+        "from": $from,
+        to,
+        sort,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
+export function getGeneratorTable(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: TableDetail;
+    }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function listGeneratorColumns(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ColumnResponse[];
+    }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/columns`, {
+        ...opts
+    });
 }
