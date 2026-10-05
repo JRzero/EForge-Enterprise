@@ -2300,3 +2300,9 @@ export function listGeneratorColumns(id: string, opts?: Oazapfts.RequestOpts) {
         ...opts
     });
 }
+export function synchronizeGeneratorTable(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/synchronize`, {
+        ...opts,
+        method: "POST"
+    });
+}

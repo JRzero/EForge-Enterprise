@@ -194,3 +194,29 @@ The final server cloud job executes both complete real API configurations and
 final original-save semantic checks. This supersedes earlier pending-cloud and
 browser-timing limitations for this implementation. Generator synchronization,
 physical DDL, safe React/EForge outputs/pages and full original parity remain active.
+
+## Generator synchronization checkpoint (2026-10-06)
+
+Canonical synchronization and original synchDb now share a guarded metadata
+transaction, preserve exact surviving IDs and original conditional settings, and
+persist actual physical PK/auto/type changes with checked writes. Tree/subtable
+references and stale complete field saves are protected. Product sync performs no
+physical DDL or business-row writes. 444 backend tests (eight MVC, eight algorithm,
+ten data-scope), frontend lint/typecheck/reproduction/build, 73 units and 64 fixture
+browsers pass. Both final actual API configurations prove complete update/insert/
+delete and audit rollback/retry, concurrent SQL waiters with 204/409 outcomes,
+permission boundaries, retained full post-DDL rows and exact live OpenAPI.
+
+A legacy SQL-detail leak was reproduced by a failing HTTP test, then repaired
+inside the original synchronization boundary; all eight MVC cases and both final
+actual API configurations pass. Both configurations passed 43 existing real
+browsers before this last backend privacy repair. Exact-head cloud must run the
+final browser/runtime source; acceptance remains pending. See
+`docs/security-review-generator-sync-v1.md` for evidence timing and limits.
+
+Physical creation remains a design checkpoint in
+`docs/proposed-generator-create-boundary.md`, with no new creation API claimed.
+React/EForge output/templates, immutable snapshots, preview/download/custom output,
+complete generator pages and generated CRUD/tree/submodule end-to-end proof remain
+required, followed by form builder, shell/shared, calendar/export audits and full
+original parity. The specifically rejected task runtime scheme remains untouched.

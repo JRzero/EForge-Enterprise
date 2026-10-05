@@ -8781,6 +8781,29 @@
           "generator-read-controller"
         ]
       }
+    },
+    "/api/v1/tool/generator/tables/{id}/synchronize": {
+      "post": {
+        "operationId": "synchronizeGeneratorTable",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "generator-synchronization-controller"
+        ]
+      }
     }
   },
   "security": [

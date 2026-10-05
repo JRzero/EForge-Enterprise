@@ -42,6 +42,9 @@ public interface GenTableColumnMapper
      */
     public int updateGenTableColumn(GenTableColumn genTableColumn);
 
+    /** Internal schema probe only; configuration request fields never call this operation. */
+    public int updatePhysicalIdentity(GenTableColumn genTableColumn);
+
     /**
      * 删除业务字段
      * 

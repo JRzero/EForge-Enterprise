@@ -55,6 +55,9 @@ public class GenTableServiceImpl implements IGenTableService
     private GeneratorMetadataBoundary metadataBoundary;
 
     @Autowired
+    private GeneratorSynchronizationService synchronization;
+
+    @Autowired
     private GenTableColumnMapper genTableColumnMapper;
 
     /**
@@ -381,50 +384,15 @@ public class GenTableServiceImpl implements IGenTableService
     @Transactional
     public void synchDb(String tableName)
     {
-        metadataBoundary.lock();
-        GenTable table = genTableMapper.selectGenTableByName(tableName);
-        List<GenTableColumn> tableColumns = table.getColumns();
-        Map<String, GenTableColumn> tableColumnMap = tableColumns.stream().collect(Collectors.toMap(GenTableColumn::getColumnName, Function.identity()));
-
-        List<GenTableColumn> dbTableColumns = genTableColumnMapper.selectDbTableColumnsByName(tableName);
-        if (StringUtils.isEmpty(dbTableColumns))
+        try
         {
-            throw new ServiceException("同步数据失败，原表结构不存在");
+            synchronization.byName(tableName, io.eforge.enterprise.common.utils.SecurityUtils.getUsername());
         }
-        List<String> dbTableColumnNames = dbTableColumns.stream().map(GenTableColumn::getColumnName).collect(Collectors.toList());
-
-        dbTableColumns.forEach(column -> {
-            GenUtils.initColumnField(column, table);
-            if (tableColumnMap.containsKey(column.getColumnName()))
-            {
-                GenTableColumn prevColumn = tableColumnMap.get(column.getColumnName());
-                column.setColumnId(prevColumn.getColumnId());
-                if (column.isList())
-                {
-                    // 如果是列表，继续保留查询方式/字典类型选项
-                    column.setDictType(prevColumn.getDictType());
-                    column.setQueryType(prevColumn.getQueryType());
-                }
-                if (StringUtils.isNotEmpty(prevColumn.getIsRequired()) && !column.isPk()
-                        && (column.isInsert() || column.isEdit())
-                        && ((column.isUsableColumn()) || (!column.isSuperColumn())))
-                {
-                    // 如果是(新增/修改&非主键/非忽略及父属性)，继续保留必填/显示类型选项
-                    column.setIsRequired(prevColumn.getIsRequired());
-                    column.setHtmlType(prevColumn.getHtmlType());
-                }
-                genTableColumnMapper.updateGenTableColumn(column);
-            }
-            else
-            {
-                genTableColumnMapper.insertGenTableColumn(column);
-            }
-        });
-
-        List<GenTableColumn> delColumns = tableColumns.stream().filter(column -> !dbTableColumnNames.contains(column.getColumnName())).collect(Collectors.toList());
-        if (StringUtils.isNotEmpty(delColumns))
+        catch (org.springframework.dao.DataAccessException sqlFailure)
         {
-            genTableColumnMapper.deleteGenTableColumns(delColumns);
+            ServiceException publicFailure = new ServiceException("同步数据失败，请稍后重试");
+            publicFailure.initCause(sqlFailure);
+            throw publicFailure;
         }
     }
 

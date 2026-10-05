@@ -39,7 +39,7 @@ try {
     Assert-Check ($saved.configuration.formColumns -eq 3 -and $saved.configuration.outputPath -ceq 'D:/生成输出' -and $saved.configuration.options.generateDetail -and $saved.table.webType -ceq 'eforge-react' -and $saved.columns[0].primaryKey -and $saved.columns[0].autoIncrement -and $saved.columns[0].id -ceq $detail.columns[0].id) 'Configuration fields/options/physical identity were not retained.'
     # Hold only the parent-owned generator guard in a separate real SQL transaction.
     # Canonical save and original sync must wait for rollback, then complete normally.
-    foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''},@{path='/api/v1/tool/generator/tables';method='DELETE';payload='{"ids": ["9223372036854775807"]}'},@{path='/tool/gen/9223372036854775807';method='DELETE';payload=''})) {
+    foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="$configPath/synchronize";method='POST';payload=''},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''},@{path='/api/v1/tool/generator/tables';method='DELETE';payload='{"ids": ["9223372036854775807"]}'},@{path='/tool/gen/9223372036854775807';method='DELETE';payload=''})) {
         $guardOwner=$null;$guardRequest=$null
         try {
             $guardOwner=Start-Job -ScriptBlock {
@@ -73,7 +73,7 @@ try {
             Wait-Job $guardRequest -Timeout 30|Out-Null
             Assert-Check ($guardRequest.State -eq 'Completed') 'Metadata writer did not resume after guard rollback.'
             $guardReply=Receive-Job $guardRequest -ErrorAction Stop
-            if($guardCase.method -eq 'PUT' -or $guardCase.path -ceq '/api/v1/tool/generator/tables'){Assert-Check ($guardReply.status -eq 204) 'Canonical save must resume and commit after rollback.'}
+            if($guardCase.path.StartsWith('/api/v1/')){Assert-Check ($guardReply.status -eq 204) 'Canonical save must resume and commit after rollback.'}
             else{Assert-Check ($guardReply.status -eq 200 -and ($guardReply.body|ConvertFrom-Json).code -eq 200) 'Original sync must resume normally after rollback.'}
         } finally {
             foreach($ownedGuardJob in @($guardOwner,$guardRequest)) {

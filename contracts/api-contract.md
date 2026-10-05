@@ -378,3 +378,17 @@ table/field metadata is removed, retaining physical SQL tables and their records
 Canonical and original writers share the generator SQL transaction guard. Rename
 propagates parent references atomically. This contract does not complete sync,
 physical table creation, output generation or the frontend management page.
+
+### Generator schema synchronization
+
+POST `/api/v1/tool/generator/tables/{id}/synchronize` uses `tool:gen:edit`,
+returns 204 and synchronizes imported metadata from the current physical schema.
+IDs are exact decimal strings. Invalid IDs return 400, missing imports 404,
+missing physical schema or removed configured tree/child reference fields 409.
+Writes are atomic metadata mutations; physical DDL/business records are retained.
+Existing field IDs and original conditional settings remain stable, actual type/
+PK/auto flags update, added fields initialize and removed fields disappear.
+Stale complete-field configuration saves must reload after synchronization.
+The original synchronization route shares this transaction behind its existing
+compatibility response boundary. Generated output and management UI stay tracked
+in the parity inventory.

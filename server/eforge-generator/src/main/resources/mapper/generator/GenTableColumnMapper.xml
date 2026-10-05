@@ -125,4 +125,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
 
+    <update id="updatePhysicalIdentity" parameterType="GenTableColumn">
+        update gen_table_column set is_pk=#{isPk}, is_increment=#{isIncrement}
+        where column_id=#{columnId} and table_id=#{tableId}
+    </update>
 </mapper>
