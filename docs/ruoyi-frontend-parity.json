@@ -1025,5 +1025,14 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37345364383",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37345364385",
     "scope": "Canonical atomic configuration save with original edit grant and authenticated audit, exact parent/column IDs, complete owned field set, physical identities retained, original types/queries/controls/flags/clearing/order, tree/subtable/menu settings and compatible route names. Real SQL update failure proves full table/field rollback and retry; read/write OpenAPI schemas stay distinct. The real browser date failure was fixed in job-log list/export using viewer-zone prepared boundaries, verified against actual Shanghai and New York DST SQL boundaries, legacy omission and XLSX agreement. Both complete runtime/browser regressions pass. Shared legacy/sync/reference concurrency, remaining generator writes, React/EForge outputs/pages, runnable generated modules, other modules calendar/export-time audit and final original-capability acceptance remain required. No scheduler mutation proposal was implemented."
+  },
+  "generatorMetadataBoundaryValidation": {
+    "state": "serialization-locally-verified",
+    "backendTests": 418,
+    "disabledRuntime": "success",
+    "enabledRuntime": "success",
+    "openApi": "exact-match-unchanged",
+    "ci": "pending",
+    "scope": "Shared feature-local InnoDB transaction row serializes current canonical import/configuration and original HTTP import/update/delete/sync writers. Actual SQL record-lock waiting by canonical save and legacy sync is observed before rollback release/resumption. Autocommit/missing row fail closed. No task dispatch, Quartz or unrelated business lock is changed. Serialization alone does not establish complete mutation integrity: legacy field ownership/checked writes, rename/reference/delete/sync races, canonical delete/sync, physical DDL/output snapshots/React-EForge generation and full pages remain required. Unused standalone column writers need the boundary before exposure."
   }
 }

@@ -42,6 +42,7 @@ class GeneratorConfigurationControllerTest {
     static final String PATH="/api/v1/tool/generator/tables/"+ID;
     @Autowired MockMvc mvc;
     @Autowired com.fasterxml.jackson.databind.ObjectMapper json;
+    @MockitoBean io.eforge.enterprise.generator.service.GeneratorMetadataBoundary boundary;
     @MockitoBean GenTableMapper tables;
     @MockitoBean GenTableColumnMapper columns;
     @MockitoBean io.eforge.enterprise.system.mapper.SysMenuMapper menus;

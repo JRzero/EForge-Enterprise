@@ -52,6 +52,9 @@ public class GenTableServiceImpl implements IGenTableService
     private GenTableMapper genTableMapper;
 
     @Autowired
+    private GeneratorMetadataBoundary metadataBoundary;
+
+    @Autowired
     private GenTableColumnMapper genTableColumnMapper;
 
     /**
@@ -125,6 +128,7 @@ public class GenTableServiceImpl implements IGenTableService
     @Transactional
     public void updateGenTable(GenTable genTable)
     {
+        metadataBoundary.lock();
         String options = JSON.toJSONString(genTable.getParams());
         genTable.setOptions(options);
         int row = genTableMapper.updateGenTable(genTable);
@@ -147,6 +151,7 @@ public class GenTableServiceImpl implements IGenTableService
     @Transactional
     public void deleteGenTableByIds(Long[] tableIds)
     {
+        metadataBoundary.lock();
         genTableMapper.deleteGenTableByIds(tableIds);
         genTableColumnMapper.deleteGenTableColumnByIds(tableIds);
     }
@@ -172,6 +177,7 @@ public class GenTableServiceImpl implements IGenTableService
     @Transactional
     public void importGenTable(List<GenTable> tableList, String tplWebType, String operName)
     {
+        metadataBoundary.lock();
         try
         {
             for (GenTable table : tableList)
@@ -294,6 +300,7 @@ public class GenTableServiceImpl implements IGenTableService
     @Transactional
     public void synchDb(String tableName)
     {
+        metadataBoundary.lock();
         GenTable table = genTableMapper.selectGenTableByName(tableName);
         List<GenTableColumn> tableColumns = table.getColumns();
         Map<String, GenTableColumn> tableColumnMap = tableColumns.stream().collect(Collectors.toMap(GenTableColumn::getColumnName, Function.identity()));

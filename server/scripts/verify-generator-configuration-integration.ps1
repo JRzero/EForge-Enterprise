@@ -37,6 +37,51 @@ try {
     Assert-Check ((Request $configPath 'PUT' $body $authorized).StatusCode -eq 204) 'Configuration retry failed.'
     $saved=(Request $configPath 'GET' '' $authorized).Content|ConvertFrom-Json
     Assert-Check ($saved.configuration.formColumns -eq 3 -and $saved.configuration.outputPath -ceq 'D:/生成输出' -and $saved.configuration.options.generateDetail -and $saved.table.webType -ceq 'eforge-react' -and $saved.columns[0].primaryKey -and $saved.columns[0].autoIncrement -and $saved.columns[0].id -ceq $detail.columns[0].id) 'Configuration fields/options/physical identity were not retained.'
+    # Hold only the parent-owned generator guard in a separate real SQL transaction.
+    # Canonical save and original sync must wait for rollback, then complete normally.
+    foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''})) {
+        $guardOwner=$null;$guardRequest=$null
+        try {
+            $guardOwner=Start-Job -ScriptBlock {
+                param($container,$password)
+                & docker exec --env "MYSQL_PWD=$password" $container mysql -N -B -uroot eforge_enterprise -e 'START TRANSACTION; SELECT guard_id FROM gen_metadata_guard WHERE guard_id=1 FOR UPDATE; SELECT SLEEP(10); ROLLBACK;'
+                if($LASTEXITCODE -ne 0){throw 'Owned guard transaction failed.'}
+            } -ArgumentList $mysqlName,$testPassword
+            $guardHeld=$false
+            for($guardAttempt=0;$guardAttempt -lt 80;$guardAttempt++) {
+                $guardCount=GeneratorConfig-Sql "SELECT COUNT(*) FROM performance_schema.data_locks WHERE OBJECT_SCHEMA='eforge_enterprise' AND OBJECT_NAME='gen_metadata_guard' AND LOCK_TYPE='RECORD' AND LOCK_STATUS='GRANTED';"
+                if([int]$guardCount -gt 0){$guardHeld=$true;break};Start-Sleep -Milliseconds 100
+            }
+            Assert-Check $guardHeld 'Owned SQL guard must be observed live before checking HTTP serialization.'
+            $guardRequest=Start-Job -ScriptBlock {
+                param($port,$path,$method,$payload,$headers)
+                $guardHttpArgs=@{Uri="http://127.0.0.1:$port$path";Method=$method;Headers=$headers;TimeoutSec=30;SkipHttpErrorCheck=$true}
+                if($payload){$guardHttpArgs.Body=$payload;$guardHttpArgs.ContentType='application/json'}
+                $reply=Invoke-WebRequest @guardHttpArgs
+                return [pscustomobject]@{status=$reply.StatusCode;body=$reply.Content}
+            } -ArgumentList $AppPort,$guardCase.path,$guardCase.method,$guardCase.payload,$authorized
+            $guardWaiting=$false
+            for($guardAttempt=0;$guardAttempt -lt 80;$guardAttempt++) {
+                $guardWaitCount=GeneratorConfig-Sql "SELECT COUNT(*) FROM performance_schema.data_lock_waits w JOIN performance_schema.data_locks l ON w.REQUESTING_ENGINE_LOCK_ID=l.ENGINE_LOCK_ID WHERE l.OBJECT_SCHEMA='eforge_enterprise' AND l.OBJECT_NAME='gen_metadata_guard';"
+                if([int]$guardWaitCount -gt 0){$guardWaiting=$true;break};Start-Sleep -Milliseconds 100
+            }
+            Assert-Check $guardWaiting 'Actual HTTP writer must be observed waiting on the SQL guard, not merely a background job startup.'
+            Assert-Check ($guardRequest.State -eq 'Running') 'Metadata writer must wait while another SQL transaction holds its guard.'
+            Wait-Job $guardOwner -Timeout 15|Out-Null
+            Assert-Check ($guardOwner.State -eq 'Completed') 'Owned guard rollback did not release its transaction.'
+            Receive-Job $guardOwner -ErrorAction Stop|Out-Null
+            Wait-Job $guardRequest -Timeout 30|Out-Null
+            Assert-Check ($guardRequest.State -eq 'Completed') 'Metadata writer did not resume after guard rollback.'
+            $guardReply=Receive-Job $guardRequest -ErrorAction Stop
+            if($guardCase.method -eq 'PUT'){Assert-Check ($guardReply.status -eq 204) 'Canonical save must resume and commit after rollback.'}
+            else{Assert-Check ($guardReply.status -eq 200 -and ($guardReply.body|ConvertFrom-Json).code -eq 200) 'Original sync must resume normally after rollback.'}
+        } finally {
+            foreach($ownedGuardJob in @($guardOwner,$guardRequest)) {
+                if($ownedGuardJob){if($ownedGuardJob.State -eq 'Running'){Stop-Job $ownedGuardJob};Remove-Job $ownedGuardJob -Force}
+            }
+        }
+    }
+    Write-Output 'Generator metadata boundary: observed actual SQL record lock, canonical save and original sync wait/resume, transaction rollback release passed.'
     foreach($control in @('input','textarea','select','radio','checkbox','datetime','imageUpload','fileUpload','editor')) {
         $configWrite.columns[1].controlType=$control;$configWrite.columns[1].javaType='Boolean';$configWrite.columns[1].queryType='LTE';$configWrite.columns[1].dictionaryType='sys_common_status'
         Assert-Check ((Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Original control setting failed.'

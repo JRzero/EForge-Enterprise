@@ -5,6 +5,7 @@ import javax.lang.model.SourceVersion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import io.eforge.enterprise.generator.service.GeneratorMetadataBoundary;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 import io.eforge.enterprise.common.exception.ApiFailure;
@@ -15,13 +16,14 @@ import static io.eforge.enterprise.web.controller.api.v1.tool.GeneratorConfigura
 
 @Service
 public class GeneratorConfigurationService {
+    private final GeneratorMetadataBoundary boundary;
     private final GenTableMapper tables;
     private final GenTableColumnMapper columns;
     private final SysMenuMapper menus;
     private final JdbcTemplate jdbc;
     private final ObjectMapper json;
-    public GeneratorConfigurationService(GenTableMapper tables,GenTableColumnMapper columns,SysMenuMapper menus,JdbcTemplate jdbc,ObjectMapper json) {
-        this.tables=tables;this.columns=columns;this.menus=menus;this.jdbc=jdbc;this.json=json;
+    public GeneratorConfigurationService(GenTableMapper tables,GenTableColumnMapper columns,SysMenuMapper menus,JdbcTemplate jdbc,ObjectMapper json,GeneratorMetadataBoundary boundary) {
+        this.tables=tables;this.columns=columns;this.menus=menus;this.jdbc=jdbc;this.json=json;this.boundary=boundary;
     }
     @Transactional
     public void update(String id,UpdateRequest input,String actor) {
@@ -29,6 +31,7 @@ public class GeneratorConfigurationService {
         javaName(input.className());
         if(Set.of("var","yield","record","sealed","permits").contains(input.className()))throw invalid();
         if(!SourceVersion.isName(input.packageName()))throw invalid();
+        boundary.lock();
         var locked=jdbc.queryForList("SELECT table_id FROM gen_table WHERE table_id=? FOR UPDATE",Long.class,tableId);
         if(locked.isEmpty())throw missing();
         var table=tables.selectGenTableById(tableId);if(table==null)throw missing();

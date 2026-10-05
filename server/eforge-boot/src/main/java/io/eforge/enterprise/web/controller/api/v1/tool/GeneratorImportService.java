@@ -2,6 +2,7 @@ package io.eforge.enterprise.web.controller.api.v1.tool;
 
 import java.util.*;
 import org.springframework.stereotype.Service;
+import io.eforge.enterprise.generator.service.GeneratorMetadataBoundary;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 import io.eforge.enterprise.common.exception.ApiFailure;
@@ -13,10 +14,11 @@ import static io.eforge.enterprise.web.controller.api.v1.tool.GeneratorImportCon
 /** Original attributed initializers/mappers stay inside this metadata boundary. */
 @Service
 public class GeneratorImportService {
+    private final GeneratorMetadataBoundary boundary;
     private final GenTableMapper tables;
     private final GenTableColumnMapper columns;
-    public GeneratorImportService(GenTableMapper tables,GenTableColumnMapper columns) {
-        this.tables=tables;this.columns=columns;
+    public GeneratorImportService(GenTableMapper tables,GenTableColumnMapper columns,GeneratorMetadataBoundary boundary) {
+        this.tables=tables;this.columns=columns;this.boundary=boundary;
     }
     @Transactional
     public ImportResponse importTables(ImportRequest request,String actor) {
@@ -24,6 +26,7 @@ public class GeneratorImportService {
         var unique=new HashSet<String>();
         for(var name:names) if(!unique.add(name.toLowerCase(Locale.ROOT)))
             throw new ApiFailure(400,"VALIDATION_ERROR","Duplicate import selection.");
+        boundary.lock();
         var available=tables.selectDbTableListByNames(names.toArray(String[]::new));
         var byName=new HashMap<String,GenTable>();
         for(var row:available)byName.put(row.getTableName(),row);

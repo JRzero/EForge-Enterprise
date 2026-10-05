@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GeneratorImportControllerTest {
     static final String PATH="/api/v1/tool/generator/imports";
     @Autowired MockMvc mvc;
+    @MockitoBean io.eforge.enterprise.generator.service.GeneratorMetadataBoundary boundary;
     @MockitoBean GenTableMapper tables;
     @MockitoBean GenTableColumnMapper columns;
     @MockitoBean TokenService tokens;

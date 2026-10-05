@@ -1339,3 +1339,19 @@ Exact implementation `66158a6b7bf7595d6da804a949110b1a4d50e7b2` passes server
 includes both configurations' complete real browsers/runtime and exact OpenAPI.
 Configuration API acceptance does not complete generator outputs/pages or the
 remaining shared mutation and original-capability audits.
+
+## Generator metadata serialization checkpoint (2026-10-06)
+
+Canonical import/configuration and original HTTP import/update/delete/sync now
+share a feature-local InnoDB transaction row through V025. This coordinates writers
+across application processes without gating tasks or unrelated business data.
+418 backend tests and both complete real API regressions pass. Actual SQL record
+locks and waiting requests are observed, then rollback releases the lock and
+canonical save/original sync complete normally. Both live OpenAPI snapshots are
+unchanged and client reproduction/security defaults pass. This adds no UI change;
+new exact-head cloud acceptance remains pending. See the metadata boundary review.
+
+This prerequisite does not complete mutation integrity. Shared legacy ownership,
+checked writes, reference-preserving rename and guarded atomic delete/sync and
+concurrent outcomes remain required before generator output/templates/full pages
+and generated-module end-to-end proof. Full original parity remains active.
