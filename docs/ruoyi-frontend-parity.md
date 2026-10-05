@@ -42,7 +42,7 @@ It is a work inventory, not executable proof of completion.
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
-| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client prepared; actual OSHI groups/units/percentages, legacy compatibility and no-role permission verified; final regression/CI and React page pending |
+| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client, actual OSHI groups/units/percentages, legacy compatibility, no-role permissions and full regression verified; exact-head server/web CI passed; React page pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
@@ -840,8 +840,11 @@ the committed snapshot; all 144 previous path/schema entries remain unchanged.
 Evidence logs are `server-monitor-backend.log`, `server-monitor-fixtures.log`
 and `server-monitor-final-runtime.log` under the ignored boot target directory.
 
-The security boundary is in `security-review-server-monitor-v1.md`. Exact API
-commit CI and the server-monitor React page remain pending. The page must retain
+The security boundary is in `security-review-server-monitor-v1.md`. API commit
+`625831cd27d0a219d704dac813de0a6c4cf6d982` passes exact-head server CI
+`37244220088` (verify, runtime-integration and auth-runtime-integration) and
+web CI `37244220086`, confirmed on 2026-10-05. The server-monitor React page
+remains pending. The page must retain
 all original groups, memory/JVM usage warnings above 80%, loading/error/retry,
 refresh, safe diagnostic text and actual platform browser acceptance. Cache
 monitoring/names/keys/values/clear, protected or disabled consoles, jobs/cron,
