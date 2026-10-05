@@ -34,6 +34,14 @@ public class BootstrapService
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public BootstrapResponse bootstrap(LoginUser session)
+    {return snapshot(session, true);}
+
+    /** Diagnostic resources must not revive/extend a session revoked during a read. */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public BootstrapResponse refreshConsoleAuthorization(LoginUser session)
+    {return snapshot(session, false);}
+
+    private BootstrapResponse snapshot(LoginUser session, boolean persistSession)
     {
         SysUser user = users.selectUserById(session.getUserId());
         if (user == null || !"0".equals(user.getStatus()) || !"0".equals(user.getDelFlag()))
@@ -54,7 +62,7 @@ public class BootstrapService
         session.setUser(user);
         session.setDeptId(user.getDeptId());
         session.setPermissions(permissions);
-        tokens.setLoginUser(session);
+        if(persistSession)tokens.setLoginUser(session);
         String displayName = user.getNickName() == null || user.getNickName().isBlank() ? user.getUserName() : user.getNickName();
         return new BootstrapResponse(new BootstrapResponse.UserSummary(user.getUserId().toString(),
                 user.getUserName(), displayName), Collections.unmodifiableSet(roles),

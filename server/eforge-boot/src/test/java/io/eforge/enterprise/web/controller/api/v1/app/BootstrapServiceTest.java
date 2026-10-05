@@ -88,4 +88,17 @@ class BootstrapServiceTest
         assertEquals(Set.of("admin"), response.roles()); assertEquals(Set.of("*:*:*"), response.permissions());
         assertEquals("ry", response.user().displayName());
     }
+    @Test void consoleSnapshotsRefreshAuthorizationWithoutRevivingOrExtendingRedisSessions()
+    {
+        when(menus.selectActiveRoles(2L)).thenReturn(List.of());
+        when(menus.selectGrantedMenus(2L,false)).thenReturn(List.of());
+        var response=service.refreshConsoleAuthorization(session);
+        assertTrue(response.permissions().isEmpty());assertTrue(session.getPermissions().isEmpty());
+        assertSame(user,session.getUser());verifyNoInteractions(tokens,permissions);
+    }
+    @Test void consoleReadsStillInvalidateDisabledAccountsWithoutRecreatingSessions()
+    {
+        user.setStatus("1");assertThrows(CredentialsExpiredException.class,()->service.refreshConsoleAuthorization(session));
+        verify(tokens).delLoginUser("session-id");verify(tokens,never()).setLoginUser(any());verifyNoInteractions(menus,permissions);
+    }
 }

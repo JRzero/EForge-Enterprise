@@ -28,17 +28,18 @@ import {listOperationLogs, getOperationLog, deleteOperationLogs, clearOperationL
 import {listOnlineSessions, revokeOnlineSession} from '../generated/api';
 import {getServerMonitor} from '../generated/api';
 import {getCacheStatistics, listCacheNames, listCacheKeys, getCacheValue, clearCacheName, clearCacheKey, clearAllCache, type ClearCacheKeyRequest} from '../generated/api';
+import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openApiDocsConsole} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
-  function transport(authenticated: boolean, timeoutMs = 15000): typeof fetch {
+  function transport(authenticated: boolean, timeoutMs = 15000, credentials: RequestCredentials = 'omit'): typeof fetch {
     return async (input, init) => {
       const token = authenticated ? auth.getState().session?.accessToken : undefined;
       const headers = new Headers(init?.headers);
       if (token) headers.set('Authorization', `Bearer ${token}`);
       const timeout = AbortSignal.timeout(timeoutMs);
       const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
-      const response = await fetcher(input, {...init, headers, signal, cache: 'no-store', credentials: 'omit'});
+      const response = await fetcher(input, {...init, headers, signal, cache: 'no-store', credentials});
       if (!response.ok) {
         const body = record(await response.clone().json().catch(() => ({})));
         if (response.status === 401 && token) onUnauthorized(token);
@@ -48,6 +49,11 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async getDruidConsoleStatus(signal?: AbortSignal) {return (await getDruidConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
+    async getApiDocsConsoleStatus(signal?: AbortSignal) {return (await getApiDocsConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
+    // Only these fixed same-origin mutations accept HttpOnly console cookies.
+    async openDruidConsole() {return (await openDruidConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin')})).data;},
+    async openApiDocsConsole() {return (await openApiDocsConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin')})).data;},
     async getCacheStatistics(signal?: AbortSignal) {return (await getCacheStatistics({baseUrl: '', fetch: transport(true), signal})).data;},
     async listCacheNames(signal?: AbortSignal) {return (await listCacheNames({baseUrl: '', fetch: transport(true), signal})).data;},
     async listCacheKeys(name: string, signal?: AbortSignal) {return (await listCacheKeys(name, {baseUrl: '', fetch: transport(true), signal})).data;},

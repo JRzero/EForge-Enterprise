@@ -1,6 +1,6 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb)
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles)
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
@@ -100,7 +100,8 @@ try {
         EFORGE_DB_USERNAME = 'eforge'; EFORGE_DB_PASSWORD = $testPassword
         EFORGE_REDIS_HOST = '127.0.0.1'; EFORGE_REDIS_PORT = "$RedisPort"; EFORGE_REDIS_DATABASE = '0'; EFORGE_REDIS_PASSWORD = ''
         EFORGE_SERVER_PORT = "$AppPort"; EFORGE_TOKEN_SECRET = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
-        EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = 'false'; EFORGE_DRUID_CONSOLE_ENABLED = 'false'
+        EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_CONSOLE_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
+        EFORGE_CONSOLE_SECURE_COOKIE = 'false'
         EFORGE_PROFILE = $uploadDirectory
     }
     foreach ($key in $testEnv.Keys) {
@@ -121,8 +122,7 @@ try {
     Assert-Check $ready "Test server did not become ready; see $logDirectory."
 
     Assert-Problem (Request '/api/v1/app/bootstrap') 401 'AUTHENTICATION_REQUIRED'
-    $anonymousDocs = (Request '/v3/api-docs/api-v1').Content | ConvertFrom-Json
-    Assert-Check ($anonymousDocs.code -eq 401 -and !$anonymousDocs.PSObject.Properties['paths']) 'OpenAPI must require authentication.'
+    Assert-Problem (Request '/v3/api-docs/api-v1') 401 'AUTHENTICATION_REQUIRED'
     Assert-Problem (Request '/api/v1/auth/login' 'POST' '{}') 400 'VALIDATION_ERROR'
     Assert-Problem (Request '/api/v1/auth/login' 'POST' '{broken') 400 'VALIDATION_ERROR'
     Assert-Problem (Request '/api/v1/auth/login' 'POST' '{"username":"admin","password":"wrong-password"}') 401 'AUTHENTICATION_FAILED'
@@ -190,6 +190,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-logs-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-online-sessions-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-server-monitor-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-consoles-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-cache-monitor-integration.ps1')
     $legacy = (Request '/login' 'POST' $credentials).Content | ConvertFrom-Json
     Assert-Check ($legacy.code -eq 200 -and $legacy.token) 'Legacy login compatibility failed.'

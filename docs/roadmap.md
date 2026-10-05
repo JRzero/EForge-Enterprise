@@ -59,6 +59,11 @@
 - [ ] online session management (canonical API/client and page verified locally and in exact-head CI, including exact filters/paging, scoped/self force logout, twelve-session isolation and Redis ACL faults; final capability audit pending)
 - [ ] server/cache monitoring and authenticated consoles (server/cache APIs, clients and pages passed full local regression and exact commit CI; cache page c597d44 server 37259840797 all three jobs/web 37259840781 success, local 312/65/52/37 and actual charts/clearing/SQL/session acceptance; consoles and final capability audit pending)
 
+Diagnostic console canonical APIs, generated client and scoped authentication
+transport pass local 336 backend/67 unit/52 fixture/37 real browser regression,
+including actual enabled servlet resources, grant/logout revocation, ACL faults
+and expiry. Exact-commit CI and both React console pages remain pending.
+
 ## Phase 4 — Generator
 
 - [ ] remove Vue generator templates

@@ -352,3 +352,16 @@ removes all keys in the selected database, including all authenticated sessions.
 The seven legacy namespace identities and compatibility endpoints are unchanged.
 `docs/security-review-cache-monitor-v1.md` records the privileged boundary and
 real fault/invalidation verification; pages and final acceptance remain pending.
+
+### Authenticated diagnostic consoles
+
+GET `/api/v1/monitor/consoles/druid` and `/api-docs` return concrete enabled
+statuses under monitor:druid:list and tool:swagger:list respectively. POST each
+`/session` returns a fixed entryPath and expiresInSeconds plus a scoped HttpOnly,
+SameSite=Strict, Secure-by-default cookie. Disabled issuance returns 404
+CONSOLE_DISABLED; missing/revoked sessions return 401, denied grants 403 and
+backend failures generic 503 CONSOLE_UNAVAILABLE. Raw Druid/Swagger/schema
+resources require fresh account/grant checks and same-origin cookie evidence.
+Cookies bind opaque five-minute tickets to existing Redis sessions and never
+authenticate product APIs or extend login TTL. Authenticated bearer schema
+export remains independent of interactive Swagger enablement. See ADR-0016.

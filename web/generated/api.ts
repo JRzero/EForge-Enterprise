@@ -128,6 +128,13 @@ export type CacheValue = {
     name: string;
     value: string;
 };
+export type ConsoleStatus = {
+    enabled: boolean;
+};
+export type ConsoleEntry = {
+    entryPath: string;
+    expiresInSeconds: number;
+};
 export type DeleteLogsRequest = {
     ids: string[];
 };
@@ -767,6 +774,40 @@ export function getCacheValue(name: string, key: string, opts?: Oazapfts.Request
         key
     }))}`, {
         ...opts
+    });
+}
+export function getApiDocsConsoleStatus(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConsoleStatus;
+    }>("/api/v1/monitor/consoles/api-docs", {
+        ...opts
+    });
+}
+export function openApiDocsConsole(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConsoleEntry;
+    }>("/api/v1/monitor/consoles/api-docs/session", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getDruidConsoleStatus(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConsoleStatus;
+    }>("/api/v1/monitor/consoles/druid", {
+        ...opts
+    });
+}
+export function openDruidConsole(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ConsoleEntry;
+    }>("/api/v1/monitor/consoles/druid/session", {
+        ...opts,
+        method: "POST"
     });
 }
 export function deleteLoginLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {

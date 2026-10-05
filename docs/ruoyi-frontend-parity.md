@@ -966,3 +966,26 @@ MySQL/Redis browser regression and exact live OpenAPI equality.
 Consoles, jobs/cron, generator/form builder, complete shell/shared capabilities
 and the final original-capability audit remain required. This page checkpoint
 does not complete the full goal.
+
+### Diagnostic console API and authentication checkpoint — 2026-10-05
+
+Four canonical status/session operations and their generated client preserve
+the original Druid and Swagger grants. Enabled consoles use five-minute opaque
+HttpOnly/SameSite=Strict cookies bound to existing Redis sessions, with Secure
+enabled by default. Every raw resource checks current account/role grants;
+console requests neither renew nor recreate login sessions. Fixed entry paths,
+same-origin checks and scoped resolution keep JWTs out of URLs and prevent
+console cookies from authenticating product APIs. ADR-0016 and the diagnostic
+console security review describe this boundary.
+
+Local verification passes 336 backend tests (including all ten data-scope
+parity cases), 67 unit tests, 52 fixture browser tests and all 37 existing real
+browser tests. Complete MySQL/Redis regression passes with consoles disabled
+and explicitly enabled. Enabled verification fetches actual Druid/Swagger HTML,
+nested assets and schema using cookies, exercises immediate grant revocation,
+logout, Redis ACL failures and ticket expiry, and proves login TTL does not grow.
+Default-disabled verification retains authenticated schema export. Both live
+OpenAPI snapshots exactly match the generated contract. Evidence lives in boot
+target's console-access-backend/web/fixtures/disabled-runtime/final-enabled-runtime
+logs. Exact-commit CI is pending. Console React pages, authenticated iframe
+browser acceptance and all remaining original capabilities remain required.

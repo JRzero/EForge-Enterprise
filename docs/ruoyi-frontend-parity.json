@@ -858,5 +858,17 @@
       "state": "missing",
       "evidence": []
     }
-  ]
+  ],
+  "diagnosticConsoleValidation": {
+    "state": "api-authentication-local-verified",
+    "backendTests": 336,
+    "unitTests": 67,
+    "fixtureBrowserTests": 52,
+    "existingLiveBrowserTests": 37,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Canonical status/session API, generated client, actual scoped cookie servlet/assets/schema authentication, current grants/logout, ACL faults, expiry and no login renewal. Both React pages and console browser controls remain pending."
+  }
 }

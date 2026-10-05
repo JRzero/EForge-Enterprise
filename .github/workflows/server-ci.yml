@@ -53,6 +53,11 @@ jobs:
         run: ./server/scripts/verify-auth-integration.ps1 -VerifyWeb -OpenApiOutputPath contracts/openapi/api-v1.json
       - name: Verify live OpenAPI snapshot matches the committed contract
         run: git diff --exit-code -- contracts/openapi/api-v1.json
+      - name: Verify explicitly enabled diagnostic consoles
+        shell: pwsh
+        run: ./server/scripts/verify-auth-integration.ps1 -EnableConsoles -OpenApiOutputPath contracts/openapi/api-v1.json
+      - name: Verify enabled-console OpenAPI remains identical
+        run: git diff --exit-code -- contracts/openapi/api-v1.json
       - name: Upload integration logs on failure
         if: failure()
         uses: actions/upload-artifact@v4

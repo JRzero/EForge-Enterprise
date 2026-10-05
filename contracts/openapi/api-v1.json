@@ -237,6 +237,33 @@
         ],
         "type": "object"
       },
+      "ConsoleEntry": {
+        "properties": {
+          "entryPath": {
+            "type": "string"
+          },
+          "expiresInSeconds": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "entryPath",
+          "expiresInSeconds"
+        ],
+        "type": "object"
+      },
+      "ConsoleStatus": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "type": "object"
+      },
       "CpuMetrics": {
         "properties": {
           "coreCount": {
@@ -3047,6 +3074,86 @@
         },
         "tags": [
           "cache-monitor-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/consoles/api-docs": {
+      "get": {
+        "operationId": "getApiDocsConsoleStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsoleStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "console-access-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/consoles/api-docs/session": {
+      "post": {
+        "operationId": "openApiDocsConsole",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsoleEntry"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "console-access-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/consoles/druid": {
+      "get": {
+        "operationId": "getDruidConsoleStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsoleStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "console-access-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/consoles/druid/session": {
+      "post": {
+        "operationId": "openDruidConsole",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsoleEntry"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "console-access-controller"
         ]
       }
     },

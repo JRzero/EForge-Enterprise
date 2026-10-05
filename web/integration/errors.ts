@@ -87,6 +87,8 @@ function messageFor(status: number, code: string): string {
   if (code === 'ONLINE_SESSIONS_UNAVAILABLE') return '在线会话暂时无法读取或撤销，请稍后重试。';
   if (code === 'SERVER_MONITOR_UNAVAILABLE') return '服务器监控暂时无法采集，请稍后重试。';
   if (code === 'CACHE_UNAVAILABLE') return '缓存服务暂时不可用，请稍后重试。';
+  if (code === 'CONSOLE_DISABLED') return '该控制台尚未启用。';
+  if (code === 'CONSOLE_UNAVAILABLE') return '控制台暂时不可用，请稍后重试。';
   if (code === 'CACHE_KEY_NOT_FOUND') return '缓存键已过期或已被清理，请刷新键列表。';
   if (code === 'INVALID_CACHE_NAME' || code === 'INVALID_CACHE_KEY') return '缓存名称或键不属于所选缓存，请刷新后重试。';
   if (status === 401) return '登录已过期，请重新登录。';
