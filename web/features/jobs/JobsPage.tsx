@@ -10,6 +10,7 @@ import {DictionaryTag} from '../../app/components/DictionaryTag';
 import type {JobResponse, JobLogResponse, JobLogDetail} from '../../generated/api';
 import {errorMessage} from '../../integration/errors';
 
+import {CronEditor} from './CronEditor';
 type Row = JobResponse | JobLogResponse;
 const empty = {name: '', group: '', target: '', status: '', from: '', to: ''};
 const time = (value?: string) => value ? new Date(value).toLocaleString('zh-CN') : '—';
@@ -24,7 +25,10 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   const [sorting, setSorting] = useState<SortingState>([{id: logs ? 'createdAt' : 'id', desc: logs}]);
   const [data, setData] = useState<{items: Row[]; total: number} | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
+  const detailFocus = useRef<HTMLElement | null>(null), cronReturnFocus = useRef<HTMLElement | null>(null);
+  const [cron, setCron] = useState<string | null>(null), [confirmedCron, setConfirmedCron] = useState('');
   const [detail, setDetail] = useState<string | null>(null), [confirmation, setConfirmation] = useState<{clear: boolean; ids: string[]} | null>(null);
+  useEffect(() => {if (cron === null && cronReturnFocus.current) {cronReturnFocus.current.focus(); cronReturnFocus.current = null;}}, [cron]);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
   const action = useRef<AbortController | null>(null); useEffect(() => () => action.current?.abort(), []);
   useEffect(() => {
@@ -54,7 +58,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     logs ? {accessorKey: 'message', header: '日志信息', enableSorting: false} : {accessorKey: 'cronExpression', header: 'Cron表达式', enableSorting: false},
     {id: 'status', header: logs ? '执行状态' : '任务状态', enableSorting: false, cell: ({row}) => <DictionaryTag options={statuses.options} value={row.original.status ?? ''} />},
     {accessorKey: 'createdAt', header: logs ? '执行时间' : '创建时间', sortDescFirst: logs, cell: ({row}) => time(row.original.createdAt)},
-    {id: 'actions', header: '操作', enableSorting: false, cell: ({row}) => <div className="post-row-actions"><PermissionGate permission="monitor:job:query"><Button label="详细" aria-label={`详细${logs ? '日志' : '任务'} ${row.original.id}`} size="sm" variant="ghost" onClick={() => setDetail(row.original.id)} />
+    {id: 'actions', header: '操作', enableSorting: false, cell: ({row}) => <div className="post-row-actions"><PermissionGate permission="monitor:job:query"><Button label="详细" aria-label={`详细${logs ? '日志' : '任务'} ${row.original.id}`} size="sm" variant="ghost" onClick={event => {detailFocus.current = event.currentTarget; setDetail(row.original.id);}} />
       {!logs && <Button label="日志" aria-label={`任务日志 ${row.original.id}`} size="sm" variant="ghost" onClick={() => controls.navigate(`/job/log/${row.original.id}`)} />}</PermissionGate></div>}
   ], [logs, groups.options, statuses.options, controls]);
   const selected = Object.keys(selection).filter(id => selection[id]);
@@ -88,16 +92,18 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
       <Button label={showSearch ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowSearch(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy || loading} onClick={() => setVersion(value => value + 1)} />
       <details className="post-column-menu"><summary>列显示</summary>{columns.filter(column => column.id !== 'actions').map(column => {const id = 'accessorKey' in column ? String(column.accessorKey) : column.id ?? ''; return <label key={id}><input type="checkbox" checked={visibility[id] !== false} onChange={event => setVisibility({...visibility, [id]: event.target.checked})} />{String(column.header)}</label>;})}</details>
     </div>
+    {!logs && <PermissionGate permission="monitor:job:query"><Button label="Cron表达式编辑" variant="ghost" onClick={event => {cronReturnFocus.current = event.currentTarget; setCron(confirmedCron);}} />{confirmedCron && <p>已确认Cron表达式：<output aria-label="已确认Cron表达式">{confirmedCron}</output></p>}</PermissionGate>}
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable={logs} rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择日志 ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
     <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={size} disabled={busy} onChange={event => {setSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(value => <option key={value} value={value}>{value}</option>)}</select></label><Button label="上一页" variant="ghost" isDisabled={busy || loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="ghost" isDisabled={busy || loading || page * size >= (data?.total ?? 0)} onClick={() => setPage(value => value + 1)} /></div>
     </>}
     {logs && <Button label="关闭调度日志" variant="ghost" onClick={() => controls.navigate('/job')} />}
     {confirmation && <ResourceDialog titleId="job-log-confirm" alert busy={busy} onCancel={() => setConfirmation(null)}><h2 id="job-log-confirm">{confirmation.clear ? '确认清空调度日志' : '确认删除调度日志'}</h2><p>{confirmation.clear ? '将清空全部调度日志，此操作无法撤销。' : `将删除所选的 ${confirmation.ids.length} 条日志。`}</p>{actionError && <p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setConfirmation(null)} /><Button label={confirmation.clear ? '确认清空' : '确认删除'} isDisabled={busy} onClick={() => {void mutate();}} /></ResourceDialog>}
-    {detail && <JobDetailDialog id={detail} logs={logs} onClose={() => setDetail(null)} />}
+    {detail && <JobDetailDialog id={detail} logs={logs} onClose={() => setDetail(null)} onEditCron={expression => {cronReturnFocus.current = detailFocus.current; setDetail(null); setCron(expression);}} />}
+    {cron !== null && <CronEditor value={cron} onCancel={() => setCron(null)} onConfirm={expression => {setConfirmedCron(expression); setCron(null);}} />}
   </section>;
 }
-function JobDetailDialog({id, logs, onClose}: {id: string; logs: boolean; onClose: () => void}) {
+function JobDetailDialog({id, logs, onClose, onEditCron}: {id: string; logs: boolean; onClose: () => void; onEditCron: (expression: string) => void}) {
   const api = useApi(), groups = useDictionary('sys_job_group'), statuses = useDictionary(logs ? 'sys_common_status' : 'sys_job_status');
   const [row, setRow] = useState<JobResponse | JobLogDetail | null>(null), [error, setError] = useState(''), [version, setVersion] = useState(0);
   useEffect(() => {const controller = new AbortController(); setRow(null); setError('');
@@ -111,6 +117,7 @@ function JobDetailDialog({id, logs, onClose}: {id: string; logs: boolean; onClos
       {row && 'entry' in row ? <><dt>开始时间</dt><dd>{time(row.entry.startedAt)}</dd><dt>结束时间</dt><dd>{time(row.entry.endedAt)}</dd><dt>日志信息</dt><dd>{row.entry.message}</dd></> : row && <><dt>Cron表达式</dt><dd>{row.cronExpression}</dd><dt>下次执行</dt><dd>{time(row.nextExecutionAt)}</dd><dt>计划策略</dt><dd>{['默认', '立即触发执行', '触发一次执行', '不触发立即执行'][Number(row.misfirePolicy)] ?? row.misfirePolicy}</dd><dt>并发执行</dt><dd>{row.concurrent ? '允许' : '禁止'}</dd><dt>备注</dt><dd>{row.remark || '—'}</dd></>}
       </dl>{row && 'entry' in row && row.entry.status !== '0' && <section className="log-payload"><h3>异常信息</h3><pre tabIndex={0} aria-label="异常信息">{row.exceptionInfo || '（无数据）'}</pre></section>}
     </>}
+    {row && !('entry' in row) && <Button label="编辑当前Cron表达式" variant="ghost" onClick={() => onEditCron(row.cronExpression ?? '')} />}
     <Button label="关闭详情" variant="ghost" onClick={onClose} />
   </ResourceDialog>;
 }

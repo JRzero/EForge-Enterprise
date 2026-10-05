@@ -4,6 +4,7 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'JOB_CRON_INVALID') return 'Cron表达式无效，请检查字段范围及日、周的指定方式。';
   if (code === 'OPERATION_LOG_NOT_FOUND') return '日志已不存在，请刷新后重试。';
   if (code === 'LOGIN_UNLOCK_UNAVAILABLE') return '账号解锁暂时未能完成，请稍后重试。';
   if (code === 'NOTICE_NOT_FOUND') return '公告已不存在，请刷新后重试。';

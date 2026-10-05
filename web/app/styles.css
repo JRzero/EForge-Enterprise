@@ -184,3 +184,16 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 @media (max-width: 600px) { .log-metadata { grid-template-columns: 88px minmax(0, 1fr); gap: 10px; } }
 .console-page iframe {width:100%; min-height:36rem; height:calc(100vh - 14rem); border:1px solid var(--color-border, #d0d5dd); border-radius:.5rem; background:white;}
 @media (max-width:600px) {.console-page iframe {min-height:30rem; height:calc(100dvh - 12rem);}}
+.cron-editor {min-width:0; display:grid; gap:14px;}
+.cron-editor label {display:grid; gap:6px; min-width:0;}
+.cron-editor textarea, .cron-editor input, .cron-editor select {max-width:100%; min-width:0; font:inherit;}
+.cron-editor textarea {width:100%; box-sizing:border-box; overflow-wrap:anywhere;}
+.cron-editor [role=tablist] {display:flex; flex-wrap:wrap; gap:6px;}
+.cron-editor [role=tab] {padding:8px 12px; font:inherit; border:1px solid #cdded7; border-radius:5px; background:transparent; color:inherit; cursor:pointer;}
+.cron-editor [role=tab][aria-selected=true] {background:#e8f1ed; font-weight:600;}
+.cron-editor fieldset {display:grid; gap:12px; min-width:0; border:1px solid #cdded7; border-radius:6px; padding:12px;}
+.cron-values {display:grid; grid-template-columns:repeat(auto-fit,minmax(72px,1fr)); gap:8px; max-height:210px; overflow:auto;}
+.cron-values label {display:flex; flex-direction:row; align-items:center; gap:6px;}
+.cron-summary {display:flex; flex-wrap:wrap; gap:12px; margin:0;}
+.cron-summary div {min-width:38px; max-width:100%;} .cron-summary dd {margin:4px 0; overflow-wrap:anywhere;}
+.cron-editor li, .cron-editor p {overflow-wrap:anywhere;}

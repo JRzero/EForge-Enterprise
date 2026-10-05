@@ -128,3 +128,12 @@ exact live OpenAPI equality. Exact implementation 94f1b18 passes server 37304885
 status/run controls, Cron editor and full scheduler/SQL mutation consistency are
 still incomplete; the affected-ID mutation proposal still awaits explicit approval.
 Generator/form builder, shell/shared capabilities and final parity audit remain.
+Cron editor checkpoint: original seven-field/date-mode/refill/reset/cancel/confirm
+behaviors and protected actual Quartz five-instant/server-zone preview now pass
+371 backend/73 unit/64 fixture and 43 real browser cases in each configuration,
+both full runtime regressions and exact live OpenAPI. Exact-head cloud acceptance
+is pending. The read tool/detail handoff does not persist task changes; task
+create/edit integration and all canonical mutations/full consistency remain
+required. Pending explicit approval still applies only to the rejected mutation
+boundary. Independent generator React/EForge output/UI, form builder, shell/
+shared capabilities and final original-capability audits continue next.

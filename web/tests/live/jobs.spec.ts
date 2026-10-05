@@ -3,7 +3,7 @@ const backend = process.env.EFORGE_E2E_BACKEND_URL!;
 import {readFile} from 'node:fs/promises';
 import {workbookXml} from '../helpers/user-workbook';
 import type {Page} from '@playwright/test';
-import type {JobLogResponse} from '../../generated/api';
+import type {JobLogResponse, JobResponse} from '../../generated/api';
 async function login(page: Page, path = '/job') {
   await page.goto(path); await page.getByLabel('账号', {exact: true}).fill('admin'); await page.getByLabel('密码', {exact: true}).fill('admin123'); await page.getByRole('button', {name: '登录', exact: true}).click();
   await expect(page.getByRole('heading', {name: path === '/job' ? '定时任务' : '调度日志', exact: true})).toBeVisible();
@@ -50,7 +50,23 @@ test('actual no-role account cannot enter task or log pages or read their APIs',
   const response = await page.request.post('/api/v1/system/users', {headers, data: {user: {username, displayName: '任务无权限', departmentId: '103', email: '', phone: '', sex: '2', status: '0', roleIds: [], postIds: []}, password: 'User12345'}}); expect(response.status()).toBe(201); const user = await response.json();
   try {
     await page.evaluate(() => sessionStorage.removeItem('eforge.enterprise.session.v1')); await page.goto('/job/log/0'); await page.getByLabel('账号', {exact: true}).fill(username); await page.getByLabel('密码', {exact: true}).fill('User12345'); await page.getByRole('button', {name: '登录', exact: true}).click(); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
-    const token = await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string); for (const path of ['/api/v1/monitor/jobs', '/api/v1/monitor/job-logs']) expect((await page.request.get(path, {headers: {Authorization: `Bearer ${token}`}})).status()).toBe(403);
+    const token = await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string); for (const path of ['/api/v1/monitor/jobs', '/api/v1/monitor/job-logs', '/api/v1/monitor/jobs/cron-preview?expression=0%200%200%20L%20*%20%3F']) expect((await page.request.get(path, {headers: {Authorization: `Bearer ${token}`}})).status()).toBe(403);
     await page.goto('/job'); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible(); await page.setViewportSize({width: 375, height: 812}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally {expect((await page.request.delete('/api/v1/system/users', {headers, data: {ids: [user.id]}})).status()).toBe(204);}
+});
+test('actual Quartz Cron editor previews special dates, raw refill, invalid/expired expressions and preserves task schedules', async ({page}) => {
+  test.setTimeout(120000); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message)); const headers = await login(page);
+  const before = await (await page.request.get('/api/v1/monitor/jobs?pageSize=100', {headers})).json();
+  await page.getByRole('button', {name: 'Cron表达式编辑', exact: true}).click(); const dialog = page.getByRole('dialog'), expression = dialog.getByLabel('Cron表达式', {exact: true});
+  for (const value of ['0 0 0 L 1 ? 2099', '0 0 0 1W 1 ? 2099', '0 0 0 ? 1 6#1 2099', '0 0 0 ? 1 6L 2099', '0 0/5 8-18 ? JAN MON-FRI 2099']) {
+    await expression.fill(value); await dialog.getByRole('button', {name: '回填字段'}).click(); const expected = await (await page.request.get(`/api/v1/monitor/jobs/cron-preview?expression=${encodeURIComponent(value)}`, {headers})).json();
+    await expect(dialog.getByRole('button', {name: '确认表达式'})).toBeEnabled(); await expect(dialog.getByText(`服务器时区：${expected.zone}`, {exact: true})).toBeVisible();
+    await expect.poll(() => dialog.locator('time').evaluateAll(elements => elements.map(element => element.getAttribute('datetime')))).toEqual(expected.times); expect(expected.times.length).toBeGreaterThan(0);
+  }
+  await expression.fill('0 0 0 1 1 ? 2099'); await dialog.getByRole('button', {name: '回填字段'}).click(); await dialog.getByRole('tab', {name: '日', exact: true}).click(); await dialog.getByLabel('日模式').selectOption('nearest'); await expect(expression).toHaveValue('0 0 0 1W 1 ? 2099'); await expect(dialog.getByRole('button', {name: '确认表达式'})).toBeEnabled();
+  await dialog.getByRole('tab', {name: '周', exact: true}).click(); await dialog.getByLabel('周模式').selectOption('nth'); await dialog.getByLabel('周星期').fill('6'); await expect(expression).toHaveValue('0 0 0 ? 1 6#1 2099'); await expect(dialog.getByRole('button', {name: '确认表达式'})).toBeEnabled();
+  await expression.fill('0 0 0 32 1 ?'); await expect(dialog.getByRole('alert')).toBeVisible(); await expect(dialog.getByRole('button', {name: '确认表达式'})).toBeDisabled();
+  await expression.fill('0 0 0 1 1 ? 1970'); await dialog.getByRole('button', {name: '回填字段'}).click(); await expect(dialog.getByText('该有效表达式没有后续执行时间。')).toBeVisible(); await page.setViewportSize({width: 375, height: 812}); expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true); await dialog.getByRole('button', {name: '确认表达式'}).click(); await expect(page.getByLabel('已确认Cron表达式')).toHaveText('0 0 0 1 1 ? 1970');
+  await page.getByRole('button', {name: 'Cron表达式编辑', exact: true}).click(); await dialog.getByRole('button', {name: '重置表达式'}).click(); await page.keyboard.press('Escape'); await expect(page.getByLabel('已确认Cron表达式')).toHaveText('0 0 0 1 1 ? 1970');
+  const after = await (await page.request.get('/api/v1/monitor/jobs?pageSize=100', {headers})).json(); expect({...after, items: after.items.map((row: JobResponse) => ({...row, nextExecutionAt: undefined}))}).toEqual({...before, items: before.items.map((row: JobResponse) => ({...row, nextExecutionAt: undefined}))}); expect(errors).toEqual([]);
 });

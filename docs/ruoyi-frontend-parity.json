@@ -266,8 +266,8 @@
         "runJob"
       ],
       "state": "partial",
-      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md", "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md"],
-      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task mutation controls, Cron editor and final capability audit"]
+      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md", "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/e2e/cron-editor.spec.ts", "docs/security-review-cron-editor.md"],
+      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task mutation controls with Cron create/edit integration and final capability audit"]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/jobLog.js",
@@ -287,7 +287,7 @@
       ],
       "remaining": [
         "Final task-log capability audit",
-        "Canonical task management, scheduler/database consistency, Cron editor and actual task browser verification"
+        "Canonical task management, scheduler/database consistency, Cron create/edit integration and actual task mutation browser verification"
       ]
     },
     {
@@ -962,5 +962,18 @@
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885166",
     "scope": "Task read/detail/full sorted XLSX and original internal log route with name/group/status/date/target filters, ordering, paging, context/close, detail/exception text, captured-ID delete/clear confirmation and filtered sorted XLSX. Twelve owned paused tasks produce actual Quartz success/failure logs; original grants, no-role denial, inert stored text and both complete runtime regressions pass. Task mutation controls, Cron editor, full scheduler/SQL consistency and final capability audits remain pending. Neither approval-rejected runtime mutation proposal is implemented.",
     "evidence": ["docs/security-review-job-pages.md", "web/features/jobs/JobsPage.tsx", "web/tests/unit/job-api.test.ts", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "sql/migrations/V023__task_read_route.sql"]
+  },
+  "cronEditorValidation": {
+    "state": "editor-and-read-tool-locally-verified",
+    "backendTests": 371,
+    "unitTests": 73,
+    "fixtureBrowserTests": 64,
+    "liveBrowserTestsPerConfiguration": 43,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Feature-local seven-field editor, original reset/refill/cancel/confirmation and task read/detail handoff. Range/interval/specified values, omitted/expired years, day/week exclusion, W/L/# and preserved named/advanced raw fields use actual protected Quartz five-instant/server-zone preview. Invalid/stale/failed previews cannot confirm; whitespace-only edits revalidate. Original grants, retry/cancel/focus/keyboard/mobile, actual no-role preview denial and unchanged persisted task fields pass. Task create/edit integration, task mutations, full scheduler/SQL consistency and final original-capability audits remain pending; neither approval-rejected runtime mutation proposal is implemented.",
+    "evidence": ["docs/security-review-cron-editor.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/unit/cron-model.test.ts", "web/tests/unit/job-api.test.ts", "web/tests/e2e/cron-editor.spec.ts", "web/tests/live/jobs.spec.ts"]
   }
 }

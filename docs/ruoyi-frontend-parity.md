@@ -41,7 +41,7 @@ It is a work inventory, not executable proof of completion.
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
-| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical task reads/log API and actual Quartz preview, read/detail/export and original log pages verified locally and in exact-head CI; task mutations, Cron editor and full consistency remain pending |
+| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical task reads/log API and actual Quartz preview, read/detail/export and original log pages verified locally and in exact-head CI; Cron editor locally verified; task mutations/create-edit integration and full consistency remain pending |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
@@ -1191,3 +1191,43 @@ in all three jobs and
 confirmed on 2026-10-05. Both configurations' complete Linux real browser/runtime
 regressions and exact live OpenAPI equality pass. Task writes/Cron editing/full
 scheduler consistency and final original-capability acceptance remain incomplete.
+
+### Cron editor and task-read handoff checkpoint — 2026-10-05
+
+The independently implemented React editor preserves the original seven fields,
+every/range/interval/specified-value modes, optional years, day/week exclusion,
+nearest workday/month end/nth or last weekday, manual expression refill and the
+original '* * * * * ?' reset. Named or advanced Quartz fields remain intact until
+explicitly edited. The existing generated canonical preview provides five
+actual Quartz instants and server-zone display. Exhausted valid expressions can
+be confirmed; invalid/failed/stale previews cannot. Confirmation returns an
+expression to the caller/read tool and never mutates a task or schedule. The task
+read detail can hand its current expression to the editor. Future task create/
+edit forms must still integrate this component; task management is not complete.
+
+The first browser failures proved local validation errors were incorrectly
+reported as network failures and cancellation lost focus after detail handoff.
+Both are repaired without weakening assertions. Tool cancellation also explicitly
+restores its opener. A whitespace-only input change now revalidates the normalized
+expression; bounded/empty fields disable confirmation. The slow-request test
+registers its listener before editing, and list-only denial waits for the actual
+page heading before asserting the missing control.
+
+Full local verification passes 371 backend tests (including ten unchanged data
+scope cases), 73 units, 64 fixture browsers and all 43 real browser cases in each
+default-disabled/enabled console configuration. Actual Quartz browser cases
+compare L/W/#/last weekday/named-range previews with protected API instants,
+verify invalid/expired expressions, context/reset/confirmation/mobile, persisted
+task field equality and actual no-role denial. Both complete disposable MySQL/
+Redis/Quartz/OSHI/ACL/captcha/data-consistency regressions pass. Lint/typecheck/
+build, generated-client reproduction, production security defaults and both
+exact live OpenAPI snapshots pass. Logs under boot target use cron-editor-
+backend/unit/build/fixtures/disabled-runtime/enabled-runtime prefixes.
+Exact-head cloud acceptance is pending until checked.
+
+Task canonical writes/white-list validation, schedule/SQL commit/concurrency/
+batch/precommit/persistent-fault consistency and task create/edit/status/run/
+delete controls remain required. The execution-gated mutation proposal is still
+explicitly approval-pending after automatic review rejection; neither rejected
+runtime patch was written. Generator React/EForge output and UI, form builder,
+full shell/shared capabilities and final per-capability acceptance remain active.

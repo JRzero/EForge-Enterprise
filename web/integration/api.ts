@@ -30,7 +30,7 @@ import {getServerMonitor} from '../generated/api';
 import {getCacheStatistics, listCacheNames, listCacheKeys, getCacheValue, clearCacheName, clearCacheKey, clearAllCache, type ClearCacheKeyRequest} from '../generated/api';
 import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openApiDocsConsole} from '../generated/api';
 
-import {listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
+import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -102,6 +102,7 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async unlockLoginAccount(username: string) {
       await unlockLoginAccount({username}, {baseUrl: '', fetch: transport(true)});
     },
+    async previewJobCron(expression: string, signal?: AbortSignal) {return (await previewJobCron(expression, {baseUrl: '', fetch: transport(true), signal})).data;},
     async listJobs(query: Parameters<typeof listJobs>[0], signal?: AbortSignal) {return (await listJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
     async getJob(id: string, signal?: AbortSignal) {return (await getJob(id, {baseUrl: '', fetch: transport(true), signal})).data;},
     async exportJobs(query: Parameters<typeof exportJobs>[0], signal?: AbortSignal) {return (await exportJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
