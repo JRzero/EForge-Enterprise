@@ -27,14 +27,23 @@ test('real iframe loading, fixed entries, mobile layout, expiry and renewal with
 });
 test('status/open/resource faults, hostile entry rejection and fresh grant checks', async ({page}) => {
   let status = 503, opening = 200, entry = '/druid/login.html', resource = 200;
-  await page.route('**/api/v1/monitor/consoles/druid', route => route.fulfill({status, json: status === 200 ? {enabled: true} : {code: status === 403 ? 'ACCESS_DENIED' : 'CONSOLE_UNAVAILABLE'}}));
-  await page.route('**/api/v1/monitor/consoles/druid/session', route => route.fulfill({status: opening, json: opening === 200 ? {entryPath: entry, expiresInSeconds: 300} : {code: 'CONSOLE_UNAVAILABLE'}}));
-  await page.route('**/druid/login.html', route => route.fulfill({status: resource, contentType: resource === 200 ? 'text/html' : 'application/problem+json', body: resource === 200 ? '<html><body>监控资源</body></html>' : '{"status":401}'}));
+  let gate: Promise<void> | undefined;
+  async function retry() {
+    let release!: () => void; gate = new Promise<void>(resolve => {release = resolve;});
+    await page.getByRole('button', {name: '重试', exact: true}).click();
+    // Consecutive failures share text. Remove the preceding alert before releasing
+    // this request so an assertion cannot accidentally accept the previous phase.
+    await expect(page.getByText('正在加载控制台，请稍候！')).toBeVisible(); await expect(page.getByRole('alert')).toHaveCount(0);
+    gate = undefined; release();
+  }
+  await page.route('**/api/v1/monitor/consoles/druid', async route => {await gate; await route.fulfill({status, json: status === 200 ? {enabled: true} : {code: status === 403 ? 'ACCESS_DENIED' : 'CONSOLE_UNAVAILABLE'}});});
+  await page.route('**/api/v1/monitor/consoles/druid/session', async route => {await gate; await route.fulfill({status: opening, json: opening === 200 ? {entryPath: entry, expiresInSeconds: 300} : {code: 'CONSOLE_UNAVAILABLE'}});});
+  await page.route('**/druid/login.html', async route => {await gate; await route.fulfill({status: resource, contentType: resource === 200 ? 'text/html' : 'application/problem+json', body: resource === 200 ? '<html><body>监控资源</body></html>' : '{"status":401}'});});
   await login(page); await expect(page.getByRole('alert')).toContainText('控制台暂时不可用');
-  status = 200; opening = 503; await page.getByRole('button', {name: '重试', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('控制台暂时不可用');
-  opening = 200; entry = 'https://example.org/?token=unsafe'; await page.getByRole('button', {name: '重试', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('控制台暂时无法加载'); await expect(page.locator('iframe')).toHaveCount(0);
-  entry = '/druid/login.html'; resource = 401; const rejected = page.waitForResponse(response => response.url().endsWith('/druid/login.html') && response.status() === 401); await page.getByRole('button', {name: '重试', exact: true}).click(); await rejected; await expect(page.getByRole('alert')).toContainText('控制台暂时无法加载');
-  resource = 200; await page.getByRole('button', {name: '重试', exact: true}).click(); await expect(page.frameLocator('iframe').getByText('监控资源')).toBeVisible();
+  status = 200; opening = 503; await retry(); await expect(page.getByRole('alert')).toContainText('控制台暂时不可用');
+  opening = 200; entry = 'https://example.org/?token=unsafe'; await retry(); await expect(page.getByRole('alert')).toContainText('控制台暂时无法加载'); await expect(page.locator('iframe')).toHaveCount(0);
+  entry = '/druid/login.html'; resource = 401; const rejected = page.waitForResponse(response => response.url().endsWith('/druid/login.html') && response.status() === 401); await retry(); await rejected; await expect(page.getByRole('alert')).toContainText('控制台暂时无法加载');
+  resource = 200; await retry(); await expect(page.frameLocator('iframe').getByText('监控资源')).toBeVisible();
   status = 403; await page.evaluate(() => window.dispatchEvent(new Event('focus'))); await expect(page.getByRole('alert')).toBeVisible(); await expect(page.locator('iframe')).toHaveCount(0);
 });
 test('navigation aborts pending reads and expired application sessions return to login', async ({page}) => {

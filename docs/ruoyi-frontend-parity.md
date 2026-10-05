@@ -1063,5 +1063,11 @@ defaults, seeded routes, full runtime regression and generated-client
 reproducibility pass. Both live OpenAPI snapshots exactly match the committed
 contract. Evidence logs in boot target use the job-api-backend/unit/build/
 fixtures/enabled-runtime/disabled-runtime prefixes; cloud validation is pending.
+The initial cloud fixture run exposed a separate retry-test race: consecutive
+failures reused the same alert text, so the assertion could accept the preceding
+phase and click a disappearing button. The fixture now holds each new response
+until the loading state is visible and the previous alert is removed. All 57
+local browser cases pass with that deterministic gate; production page behavior
+is unchanged.
 The complete original frontend objective and all final capability audits remain
 active.
