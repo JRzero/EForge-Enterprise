@@ -30,12 +30,25 @@ trusted Origin. A bearer-only schema export remains available when Swagger UI
 is disabled, so client reproducibility does not require enabling an interactive
 production console.
 
-No JWT or ticket is placed in entry URLs, response DTOs, client storage or browser
-traces. Only the generated-client open calls opt into same-origin cookies;
+Console entry URLs and response DTOs contain neither JWTs nor tickets. Ticket
+values stay in HttpOnly cookies and hashed Redis bindings; existing application
+bearer sessions keep their established storage contract. Real browser traces
+are disabled. Only the generated-client open calls opt into same-origin cookies;
 normal API/status reads continue to omit cookies. Redis binding failures and
 authorization snapshot failures return generic CONSOLE_UNAVAILABLE without
 exception text or cached private values. Configured-off consoles return a typed
 false status and reject issuance/resources with CONSOLE_DISABLED.
+
+Diagnostic servlet, HTML, script and schema responses enforce no-store even
+when an imported servlet tries to set public cache headers, future Expires or
+reset the response. The wrapper is limited to the fixed diagnostic resources;
+ordinary resource caching stays unchanged. This ensures logout/revocation
+checks reach the server instead of reusing an earlier cached success. Parent
+pages also probe resources without cache and remove the iframe on expiry,
+current-grant failure or application logout. Embedded Druid forms, JSON links,
+downloads and Swagger authorization/Try it out retain their original controls.
+Live tests remove the iframe before failure snapshots, so Swagger bearer
+inputs and generated curl text cannot enter the failure DOM artifact.
 
 ADR-0016 records the architecture boundary and deployment defaults. Unit/MVC
 coverage and owned MySQL/Redis verification include actual console resources,

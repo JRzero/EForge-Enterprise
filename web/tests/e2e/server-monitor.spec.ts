@@ -28,9 +28,10 @@ test('all server groups, binary units, unsafe text, strict warning threshold and
 });
 test('loading, generic failure, keyboard retry and denied backend request', async ({page}) => {
   let fail = true;
-  await page.route('**/api/v1/monitor/server', async route => {await new Promise(resolve => setTimeout(resolve, 300)); await route.fulfill(fail ? {status: 503, json: {code: 'SERVER_MONITOR_UNAVAILABLE'}} : {json: sample});});
+  let release!: () => void; const initialResponse = new Promise<void>(resolve => {release = resolve;});
+  await page.route('**/api/v1/monitor/server', async route => {await initialResponse; await route.fulfill(fail ? {status: 503, json: {code: 'SERVER_MONITOR_UNAVAILABLE'}} : {json: sample}).catch(() => {});});
   await login(page); await expect(page.getByText('正在加载服务监控数据，请稍候！', {exact: true})).toBeVisible(); await expect(page.getByRole('button', {name: '刷新', exact: true})).toBeDisabled();
-  await expect(page.getByRole('alert')).toContainText('服务器监控暂时无法'); await expect(page.getByRole('button', {name: '刷新', exact: true})).toBeEnabled();
+  release(); await expect(page.getByRole('alert')).toContainText('服务器监控暂时无法'); await expect(page.getByRole('button', {name: '刷新', exact: true})).toBeEnabled();
   fail = false; await page.getByRole('button', {name: '重试', exact: true}).focus(); await page.keyboard.press('Enter'); await expect(page.getByRole('heading', {name: 'CPU', exact: true})).toBeVisible(); await expect(page.getByRole('alert')).toHaveCount(0);
   await page.route('**/api/v1/monitor/server', route => route.fulfill({status: 403, json: {code: 'ACCESS_DENIED'}})); await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.getByRole('alert')).toBeVisible(); await expect(page.getByRole('heading', {name: 'CPU', exact: true})).toHaveCount(0);
 });

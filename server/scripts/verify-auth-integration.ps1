@@ -1,6 +1,6 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles)
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [string]$WebTestPattern = '')
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
@@ -102,6 +102,8 @@ try {
         EFORGE_SERVER_PORT = "$AppPort"; EFORGE_TOKEN_SECRET = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
         EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_CONSOLE_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         EFORGE_CONSOLE_SECURE_COOKIE = 'false'
+        EFORGE_DRUID_USERNAME = 'console-validator'; EFORGE_DRUID_PASSWORD = $testPassword
+        EFORGE_DRUID_SQL_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_WEB_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         EFORGE_PROFILE = $uploadDirectory
     }
     foreach ($key in $testEnv.Keys) {
@@ -145,7 +147,7 @@ try {
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'
-    Assert-Check ($bootstrap.navigation.Count -eq 4 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children.Count -eq 9 -and $bootstrap.navigation[1].children[0].routeId -eq 'system-users' -and $bootstrap.navigation[1].children[1].routeId -eq 'system-roles' -and $bootstrap.navigation[1].children[2].routeId -eq 'system-menus' -and $bootstrap.navigation[1].children[3].routeId -eq 'system-departments' -and $bootstrap.navigation[1].children[4].routeId -eq 'system-posts' -and $bootstrap.navigation[1].children[5].routeId -eq 'system-dictionaries' -and $bootstrap.navigation[1].children[6].routeId -eq 'system-configurations' -and $bootstrap.navigation[1].children[7].routeId -eq 'system-notices' -and $bootstrap.navigation[1].children[8].key -eq 'system-logs' -and $bootstrap.navigation[1].children[8].type -eq 'GROUP' -and $bootstrap.navigation[1].children[8].children.Count -eq 2 -and $bootstrap.navigation[1].children[8].children[0].routeId -eq 'monitor-operation-logs' -and $bootstrap.navigation[1].children[8].children[1].routeId -eq 'monitor-login-logs' -and $bootstrap.navigation[2].key -eq 'monitor' -and $bootstrap.navigation[2].type -eq 'GROUP' -and $bootstrap.navigation[2].children.Count -eq 4 -and $bootstrap.navigation[2].children[0].routeId -eq 'monitor-online-sessions' -and $bootstrap.navigation[2].children[1].routeId -eq 'monitor-server' -and $bootstrap.navigation[2].children[2].routeId -eq 'monitor-cache' -and $bootstrap.navigation[2].children[3].routeId -eq 'monitor-cache-entries' -and $bootstrap.navigation[3].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
+    Assert-Check ($bootstrap.navigation.Count -eq 5 -and $bootstrap.navigation[0].routeId -eq 'dashboard' -and $bootstrap.navigation[1].key -eq 'system' -and $bootstrap.navigation[1].children.Count -eq 9 -and $bootstrap.navigation[1].children[0].routeId -eq 'system-users' -and $bootstrap.navigation[1].children[1].routeId -eq 'system-roles' -and $bootstrap.navigation[1].children[2].routeId -eq 'system-menus' -and $bootstrap.navigation[1].children[3].routeId -eq 'system-departments' -and $bootstrap.navigation[1].children[4].routeId -eq 'system-posts' -and $bootstrap.navigation[1].children[5].routeId -eq 'system-dictionaries' -and $bootstrap.navigation[1].children[6].routeId -eq 'system-configurations' -and $bootstrap.navigation[1].children[7].routeId -eq 'system-notices' -and $bootstrap.navigation[1].children[8].key -eq 'system-logs' -and $bootstrap.navigation[1].children[8].type -eq 'GROUP' -and $bootstrap.navigation[1].children[8].children.Count -eq 2 -and $bootstrap.navigation[1].children[8].children[0].routeId -eq 'monitor-operation-logs' -and $bootstrap.navigation[1].children[8].children[1].routeId -eq 'monitor-login-logs' -and $bootstrap.navigation[2].key -eq 'monitor' -and $bootstrap.navigation[2].type -eq 'GROUP' -and $bootstrap.navigation[2].children.Count -eq 5 -and $bootstrap.navigation[2].children[0].routeId -eq 'monitor-online-sessions' -and $bootstrap.navigation[2].children[1].routeId -eq 'monitor-druid' -and $bootstrap.navigation[2].children[2].routeId -eq 'monitor-server' -and $bootstrap.navigation[2].children[3].routeId -eq 'monitor-cache' -and $bootstrap.navigation[2].children[4].routeId -eq 'monitor-cache-entries' -and $bootstrap.navigation[3].key -eq 'tool' -and $bootstrap.navigation[3].type -eq 'GROUP' -and !$bootstrap.navigation[3].PSObject.Properties['routeId'] -and $bootstrap.navigation[3].children.Count -eq 1 -and $bootstrap.navigation[3].children[0].routeId -eq 'tool-openapi' -and $bootstrap.navigation[4].type -eq 'EXTERNAL') 'Only implemented pages and explicit external links enter seeded navigation.'
     Assert-Problem (Request '/api/v1/auth/login' 'GET' '' $authorized) 405 'HTTP_405'
     $openapi = (Request '/v3/api-docs/api-v1' 'GET' '' $authorized).Content | ConvertFrom-Json -AsHashtable
     $operation = $openapi.paths['/api/v1/auth/login'].post
@@ -164,14 +166,15 @@ try {
         Push-Location (Join-Path $repoRoot 'web')
         try {
             $npmCommand = if ($IsWindows) { 'npm.cmd' } else { 'npm' }
-            & $npmCommand run test:e2e:live
+            if ($WebTestPattern) { & $npmCommand run test:e2e:live -- $WebTestPattern }
+            else { & $npmCommand run test:e2e:live }
             Assert-Check ($LASTEXITCODE -eq 0) 'Browser integration with real MySQL/Redis failed.'
         } finally {
             Pop-Location
             [Environment]::SetEnvironmentVariable('EFORGE_E2E_BACKEND_URL', $previousBackendUrl, 'Process')
         }
         # The real global-cache browser case revokes the harness session too.
-        Assert-Problem (Request '/api/v1/app/bootstrap' 'GET' '' $authorized) 401 'AUTHENTICATION_REQUIRED'
+        if (!$WebTestPattern) { Assert-Problem (Request '/api/v1/app/bootstrap' 'GET' '' $authorized) 401 'AUTHENTICATION_REQUIRED' }
         $afterBrowserLogin = Request '/api/v1/auth/login' 'POST' $credentials
         Assert-Check ($afterBrowserLogin.StatusCode -eq 200) 'Fresh login after browser cache clearing failed.'
         $authorized = @{Authorization = "Bearer $(($afterBrowserLogin.Content | ConvertFrom-Json).accessToken)"}

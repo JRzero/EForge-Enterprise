@@ -58,3 +58,23 @@ CI also exports the live schema and checks it against the committed snapshot.
 Only `integration/legacy-auth.ts` reads RuoYi captcha/logout wrappers. The login
 and bootstrap pages use generated canonical types/functions. Session, permission
 and navigation composition are documented in ADR-0010.
+
+## Diagnostic consoles
+
+`/druid` and `/swagger` are application routes. The embedded resources remain
+same-origin at `/druid/**`, `/swagger-ui/**`, `/swagger-ui.html` and `/v3/api-docs/**`.
+Vite proxies those resources while preserving Host; `/druid` itself serves the
+SPA. Production reverse proxies must preserve that distinction and forward the
+resource prefixes to the backend over HTTPS. Console cookies default to Secure;
+only the disposable HTTP integration harness explicitly overrides it.
+Configure `EFORGE_DRUID_USERNAME` and `EFORGE_DRUID_PASSWORD` when enabling
+Druid's original login screen. Its internal login never replaces the required
+application session and monitor grant.
+
+Run the runtime script with `-EnableConsoles -VerifyWeb` to verify both actual
+consoles, including Druid login/SQL and Swagger authorization/Try it out. Without
+`-EnableConsoles`, the same pages verify their protected disabled state. Optional
+`-WebTestPattern consoles.spec.ts` selects browser cases for diagnosis; final
+acceptance requires an unfiltered run. Imported resources cannot override
+no-store caching. Console credentials expire after five minutes; refresh opens
+a fresh scoped ticket using the current application session and grants.

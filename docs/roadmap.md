@@ -63,7 +63,11 @@ Diagnostic console canonical APIs, generated client and scoped authentication
 transport pass local 336 backend/67 unit/52 fixture/37 real browser regression,
 including actual enabled servlet resources, grant/logout revocation, ACL faults
 and expiry. Exact commit 3a77fda passes server 37267216665 all three jobs and web
-37267216628. Both React console pages remain pending.
+37267216628. Both embedded React console pages now pass local 338 backend/67
+unit/57 fixture/40 real browser cases in enabled and default-disabled runtime,
+including original Druid login/SQL/JSON windows, Swagger authorization and actual
+execution, scoped caching/logout/revocation and error recovery. Page exact-head
+CI and final capability audit remain pending.
 
 ## Phase 4 — Generator
 

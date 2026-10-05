@@ -19,6 +19,8 @@ const OnlineSessionsPage = lazy(() => import('../features/online-sessions/Online
 const ServerMonitorPage = lazy(() => import('../features/server-monitor/ServerMonitorPage').then(module => ({default: module.ServerMonitorPage})));
 const CacheStatisticsPage = lazy(() => import('../features/cache-monitor/CacheStatisticsPage').then(module => ({default: module.CacheStatisticsPage})));
 const CacheEntriesPage = lazy(() => import('../features/cache-monitor/CacheEntriesPage').then(module => ({default: module.CacheEntriesPage})));
+const DruidConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.DruidConsolePage})));
+const ApiDocsConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.ApiDocsConsolePage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
@@ -53,6 +55,8 @@ if (!serverMonitor) throw new Error('Missing server monitor route contract.');
 const cacheStatistics = contracts.find(route => route.id === 'monitor-cache');
 const cacheEntries = contracts.find(route => route.id === 'monitor-cache-entries');
 if (!cacheStatistics || !cacheEntries) throw new Error('Missing cache monitor route contracts.');
+const druid = contracts.find(route => route.id === 'monitor-druid'), apiDocs = contracts.find(route => route.id === 'tool-openapi');
+if (!druid || !apiDocs) throw new Error('Missing diagnostic console route contracts.');
 if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
 export const routes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
@@ -99,6 +103,10 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: cacheEntries.id, path: cacheEntries.path, title: '缓存列表',
   access: {permission: cacheEntries.permission}, component: CacheEntriesPage
+}, {
+  id: druid.id, path: druid.path, title: '数据监控', access: {permission: druid.permission}, component: DruidConsolePage
+}, {
+  id: apiDocs.id, path: apiDocs.path, title: '接口文档', access: {permission: apiDocs.permission}, component: ApiDocsConsolePage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

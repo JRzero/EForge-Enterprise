@@ -873,5 +873,17 @@
     "implementationCommit": "3a77fdaffed522db278260fae6acd809273dd4d1",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37267216665",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37267216628"
+  },
+  "diagnosticConsolePageValidation": {
+    "state": "page-local-verified",
+    "backendTests": 338,
+    "unitTests": 67,
+    "fixtureBrowserTests": 57,
+    "liveBrowserTests": 40,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Both original embedded routes, disabled/loading/retry/refresh/expiry/abort behavior, actual Druid login/basic/SQL/JSON popup, Swagger authorization/Try it out execution, cookie scope, no-role guards, live grant revocation/logout and enforced diagnostic no-store. Full original-capability audit remains pending."
   }
 }

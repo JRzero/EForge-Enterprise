@@ -24,9 +24,10 @@ test('cache statistics retain all fields, exact counters, rose/gauge graphics, s
   await page.getByRole('link', {name: '工作台', exact: true}).click(); await page.getByRole('link', {name: '缓存监控', exact: true}).click(); await expect(page.locator('.cache-chart svg')).toHaveCount(2); expect(errors).toEqual([]);
 });
 test('stats loading ends on fault, keyboard retry succeeds, backend denial clears diagnostic fields', async ({page}) => {
-  let failure = 503; await page.route('**/api/v1/monitor/cache', async route => {await new Promise(resolve => setTimeout(resolve, 300)); await route.fulfill(failure ? {status: failure, json: {code: failure === 503 ? 'CACHE_UNAVAILABLE' : 'ACCESS_DENIED'}} : {json: stats});});
+  let release!: () => void; const initialResponse = new Promise<void>(resolve => {release = resolve;});
+  let failure = 503; await page.route('**/api/v1/monitor/cache', async route => {await initialResponse; await route.fulfill(failure ? {status: failure, json: {code: failure === 503 ? 'CACHE_UNAVAILABLE' : 'ACCESS_DENIED'}} : {json: stats}).catch(() => {});});
   await login(page, '/cache'); await expect(page.getByText('正在加载缓存监控数据，请稍候！', {exact: true})).toBeVisible(); await expect(page.getByRole('button', {name: '刷新', exact: true})).toBeDisabled();
-  await expect(page.getByRole('alert')).toContainText('缓存服务暂时不可用'); failure = 0; await page.getByRole('button', {name: '重试', exact: true}).focus(); await page.keyboard.press('Enter'); await expect(page.getByRole('heading', {name: '基本信息', exact: true})).toBeVisible();
+  release(); await expect(page.getByRole('alert')).toContainText('缓存服务暂时不可用'); failure = 0; await page.getByRole('button', {name: '重试', exact: true}).focus(); await page.keyboard.press('Enter'); await expect(page.getByRole('heading', {name: '基本信息', exact: true})).toBeVisible();
   failure = 403; await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.getByRole('alert')).toBeVisible(); await expect(page.locator('dd')).toHaveCount(0);
 });
 test('leaving statistics aborts its pending request', async ({page}) => {

@@ -44,7 +44,7 @@ It is a work inventory, not executable proof of completion.
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
-| Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
+| Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; exact-head page CI and final capability audit pending |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
 | Shared controls | dictionary tags, paging, reset/date ranges, toolbar column/search toggle, image/file upload and preview, rich editor, icon picker, cron editor, keyboard/focus and empty/loading/error/retry states | Missing complete parity |
@@ -993,3 +993,38 @@ real browser regression and explicitly enabled console integration) and web
 CI `37267216628`, confirmed on 2026-10-05. Both cloud live OpenAPI comparisons
 pass. Console React pages, authenticated iframe
 browser acceptance and all remaining original capabilities remain required.
+
+### Diagnostic console pages checkpoint — 2026-10-05
+
+Both original console routes now bind actual lazy React pages via migration
+V022. The tool GROUP remains a navigation identity without a React route.
+Original Druid login, basic/SQL views and its JSON window remain functional;
+Swagger retains its authorization dialog and actual Try it out execution.
+The parent pages cover disabled/loading/failure/retry/refresh states, expire
+scoped tickets without signing out a valid application session, recheck grants
+on focus and while active, abort reads/issuance on navigation and remove frames
+on application logout or authorization failure. Fixed same-origin paths and
+HttpOnly cookies keep console tickets out of entry URLs and parent storage.
+
+Real browser verification exposed Druid's public resource caching. The scoped
+filter wrapper now enforces no-store even after imported code resets/overwrites
+headers; ordinary resource caching remains intact. Actual default browser fetches
+after logout return 401 and after grant revocation return 403. The inner Druid
+session cookie and JSON popup are verified independently of the outer grant.
+Swagger's actual authorization/HTTP-200 execution is verified; failure snapshots
+remove the iframe to avoid capturing bearer input/generated curl text.
+
+All 338 backend tests (including ten unchanged data-scope parity cases), 67 unit
+tests, 57 fixture browser tests, lint/typecheck/build and reproducible client
+checks pass. Complete MySQL/Redis regression and all 40 real browser tests pass
+in both explicitly enabled and default-disabled configurations. Both live
+OpenAPI snapshots exactly match the committed contract. Runtime regression
+includes all earlier modules, captcha, ACL faults, transaction rollback, SQL
+retention and cache clearing/session invalidation. The two earlier monitor
+loading fixtures now gate responses explicitly instead of relying on 300ms
+timing. Evidence logs under boot target are console-pages-backend,
+console-pages-final-static, console-pages-fixtures, console-pages-enabled-runtime
+and console-pages-disabled-runtime. Exact-commit CI is pending. Jobs/cron and
+task logs, generator/form builder, complete shell/shared capabilities and the
+final original-capability audit remain required; this checkpoint is not full
+goal completion.

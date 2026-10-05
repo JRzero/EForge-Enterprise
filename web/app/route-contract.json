@@ -13,5 +13,7 @@
   {"id": "monitor-online-sessions", "path": "/online", "permission": "monitor:online:list"},
   {"id": "monitor-server", "path": "/server", "permission": "monitor:server:list"},
   {"id": "monitor-cache", "path": "/cache", "permission": "monitor:cache:list"},
-  {"id": "monitor-cache-entries", "path": "/cacheList", "permission": "monitor:cache:list"}
+  {"id": "monitor-cache-entries", "path": "/cacheList", "permission": "monitor:cache:list"},
+  {"id": "monitor-druid", "path": "/druid", "permission": "monitor:druid:list"},
+  {"id": "tool-openapi", "path": "/swagger", "permission": "tool:swagger:list"}
 ]

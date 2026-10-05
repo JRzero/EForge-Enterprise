@@ -52,8 +52,8 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async getDruidConsoleStatus(signal?: AbortSignal) {return (await getDruidConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
     async getApiDocsConsoleStatus(signal?: AbortSignal) {return (await getApiDocsConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
     // Only these fixed same-origin mutations accept HttpOnly console cookies.
-    async openDruidConsole() {return (await openDruidConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin')})).data;},
-    async openApiDocsConsole() {return (await openApiDocsConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin')})).data;},
+    async openDruidConsole(signal?: AbortSignal) {return (await openDruidConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin'), signal})).data;},
+    async openApiDocsConsole(signal?: AbortSignal) {return (await openApiDocsConsole({baseUrl: '', fetch: transport(true, 15000, 'same-origin'), signal})).data;},
     async getCacheStatistics(signal?: AbortSignal) {return (await getCacheStatistics({baseUrl: '', fetch: transport(true), signal})).data;},
     async listCacheNames(signal?: AbortSignal) {return (await listCacheNames({baseUrl: '', fetch: transport(true), signal})).data;},
     async listCacheKeys(name: string, signal?: AbortSignal) {return (await listCacheKeys(name, {baseUrl: '', fetch: transport(true), signal})).data;},

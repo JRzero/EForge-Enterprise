@@ -40,6 +40,10 @@ try {
         Assert-Check ((Request '/swagger-ui/index.html' 'GET' '' $cookies.'api-docs').StatusCode -eq 200) 'Cookie did not authenticate actual Swagger HTML.'
         Assert-Check ((Request '/swagger-ui/swagger-ui-bundle.js' 'GET' '' $cookies.'api-docs').StatusCode -eq 200) 'Nested Swagger assets must authenticate.'
         Assert-Check ((Request '/v3/api-docs/api-v1' 'GET' '' $cookies.'api-docs').StatusCode -eq 200) 'Swagger schema requests must authenticate.'
+        foreach($resource in @(@{path='/druid/login.html';headers=$cookies.druid},@{path='/swagger-ui/swagger-ui-bundle.js';headers=$cookies.'api-docs'},@{path='/v3/api-docs/api-v1';headers=$cookies.'api-docs'})) {
+            $protectedResource=Request $resource.path 'GET' '' $resource.headers
+            Assert-Check ($protectedResource.StatusCode -eq 200 -and ($protectedResource.Headers['Cache-Control'] -join ',') -match 'no-store') 'Diagnostic servlet/assets/schema responses must forbid browser caching.'
+        }
         try {
             Invoke-Docker exec $redisName redis-cli ACL SETUSER default '-get'|Out-Null
             Assert-Problem (Request '/druid/index.html' 'GET' '' $cookies.druid) 503 'CONSOLE_UNAVAILABLE'

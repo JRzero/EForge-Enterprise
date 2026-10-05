@@ -40,6 +40,12 @@ This prevents a diagnostic read from recreating a session removed concurrently
 by logout. Missing sessions, expiry or full cache clearing make tickets unusable;
 revoked grants are rejected on every resource request.
 
+Raw diagnostic responses enforce no-store at the filter boundary, including
+when imported static-resource code sets public caching, future Expires or resets
+the response. Browser requests after logout/revocation must reach the guard.
+This wrapper applies only to the fixed console targets; ordinary asset caching
+keeps its existing policy.
+
 Authenticated OpenAPI schema export can remain enabled independently of
 interactive Swagger, for reproducible client generation. A disabled interactive
 console cannot use cookies to access that export.
