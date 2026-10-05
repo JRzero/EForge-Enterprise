@@ -146,6 +146,7 @@ Generator import checkpoint: canonical batch metadata import, original permissio
 and audit, preflight, SQL uniqueness, rollback/retry and requested-order exact IDs
 pass 400 backend/73 unit/64 fixture and both configurations' 43 existing real
 browsers/full MySQL/Redis/Quartz/OSHI/ACL/captcha regressions, exact live OpenAPI.
-Exact-head cloud acceptance is pending. All other generator writes, React/EForge
+Exact implementation 15d7bce passes server 37333745938 all three jobs and web
+37333746012. All other generator writes, React/EForge
 output/templates/UI and runnable generated module proof remain required. No
 physical table creation or custom filesystem output is implemented in this stage.

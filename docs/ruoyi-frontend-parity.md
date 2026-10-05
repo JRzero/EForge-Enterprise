@@ -1293,7 +1293,8 @@ harness run exposed a trigger syntax issue. After correcting that verifier, the
 full database regression passed, including actual insertion-fault rollback without
 orphan fields, retry, no-role denial and concurrent import uniqueness. Enabled
 configuration also passes all 43 existing real browsers and full runtime regressions.
-Both live OpenAPI snapshots exactly match the contract. Exact-head cloud acceptance
-remains pending. No generator UI or
+Both live OpenAPI snapshots exactly match the contract. Exact-head implementation
+15d7bcea995be82219d5aaa307762216b3721614 passes server 37333745938 all
+three jobs and web 37333746012, confirmed on 2026-10-05. No generator UI or
 React/EForge output completion is claimed; all remaining original capabilities,
 full task mutation consistency and its pending approval remain in scope.

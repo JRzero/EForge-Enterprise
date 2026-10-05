@@ -996,7 +996,7 @@
     "scope": "Canonical imported/database table lists, detailed configuration/table choices and columns with original split list/query grants and generated client. Seventeen MVC cases plus actual MySQL schema/import exclusion, exact long IDs/flags/tree/subtable settings, filters/calendar/order before paging, injection-as-data, no-role/anonymous denial, malformed stored JSON and recoverable SQL faults pass. All generator mutations, React/EForge outputs and UI, end-to-end generation and final capability audit remain pending."
   },
   "generatorImportApiValidation": {
-    "state": "import-api-locally-verified",
+    "state": "import-api-verified",
     "backendTests": 400,
     "unitTests": 73,
     "fixtureBrowserTests": 64,
@@ -1004,7 +1004,10 @@
     "disabledRuntime": "success",
     "enabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
-    "scope": "Canonical batch metadata import with original import grant and authenticated audit actor, requested-order string IDs, original field initialization and eforge-react target. Twelve MVC cases and actual MySQL preflight, metadata/field rollback under insert fault, successful retry, duplicate/conflicting concurrent HTTP imports and no-role denial pass in both configurations. First harness trigger syntax was corrected and database regression rerun successfully; 43 unchanged real browsers passed before that harness fault. Both configurations pass their complete runtime regressions and 43 existing real browsers; exact-head cloud acceptance remains pending. Configuration writes, physical table create, deletion/sync, preview/archive/custom outputs, React/EForge templates/pages, generated module end-to-end and final original-capability audits remain required."
+    "ci": "success",
+    "implementationCommit": "15d7bcea995be82219d5aaa307762216b3721614",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37333745938",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37333746012",
+    "scope": "Canonical batch metadata import with original import grant and authenticated audit actor, requested-order string IDs, original field initialization and eforge-react target. Twelve MVC cases and actual MySQL preflight, metadata/field rollback under insert fault, successful retry, duplicate/conflicting concurrent HTTP imports and no-role denial pass in both configurations. First harness trigger syntax was corrected and database regression rerun successfully; 43 unchanged real browsers passed before that harness fault. Both configurations pass their complete runtime regressions and 43 existing real browsers; exact-head server (all three jobs) and web cloud acceptance pass. Configuration writes, physical table create, deletion/sync, preview/archive/custom outputs, React/EForge templates/pages, generated module end-to-end and final original-capability audits remain required."
   }
 }
