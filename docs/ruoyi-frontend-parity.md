@@ -1111,3 +1111,37 @@ Canonical task CRUD, full scheduler/database mutation consistency and all
 task/Cron/log pages remain pending. Generator/form builder, complete shell and
 shared capabilities and the final full original-capability audit remain required.
 This repair does not complete the task module or the full parity objective.
+Task replacement repair exact commit ec658d1686a2db771d43c4db067af3a5be5c73e8
+passes server CI 37295454573 in all three jobs and web CI 37295454526,
+confirmed on 2026-10-05. This includes both configurations' complete Linux real
+browser/runtime regression and exact live OpenAPI equality.
+### Canonical task read API checkpoint — 2026-10-05
+
+Task list/detail and full filtered sorted XLSX export now use canonical DTOs,
+string long IDs, validated paging/status/filter lengths and fixed sort enums
+under the original list/query/export grants. Actual Quartz-derived next execution
+and original task fields remain available. Compatibility entities stay behind
+projection/export boundaries; PageHelper state is always cleared and SQL errors
+are sanitized.
+
+Thirteen new MVC cases pass. Full local regression passes 371 backend tests
+(including ten unchanged data-scope parity cases), 67 unit tests, 57 fixture
+browsers and all 40 real browser cases in each default-disabled/enabled console
+configuration. The real MySQL/Redis/Quartz harness checks combined filters,
+ordering before paging, task detail/next time, invalid/missing long IDs, full
+sorted XLSX and anonymous/no-role denial. Existing rollback/session/ACL/OSHI/
+captcha coverage passes. Lint/typecheck/build and generated-client reproduction
+pass; both live OpenAPI snapshots are exactly equal. Evidence logs under boot
+target use job-read-api-backend/unit/build/fixtures/disabled-runtime/enabled-runtime.
+Cloud verification of this new read API remains pending until its exact commit
+results are checked.
+
+Automatic approval review rejected a proposed scheduler-wide mutation boundary
+and then a narrower affected-ID mutation/execution-gate implementation because
+of potential task interruption, latency or SQL-dependent availability. Neither
+rejected runtime implementation was written. The abandoned wide proposal will
+not be pursued. proposed-task-mutation-boundary.md records the narrower concrete
+proposal and risks; explicit approval is pending. Canonical task mutations and
+full consistency remain incomplete. Independent task-log pages and the remaining
+original generator/form builder/shell/shared capabilities can proceed while this
+specific proposal waits. Full frontend parity and final audits remain active.

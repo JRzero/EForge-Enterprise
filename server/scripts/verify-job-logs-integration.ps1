@@ -12,6 +12,23 @@ try {
         $run=Request '/monitor/job/run' 'PUT' (@{jobId=$job.jobId;jobGroup='SYSTEM'}|ConvertTo-Json -Compress) $authorized
         Assert-Check ($run.StatusCode -eq 200 -and ($run.Content|ConvertFrom-Json).code -eq 200) 'Real Quartz task dispatch failed.'
     }
+    # Canonical task reads use the same actual Quartz-backed SQL fixtures.
+    $taskBase='/api/v1/monitor/jobs'
+    $tasks=(Request "$taskBase`?name=$jobMarker&group=SYSTEM&invokeTarget=ryTask&status=1&pageSize=1&sort=name&direction=desc" 'GET' '' $authorized).Content|ConvertFrom-Json
+    Assert-Check ($tasks.total -eq 2 -and $tasks.items.Count -eq 1 -and $tasks.items[0].name -eq "$jobMarker-1" -and $tasks.items[0].concurrent -eq $false) 'Canonical task combined filters and sort-before-page failed.'
+    $taskDetail=(Request "$taskBase/$($ownedJobs[0])" 'GET' '' $authorized).Content|ConvertFrom-Json
+    Assert-Check ($taskDetail.id -eq "$($ownedJobs[0])" -and $taskDetail.cronExpression -eq '0 0 0 1 1 ? 2099' -and $taskDetail.nextExecutionAt -and !$taskDetail.PSObject.Properties['params']) 'Canonical task detail must retain actual cron and string identity without legacy fields.'
+    Assert-Problem (Request "$taskBase/9223372036854775808" 'GET' '' $authorized) 400 'VALIDATION_ERROR'
+    Assert-Problem (Request "$taskBase/9223372036854775807" 'GET' '' $authorized) 404 'JOB_NOT_FOUND'
+    $taskFile=Join-Path $logDirectory 'owned-tasks.xlsx'
+    Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$taskBase/export?name=$jobMarker&pageSize=1&sort=name&direction=desc" -Method POST -Headers $authorized -OutFile $taskFile|Out-Null
+    $taskArchive=[IO.Compression.ZipFile]::OpenRead($taskFile)
+    try {
+        $taskReader=[IO.StreamReader]::new($taskArchive.GetEntry('xl/worksheets/sheet1.xml').Open());try{$taskSheet=$taskReader.ReadToEnd()}finally{$taskReader.Dispose()}
+        [xml]$taskXml=$taskSheet;$taskRows=@($taskXml.SelectNodes("//*[local-name()='sheetData']/*[local-name()='row']"))
+        Assert-Check ($taskRows.Count -eq 3 -and $taskSheet.IndexOf("$jobMarker-1") -lt $taskSheet.IndexOf("$jobMarker-0")) 'Canonical task XLSX must export the full filtered sorted set.'
+    } finally {$taskArchive.Dispose()}
+    Write-Output 'Task reads: actual SQL/Quartz detail, string IDs, combined filters/sort-before-page and full filtered sorted XLSX passed.'
     $actual=$null
     for($attempt=0;$attempt -lt 30;$attempt++) {
         $actual=(Request "$jobLogBase`?name=$jobMarker" 'GET' '' $authorized).Content|ConvertFrom-Json
@@ -65,8 +82,8 @@ try {
     $login=Request '/api/v1/auth/login' 'POST' (@{username=$username;password='User12345'}|ConvertTo-Json -Compress);$denied=@{Authorization="Bearer $(($login.Content|ConvertFrom-Json).accessToken)"}
     foreach($headers in @(@{},$denied)) {
         $expected=if($headers.Count){403}else{401};$code=if($headers.Count){'ACCESS_DENIED'}else{'AUTHENTICATION_REQUIRED'}
-        foreach($path in @($jobLogBase,"$jobLogBase/$($failure.id)",'/api/v1/monitor/jobs/cron-preview?expression=0%20*%20*%20*%20*%20%3F')) {Assert-Problem (Request $path 'GET' '' $headers) $expected $code}
-        foreach($path in @("$jobLogBase/clear","$jobLogBase/export")) {Assert-Problem (Request $path 'POST' '' $headers) $expected $code}
+        foreach($path in @($jobLogBase,"$jobLogBase/$($failure.id)",$taskBase,"$taskBase/$($ownedJobs[0])",'/api/v1/monitor/jobs/cron-preview?expression=0%20*%20*%20*%20*%20%3F')) {Assert-Problem (Request $path 'GET' '' $headers) $expected $code}
+        foreach($path in @("$jobLogBase/clear","$jobLogBase/export","$taskBase/export")) {Assert-Problem (Request $path 'POST' '' $headers) $expected $code}
         Assert-Problem (Request $jobLogBase 'DELETE' (@{ids=@($failure.id)}|ConvertTo-Json -Compress) $headers) $expected $code
     }
     $ids=@($actual.items|ForEach-Object id);$deleteBody=@{ids=$ids}|ConvertTo-Json -Compress

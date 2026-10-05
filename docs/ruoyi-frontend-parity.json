@@ -265,8 +265,9 @@
         "changeJobStatus",
         "runJob"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md"],
+      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task/Cron/log pages, actual task browser acceptance and final capability audit"]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/jobLog.js",
@@ -923,8 +924,23 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "ec658d1686a2db771d43c4db067af3a5be5c73e8",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37295454573",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37295454526",
     "scope": "Failed existing-task replacement preserves the original RAMJobStore payload, keys, saved next deadline and pause states, rejects target-key collisions and removes a partially created replacement. Real MySQL checked-exception rollback and actual original-target execution verified. Canonical task CRUD, commit/concurrency/batch/precommit/persistent-fault consistency and all task/Cron/log pages remain pending.",
     "evidence": ["docs/security-review-task-replacement.md", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/TaskScheduleReplacementTest.java", "server/scripts/verify-job-logs-integration.ps1"]
+  },
+  "jobReadApiValidation": {
+    "state": "read-api-locally-verified",
+    "backendTests": 371,
+    "unitTests": 67,
+    "fixtureBrowserTests": 57,
+    "liveBrowserTestsPerConfiguration": 40,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Canonical task list/detail/full filtered sorted XLSX only, original grants, string IDs and validated fixed sorting. Thirteen MVC cases plus actual SQL/Quartz fixture and full regressions pass. Canonical task mutations, full scheduler/database consistency and all task/Cron/log pages remain pending. The execution-gated mutation proposal requires explicit approval after automatic review rejection."
   }
 }

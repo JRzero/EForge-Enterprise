@@ -159,6 +159,26 @@ export type JobLogDetail = {
     entry: JobLogResponse;
     exceptionInfo?: string;
 };
+export type JobResponse = {
+    concurrent?: boolean;
+    createdAt?: string;
+    cronExpression?: string;
+    group?: string;
+    id: string;
+    invokeTarget?: string;
+    misfirePolicy?: string;
+    name?: string;
+    nextExecutionAt?: string;
+    remark?: string;
+    status?: string;
+    updatedAt?: string;
+};
+export type PageResponseJobResponse = {
+    items: JobResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
 export type CronPreviewResponse = {
     times: string[];
     zone: string;
@@ -913,6 +933,32 @@ export function getJobLog(id: string, opts?: Oazapfts.RequestOpts) {
         ...opts
     });
 }
+export function listJobs({ page, pageSize, name, group, invokeTarget, status, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    group?: string;
+    invokeTarget?: string;
+    status?: number;
+    sort?: "id" | "name" | "createdAt";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseJobResponse;
+    }>(`/api/v1/monitor/jobs${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        group,
+        invokeTarget,
+        status,
+        sort,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
 export function previewJobCron(expression: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
@@ -920,6 +966,41 @@ export function previewJobCron(expression: string, opts?: Oazapfts.RequestOpts) 
     }>(`/api/v1/monitor/jobs/cron-preview${QS.query(QS.explode({
         expression
     }))}`, {
+        ...opts
+    });
+}
+export function exportJobs({ page, pageSize, name, group, invokeTarget, status, sort, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    group?: string;
+    invokeTarget?: string;
+    status?: number;
+    sort?: "id" | "name" | "createdAt";
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/monitor/jobs/export${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        group,
+        invokeTarget,
+        status,
+        sort,
+        direction
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getJob(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: JobResponse;
+    }>(`/api/v1/monitor/jobs/${encodeURIComponent(id)}`, {
         ...opts
     });
 }

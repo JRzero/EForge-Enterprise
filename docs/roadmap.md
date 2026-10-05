@@ -112,6 +112,14 @@ restores its original RAMJobStore schedule after replacement failure; seven
 actual Quartz tests and real MySQL checked-exception rollback/original-target
 execution pass. Full local regression is 358 backend/67 unit/57 fixture and 40
 real browser cases in each configuration, with both live OpenAPI snapshots exact.
-Cloud validation is pending. Canonical task CRUD, commit/concurrency/batch/
+Exact commit ec658d1 passes server 37295454573 all three jobs and web 37295454526. Canonical task CRUD, commit/concurrency/batch/
 precommit/persistent-fault consistency and all task/Cron/log pages remain pending;
 see security-review-task-replacement.md. The complete parity objective stays active.
+Canonical task read checkpoint: list/detail/full filtered sorted XLSX and generated
+client pass 371 backend/67 unit/57 fixture and both configurations' 40 real
+browser regressions, with exact live OpenAPI equality. New exact-head cloud
+validation is pending. Task mutations, full SQL/Quartz consistency and all pages
+remain incomplete. Automatic review rejected the proposed high-impact mutation
+boundary; neither rejected runtime patch was written. Explicit approval of the
+narrower proposal in proposed-task-mutation-boundary.md is pending. Independent
+task-log pages and all remaining original capabilities continue to be required.
