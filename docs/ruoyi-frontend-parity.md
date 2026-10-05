@@ -43,7 +43,7 @@ It is a work inventory, not executable proof of completion.
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
-| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client, original fields/names/grant, real special/exact values, credential boundary, Redis ACL faults and all clearing/session scopes verified locally; exact API CI and both React pages pending |
+| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client passed local and exact-head CI; original fields/names/grant, real special/exact values, credential boundary, Redis ACL faults and all clearing/session scopes verified; both React pages pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
@@ -913,7 +913,9 @@ captcha/bootstrap checks. All earlier module/security/fault cases remain green.
 Evidence logs are `cache-api-backend.log`, `cache-api-unit.log`,
 `cache-api-fixtures.log` and `cache-api-final-runtime.log` under boot target.
 
-Exact API commit CI remains pending. Both React pages still require original
+API commit `c6d35ed8c8567a6250d02eb2b5f3fd93f483490f` passes exact-head server CI
+`37257129432` (verify, runtime-integration and auth-runtime-integration) and web
+CI `37257129477`, confirmed on 2026-10-05. Both React pages still require original
 statistics/command and memory charts, names/keys/value selection and refresh,
 each clearing level with confirmations, all-session invalidation handling,
 safe text, loading/empty/error/retry, mobile and keyboard acceptance. No cache

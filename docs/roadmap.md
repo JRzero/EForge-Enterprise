@@ -57,7 +57,7 @@
 - [ ] notices (canonical API/client, rich editor/rendering, administration/top-feed/readers UI and JPG/PNG/static-SVG upload passed local verification and exact-commit CI at c7605fe: server 37237590148, web 37237590166; full capability audit remains pending)
 - [ ] operation/login logs (ten canonical operations/client and both React pages verified locally and in exact-head CI, including real audit detail/copy/sorting/XLSX/deletion/password-lock/unlock/session preservation; final capability audit pending)
 - [ ] online session management (canonical API/client and page verified locally and in exact-head CI, including exact filters/paging, scoped/self force logout, twelve-session isolation and Redis ACL faults; final capability audit pending)
-- [ ] server/cache monitoring and authenticated consoles (server diagnostics API/client and server page passed full real regression and exact commit 625831c/e454399 server/web CI; cache API/client and real fault/clearing/session boundaries verified locally, exact API CI, both cache pages and console acceptance pending)
+- [ ] server/cache monitoring and authenticated consoles (server diagnostics API/client/page and cache API/client passed full real regression and exact commit 625831c/e454399/c6d35ed server/web CI; both cache pages and console acceptance pending)
 
 ## Phase 4 — Generator
 
