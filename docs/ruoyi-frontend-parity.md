@@ -1274,3 +1274,26 @@ metadata/import/preview/output UI and actual generated-code end-to-end acceptanc
 remain required. Form builder, shell/shared capabilities, complete task writes/
 consistency and final original-capability audits remain active. This read stage
 does not complete the generator module or change the pending task-boundary approval.
+
+### Generator canonical import checkpoint — 2026-10-05
+
+POST /api/v1/tool/generator/imports preserves the original import grant and audit
+actor. It validates 1–100 selected current-schema tables and every field before
+writing, initializes metadata with attributed original utilities, returns created
+string IDs in selection order and assigns the React/EForge target. One transaction
+owns all table/field writes. V024 enforces a unique physical-table configuration
+for concurrent canonical and compatibility imports; existing duplicates stop the
+migration without silently deleting user configuration. See
+security-review-generator-import-v1.md for the exact boundary and remaining scope.
+
+400 backend tests (12 new MVC cases and 10 unchanged data-scope cases), 73 units,
+64 fixture browsers, lint/typecheck/build/client reproduction and hardened defaults
+pass. The disabled configuration passed 43 existing real browsers; its first SQL
+harness run exposed a trigger syntax issue. After correcting that verifier, the
+full database regression passed, including actual insertion-fault rollback without
+orphan fields, retry, no-role denial and concurrent import uniqueness. Enabled
+configuration also passes all 43 existing real browsers and full runtime regressions.
+Both live OpenAPI snapshots exactly match the contract. Exact-head cloud acceptance
+remains pending. No generator UI or
+React/EForge output completion is claimed; all remaining original capabilities,
+full task mutation consistency and its pending approval remain in scope.

@@ -142,3 +142,10 @@ both configurations' 43 existing real browsers/full runtime, exact live OpenAPI.
 Exact implementation 2ca49b1 passes server 37315345511 all three jobs and web
 37315345434. All generator mutations/output/templates/UI and generated
 reference module end-to-end proof remain required; full original parity stays active.
+Generator import checkpoint: canonical batch metadata import, original permission
+and audit, preflight, SQL uniqueness, rollback/retry and requested-order exact IDs
+pass 400 backend/73 unit/64 fixture and both configurations' 43 existing real
+browsers/full MySQL/Redis/Quartz/OSHI/ACL/captcha regressions, exact live OpenAPI.
+Exact-head cloud acceptance is pending. All other generator writes, React/EForge
+output/templates/UI and runnable generated module proof remain required. No
+physical table creation or custom filesystem output is implemented in this stage.

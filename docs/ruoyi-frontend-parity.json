@@ -868,8 +868,8 @@
         "synchDb"
       ],
       "state": "partial",
-      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadControllerTest.java", "server/scripts/verify-generator-read-integration.ps1", "web/generated/api.ts", "docs/security-review-generator-read-v1.md"],
-      "remaining": ["Canonical import/create/update/delete/sync/preview/download/custom-output endpoints", "React/EForge generated contracts/routes/pages and generator metadata/import/preview/output UI with end-to-end validation", "Final original-capability audit"]
+      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadControllerTest.java", "server/scripts/verify-generator-read-integration.ps1", "web/generated/api.ts", "docs/security-review-generator-read-v1.md", "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportControllerTest.java", "server/scripts/verify-generator-import-integration.ps1", "sql/migrations/V024__generator_table_identity.sql", "docs/security-review-generator-import-v1.md"],
+      "remaining": ["Canonical create/update/delete/sync/preview/download/custom-output endpoints", "React/EForge generated contracts/routes/pages and generator metadata/import/preview/output UI with end-to-end validation", "Final original-capability audit"]
     }
   ],
   "jobLogApiValidation": {
@@ -994,5 +994,17 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37315345511",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37315345434",
     "scope": "Canonical imported/database table lists, detailed configuration/table choices and columns with original split list/query grants and generated client. Seventeen MVC cases plus actual MySQL schema/import exclusion, exact long IDs/flags/tree/subtable settings, filters/calendar/order before paging, injection-as-data, no-role/anonymous denial, malformed stored JSON and recoverable SQL faults pass. All generator mutations, React/EForge outputs and UI, end-to-end generation and final capability audit remain pending."
+  },
+  "generatorImportApiValidation": {
+    "state": "import-api-locally-verified",
+    "backendTests": 400,
+    "unitTests": 73,
+    "fixtureBrowserTests": 64,
+    "existingLiveBrowserTestsPerConfiguration": 43,
+    "disabledRuntime": "success",
+    "enabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Canonical batch metadata import with original import grant and authenticated audit actor, requested-order string IDs, original field initialization and eforge-react target. Twelve MVC cases and actual MySQL preflight, metadata/field rollback under insert fault, successful retry, duplicate/conflicting concurrent HTTP imports and no-role denial pass in both configurations. First harness trigger syntax was corrected and database regression rerun successfully; 43 unchanged real browsers passed before that harness fault. Both configurations pass their complete runtime regressions and 43 existing real browsers; exact-head cloud acceptance remains pending. Configuration writes, physical table create, deletion/sync, preview/archive/custom outputs, React/EForge templates/pages, generated module end-to-end and final original-capability audits remain required."
   }
 }

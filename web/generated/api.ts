@@ -710,6 +710,17 @@ export type PageResponseDatabaseTable = {
     pageSize: number;
     total: number;
 };
+export type ImportRequest = {
+    names: string[];
+};
+export type ImportedTable = {
+    columnCount?: number;
+    id: string;
+    name: string;
+};
+export type ImportResponse = {
+    tables: ImportedTable[];
+};
 export type TableSummary = {
     category?: string;
     className?: string;
@@ -2174,6 +2185,16 @@ export function listGeneratorDatabaseTables({ page, pageSize, name, comment, $fr
     }))}`, {
         ...opts
     });
+}
+export function importGeneratorTables(importRequest: ImportRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: ImportResponse;
+    }>("/api/v1/tool/generator/imports", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: importRequest
+    }));
 }
 export function listGeneratorTables({ page, pageSize, name, comment, $from, to, sort, direction }: {
     page?: number;
