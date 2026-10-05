@@ -22,6 +22,10 @@ const CacheEntriesPage = lazy(() => import('../features/cache-monitor/CacheEntri
 const DruidConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.DruidConsolePage})));
 const ApiDocsConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.ApiDocsConsolePage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
+const JobsPage = lazy(() => import('../features/jobs/JobsPage').then(module => ({default: module.JobsPage})));
+const JobLogsPage = lazy(() => import('../features/jobs/JobsPage').then(module => ({default: module.JobLogsPage})));
+const jobs = contracts.find(route => route.id === 'monitor-jobs'), jobLogs = internalContracts.find(route => route.id === 'job-logs');
+if (!jobs || !jobLogs) throw new Error('Missing task route contracts.');
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
 const posts = contracts.find(route => route.id === 'system-posts');
@@ -108,6 +112,8 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: apiDocs.id, path: apiDocs.path, title: '接口文档', access: {permission: apiDocs.permission}, component: ApiDocsConsolePage
 }, {
+  id: jobs.id, path: jobs.path, title: '定时任务', access: {permission: jobs.permission}, component: JobsPage
+}, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {
   id: roleUsers.id, path: roleUsers.path, title: '用户授权',
@@ -115,4 +121,6 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: dictionaryData.id, path: dictionaryData.path, title: '字典数据',
   access: {permission: dictionaryData.permission}, component: DictionaryEntriesPage
+}, {
+  id: jobLogs.id, path: jobLogs.path, title: '调度日志', access: {permission: jobLogs.permission}, component: JobLogsPage
 }]);

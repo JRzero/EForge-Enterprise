@@ -117,9 +117,14 @@ precommit/persistent-fault consistency and all task/Cron/log pages remain pendin
 see security-review-task-replacement.md. The complete parity objective stays active.
 Canonical task read checkpoint: list/detail/full filtered sorted XLSX and generated
 client pass 371 backend/67 unit/57 fixture and both configurations' 40 real
-browser regressions, with exact live OpenAPI equality. New exact-head cloud
-validation is pending. Task mutations, full SQL/Quartz consistency and all pages
+browser regressions, with exact live OpenAPI equality. Exact commit 1337834 cloud
+validation passes server 37298378311 all three jobs and web 37298378298. Task mutations, full SQL/Quartz consistency and all pages
 remain incomplete. Automatic review rejected the proposed high-impact mutation
 boundary; neither rejected runtime patch was written. Explicit approval of the
 narrower proposal in proposed-task-mutation-boundary.md is pending. Independent
-task-log pages and all remaining original capabilities continue to be required.
+task-log pages and all remaining original capabilities continue to be required.Task read and original task-log pages now pass 371 backend/69 unit/61 fixture and
+42 real browser cases in each configuration, both full runtime regressions and
+exact live OpenAPI equality. Exact-head cloud acceptance is pending. Task CRUD,
+status/run controls, Cron editor and full scheduler/SQL mutation consistency are
+still incomplete; the affected-ID mutation proposal still awaits explicit approval.
+Generator/form builder, shell/shared capabilities and final parity audit remain.

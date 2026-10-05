@@ -30,6 +30,8 @@ import {getServerMonitor} from '../generated/api';
 import {getCacheStatistics, listCacheNames, listCacheKeys, getCacheValue, clearCacheName, clearCacheKey, clearAllCache, type ClearCacheKeyRequest} from '../generated/api';
 import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openApiDocsConsole} from '../generated/api';
 
+import {listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
+
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
   function transport(authenticated: boolean, timeoutMs = 15000, credentials: RequestCredentials = 'omit'): typeof fetch {
@@ -100,6 +102,14 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async unlockLoginAccount(username: string) {
       await unlockLoginAccount({username}, {baseUrl: '', fetch: transport(true)});
     },
+    async listJobs(query: Parameters<typeof listJobs>[0], signal?: AbortSignal) {return (await listJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async getJob(id: string, signal?: AbortSignal) {return (await getJob(id, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async exportJobs(query: Parameters<typeof exportJobs>[0], signal?: AbortSignal) {return (await exportJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async listJobLogs(query: Parameters<typeof listJobLogs>[0], signal?: AbortSignal) {return (await listJobLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async getJobLog(id: string, signal?: AbortSignal) {return (await getJobLog(id, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async deleteJobLogs(ids: string[], signal?: AbortSignal) {await deleteJobLogs({ids}, {baseUrl: '', fetch: transport(true), signal});},
+    async clearJobLogs(signal?: AbortSignal) {await clearJobLogs({baseUrl: '', fetch: transport(true), signal});},
+    async exportJobLogs(query: Parameters<typeof exportJobLogs>[0], signal?: AbortSignal) {return (await exportJobLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
     async listNotices(query: Parameters<typeof listNotices>[0], signal?: AbortSignal) {
       return (await listNotices(query, {baseUrl: '', fetch: transport(true), signal})).data;
     },

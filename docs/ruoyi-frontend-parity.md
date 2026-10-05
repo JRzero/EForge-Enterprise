@@ -1145,3 +1145,40 @@ proposal and risks; explicit approval is pending. Canonical task mutations and
 full consistency remain incomplete. Independent task-log pages and the remaining
 original generator/form builder/shell/shared capabilities can proceed while this
 specific proposal waits. Full frontend parity and final audits remain active.
+Canonical task reads exact commit 13378346239029ad05cb40f17ea81406c348b5df
+passes server 37298378311 in all three jobs and web 37298378298, confirmed on
+2026-10-05. Both configurations' full Linux browsers/runtime and exact OpenAPI
+remain green. This acceptance does not cover canonical task mutations or pages.
+### Task read and original task-log pages checkpoint — 2026-10-05
+
+The task menu now opens its implemented read/detail/export page; migration V023
+binds the existing stable ROUTE only. The internal /job/log/:jobId page preserves
+original task context and close-to-parent behavior, name/group/status/date
+filters, ordering, selection/paging, detail and exception text, delete/clear
+confirmations and full filtered sorted XLSX. A failed task-context lookup never
+falls back to querying all logs. All product requests use generated canonical
+API functions; fixture setup uses the owned legacy backend directly.
+
+Four new fixture browser cases and two real browser cases pass. Real verification
+creates twelve paused owned tasks, dispatches actual Quartz success/failure,
+checks stored normalized text without HTML execution, whole sorted XLSX, filters,
+context/close, paging deletion, cancelled/confirmed clearing, SQL results and
+actual no-role route/API denial. Large string IDs, retry faults, keyboard/mobile
+bounds and original grant visibility are covered by the fixture/transport suites.
+Exact navigation assertions now include the task leaf; the legacy pending-route
+compatibility test still strictly checks an unimplemented generator entry.
+
+Full validation passes 371 backend tests (including ten unchanged data-scope
+parity cases), 69 unit tests, 61 fixture browsers and all 42 real browser cases
+in each enabled/default-disabled console configuration. Both complete disposable
+MySQL/Redis/Quartz/OSHI/ACL/captcha/data-consistency regressions pass, and both
+live OpenAPI snapshots exactly match the committed contract. Frontend lint,
+typecheck/build, generated-client reproduction and hardened defaults pass.
+Evidence logs under boot target use job-pages-backend/unit/build/fixtures/
+disabled-runtime/enabled-runtime prefixes. Exact-head cloud acceptance is pending.
+
+Task mutations, status/run controls, Cron editor and full scheduler/SQL consistency
+remain incomplete. The explicitly approval-pending affected-ID mutation proposal
+is unchanged and unimplemented; neither rejected runtime patch was written.
+Generator/form builder, complete shell/shared capabilities and final audits
+remain required. This checkpoint does not complete task management or full parity.

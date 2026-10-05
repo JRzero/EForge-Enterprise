@@ -266,8 +266,8 @@
         "runJob"
       ],
       "state": "partial",
-      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md"],
-      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task/Cron/log pages, actual task browser acceptance and final capability audit"]
+      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md", "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md"],
+      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task mutation controls, Cron editor and final capability audit"]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/jobLog.js",
@@ -282,10 +282,11 @@
         "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobLogControllerTest.java",
         "server/scripts/verify-job-logs-integration.ps1",
         "docs/security-review-job-logs-v1.md",
+        "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md",
         "web/generated/api.ts"
       ],
       "remaining": [
-        "Task log React page, original filters/detail/delete/clear/export browser acceptance and final capability audit",
+        "Exact-head task-log page CI and final capability audit",
         "Canonical task management, scheduler/database consistency, Cron editor and actual task browser verification"
       ]
     },
@@ -940,7 +941,23 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "13378346239029ad05cb40f17ea81406c348b5df",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37298378311",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37298378298",
     "scope": "Canonical task list/detail/full filtered sorted XLSX only, original grants, string IDs and validated fixed sorting. Thirteen MVC cases plus actual SQL/Quartz fixture and full regressions pass. Canonical task mutations, full scheduler/database consistency and all task/Cron/log pages remain pending. The execution-gated mutation proposal requires explicit approval after automatic review rejection."
+  },
+  "jobReadAndLogPageValidation": {
+    "state": "pages-locally-verified",
+    "backendTests": 371,
+    "unitTests": 69,
+    "fixtureBrowserTests": 61,
+    "liveBrowserTestsPerConfiguration": 42,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Task read/detail/full sorted XLSX and original internal log route with name/group/status/date/target filters, ordering, paging, context/close, detail/exception text, captured-ID delete/clear confirmation and filtered sorted XLSX. Twelve owned paused tasks produce actual Quartz success/failure logs; original grants, no-role denial, inert stored text and both complete runtime regressions pass. Task mutation controls, Cron editor, full scheduler/SQL consistency and final capability audits remain pending. Neither approval-rejected runtime mutation proposal is implemented.",
+    "evidence": ["docs/security-review-job-pages.md", "web/features/jobs/JobsPage.tsx", "web/tests/unit/job-api.test.ts", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "sql/migrations/V023__task_read_route.sql"]
   }
 }
