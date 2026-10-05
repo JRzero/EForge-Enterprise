@@ -42,7 +42,7 @@ It is a work inventory, not executable proof of completion.
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
-| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client passed exact-head CI; React page, original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified locally; page CI and final capability audit pending |
+| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
@@ -878,7 +878,10 @@ checks; its normalized OpenAPI exactly equals the committed snapshot. Evidence
 logs are `server-page-backend.log`, `server-page-unit.log`,
 `server-page-all-fixtures.log` and `server-page-final-runtime.log` under boot target.
 
-Exact page commit CI and the final original-capability audit remain pending.
+Page commit `e454399003c9569bb4aa5304413d80145501aede` passes exact-head server CI
+`37254967428` (verify, runtime-integration and auth-runtime-integration) and web
+CI `37254967427`, confirmed on 2026-10-05. The final original-capability audit
+remains pending.
 Cache statistics/names/keys/values/all clearing levels, authenticated or disabled
 consoles, jobs/cron, generator/form builder and complete shell/shared capabilities
 remain required. This page checkpoint does not complete the full objective.
