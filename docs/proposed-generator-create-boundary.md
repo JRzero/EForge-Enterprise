@@ -47,3 +47,47 @@ a select subtree; DATA DIRECTORY/CONNECTION/ENGINE appear as explicit options;
 a mixed CREATE/DROP batch yields distinct statement classes. See ignored target
 generator-create-parser-probe.log. These facts guide preflight; they prove neither
 policy completeness nor runtime creation/output acceptance.
+
+## Execution and recovery details to implement
+
+Canonical preflight errors use controlled 400/409 ProblemDetail and execute no
+DDL. Successful creation returns 201 with requested-order physical and import
+outcomes and exact string metadata IDs. A failure after any successful CREATE
+must return a controlled failure with explicit created/failed/unattempted entries;
+created-but-not-imported entries remain visible for recovery. A generic SQL error
+alone cannot describe the result. Use a creation-local exception/advice or concrete
+response boundary; do not extend unrelated compatibility errors to expose SQL or
+rewrite the global ApiFailure contract for this single feature. Public entries
+contain validated table names and fixed status/code fields, never datasource,
+raw driver errors or request SQL. Original HTTP 200/AjaxResult success/failure
+semantics remain behind its compatibility boundary with honest outcome data.
+
+Do not use IF NOT EXISTS as evidence of physical ownership: concurrent CREATE can
+return a non-error no-op for a table created by another request. Preflight may
+accept that syntax, but validated execution must either explicitly report an
+existing table or require an actual successful CREATE without the no-op clause;
+never automatically import an unrelated existing table as newly created. Existing
+targets must be identified before the first DDL. Target races after preflight
+produce honest failure outcomes with retained earlier creates. The metadata import
+transaction remains separate and serialized; a competing import may win, which
+must be reported without overwriting its configuration or deleting physical rows.
+Do not introduce a long global application lock or claim ordinary MySQL CREATE
+and metadata import constitute one atomic transaction.
+
+AST checks must cover every actual source reference, including LIKE, CTAS joins/
+subqueries/CTEs and foreign-key references, and all side-effect surfaces including
+SELECT INTO, variables/assignments, stored/user-defined functions, file/directory/
+connection/tablespace options, hints and executable comments. Quoted identifiers
+and literals/comments containing suspicious words stay data. Legal same-schema
+LIKE/CTAS and original column/index/constraint/table/partition constructs require
+explicit acceptance tests; unknown or dangerous syntax cannot fall through to the
+old raw mapper. Read actual pinned parser classes and prove validation before
+wiring either endpoint. Bound request size/count/depth before execution, and test
+all-item preflight refusal with a valid earlier statement to prove no early DDL.
+
+The original admin role remains authoritative for both routes; canonical import
+permission is not added as an accidental extra restriction to this admin action.
+Authenticated actor attribution applies to newly imported metadata. Keep original
+legacy template selection behind its compatibility boundary; canonical output
+uses the versioned EForge React target. Creation recovery does not imply the
+existing Vue templates already produce accepted React/EForge code.
