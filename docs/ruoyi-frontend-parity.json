@@ -326,7 +326,11 @@
         "server/scripts/verify-server-monitor-integration.ps1",
         "docs/security-review-server-monitor-v1.md",
         "web/tests/unit/server-monitor-api.test.ts",
-        "contracts/openapi/api-v1.json"
+        "contracts/openapi/api-v1.json",
+        "web/features/server-monitor/ServerMonitorPage.tsx",
+        "web/tests/e2e/server-monitor.spec.ts",
+        "web/tests/live/server-monitor.spec.ts",
+        "sql/migrations/V020__server_monitor_route.sql"
       ]
     },
     {

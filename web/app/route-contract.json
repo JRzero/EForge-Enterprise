@@ -10,5 +10,6 @@
   {"id": "system-notices", "path": "/notice", "permission": "system:notice:list"},
   {"id": "monitor-operation-logs", "path": "/operlog", "permission": "monitor:operlog:list"},
   {"id": "monitor-login-logs", "path": "/logininfor", "permission": "monitor:logininfor:list"},
-  {"id": "monitor-online-sessions", "path": "/online", "permission": "monitor:online:list"}
+  {"id": "monitor-online-sessions", "path": "/online", "permission": "monitor:online:list"},
+  {"id": "monitor-server", "path": "/server", "permission": "monitor:server:list"}
 ]

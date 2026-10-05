@@ -29,3 +29,12 @@ MySQL/Redis runtime checks CPU/RAM/JVM/host/disks, percentage bounds, stable
 identity and memory-unit agreement with the unchanged legacy endpoint, then
 denies a no-role account. Final client/regression/CI evidence is recorded in the
 parity inventory. A prepared API does not establish a completed monitoring page.
+
+The server React page now consumes this generated contract on the explicit
+monitor-server route. The existing grant controls page access and the backend
+continues to enforce it for every sample; an owned no-role browser and API request
+prove denial. Host/path/JVM arguments/filesystem values are escaped React text,
+never HTML. Fixture markup and long paths remain inert and within mobile bounds.
+Abort-on-leave and failed-refresh clearing prevent stale privileged displays.
+Actual OSHI browser sampling and strict memory/JVM/disk warning thresholds are
+verified in the page checkpoint; exact page CI remains a separate acceptance gate.

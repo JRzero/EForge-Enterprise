@@ -42,7 +42,7 @@ It is a work inventory, not executable proof of completion.
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
-| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client, actual OSHI groups/units/percentages, legacy compatibility, no-role permissions and full regression verified; exact-head server/web CI passed; React page pending |
+| Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client passed exact-head CI; React page, original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified locally; page CI and final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
@@ -850,3 +850,35 @@ refresh, safe diagnostic text and actual platform browser acceptance. Cache
 monitoring/names/keys/values/clear, protected or disabled consoles, jobs/cron,
 generator/form builder and complete shell/shared capabilities remain required.
 No server React route is bound at this API checkpoint; the full goal continues.
+
+## Server-monitor page checkpoint (2026-10-05)
+
+The lazy `monitor-server` route at `/server` now consumes the generated canonical
+client under the original `monitor:server:list` grant. V020 binds only the existing
+server ROUTE; the monitor GROUP remains navigation-only with online/server children.
+The page retains every original CPU, physical RAM/JVM, host, Java startup/uptime/
+installation/project/argument and disk field. Binary units are explicit GiB/MiB;
+disk size strings retain upstream formatting. Physical RAM, JVM and disk usage
+retain the strictly-above-80% warning threshold. CPU wait and JVM maximum memory
+are also visible. All diagnostic strings render as React text, including paths,
+arguments and filesystem names. Loading clears on failure; keyboard retry/refresh
+and abort-on-leave avoid stale results. Mobile overflow stays inside the disk table.
+
+Validation passes 300 backend cases (including ten unchanged data-scope cases),
+60 unit cases, lint/typecheck/build, generated-client reproducibility, production
+security defaults, 42 fixture browser cases and 32 real browser cases. The four
+new fixture cases verify all groups/units, inert markup and long paths, strict
+memory/JVM/disk 80/81% thresholds, empty disks, 503 retry, 403 clearing, route-denied
+no-request behavior, keyboard controls, mobile bounds and request cancellation.
+The real browser reads actual OSHI/JVM measurements and all disk fields, checks
+fresh sampling after refresh, verifies the seeded GROUP/ROUTE identities and
+proves both backend 403 and the denied page for an owned no-role account.
+The final owned MySQL/Redis run passes all earlier module/security/fault/captcha
+checks; its normalized OpenAPI exactly equals the committed snapshot. Evidence
+logs are `server-page-backend.log`, `server-page-unit.log`,
+`server-page-all-fixtures.log` and `server-page-final-runtime.log` under boot target.
+
+Exact page commit CI and the final original-capability audit remain pending.
+Cache statistics/names/keys/values/all clearing levels, authenticated or disabled
+consoles, jobs/cron, generator/form builder and complete shell/shared capabilities
+remain required. This page checkpoint does not complete the full objective.
