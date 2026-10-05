@@ -56,3 +56,5 @@ was repaired in the product and rerun successfully; see the job-log calendar rev
 Both configurations also pass their complete 43-browser/full-runtime regressions and exact live OpenAPI checks. Exact-head cloud acceptance
 remains pending. No configuration page or final generator completion is claimed.
 Logs use generator-configuration-* under boot target.
+
+Exact implementation 66158a6b7bf7595d6da804a949110b1a4d50e7b2 passes server 37345364383 all three jobs and web 37345364385 on 2026-10-06. Previous pending-cloud wording is superseded by these terminal results; all stated remaining scopes stay required.

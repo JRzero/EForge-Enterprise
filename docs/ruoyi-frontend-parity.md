@@ -1333,3 +1333,9 @@ runnable generated CRUD/tree/subtable proof, form builder, shell/shared features
 other modules' calendar/export-time audit and final original-capability acceptance
 remain required. The rejected task runtime proposal still requires explicit
 approval; no equivalent scheduler mutation change is included here.
+
+Exact implementation `66158a6b7bf7595d6da804a949110b1a4d50e7b2` passes server
+`37345364383` all three jobs and web `37345364385`, confirmed 2026-10-06. This
+includes both configurations' complete real browsers/runtime and exact OpenAPI.
+Configuration API acceptance does not complete generator outputs/pages or the
+remaining shared mutation and original-capability audits.

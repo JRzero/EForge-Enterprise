@@ -161,3 +161,5 @@ cloud acceptance is pending. Shared legacy/sync/reference concurrency, remaining
 generator writes/output/templates/full pages and runnable generation proof remain
 required, followed by form builder, shell/shared and final capability/calendar
 checks. No approval-rejected task mutation scheme is implemented.
+
+Configuration API/calendar repair exact 66158a6 passes server 37345364383 all three jobs and web 37345364385; remaining generator and complete frontend parity work stays active.

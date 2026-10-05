@@ -29,3 +29,5 @@ original frontend capabilities are not accepted by this read/export repair.
 Evidence: generator-configuration-calendar-* boot target logs, JobLogControllerTest,
 verify-job-logs-integration.ps1 and web/tests/live/jobs.spec.ts. Exact-head cloud
 acceptance is pending until its runs actually terminate successfully.
+
+Exact implementation 66158a6b7bf7595d6da804a949110b1a4d50e7b2 passes server 37345364383 all three jobs and web 37345364385 on 2026-10-06. Previous pending-cloud wording is superseded by these terminal results; all stated remaining scopes stay required.
