@@ -11,5 +11,7 @@
   {"id": "monitor-operation-logs", "path": "/operlog", "permission": "monitor:operlog:list"},
   {"id": "monitor-login-logs", "path": "/logininfor", "permission": "monitor:logininfor:list"},
   {"id": "monitor-online-sessions", "path": "/online", "permission": "monitor:online:list"},
-  {"id": "monitor-server", "path": "/server", "permission": "monitor:server:list"}
+  {"id": "monitor-server", "path": "/server", "permission": "monitor:server:list"},
+  {"id": "monitor-cache", "path": "/cache", "permission": "monitor:cache:list"},
+  {"id": "monitor-cache-entries", "path": "/cacheList", "permission": "monitor:cache:list"}
 ]

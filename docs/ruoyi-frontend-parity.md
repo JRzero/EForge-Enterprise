@@ -43,7 +43,7 @@ It is a work inventory, not executable proof of completion.
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
-| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client passed local and exact-head CI; original fields/names/grant, real special/exact values, credential boundary, Redis ACL faults and all clearing/session scopes verified; both React pages pending |
+| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client passed exact-head CI; both React pages passed complete local regression, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; page CI and final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
@@ -922,3 +922,44 @@ safe text, loading/empty/error/retry, mobile and keyboard acceptance. No cache
 React route is bound at this API checkpoint. Authenticated/disabled consoles,
 jobs/cron, generator/form builder and complete shell/shared capabilities plus
 the final original-capability audit remain required; the full goal continues.
+
+## Cache-monitor pages checkpoint (2026-10-05)
+
+The canonical statistics page retains every original Redis field, exact key/call
+counts, the command rose chart and the memory gauge. Both SVG charts load lazily
+from pinned ECharts 6.1.0 public modules (ADR-0015). Command shapes use proportional
+geometry while readouts and native text tooltips retain exact counts beyond the
+JavaScript safe integer range. Gauge readings use MiB converted from exact Redis
+bytes, retain the original human value and expand their range above 1000 MiB.
+Keyboard tooltips, inert markup-like command names, zero/empty results, chart
+resizing and disposal on data replacement/navigation are covered.
+
+The cache list retains names/remarks, sorted keys, selected name/key/value,
+independent refresh and every clearing level under the original monitor grant.
+Read-only values and Unicode/slash/ampersand/markup-like keys remain literal text.
+Reads abort on selection changes or navigation. Loading, empty, fault and retry
+states remain independent; deletion failures preserve the action for retry.
+Confirmations support Escape/focus and block cancellation/duplicate writes while
+busy. Clearing reloads authenticated data so a genuinely revoked current session
+returns to login. Migration V021 binds only the two existing cache ROUTEs.
+
+Frontend lint/typecheck/build, generated-client reproducibility, 65 unit cases
+and 52 fixture browser cases pass. Backend verification passes 312 cases including
+the ten unchanged data-scope cases. All 37 real browser cases pass, including five
+new cache cases for actual Redis fields/drawings, no-role denial, scoped clearing,
+SQL record retention, safe values, special keys and rewarming. Single-session
+clearing preserves its caller until its own key is cleared. Namespace/global
+clearing revokes both actual caller/other tokens; non-global scopes preserve
+the configuration namespace and global clearing removes it while SQL records stay.
+The live normalized OpenAPI exactly matches the committed snapshot.
+
+Complete runtime verification passes all earlier module/security/fault/captcha
+checks. It also proves the browser's global clear invalidates the harness's old
+session and fresh login restores authentication before subsequent module checks.
+Production security defaults remain protected. Evidence logs are
+`cache-page-backend.log`, `cache-page-unit.log`, `cache-page-fixtures.log` and
+`cache-page-accepted-runtime.log` under boot target. Exact commit cloud acceptance
+remains pending.
+Consoles, jobs/cron, generator/form builder, complete shell/shared capabilities
+and the final original-capability audit remain required. This page checkpoint
+does not complete the full goal.

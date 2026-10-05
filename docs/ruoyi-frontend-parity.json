@@ -214,7 +214,7 @@
         "clearCacheKey",
         "clearCacheAll"
       ],
-      "state": "partial",
+      "state": "partial-validation",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorController.java",
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorService.java",
@@ -223,8 +223,28 @@
         "server/scripts/verify-cache-monitor-integration.ps1",
         "docs/security-review-cache-monitor-v1.md",
         "web/tests/unit/cache-monitor-api.test.ts",
-        "contracts/openapi/api-v1.json"
-      ]
+        "contracts/openapi/api-v1.json",
+        "web/features/cache-monitor/CacheStatisticsPage.tsx",
+        "web/features/cache-monitor/CacheEntriesPage.tsx",
+        "web/features/cache-monitor/CacheCharts.tsx",
+        "web/features/cache-monitor/chart-options.ts",
+        "web/tests/unit/cache-chart.test.ts",
+        "web/tests/e2e/cache-monitor.spec.ts",
+        "web/tests/live/cache-monitor.spec.ts",
+        "sql/migrations/V021__cache_monitor_routes.sql",
+        "docs/adr/0015-cache-monitor-charts.md"
+      ],
+      "localCachePageValidation": {
+        "date": "2026-10-05",
+        "backend": 312,
+        "webUnit": 65,
+        "fixtureBrowser": 52,
+        "liveBrowser": 37,
+        "conclusion": "local-success",
+        "runtime": "success",
+        "ci": "pending",
+        "scope": "Original Redis fields and exact counters; lazy rose/gauge SVG charts, inert keyboard tooltip, zero readings/resizing/disposal; names/keys/value reads and refresh/retry/abort; scoped/global confirmations, special values/keys, SQL retention and actual Redis caller/other-session revocation; full MySQL/Redis/ACL/security/captcha regression and exact live OpenAPI. Page CI and final original-capability audit pending."
+      }
     },
     {
       "source": "ruoyi-ui/src/api/monitor/job.js",

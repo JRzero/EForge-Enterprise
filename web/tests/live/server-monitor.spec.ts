@@ -18,7 +18,7 @@ test('actual OSHI groups, memory units, refresh, navigation and no-role server d
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const token = await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string), headers = {Authorization: `Bearer ${token}`};
   const bootstrap = await page.request.get('/api/v1/app/bootstrap', {headers}); const navigation = (await bootstrap.json()).navigation;
-  expect(navigation.find((node: {key: string}) => node.key === 'monitor').children.map((node: {routeId: string}) => node.routeId)).toEqual(['monitor-online-sessions', 'monitor-server']);
+  expect(navigation.find((node: {key: string}) => node.key === 'monitor').children.map((node: {routeId: string}) => node.routeId)).toEqual(['monitor-online-sessions', 'monitor-server', 'monitor-cache', 'monitor-cache-entries']);
   const username = `sv${Date.now()}`; const created = await page.request.post('/api/v1/system/users', {headers, data: {user: {username, displayName: '服务器权限验证', departmentId: '103', email: '', phone: '', sex: '2', status: '0', roleIds: [], postIds: []}, password: 'User12345'}}); expect(created.status()).toBe(201); const account = await created.json();
   try {
     const login = await page.request.post('/api/v1/auth/login', {data: {username, password: 'User12345'}}); expect(login.status()).toBe(200); const ownToken: string = (await login.json()).accessToken;

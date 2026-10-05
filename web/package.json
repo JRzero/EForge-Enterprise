@@ -25,6 +25,7 @@
     "@eforge/ui": "file:../dependencies/eforge/a7b644b724f4264c1ca015ce4c686ca94476d62f/eforge-ui-0.1.0.tgz",
     "@oazapfts/runtime": "1.2.0",
     "dompurify": "3.4.16",
+    "echarts": "6.1.0",
     "quill": "2.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"

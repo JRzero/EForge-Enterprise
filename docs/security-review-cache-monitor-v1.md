@@ -44,5 +44,20 @@ faults. The owned Redis runtime verifies actual compatibility info, special keys
 exact values, session metadata, INFO/KEYS/DEL ACL failures and all clearing scopes,
 including real single-session/namespace/global invalidation and preserved other
 data. Final client/regression/CI evidence is recorded in the parity inventory.
-The statistics and cache-management React pages remain required; a prepared API
-does not establish completed frontend parity.
+The statistics and cache-management React pages consume these generated contracts
+under the same original grant. Only their existing ROUTE nodes are bound; the
+monitor GROUP stays a navigation group. Reads abort on selection changes or
+unmount; failure/retry and loading states are independent for names, keys and
+values. Diagnostic text remains inert in React, preformatted value output and
+native DOM chart tooltips, including markup-like command names and cache keys.
+Exact decimal counters stay intact in readouts and chart tooltips.
+
+All three deletion scopes require an accessible confirmation. An in-flight
+deletion blocks cancellation, duplicate submissions and Escape. Failure retains
+the selected action and allows retry. Successful clearing refreshes through
+authenticated reads: a revoked current session receives real 401 and the shared
+session runtime removes the token and returns to login. It never assumes that
+clearing another key implies the caller was revoked. Browser acceptance verifies
+actual caller/other-token validity, retained other namespaces and unchanged SQL
+records. ADR-0015 records the independent pinned chart dependency and lifecycle.
+The full original-capability audit remains required beyond this page checkpoint.
