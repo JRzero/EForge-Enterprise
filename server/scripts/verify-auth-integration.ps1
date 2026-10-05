@@ -191,6 +191,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-notices-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notice-images-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-logs-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-job-logs-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-online-sessions-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-server-monitor-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-consoles-integration.ps1')

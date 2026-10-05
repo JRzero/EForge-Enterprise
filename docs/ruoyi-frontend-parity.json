@@ -275,8 +275,18 @@
         "delJobLog",
         "cleanJobLog"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobLogController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobLogControllerTest.java",
+        "server/scripts/verify-job-logs-integration.ps1",
+        "docs/security-review-job-logs-v1.md",
+        "web/generated/api.ts"
+      ],
+      "remaining": [
+        "Task log React page, original filters/detail/delete/clear/export browser acceptance and final capability audit",
+        "Canonical task management, scheduler/database consistency, Cron editor and actual task browser verification"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/logininfor.js",
@@ -859,6 +869,18 @@
       "evidence": []
     }
   ],
+  "jobLogApiValidation": {
+    "state": "api-verified",
+    "backendTests": 351,
+    "unitTests": 67,
+    "fixtureBrowserTests": 57,
+    "existingLiveBrowserTestsPerConfiguration": 40,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Task logs and actual Quartz Cron preview only: real dispatched success/failure logs, filtered details/XLSX, calendar bounds and paging/sorting, all permissions, SQL fault preservation and monotonic clearing. Regression fixes repeated stateless session identity rotation and checks actual Druid native cookie continuity. Task CRUD, scheduler/SQL consistency, all task/log pages and final capability audit remain pending."
+  },
   "diagnosticConsoleValidation": {
     "state": "api-authentication-verified",
     "backendTests": 336,

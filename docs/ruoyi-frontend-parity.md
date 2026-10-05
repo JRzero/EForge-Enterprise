@@ -41,7 +41,7 @@ It is a work inventory, not executable proof of completion.
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
-| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
+| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical log API and Quartz preview; task management and pages remain missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
@@ -1032,3 +1032,36 @@ confirmed on 2026-10-05. Jobs/cron and
 task logs, generator/form builder, complete shell/shared capabilities and the
 final original-capability audit remain required; this checkpoint is not full
 goal completion.
+
+### Task log API and actual Quartz preview checkpoint — 2026-10-05
+
+Canonical task logs now expose typed list/detail, idempotent batch deletion,
+clear and filtered XLSX export under the original task permissions. String IDs
+retain full long precision, summary responses omit exceptions, validated time
+ordering/date ranges apply before paging, and canonical clear preserves the ID
+sequence. The separate preview endpoint uses Quartz's actual parser and server
+timezone, including special dates and valid exhausted expressions.
+
+The owned MySQL/Redis/Quartz harness dispatches an actual successful task and
+an actual failing task through the retained compatibility API. It checks their
+canonical logs/details, filtered XLSX, permission gates, delete-trigger failure
+preservation, calendar boundaries/sorting/paging and monotonic IDs after clear.
+Canonical task CRUD, scheduler/database mutation consistency, Cron editor and
+all task/log React pages remain pending; this is an API checkpoint only.
+
+Full regression also reproduced a Druid session race. Stateless authentication
+was rotating the independent servlet session on every request, invalidating
+concurrent iframe resources. A new security-chain test fails before the fix and
+passes with an explicit null session authentication strategy. Real browser
+verification retains the same native cookie across basic/JSON popup/SQL views,
+with all existing scoped authorization/logout checks still enforced.
+
+Local verification passes 351 backend tests (including ten unchanged data-scope
+cases), 67 unit tests, 57 fixture browsers and all 40 real browser cases in each
+enabled/default-disabled console configuration. Lint/typecheck/build, hardened
+defaults, seeded routes, full runtime regression and generated-client
+reproducibility pass. Both live OpenAPI snapshots exactly match the committed
+contract. Evidence logs in boot target use the job-api-backend/unit/build/
+fixtures/enabled-runtime/disabled-runtime prefixes; cloud validation is pending.
+The complete original frontend objective and all final capability audits remain
+active.

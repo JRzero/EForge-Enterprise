@@ -56,3 +56,22 @@ nested assets/schema, permission changes, logout, ACL faults, expiry and no
 session extension. Default-disabled and explicitly-enabled scenarios are both
 required. React pages, full browser control acceptance and exact-head cloud
 verification remain separate gates recorded in the parity inventory.
+
+### Independent servlet session identity
+
+Task API regression uncovered an intermittent original Druid login failure:
+Spring Security's default session authentication strategy changed JSESSIONID on
+each stateless JWT/cookie authentication. Concurrent iframe resources then sent
+obsolete identifiers and were redirected to the inner login page. A targeted
+test reproduces the identity change before the fix.
+
+The stateless security chain now explicitly uses NullAuthenticatedSessionStrategy.
+Application authentication remains JWT/Redis based; servlet sessions do not
+authenticate product endpoints. Druid still validates its own original login,
+and every resource still requires the scoped ticket and current authoritative
+grant. This avoids session fixation handling for repeated JWT authentication;
+it does not add session-based application login or relax console authorization.
+The targeted test retains the native identity and inner-login attribute across
+successive authentications. Real browser checks retain the native cookie across
+the original basic/JSON popup/SQL interactions, as well as existing logout and
+grant-revocation failures. No raw native session identifiers are logged.

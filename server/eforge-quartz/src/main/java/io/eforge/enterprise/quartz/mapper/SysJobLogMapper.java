@@ -1,6 +1,7 @@
 package io.eforge.enterprise.quartz.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Delete;
 import io.eforge.enterprise.quartz.domain.SysJobLog;
 
 /**
@@ -10,6 +11,9 @@ import io.eforge.enterprise.quartz.domain.SysJobLog;
  */
 public interface SysJobLogMapper
 {
+    /** Canonical clearing preserves monotonic identities while the compatibility TRUNCATE stays unchanged. */
+    @Delete("delete from sys_job_log")
+    int deleteAllJobLogs();
     /**
      * 获取quartz调度器日志的计划任务
      * 

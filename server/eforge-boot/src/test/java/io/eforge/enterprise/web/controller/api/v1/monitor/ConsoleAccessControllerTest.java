@@ -38,6 +38,15 @@ class ConsoleAccessControllerTest
     @MockitoBean BootstrapService bootstrap;
     @MockitoBean LogoutSuccessHandlerImpl logout;
     LoginUser session;
+    @Test void statelessAuthenticationPreservesNativeConsoleSessionIdentity() throws Exception {
+        var nativeSession=new org.springframework.mock.web.MockHttpSession();
+        nativeSession.setAttribute("druid-user","console-validator");var identity=nativeSession.getId();
+        for(int i=0;i<3;i++) {
+            mvc.perform(get("/api/v1/monitor/consoles/druid").session(nativeSession)).andExpect(status().isOk());
+            org.junit.jupiter.api.Assertions.assertEquals(identity,nativeSession.getId(),"JWT authentication must not rotate the independent servlet session on every request.");
+            org.junit.jupiter.api.Assertions.assertEquals("console-validator",nativeSession.getAttribute("druid-user"));
+        }
+    }
     @BeforeEach void setup(){session=new LoginUser();var user=new io.eforge.enterprise.common.core.domain.entity.SysUser(2L);user.setUserName("reader");session.setUser(user);session.setToken("1234567890abcdef1234567890abcdef");when(tokens.getLoginUser(any())).thenReturn(session);grants("*:*:*");}
     void grants(String... values){when(bootstrap.refreshConsoleAuthorization(session)).thenReturn(new BootstrapResponse(null,Set.of(),Set.of(values),List.of()));}
     @Test void statusesAreCanonicalAndDisabledWithoutLeakingConsoleResources() throws Exception

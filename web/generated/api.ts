@@ -138,6 +138,31 @@ export type ConsoleEntry = {
 export type DeleteLogsRequest = {
     ids: string[];
 };
+export type JobLogResponse = {
+    createdAt?: string;
+    endedAt?: string;
+    group?: string;
+    id: string;
+    invokeTarget?: string;
+    message?: string;
+    name?: string;
+    startedAt?: string;
+    status?: string;
+};
+export type PageResponseJobLogResponse = {
+    items: JobLogResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type JobLogDetail = {
+    entry: JobLogResponse;
+    exceptionInfo?: string;
+};
+export type CronPreviewResponse = {
+    times: string[];
+    zone: string;
+};
 export type LoginLogResponse = {
     browser?: string;
     id: string;
@@ -808,6 +833,94 @@ export function openDruidConsole(opts?: Oazapfts.RequestOpts) {
     }>("/api/v1/monitor/consoles/druid/session", {
         ...opts,
         method: "POST"
+    });
+}
+export function deleteJobLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/job-logs", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteLogsRequest
+    }));
+}
+export function listJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    group?: string;
+    invokeTarget?: string;
+    status?: number;
+    $from?: string;
+    to?: string;
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseJobLogResponse;
+    }>(`/api/v1/monitor/job-logs${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        group,
+        invokeTarget,
+        status,
+        "from": $from,
+        to,
+        direction
+    }))}`, {
+        ...opts
+    });
+}
+export function clearJobLogs(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/job-logs/clear", {
+        ...opts,
+        method: "POST"
+    });
+}
+export function exportJobLogs({ page, pageSize, name, group, invokeTarget, status, $from, to, direction }: {
+    page?: number;
+    pageSize?: number;
+    name?: string;
+    group?: string;
+    invokeTarget?: string;
+    status?: number;
+    $from?: string;
+    to?: string;
+    direction?: "asc" | "desc";
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/v1/monitor/job-logs/export${QS.query(QS.explode({
+        page,
+        pageSize,
+        name,
+        group,
+        invokeTarget,
+        status,
+        "from": $from,
+        to,
+        direction
+    }))}`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function getJobLog(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: JobLogDetail;
+    }>(`/api/v1/monitor/job-logs/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function previewJobCron(expression: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CronPreviewResponse;
+    }>(`/api/v1/monitor/jobs/cron-preview${QS.query(QS.explode({
+        expression
+    }))}`, {
+        ...opts
     });
 }
 export function deleteLoginLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {

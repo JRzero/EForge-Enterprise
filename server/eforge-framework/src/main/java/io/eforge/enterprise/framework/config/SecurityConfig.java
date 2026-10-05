@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.web.filter.CorsFilter;
 
 import io.eforge.enterprise.framework.config.properties.PermitAllUrlProperties;
@@ -77,7 +78,10 @@ public class SecurityConfig
                     else
                         response.sendError(403);
                 }))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // JWTs are re-authenticated on every request. Rotating a servlet session here
+            // races concurrent Druid assets and destroys its independent inner login.
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy()))
             .authorizeHttpRequests(requests -> {
                 permitAllUrl.getUrls().forEach(url -> requests.requestMatchers(url).permitAll());
 

@@ -8,6 +8,8 @@ async function token(page: Page) {return page.evaluate(() => JSON.parse(sessionS
 for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/login.html', 'eforge_console_druid'], ['/swagger', '接口文档', '/swagger-ui/index.html', 'eforge_console_docs']] as const) {
   test(`${title}: actual disabled/enabled iframe, original interactions, refresh and logout`, async ({page, context}) => {
     test.setTimeout(60000); const errors: string[] = []; page.on('pageerror', cause => errors.push(cause.message));
+    const diagnosticResources: {path: string; status: number}[] = [];
+    page.on('response', response => {const path = new URL(response.url()).pathname; if (path.startsWith('/druid/') && diagnosticResources.length < 100) diagnosticResources.push({path, status: response.status()});});
     try {
     await login(page, path); await expect(page.getByRole('heading', {name: title, exact: true})).toBeVisible();
     const accessToken = await token(page);
@@ -19,10 +21,14 @@ for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/l
       await expect(page.locator('iframe')).toHaveAttribute('src', entry); const frame = page.frameLocator('iframe');
       if (path === '/druid') {
         await expect(frame.getByRole('heading', {name: 'Login', exact: true})).toBeVisible();
+        await expect.poll(() => frame.locator('html').evaluate(element => element.ownerDocument.readyState)).toBe('complete');
         await frame.getByPlaceholder('用户名').fill(process.env.EFORGE_DRUID_USERNAME!); await frame.getByPlaceholder('密码', {exact: true}).fill(process.env.EFORGE_DRUID_PASSWORD!);
-        const basicResponse = page.waitForResponse(response => response.url().endsWith('/druid/basic.json') && response.request().method() === 'POST' && response.status() === 200);
-        await frame.getByRole('button', {name: 'Sign in', exact: true}).click(); await expect(frame.locator('#DruidVersion')).toContainText('1.2.28');
-        const actual = await (await basicResponse).json(); expect(actual.ResultCode).toBe(1); expect(actual.Content.JavaVersion).toBeTruthy();
+        const [basicResponse] = await Promise.all([
+          page.waitForResponse(response => response.url().endsWith('/druid/basic.json') && response.request().method() === 'POST' && response.status() === 200),
+          frame.getByRole('button', {name: 'Sign in', exact: true}).click(),
+        ]);
+        const actual = await basicResponse.json(); expect(actual.ResultCode).toBe(1); expect(actual.Content.JavaVersion).toBeTruthy();
+        await expect(frame.locator('#DruidVersion')).toContainText('1.2.28');
         expect((await context.cookies()).filter(value => value.name === 'JSESSIONID').map(value => ({name: value.name, path: value.path}))).toEqual([{name: 'JSESSIONID', path: '/'}]);
         const sessionCookie = (await context.cookies()).find(value => value.name === 'JSESSIONID')!;
         const jsonRequest = context.waitForEvent('request', request => request.url().endsWith('/druid/basic.json') && request.method() === 'GET');
@@ -35,6 +41,7 @@ for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/l
         const sqlResponse = page.waitForResponse(response => response.url().includes('/druid/sql.json') && response.status() === 200);
         await frame.locator('a[href="sql.html"]').first().click(); await expect(frame.locator('#dataTable')).toBeVisible();
         const sql = await (await sqlResponse).json(); expect(sql.ResultCode).toBe(1); expect(Array.isArray(sql.Content)).toBe(true);
+        expect((await context.cookies()).find(value => value.name === 'JSESSIONID')?.value === sessionCookie.value).toBe(true);
       } else {
         await expect(frame.locator('.swagger-ui').first()).toBeVisible(); await expect(frame.locator('.opblock').first()).toBeVisible();
         const schema = await page.evaluate(async () => (await fetch('/v3/api-docs/api-v1')).json()); expect(schema.paths['/api/v1/monitor/consoles/druid']).toBeDefined();
@@ -53,6 +60,9 @@ for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/l
     await page.getByRole('button', {name: '退出登录', exact: true}).click(); await expect(page.getByRole('heading', {name: '登录工作空间'})).toBeVisible(); await expect(page.locator('iframe')).toHaveCount(0);
     if (enabled) expect(await page.evaluate(async entry => (await fetch(entry)).status, entry)).toBe(401);
     expect(errors).toEqual([]);
+    } catch (cause) {
+      console.log('Console failure resource statuses:', JSON.stringify(diagnosticResources), 'script error count:', errors.length);
+      throw cause;
     } finally {
       // Error context captures the DOM even with traces off. Never snapshot Swagger's bearer input/curl.
       await page.locator('iframe').evaluateAll(frames => frames.forEach(frame => frame.remove())).catch(() => {});
