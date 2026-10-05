@@ -1362,3 +1362,22 @@ configurations' complete real browsers/runtime and exact OpenAPI. Its frontend
 and contracts trees are identical to accepted 66158a6; web-ci's path filter does
 not trigger for this backend-only change. This accepts serialization only; all
 stated remaining integrity, generator outputs/pages and full-parity work remains.
+
+## Generator deletion and shared references checkpoint (2026-10-06)
+
+Canonical bounded batch metadata deletion, original remove permission/audit,
+shared original deletion guards, atomic parent-reference rename and original
+complete owned-field/category/tree/subtable validation pass 428 backend tests.
+Actual default/enabled complete API regressions prove SQL waiting, simultaneously
+queued reference/delete consistency, complete rename/delete rollback and retry,
+original invalid writes without audit changes, idempotence and retained physical
+tables with their original seeded records. Both live OpenAPI snapshots match the
+contract; generated client reproduction, security defaults, frontend lint/typecheck/
+build, 73 units and 64 fixture browsers pass. Each configuration passed 43 existing
+real browsers before the last original-save semantic checks; both final complete
+API runs independently verify those new checks. Exact-head cloud is pending.
+See docs/security-review-generator-deletion-v1.md for precise evidence timing.
+Canonical sync and physical schema/key/type changes, physical DDL, safe React/EForge
+output/templates, preview/download/custom output and full generator pages/generated
+module proof remain required. Form builder, shell/shared features and final full
+original-capability acceptance remain active; task approval restrictions stay intact.

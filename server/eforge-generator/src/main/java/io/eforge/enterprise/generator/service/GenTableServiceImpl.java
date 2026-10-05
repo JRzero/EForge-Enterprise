@@ -129,14 +129,94 @@ public class GenTableServiceImpl implements IGenTableService
     public void updateGenTable(GenTable genTable)
     {
         metadataBoundary.lock();
+        GenTable previous = genTableMapper.selectGenTableById(genTable.getTableId());
+        if (previous == null || genTable.getColumns() == null)
+        {
+            throw new ServiceException("生成配置不存在或字段集合不完整");
+        }
+        Map<Long, GenTableColumn> owned = previous.getColumns().stream().collect(Collectors.toMap(GenTableColumn::getColumnId, Function.identity()));
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        for (GenTableColumn field : genTable.getColumns())
+        {
+            if (field == null || field.getColumnId() == null)
+            {
+                throw new ServiceException("字段集合不完整");
+            }
+            GenTableColumn original = owned.get(field.getColumnId());
+            if (original == null || !seen.add(field.getColumnId()))
+            {
+                throw new ServiceException("字段必须完整归属于当前生成配置");
+            }
+            field.setColumnType(original.getColumnType());
+            field.setUpdateBy(io.eforge.enterprise.common.utils.SecurityUtils.getUsername());
+        }
+        if (seen.size() != owned.size())
+        {
+            throw new ServiceException("字段集合不完整，请重新加载");
+        }
+        String category = StringUtils.isEmpty(genTable.getTplCategory()) ? previous.getTplCategory() : genTable.getTplCategory();
+        if (category == null || !java.util.Set.of(GenConstants.TPL_CRUD, GenConstants.TPL_TREE, GenConstants.TPL_SUB).contains(category))
+        {
+            throw new ServiceException("请选择有效生成类型");
+        }
+        genTable.setTplCategory(category);
+        if (GenConstants.TPL_SUB.equals(category))
+        {
+            String childName = genTable.getSubTableName() == null ? previous.getSubTableName() : genTable.getSubTableName();
+            String foreignKey = genTable.getSubTableFkName() == null ? previous.getSubTableFkName() : genTable.getSubTableFkName();
+            GenTable child = genTableMapper.selectGenTableByName(childName);
+            if (child == null || child.getTableId().equals(previous.getTableId()) || child.getColumns() == null || child.getColumns().stream().noneMatch(field -> java.util.Objects.equals(field.getColumnName(), foreignKey)))
+            {
+                throw new ServiceException("子表及关联字段必须存在且不能关联自身");
+            }
+            genTable.setSubTableName(childName);
+            genTable.setSubTableFkName(foreignKey);
+        }
+        else
+        {
+            genTable.setSubTableName("");
+            genTable.setSubTableFkName("");
+        }
+        if (GenConstants.TPL_TREE.equals(category))
+        {
+            java.util.Set<String> physicalNames = previous.getColumns().stream().map(GenTableColumn::getColumnName).collect(Collectors.toSet());
+            for (String key : java.util.List.of(GenConstants.TREE_CODE, GenConstants.TREE_PARENT_CODE, GenConstants.TREE_NAME))
+            {
+                Object value = genTable.getParams().get(key);
+                if (value == null || !physicalNames.contains(value.toString()))
+                {
+                    throw new ServiceException("树字段必须属于当前生成配置");
+                }
+            }
+        }
+        if (!java.util.Objects.equals(previous.getTableName(), genTable.getTableName()))
+        {
+            GenTable conflict = genTableMapper.selectGenTableByName(genTable.getTableName());
+            List<GenTable> physical = genTableMapper.selectDbTableListByNames(new String[]{genTable.getTableName()});
+            java.util.Set<String> physicalNames = genTableColumnMapper.selectDbTableColumnsByName(genTable.getTableName()).stream().map(GenTableColumn::getColumnName).collect(Collectors.toSet());
+            java.util.Set<String> configuredNames = previous.getColumns().stream().map(GenTableColumn::getColumnName).collect(Collectors.toSet());
+            if (conflict != null || physical.isEmpty() || !physicalNames.equals(configuredNames))
+            {
+                throw new ServiceException("目标表必须存在、未导入且字段集合相同");
+            }
+        }
+        genTable.setUpdateBy(io.eforge.enterprise.common.utils.SecurityUtils.getUsername());
         String options = JSON.toJSONString(genTable.getParams());
         genTable.setOptions(options);
         int row = genTableMapper.updateGenTable(genTable);
+        if (row != 1)
+        {
+            throw new ServiceException("生成配置保存失败");
+        }
         if (row > 0)
         {
+            metadataBoundary.renameReferences(previous.getTableName(), genTable.getTableName(), genTable.getUpdateBy());
             for (GenTableColumn genTableColumn : genTable.getColumns())
             {
-                genTableColumnMapper.updateGenTableColumn(genTableColumn);
+                if (genTableColumnMapper.updateGenTableColumn(genTableColumn) != 1)
+                {
+                    throw new ServiceException("字段配置保存失败");
+                }
             }
         }
     }
@@ -152,6 +232,7 @@ public class GenTableServiceImpl implements IGenTableService
     public void deleteGenTableByIds(Long[] tableIds)
     {
         metadataBoundary.lock();
+        metadataBoundary.assertDeletionAllowed(tableIds);
         genTableMapper.deleteGenTableByIds(tableIds);
         genTableColumnMapper.deleteGenTableColumnByIds(tableIds);
     }

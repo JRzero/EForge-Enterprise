@@ -5,11 +5,11 @@ function GeneratorConfig-Input($detail){
     $fields=@($detail.columns|ForEach-Object {@{id=$_.id;comment=$_.comment;javaType=$_.javaType;javaField=$_.javaField;required=[bool]$_.required;insertable=[bool]$_.insertable;editable=[bool]$_.editable;listed=[bool]$_.listed;queryable=[bool]$_.queryable;queryType=$_.queryType;controlType=$_.controlType;dictionaryType=$_.dictionaryType;order=$_.order}})
     return @{name=$detail.table.name;comment='配置中文';className='ConfiguredEntry';category='crud';packageName='io.eforge.enterprise.owned';moduleName='sales-api';businessName='order-line';functionName='配置';author='作者';formColumns=3;outputType='1';outputPath='D:/生成输出';remark='';options=@{parentMenuId='0';generateDetail=$true};columns=$fields}
 }
-function GeneratorConfig-Snapshot($id){return @(GeneratorConfig-Sql "SELECT CONCAT_WS('|',table_name,table_comment,class_name,tpl_category,tpl_web_type,function_name,form_col_num,gen_type,gen_path,remark,options) FROM gen_table WHERE table_id=$id; SELECT CONCAT_WS('|',column_id,column_name,column_comment,column_type,java_type,java_field,is_pk,is_increment,is_required,is_insert,is_edit,is_list,is_query,query_type,html_type,dict_type,sort) FROM gen_table_column WHERE table_id=$id ORDER BY column_id;") -join "`n"}
+function GeneratorConfig-Snapshot($id){return @(GeneratorConfig-Sql "SELECT CONCAT_WS('|',table_name,table_comment,class_name,tpl_category,tpl_web_type,function_name,form_col_num,gen_type,gen_path,remark,options,update_by,IFNULL(CAST(update_time AS CHAR),'<null>')) FROM gen_table WHERE table_id=$id; SELECT CONCAT_WS('|',column_id,column_name,column_comment,column_type,java_type,java_field,is_pk,is_increment,is_required,is_insert,is_edit,is_list,is_query,query_type,html_type,dict_type,sort,update_by,IFNULL(CAST(update_time AS CHAR),'<null>')) FROM gen_table_column WHERE table_id=$id ORDER BY column_id;") -join "`n"}
 try {
     $configSpec=Get-Content -LiteralPath $snapshotPath -Raw|ConvertFrom-Json -AsHashtable
     Assert-Check ($configSpec.components.schemas.Options.properties.parentMenuName -and ($configSpec.components.schemas.GeneratorConfigurationOptions.required -contains 'generateDetail') -and ($configSpec.components.schemas.GeneratorConfigurationUpdate.properties.options.'$ref' -ceq '#/components/schemas/GeneratorConfigurationOptions')) 'Generator read/write OpenAPI options must have distinct complete schemas.'
-    foreach($suffix in @('a','b','c')){GeneratorConfig-Sql "CREATE TABLE ${configMarker}_$suffix (entry_id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(64) NOT NULL) COMMENT='配置中文';"|Out-Null}
+    foreach($suffix in @('a','b','c')){GeneratorConfig-Sql "CREATE TABLE ${configMarker}_$suffix (entry_id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(64) NOT NULL) COMMENT='配置中文'; INSERT INTO ${configMarker}_$suffix(name) VALUES('owned-preserve-$suffix');"|Out-Null}
     $imported=Request '/api/v1/tool/generator/imports' 'POST' (@{names=@("${configMarker}_a","${configMarker}_b")}|ConvertTo-Json -Compress) $authorized
     Assert-Check ($imported.StatusCode -eq 201) 'Configuration fixture import failed.'
     $resources=$imported.Content|ConvertFrom-Json;$configId=$resources.tables[0].id;$otherId=$resources.tables[1].id;$configPath="/api/v1/tool/generator/tables/$configId"
@@ -39,7 +39,7 @@ try {
     Assert-Check ($saved.configuration.formColumns -eq 3 -and $saved.configuration.outputPath -ceq 'D:/生成输出' -and $saved.configuration.options.generateDetail -and $saved.table.webType -ceq 'eforge-react' -and $saved.columns[0].primaryKey -and $saved.columns[0].autoIncrement -and $saved.columns[0].id -ceq $detail.columns[0].id) 'Configuration fields/options/physical identity were not retained.'
     # Hold only the parent-owned generator guard in a separate real SQL transaction.
     # Canonical save and original sync must wait for rollback, then complete normally.
-    foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''})) {
+    foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''},@{path='/api/v1/tool/generator/tables';method='DELETE';payload='{"ids": ["9223372036854775807"]}'},@{path='/tool/gen/9223372036854775807';method='DELETE';payload=''})) {
         $guardOwner=$null;$guardRequest=$null
         try {
             $guardOwner=Start-Job -ScriptBlock {
@@ -73,7 +73,7 @@ try {
             Wait-Job $guardRequest -Timeout 30|Out-Null
             Assert-Check ($guardRequest.State -eq 'Completed') 'Metadata writer did not resume after guard rollback.'
             $guardReply=Receive-Job $guardRequest -ErrorAction Stop
-            if($guardCase.method -eq 'PUT'){Assert-Check ($guardReply.status -eq 204) 'Canonical save must resume and commit after rollback.'}
+            if($guardCase.method -eq 'PUT' -or $guardCase.path -ceq '/api/v1/tool/generator/tables'){Assert-Check ($guardReply.status -eq 204) 'Canonical save must resume and commit after rollback.'}
             else{Assert-Check ($guardReply.status -eq 200 -and ($guardReply.body|ConvertFrom-Json).code -eq 200) 'Original sync must resume normally after rollback.'}
         } finally {
             foreach($ownedGuardJob in @($guardOwner,$guardRequest)) {
@@ -97,6 +97,71 @@ try {
     Assert-Check ((Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Actual subtable configuration failed.'
     $configWrite.name="${configMarker}_c";Assert-Check ((Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Original table-name edit with matching real schema failed.'
     Assert-Check (((Request $configPath 'GET' '' $authorized).Content|ConvertFrom-Json).table.name -ceq "${configMarker}_c") 'Table-name edit must retain its string resource ID.'
+    $deletePath='/api/v1/tool/generator/tables';$deleteBody=@{ids=@($configId,$otherId)}|ConvertTo-Json -Compress
+    Assert-Problem (Request $deletePath 'DELETE' $deleteBody) 401 'AUTHENTICATION_REQUIRED'
+    Assert-Problem (Request $deletePath 'DELETE' $deleteBody @{Authorization="Bearer $(($login.Content|ConvertFrom-Json).accessToken)"}) 403 'ACCESS_DENIED'
+    $parentBefore=GeneratorConfig-Snapshot $configId;$childBefore=GeneratorConfig-Snapshot $otherId
+    Assert-Problem (Request $deletePath 'DELETE' (@{ids=@($otherId)}|ConvertTo-Json -Compress) $authorized) 409 'GENERATOR_TABLE_REFERENCED'
+    $legacyRefusal=Request "/tool/gen/$otherId" 'DELETE' '' $authorized
+    Assert-Check (($legacyRefusal.Content|ConvertFrom-Json).code -ne 200 -and (GeneratorConfig-Snapshot $otherId) -ceq $childBefore) 'Original delete must not bypass reference protection.'
+    $child=(Request "/api/v1/tool/generator/tables/$otherId" 'GET' '' $authorized).Content|ConvertFrom-Json
+    $childWrite=GeneratorConfig-Input $child;$childWrite.name="${configMarker}_a"
+    GeneratorConfig-Sql "SET SESSION sql_mode='STRICT_ALL_TABLES'; CREATE TRIGGER $configTrigger BEFORE UPDATE ON gen_table_column FOR EACH ROW SET NEW.column_comment=IF(NEW.column_name='name',REPEAT('x',1000),NEW.column_comment);"|Out-Null
+    try {
+        Assert-Problem (Request "/api/v1/tool/generator/tables/$otherId" 'PUT' ($childWrite|ConvertTo-Json -Depth 10 -Compress) $authorized) 500 'INTERNAL_ERROR'
+        Assert-Check ((GeneratorConfig-Snapshot $configId) -ceq $parentBefore -and (GeneratorConfig-Snapshot $otherId) -ceq $childBefore) 'Rename failure must roll back child name and propagated parent reference together.'
+    }finally{GeneratorConfig-Sql "DROP TRIGGER $configTrigger;"|Out-Null}
+    Assert-Check ((Request "/api/v1/tool/generator/tables/$otherId" 'PUT' ($childWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Child rename retry failed.'
+    Assert-Check ((GeneratorConfig-Sql "SELECT sub_table_name FROM gen_table WHERE table_id=$configId;") -ceq "${configMarker}_a") 'Canonical rename must preserve parent references.'
+    $legacyDetail=(Request "/tool/gen/$otherId" 'GET' '' $authorized).Content|ConvertFrom-Json -AsHashtable
+    $legacyPhysicalType=$legacyDetail.data.rows[0].columnType;
+    $legacyWrite=$legacyDetail.data.info;$legacyWrite.columns=$legacyDetail.data.rows
+    $legacyWrite.params=@{parentMenuId=0;genView=$true}
+    $legacyBefore=GeneratorConfig-Snapshot $otherId;$legacyParentBefore=GeneratorConfig-Snapshot $configId
+    foreach($invalidCase in @('foreign','duplicate','incomplete','null','missing-child','self-child','missing-foreign-key','foreign-tree','unknown-category')) {
+        $badLegacy=($legacyWrite|ConvertTo-Json -Depth 20)|ConvertFrom-Json -AsHashtable
+        switch($invalidCase){'foreign'{$badLegacy.columns[0].columnId=[long]$detail.columns[0].id};'duplicate'{$badLegacy.columns[1].columnId=$badLegacy.columns[0].columnId};'incomplete'{$badLegacy.columns=@($badLegacy.columns[0])};'null'{$badLegacy.columns=@($null,$badLegacy.columns[1])};'missing-child'{$badLegacy.tplCategory='sub';$badLegacy.subTableName='owned_missing_generator_child';$badLegacy.subTableFkName='entry_id'};'self-child'{$badLegacy.tplCategory='sub';$badLegacy.subTableName=$legacyWrite.tableName;$badLegacy.subTableFkName='entry_id'};'missing-foreign-key'{$badLegacy.tplCategory='sub';$badLegacy.subTableName="${configMarker}_c";$badLegacy.subTableFkName='owned_missing_field'};'foreign-tree'{$badLegacy.tplCategory='tree';$badLegacy.params=@{treeCode='owned_missing_field';treeParentCode='entry_id';treeName='name'}};'unknown-category'{$badLegacy.tplCategory='unknown'}}
+        $legacyBad=Request '/tool/gen' 'PUT' ($badLegacy|ConvertTo-Json -Depth 20 -Compress) $authorized
+        Assert-Check (($legacyBad.Content|ConvertFrom-Json).code -ne 200 -and (GeneratorConfig-Snapshot $otherId) -ceq $legacyBefore -and (GeneratorConfig-Snapshot $configId) -ceq $legacyParentBefore) 'Original save must reject unowned/duplicate/incomplete/null fields without mutation.'
+    }
+    $legacyWrite.tableName="${configMarker}_b";$legacyWrite.columns[0].columnType='varchar(200)'
+    $legacySaved=Request '/tool/gen' 'PUT' ($legacyWrite|ConvertTo-Json -Depth 20 -Compress) $authorized
+    Assert-Check (($legacySaved.Content|ConvertFrom-Json).code -eq 200 -and (GeneratorConfig-Sql "SELECT sub_table_name FROM gen_table WHERE table_id=$configId;") -ceq "${configMarker}_b") 'Original rename must preserve references in the shared transaction.'
+    Assert-Check ((GeneratorConfig-Sql "SELECT column_type FROM gen_table_column WHERE column_id=$($legacyWrite.columns[0].columnId);") -ceq $legacyPhysicalType) 'Original save must retain server-owned physical type despite request tampering.'
+    # Two actual HTTP writers queue behind the same observed SQL lock: only a valid serial outcome is allowed.
+    $configWrite.category='crud';Assert-Check ((Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Race fixture reset failed.'
+    $configWrite.category='sub';$configWrite.subTableName="${configMarker}_b";$configWrite.subTableForeignKey='entry_id'
+    $raceOwner=$null;$raceRequests=@()
+    try {
+        $raceOwner=Start-Job -ScriptBlock {param($container,$password);& docker exec --env "MYSQL_PWD=$password" $container mysql -N -B -uroot eforge_enterprise -e 'START TRANSACTION; SELECT guard_id FROM gen_metadata_guard WHERE guard_id=1 FOR UPDATE; SELECT SLEEP(15); ROLLBACK;';if($LASTEXITCODE -ne 0){throw 'Race guard failed.'}} -ArgumentList $mysqlName,$testPassword
+        $raceHeld=$false
+        for($raceAttempt=0;$raceAttempt -lt 80;$raceAttempt++){if([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM performance_schema.data_locks WHERE OBJECT_NAME='gen_metadata_guard' AND LOCK_TYPE='RECORD' AND LOCK_STATUS='GRANTED';") -gt 0){$raceHeld=$true;break};Start-Sleep -Milliseconds 100}
+        Assert-Check $raceHeld 'Race owner lock must be observed before dispatch.'
+        foreach($raceCase in @(@{path=$configPath;method='PUT';body=($configWrite|ConvertTo-Json -Depth 10 -Compress)},@{path=$deletePath;method='DELETE';body=(@{ids=@($otherId)}|ConvertTo-Json -Compress)})) {
+            $raceRequests+=Start-Job -ScriptBlock {param($port,$case,$headers);$reply=Invoke-WebRequest -Uri "http://127.0.0.1:$port$($case.path)" -Method $case.method -Body $case.body -ContentType 'application/json' -Headers $headers -SkipHttpErrorCheck -TimeoutSec 35;return [int]$reply.StatusCode} -ArgumentList $AppPort,$raceCase,$authorized
+        }
+        $raceQueued=$false
+        for($raceAttempt=0;$raceAttempt -lt 80;$raceAttempt++){if([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM performance_schema.data_lock_waits w JOIN performance_schema.data_locks l ON w.REQUESTING_ENGINE_LOCK_ID=l.ENGINE_LOCK_ID WHERE l.OBJECT_NAME='gen_metadata_guard';") -ge 2){$raceQueued=$true;break};Start-Sleep -Milliseconds 100}
+        Assert-Check $raceQueued 'Both actual HTTP writers must be observed concurrently waiting on SQL.'
+        Wait-Job $raceOwner -Timeout 20|Out-Null;Assert-Check ($raceOwner.State -eq 'Completed') 'Race owner rollback failed.';Receive-Job $raceOwner -ErrorAction Stop|Out-Null
+        $raceStatuses=@();foreach($raceRequest in $raceRequests){Wait-Job $raceRequest -Timeout 35|Out-Null;Assert-Check ($raceRequest.State -eq 'Completed') 'Concurrent writer did not finish.';$raceStatuses+=Receive-Job $raceRequest -ErrorAction Stop}
+        Write-Output "Generator reference/delete concurrent statuses: $($raceStatuses -join ',')"
+        Assert-Check (($raceStatuses -join ',') -in @('204,409','400,204')) 'Concurrent reference creation/deletion must have one valid serial outcome.'
+        Assert-Check ([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM gen_table p LEFT JOIN gen_table c ON p.sub_table_name=c.table_name WHERE p.table_id=$configId AND p.tpl_category='sub' AND c.table_id IS NULL;") -eq 0) 'Concurrent writers must never commit a dangling subtable reference.'
+    }finally{foreach($ownedRaceJob in @($raceOwner)+$raceRequests){if($ownedRaceJob){if($ownedRaceJob.State -eq 'Running'){Stop-Job $ownedRaceJob};Remove-Job $ownedRaceJob -Force}}}
+    $deleteParentBefore=GeneratorConfig-Snapshot $configId;$deleteChildBefore=GeneratorConfig-Snapshot $otherId
+    GeneratorConfig-Sql "CREATE TRIGGER $configTrigger BEFORE DELETE ON gen_table_column FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='owned deletion fault';"|Out-Null
+    try {
+        Assert-Problem (Request $deletePath 'DELETE' $deleteBody $authorized) 500 'INTERNAL_ERROR'
+        Assert-Check ((GeneratorConfig-Snapshot $configId) -ceq $deleteParentBefore -and (GeneratorConfig-Snapshot $otherId) -ceq $deleteChildBefore) 'Field deletion failure must roll back the entire selected metadata batch.'
+    }finally{GeneratorConfig-Sql "DROP TRIGGER $configTrigger;"|Out-Null}
+    foreach($repeatDelete in 1..2){Assert-Check ((Request $deletePath 'DELETE' $deleteBody $authorized).StatusCode -eq 204) 'Batch metadata deletion must be atomic and idempotent.'}
+    Assert-Check ([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM gen_table WHERE table_id IN ($configId,$otherId);") -eq 0 -and [int](GeneratorConfig-Sql "SELECT COUNT(*) FROM gen_table_column WHERE table_id IN ($configId,$otherId);") -eq 0) 'Metadata deletion must leave no selected fields or tables.'
+    Assert-Check ([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=database() AND table_name IN ('${configMarker}_a','${configMarker}_b','${configMarker}_c');") -eq 3) 'Metadata deletion must retain every actual physical fixture table.'
+    foreach($retainedSuffix in @('a','b','c')) {
+        Assert-Check ([int](GeneratorConfig-Sql "SELECT COUNT(*) FROM ${configMarker}_$retainedSuffix WHERE entry_id=1 AND name='owned-preserve-$retainedSuffix';") -eq 1) 'Metadata deletion must preserve original physical row identity and content.'
+    }
+    Write-Output 'Generator deletion/references: real permissions, canonical/legacy guards and rename, full rename/deletion rollback, legacy complete owned fields/physical types, observed concurrent valid outcomes, idempotent batch cleanup and physical SQL table retention passed.'
     Write-Output 'Generator configuration: actual original settings/control types/tree/subtable/name, clear/order/IDs/physical identity, no-role/foreign/incomplete refusal and SQL full rollback/retry passed.'
 }finally {
     GeneratorConfig-Sql "DROP TRIGGER IF EXISTS $configTrigger; DELETE c FROM gen_table_column c JOIN gen_table t ON c.table_id=t.table_id WHERE t.table_name LIKE '${configMarker}%'; DELETE FROM gen_table WHERE table_name LIKE '${configMarker}%';"|Out-Null

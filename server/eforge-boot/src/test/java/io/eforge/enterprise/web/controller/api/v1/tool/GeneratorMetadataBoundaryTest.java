@@ -15,6 +15,12 @@ class GeneratorMetadataBoundaryTest {
         assertThrows(IllegalStateException.class,()->new GeneratorMetadataBoundary(jdbc).lock());
         verifyNoInteractions(jdbc);
     }
+    @Test void referenceHelpersCannotRunWithoutTransaction() {
+        var jdbc=mock(JdbcTemplate.class);var boundary=new GeneratorMetadataBoundary(jdbc);
+        assertThrows(IllegalStateException.class,()->boundary.assertDeletionAllowed(new Long[]{1L}));
+        assertThrows(IllegalStateException.class,()->boundary.renameReferences("a","b","editor"));
+        verifyNoInteractions(jdbc);
+    }
     @Test void missingGuardFailsClosedInsideTransaction() {
         var jdbc=mock(JdbcTemplate.class);
         when(jdbc.queryForList(anyString(),eq(Integer.class))).thenReturn(List.of());

@@ -511,6 +511,24 @@
         ],
         "type": "object"
       },
+      "DeleteGeneratorTablesRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "minLength": 1,
+              "pattern": "[1-9][0-9]{0,18}",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
       "DeleteLogsRequest": {
         "properties": {
           "ids": {
@@ -8540,6 +8558,27 @@
       }
     },
     "/api/v1/tool/generator/tables": {
+      "delete": {
+        "operationId": "deleteGeneratorTables",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteGeneratorTablesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "generator-deletion-controller"
+        ]
+      },
       "get": {
         "operationId": "listGeneratorTables",
         "parameters": [

@@ -266,8 +266,25 @@
         "runJob"
       ],
       "state": "partial",
-      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java", "server/scripts/verify-job-logs-integration.ps1", "web/generated/api.ts", "docs/security-review-job-read-v1.md", "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/e2e/cron-editor.spec.ts", "docs/security-review-cron-editor.md"],
-      "remaining": ["Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)", "Task mutation controls with Cron create/edit integration and final capability audit"]
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java",
+        "server/scripts/verify-job-logs-integration.ps1",
+        "web/generated/api.ts",
+        "docs/security-review-job-read-v1.md",
+        "web/features/jobs/JobsPage.tsx",
+        "web/tests/e2e/jobs.spec.ts",
+        "web/tests/live/jobs.spec.ts",
+        "docs/security-review-job-pages.md",
+        "web/features/jobs/CronEditor.tsx",
+        "web/features/jobs/cron-model.ts",
+        "web/tests/e2e/cron-editor.spec.ts",
+        "docs/security-review-cron-editor.md"
+      ],
+      "remaining": [
+        "Canonical task create/update/delete/status/run and scheduler/database consistency (execution-gated mutation proposal approval pending)",
+        "Task mutation controls with Cron create/edit integration and final capability audit"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/jobLog.js",
@@ -282,7 +299,10 @@
         "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobLogControllerTest.java",
         "server/scripts/verify-job-logs-integration.ps1",
         "docs/security-review-job-logs-v1.md",
-        "web/features/jobs/JobsPage.tsx", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "docs/security-review-job-pages.md",
+        "web/features/jobs/JobsPage.tsx",
+        "web/tests/e2e/jobs.spec.ts",
+        "web/tests/live/jobs.spec.ts",
+        "docs/security-review-job-pages.md",
         "web/generated/api.ts"
       ],
       "remaining": [
@@ -868,8 +888,23 @@
         "synchDb"
       ],
       "state": "partial",
-      "evidence": ["server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadControllerTest.java", "server/scripts/verify-generator-read-integration.ps1", "web/generated/api.ts", "docs/security-review-generator-read-v1.md", "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportController.java", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportControllerTest.java", "server/scripts/verify-generator-import-integration.ps1", "sql/migrations/V024__generator_table_identity.sql", "docs/security-review-generator-import-v1.md"],
-      "remaining": ["Canonical create/update/delete/sync/preview/download/custom-output endpoints", "React/EForge generated contracts/routes/pages and generator metadata/import/preview/output UI with end-to-end validation", "Final original-capability audit"]
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorReadControllerTest.java",
+        "server/scripts/verify-generator-read-integration.ps1",
+        "web/generated/api.ts",
+        "docs/security-review-generator-read-v1.md",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/tool/GeneratorImportControllerTest.java",
+        "server/scripts/verify-generator-import-integration.ps1",
+        "sql/migrations/V024__generator_table_identity.sql",
+        "docs/security-review-generator-import-v1.md"
+      ],
+      "remaining": [
+        "Canonical create/update/delete/sync/preview/download/custom-output endpoints",
+        "React/EForge generated contracts/routes/pages and generator metadata/import/preview/output UI with end-to-end validation",
+        "Final original-capability audit"
+      ]
     }
   ],
   "jobLogApiValidation": {
@@ -931,7 +966,11 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37295454573",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37295454526",
     "scope": "Failed existing-task replacement preserves the original RAMJobStore payload, keys, saved next deadline and pause states, rejects target-key collisions and removes a partially created replacement. Real MySQL checked-exception rollback and actual original-target execution verified. Canonical task CRUD, commit/concurrency/batch/precommit/persistent-fault consistency and all task/Cron/log pages remain pending.",
-    "evidence": ["docs/security-review-task-replacement.md", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/TaskScheduleReplacementTest.java", "server/scripts/verify-job-logs-integration.ps1"]
+    "evidence": [
+      "docs/security-review-task-replacement.md",
+      "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/TaskScheduleReplacementTest.java",
+      "server/scripts/verify-job-logs-integration.ps1"
+    ]
   },
   "jobReadApiValidation": {
     "state": "read-api-locally-verified",
@@ -962,7 +1001,14 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885110",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885166",
     "scope": "Task read/detail/full sorted XLSX and original internal log route with name/group/status/date/target filters, ordering, paging, context/close, detail/exception text, captured-ID delete/clear confirmation and filtered sorted XLSX. Twelve owned paused tasks produce actual Quartz success/failure logs; original grants, no-role denial, inert stored text and both complete runtime regressions pass. Task mutation controls, Cron editor, full scheduler/SQL consistency and final capability audits remain pending. Neither approval-rejected runtime mutation proposal is implemented.",
-    "evidence": ["docs/security-review-job-pages.md", "web/features/jobs/JobsPage.tsx", "web/tests/unit/job-api.test.ts", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "sql/migrations/V023__task_read_route.sql"]
+    "evidence": [
+      "docs/security-review-job-pages.md",
+      "web/features/jobs/JobsPage.tsx",
+      "web/tests/unit/job-api.test.ts",
+      "web/tests/e2e/jobs.spec.ts",
+      "web/tests/live/jobs.spec.ts",
+      "sql/migrations/V023__task_read_route.sql"
+    ]
   },
   "cronEditorValidation": {
     "state": "editor-and-read-tool-verified",
@@ -978,7 +1024,15 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528730",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528660",
     "scope": "Feature-local seven-field editor, original reset/refill/cancel/confirmation and task read/detail handoff. Range/interval/specified values, omitted/expired years, day/week exclusion, W/L/# and preserved named/advanced raw fields use actual protected Quartz five-instant/server-zone preview. Invalid/stale/failed previews cannot confirm; whitespace-only edits revalidate. Original grants, retry/cancel/focus/keyboard/mobile, actual no-role preview denial and unchanged persisted task fields pass. Task create/edit integration, task mutations, full scheduler/SQL consistency and final original-capability audits remain pending; neither approval-rejected runtime mutation proposal is implemented.",
-    "evidence": ["docs/security-review-cron-editor.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/unit/cron-model.test.ts", "web/tests/unit/job-api.test.ts", "web/tests/e2e/cron-editor.spec.ts", "web/tests/live/jobs.spec.ts"]
+    "evidence": [
+      "docs/security-review-cron-editor.md",
+      "web/features/jobs/CronEditor.tsx",
+      "web/features/jobs/cron-model.ts",
+      "web/tests/unit/cron-model.test.ts",
+      "web/tests/unit/job-api.test.ts",
+      "web/tests/e2e/cron-editor.spec.ts",
+      "web/tests/live/jobs.spec.ts"
+    ]
   },
   "generatorReadApiValidation": {
     "state": "read-api-verified",
@@ -1036,5 +1090,18 @@
     "implementationCommit": "ef2ba15041be3954b3f28f53cae7286a4ec695ce",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37347737857",
     "scope": "Shared feature-local InnoDB transaction row serializes current canonical import/configuration and original HTTP import/update/delete/sync writers. Actual SQL record-lock waiting by canonical save and legacy sync is observed before rollback release/resumption. Autocommit/missing row fail closed. No task dispatch, Quartz or unrelated business lock is changed. Serialization alone does not establish complete mutation integrity: legacy field ownership/checked writes, rename/reference/delete/sync races, canonical delete/sync, physical DDL/output snapshots/React-EForge generation and full pages remain required. Unused standalone column writers need the boundary before exposure."
+  },
+  "generatorDeletionApiValidation": {
+    "deletionMvcTests": 9,
+    "openApi": "exact-match",
+    "backendTests": 428,
+    "enabledRuntime": "success",
+    "unitTests": 73,
+    "scope": "Canonical bounded metadata-only deletion with original remove grant, exact IDs and generated client; shared original reference guards and atomic canonical/original rename. Complete legacy owned field set/type/category/tree/subtable validation and checked saves. Real SQL faults prove complete rename/deletion/audit rollback and retry; two actual HTTP reference/delete SQL waiters prove consistent serial outcomes. Physical tables and seeded original row identity/content remain retained. Both configurations pass final complete APIs including five additional legacy semantic refusals. Their 43 existing browsers passed before those final Java-only checks; frontend lint/typecheck/reproduction/build, 73 units and 64 fixture browsers pass. Exact-head cloud awaits acceptance. Canonical sync/schema/key changes, physical DDL, safe React/EForge templates/output/pages/generated modules and full original parity remain required. No rejected task runtime proposal is implemented.",
+    "fixtureBrowserTests": 64,
+    "state": "local-deletion-and-reference-verified",
+    "ci": "pending",
+    "existingLiveBrowserTestsPerConfiguration": 43,
+    "disabledRuntime": "success"
   }
 }

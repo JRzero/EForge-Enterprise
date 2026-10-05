@@ -365,3 +365,16 @@ resources require fresh account/grant checks and same-origin cookie evidence.
 Cookies bind opaque five-minute tickets to existing Redis sessions and never
 authenticate product APIs or extend login TTL. Authenticated bearer schema
 export remains independent of interactive Swagger enablement. See ADR-0016.
+
+### Generator metadata deletion
+
+DELETE `/api/v1/tool/generator/tables` accepts `{ "ids": ["..."] }` using exact
+positive decimal string IDs, one to 100 selections, under `tool:gen:remove`.
+It returns idempotent 204 for removed or already absent metadata. An external
+unselected parent reference rejects the whole batch with 409
+`GENERATOR_TABLE_REFERENCED`; parent and child may be selected together. Invalid
+IDs return 400 and SQL faults return a sanitized ProblemDetail. Only generator
+table/field metadata is removed, retaining physical SQL tables and their records.
+Canonical and original writers share the generator SQL transaction guard. Rename
+propagates parent references atomically. This contract does not complete sync,
+physical table creation, output generation or the frontend management page.

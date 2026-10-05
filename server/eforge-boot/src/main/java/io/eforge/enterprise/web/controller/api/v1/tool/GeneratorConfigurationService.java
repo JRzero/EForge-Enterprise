@@ -70,12 +70,14 @@ public class GeneratorConfigurationService {
             if(parent!=0){var menu=menus.selectMenuById(parent);if(menu==null||"F".equals(menu.getMenuType()))throw new ApiFailure(400,"GENERATOR_MENU_INVALID","Parent menu must exist and cannot be a function.");stored.put("parentMenuName",menu.getMenuName());}
         }
         try {table.setOptions(json.writeValueAsString(stored));}catch(com.fasterxml.jackson.core.JsonProcessingException impossible){throw new IllegalStateException(impossible);}
+        var previousName=table.getTableName();
         table.setTableName(input.name());table.setTableComment(input.comment());table.setClassName(input.className());table.setTplCategory(input.category().name());table.setTplWebType("eforge-react");
         table.setPackageName(input.packageName());table.setModuleName(input.moduleName());table.setBusinessName(input.businessName());table.setFunctionName(input.functionName());table.setFunctionAuthor(input.author());
         table.setFormColNum(input.formColumns());table.setGenType(input.outputType());table.setGenPath(input.outputPath()==null||input.outputPath().isBlank()?"/":input.outputPath());table.setRemark(text(input.remark()));table.setUpdateBy(actor);
         table.setSubTableName(input.category()==Category.sub?input.subTableName():"");table.setSubTableFkName(input.category()==Category.sub?input.subTableForeignKey():"");
         try {
             if(tables.updateGenTable(table)!=1)throw failed();
+            boundary.renameReferences(previousName,input.name(),actor);
             for(var edit:input.columns()) {
                 var field=byId.get(identifier(edit.id()));field.setColumnComment(text(edit.comment()));field.setJavaType(edit.javaType().name());field.setJavaField(edit.javaField());
                 field.setIsRequired(flag(edit.required()));field.setIsInsert(flag(edit.insertable()));field.setIsEdit(flag(edit.editable()));field.setIsList(flag(edit.listed()));field.setIsQuery(flag(edit.queryable()));

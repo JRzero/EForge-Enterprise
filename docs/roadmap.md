@@ -167,3 +167,22 @@ Configuration API/calendar repair exact 66158a6 passes server 37345364383 all th
 Generator metadata serialization: V025 shared SQL transaction guard, actual canonical/original wait and rollback resumption, 418 backend and both complete API regressions pass; exact contract unchanged, cloud pending. Next enforce legacy ownership/checked writes and rename/reference/delete/sync consistency, add canonical delete/sync, then remaining generator/output/UI and full original parity deliverables.
 
 Metadata serialization exact ef2ba15 passes server 37347737857 all three jobs and both full browser/runtime configurations; remaining reference/legacy ownership/delete/sync/output/UI acceptance stays required.
+
+## Generator deletion and shared references checkpoint (2026-10-06)
+
+Canonical bounded batch metadata deletion, original remove permission/audit,
+shared original deletion guards, atomic parent-reference rename and original
+complete owned-field/category/tree/subtable validation pass 428 backend tests.
+Actual default/enabled complete API regressions prove SQL waiting, simultaneously
+queued reference/delete consistency, complete rename/delete rollback and retry,
+original invalid writes without audit changes, idempotence and retained physical
+tables with their original seeded records. Both live OpenAPI snapshots match the
+contract; generated client reproduction, security defaults, frontend lint/typecheck/
+build, 73 units and 64 fixture browsers pass. Each configuration passed 43 existing
+real browsers before the last original-save semantic checks; both final complete
+API runs independently verify those new checks. Exact-head cloud is pending.
+See docs/security-review-generator-deletion-v1.md for precise evidence timing.
+Canonical sync and physical schema/key/type changes, physical DDL, safe React/EForge
+output/templates, preview/download/custom output and full generator pages/generated
+module proof remain required. Form builder, shell/shared features and final full
+original-capability acceptance remain active; task approval restrictions stay intact.

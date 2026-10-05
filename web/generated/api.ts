@@ -721,6 +721,9 @@ export type ImportedTable = {
 export type ImportResponse = {
     tables: ImportedTable[];
 };
+export type DeleteGeneratorTablesRequest = {
+    ids: string[];
+};
 export type TableSummary = {
     category?: string;
     className?: string;
@@ -2239,6 +2242,13 @@ export function importGeneratorTables(importRequest: ImportRequest, opts?: Oazap
         ...opts,
         method: "POST",
         body: importRequest
+    }));
+}
+export function deleteGeneratorTables(deleteGeneratorTablesRequest: DeleteGeneratorTablesRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/tool/generator/tables", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: deleteGeneratorTablesRequest
     }));
 }
 export function listGeneratorTables({ page, pageSize, name, comment, $from, to, sort, direction }: {
