@@ -286,7 +286,7 @@
         "web/generated/api.ts"
       ],
       "remaining": [
-        "Exact-head task-log page CI and final capability audit",
+        "Final task-log capability audit",
         "Canonical task management, scheduler/database consistency, Cron editor and actual task browser verification"
       ]
     },
@@ -948,7 +948,7 @@
     "scope": "Canonical task list/detail/full filtered sorted XLSX only, original grants, string IDs and validated fixed sorting. Thirteen MVC cases plus actual SQL/Quartz fixture and full regressions pass. Canonical task mutations, full scheduler/database consistency and all task/Cron/log pages remain pending. The execution-gated mutation proposal requires explicit approval after automatic review rejection."
   },
   "jobReadAndLogPageValidation": {
-    "state": "pages-locally-verified",
+    "state": "pages-verified",
     "backendTests": 371,
     "unitTests": 69,
     "fixtureBrowserTests": 61,
@@ -956,7 +956,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "94f1b1889150cc8e257245294b88e74c9517c650",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885110",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885166",
     "scope": "Task read/detail/full sorted XLSX and original internal log route with name/group/status/date/target filters, ordering, paging, context/close, detail/exception text, captured-ID delete/clear confirmation and filtered sorted XLSX. Twelve owned paused tasks produce actual Quartz success/failure logs; original grants, no-role denial, inert stored text and both complete runtime regressions pass. Task mutation controls, Cron editor, full scheduler/SQL consistency and final capability audits remain pending. Neither approval-rejected runtime mutation proposal is implemented.",
     "evidence": ["docs/security-review-job-pages.md", "web/features/jobs/JobsPage.tsx", "web/tests/unit/job-api.test.ts", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "sql/migrations/V023__task_read_route.sql"]
   }

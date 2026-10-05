@@ -41,7 +41,7 @@ It is a work inventory, not executable proof of completion.
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
-| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical log API and Quartz preview; task management and pages remain missing |
+| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical task reads/log API and actual Quartz preview, read/detail/export and original log pages verified locally and in exact-head CI; task mutations, Cron editor and full consistency remain pending |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
@@ -1182,3 +1182,12 @@ remain incomplete. The explicitly approval-pending affected-ID mutation proposal
 is unchanged and unimplemented; neither rejected runtime patch was written.
 Generator/form builder, complete shell/shared capabilities and final audits
 remain required. This checkpoint does not complete task management or full parity.
+
+Task read and original log pages exact implementation commit
+94f1b1889150cc8e257245294b88e74c9517c650 passes
+[server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885110)
+in all three jobs and
+[web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37304885166),
+confirmed on 2026-10-05. Both configurations' complete Linux real browser/runtime
+regressions and exact live OpenAPI equality pass. Task writes/Cron editing/full
+scheduler consistency and final original-capability acceptance remain incomplete.

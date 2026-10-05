@@ -124,7 +124,7 @@ boundary; neither rejected runtime patch was written. Explicit approval of the
 narrower proposal in proposed-task-mutation-boundary.md is pending. Independent
 task-log pages and all remaining original capabilities continue to be required.Task read and original task-log pages now pass 371 backend/69 unit/61 fixture and
 42 real browser cases in each configuration, both full runtime regressions and
-exact live OpenAPI equality. Exact-head cloud acceptance is pending. Task CRUD,
+exact live OpenAPI equality. Exact implementation 94f1b18 passes server 37304885110 all three jobs and web 37304885166. Task CRUD,
 status/run controls, Cron editor and full scheduler/SQL mutation consistency are
 still incomplete; the affected-ID mutation proposal still awaits explicit approval.
 Generator/form builder, shell/shared capabilities and final parity audit remain.
