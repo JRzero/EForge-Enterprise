@@ -1109,17 +1109,20 @@
   }
 ,
   "generatorSynchronizationApiValidation": {
-    "state": "local-synchronization-api-verified",
+    "state": "synchronization-api-verified",
     "backendTests": 444,
     "synchronizationMvcTests": 8,
     "synchronizationAlgorithmTests": 8,
     "unitTests": 73,
     "fixtureBrowserTests": 64,
     "existingLiveBrowserTestsPerConfiguration": 43,
-    "browserEvidenceTiming": "before-final-legacy-SQL-error-privacy-repair; exact-head-cloud-required",
+    "browserEvidenceTiming": "final-exact-head-cloud-both-configurations",
     "disabledRuntime": "success-final-privacy-repair",
     "enabledRuntime": "success-final-privacy-repair",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "ff67dd4889723f9704df34cbc7edccd01eaef90e",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37371330417",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37371330438",
     "scope": "Shared canonical/original guarded metadata sync, checked writes, actual physical PK/auto/type changes, exact surviving IDs, original conditional settings, actor attribution, tree/subtable reference and stale full-field protection. Real SQL UPDATE/INSERT/DELETE faults prove complete metadata/audit rollback and retry, safe original/canonical public errors, and simultaneous HTTP SQL waiting with consistent 204/409 outcomes. Complete physical post-DDL rows retained. No product DDL, sync UI, physical creation API or generator output/page completion is claimed. All remaining original-capability requirements and specific task approval restrictions remain active."
   }}

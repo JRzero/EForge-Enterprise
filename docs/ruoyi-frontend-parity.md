@@ -1415,3 +1415,12 @@ React/EForge output/templates, immutable snapshots, preview/download/custom outp
 complete generator pages and generated CRUD/tree/submodule end-to-end proof remain
 required, followed by form builder, shell/shared, calendar/export audits and full
 original parity. The specifically rejected task runtime scheme remains untouched.
+Exact synchronization implementation ff67dd4889723f9704df34cbc7edccd01eaef90e
+passes server 37371330417 all three jobs (attempt 2) and web 37371330438,
+confirmed 2026-10-06. Both final configurations pass 43 actual browsers, full
+MySQL/Redis/Quartz/OSHI/ACL/captcha and synchronization regressions, and exact
+OpenAPI. This supersedes the earlier pending-cloud/browser-timing limitation.
+Attempt 1 could not acquire hosted runners for two jobs; those jobs had no test
+steps, and the same-run failed-job retry passed without a source change. The
+successful original runtime job is retained. This accepts synchronization only;
+physical creation, generator output/templates/pages and full parity remain active.
