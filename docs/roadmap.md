@@ -57,7 +57,7 @@
 - [ ] notices (canonical API/client, rich editor/rendering, administration/top-feed/readers UI and JPG/PNG/static-SVG upload passed local verification and exact-commit CI at c7605fe: server 37237590148, web 37237590166; full capability audit remains pending)
 - [ ] operation/login logs (ten canonical operations/client and both React pages verified locally and in exact-head CI, including real audit detail/copy/sorting/XLSX/deletion/password-lock/unlock/session preservation; final capability audit pending)
 - [ ] online session management (canonical API/client and page verified locally and in exact-head CI, including exact filters/paging, scoped/self force logout, twelve-session isolation and Redis ACL faults; final capability audit pending)
-- [ ] scheduled tasks, Cron editor and task logs (canonical task-log API/client and actual Quartz preview verified at e0b4f97: server 37280882240 all three jobs/web 37280882307 success; local 351/67/57 and both configurations' 40 real browsers, actual Quartz dispatch/logs and native Druid session continuity; task CRUD, scheduler/database mutation consistency, all task/log pages and browser acceptance remain pending)
+- [ ] scheduled tasks, Cron editor and task logs (canonical task reads/logs/actual Quartz preview and original read/log pages verified in CI; seven-field Cron editor/read-tool/detail handoff verified locally at 06f4fbd with 371 backend/73 unit/64 fixture and both configurations' 43 real browsers; Cron exact-head server 37310528730 all three jobs and web 37310528660 pass. Task CRUD, scheduler/SQL mutation consistency, create/edit Cron integration and final capability audit remain pending)
 - [ ] server/cache monitoring and authenticated consoles (server/cache APIs, clients and pages passed full local regression and exact commit CI; cache page c597d44 server 37259840797 all three jobs/web 37259840781 success, local 312/65/52/37 and actual charts/clearing/SQL/session acceptance; consoles and final capability audit pending)
 
 Diagnostic console canonical APIs, generated client and scoped authentication
@@ -131,8 +131,7 @@ Generator/form builder, shell/shared capabilities and final parity audit remain.
 Cron editor checkpoint: original seven-field/date-mode/refill/reset/cancel/confirm
 behaviors and protected actual Quartz five-instant/server-zone preview now pass
 371 backend/73 unit/64 fixture and 43 real browser cases in each configuration,
-both full runtime regressions and exact live OpenAPI. Exact-head cloud acceptance
-is pending. The read tool/detail handoff does not persist task changes; task
+both full runtime regressions and exact live OpenAPI. Exact implementation 06f4fbd passes server 37310528730 all three jobs and web 37310528660. The read tool/detail handoff does not persist task changes; task
 create/edit integration and all canonical mutations/full consistency remain
 required. Pending explicit approval still applies only to the rejected mutation
 boundary. Independent generator React/EForge output/UI, form builder, shell/

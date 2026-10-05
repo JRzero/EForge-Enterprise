@@ -964,7 +964,7 @@
     "evidence": ["docs/security-review-job-pages.md", "web/features/jobs/JobsPage.tsx", "web/tests/unit/job-api.test.ts", "web/tests/e2e/jobs.spec.ts", "web/tests/live/jobs.spec.ts", "sql/migrations/V023__task_read_route.sql"]
   },
   "cronEditorValidation": {
-    "state": "editor-and-read-tool-locally-verified",
+    "state": "editor-and-read-tool-verified",
     "backendTests": 371,
     "unitTests": 73,
     "fixtureBrowserTests": 64,
@@ -972,7 +972,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "06f4fbdf3c891a460e6db38b95eb086e0e61cc20",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528730",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528660",
     "scope": "Feature-local seven-field editor, original reset/refill/cancel/confirmation and task read/detail handoff. Range/interval/specified values, omitted/expired years, day/week exclusion, W/L/# and preserved named/advanced raw fields use actual protected Quartz five-instant/server-zone preview. Invalid/stale/failed previews cannot confirm; whitespace-only edits revalidate. Original grants, retry/cancel/focus/keyboard/mobile, actual no-role preview denial and unchanged persisted task fields pass. Task create/edit integration, task mutations, full scheduler/SQL consistency and final original-capability audits remain pending; neither approval-rejected runtime mutation proposal is implemented.",
     "evidence": ["docs/security-review-cron-editor.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/unit/cron-model.test.ts", "web/tests/unit/job-api.test.ts", "web/tests/e2e/cron-editor.spec.ts", "web/tests/live/jobs.spec.ts"]
   }

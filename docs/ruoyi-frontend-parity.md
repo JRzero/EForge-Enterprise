@@ -41,7 +41,7 @@ It is a work inventory, not executable proof of completion.
 | Operation logs | filters/date range/pagination, operator/time/cost sorting, detail request/response/status with JSON formatting/copy, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual audit payload/clipboard/XLSX/last-page deletion; final capability audit pending |
 | Login logs | filters/date range/pagination, username/time sorting, failure/success details, unlock locked login account, selection/delete/clear/export | Canonical API/client and React page verified locally and in exact-head CI, including actual password lock/unlock, session preservation and deletion; final capability audit pending |
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
-| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical task reads/log API and actual Quartz preview, read/detail/export and original log pages verified locally and in exact-head CI; Cron editor locally verified; task mutations/create-edit integration and full consistency remain pending |
+| Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Partial: canonical task reads/log API and actual Quartz preview, read/detail/export and original log pages verified locally and in exact-head CI; Cron editor verified locally and in exact-head CI; task mutations/create-edit integration and full consistency remain pending |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
@@ -1231,3 +1231,12 @@ delete controls remain required. The execution-gated mutation proposal is still
 explicitly approval-pending after automatic review rejection; neither rejected
 runtime patch was written. Generator React/EForge output and UI, form builder,
 full shell/shared capabilities and final per-capability acceptance remain active.
+
+Cron editor exact implementation commit 06f4fbdf3c891a460e6db38b95eb086e0e61cc20
+passes [server CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528730)
+in all three jobs and
+[web CI](https://github.com/JRzero/EForge-Enterprise/actions/runs/37310528660),
+confirmed on 2026-10-05. Both configurations' complete Linux real browsers,
+runtime regressions and exact live OpenAPI equality pass. This accepts the
+editor/read tool/detail handoff only; task create/edit integration, all canonical
+task mutations/full consistency and final capability audit remain incomplete.
