@@ -338,3 +338,17 @@ strings preserve original behavior. Sampling faults return generic 503
 SERVER_MONITOR_UNAVAILABLE. The legacy monitor endpoint stays unchanged.
 `docs/security-review-server-monitor-v1.md` describes the privileged diagnostic
 boundary. Page and browser acceptance remain tracked in the parity inventory.
+
+### Cache diagnostics and clearing
+
+`/api/v1/monitor/cache` exposes seven generated operations under the original
+monitor:cache:list grant: GET statistics, GET `/names`, GET `/keys?name=...`, GET
+`/value?name=...&key=...`, DELETE `/names/{name}`, DELETE `/keys` with a concrete
+name/key body and DELETE the base for all-cache clearing. Counts/bytes use exact
+decimal strings; values are diagnostic text with normalized cached JSON and a
+session-credential boundary. Deletes return idempotent 204; expired values 404,
+invalid namespace/key selection 400 and Redis faults generic 503. Global clearing
+removes all keys in the selected database, including all authenticated sessions.
+The seven legacy namespace identities and compatibility endpoints are unchanged.
+`docs/security-review-cache-monitor-v1.md` records the privileged boundary and
+real fault/invalidation verification; pages and final acceptance remain pending.

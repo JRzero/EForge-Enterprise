@@ -27,6 +27,7 @@ import {listOperationLogs, getOperationLog, deleteOperationLogs, clearOperationL
   listLoginLogs, deleteLoginLogs, clearLoginLogs, exportLoginLogs, unlockLoginAccount} from '../generated/api';
 import {listOnlineSessions, revokeOnlineSession} from '../generated/api';
 import {getServerMonitor} from '../generated/api';
+import {getCacheStatistics, listCacheNames, listCacheKeys, getCacheValue, clearCacheName, clearCacheKey, clearAllCache, type ClearCacheKeyRequest} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -47,6 +48,13 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async getCacheStatistics(signal?: AbortSignal) {return (await getCacheStatistics({baseUrl: '', fetch: transport(true), signal})).data;},
+    async listCacheNames(signal?: AbortSignal) {return (await listCacheNames({baseUrl: '', fetch: transport(true), signal})).data;},
+    async listCacheKeys(name: string, signal?: AbortSignal) {return (await listCacheKeys(name, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async getCacheValue(name: string, key: string, signal?: AbortSignal) {return (await getCacheValue(name, key, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async clearCacheName(name: string) {await clearCacheName(name, {baseUrl: '', fetch: transport(true)});},
+    async clearCacheKey(request: ClearCacheKeyRequest) {await clearCacheKey(request, {baseUrl: '', fetch: transport(true)});},
+    async clearAllCache() {await clearAllCache({baseUrl: '', fetch: transport(true)});},
     async getServerMonitor(signal?: AbortSignal) {
       return (await getServerMonitor({baseUrl: '', fetch: transport(true), signal})).data;
     },

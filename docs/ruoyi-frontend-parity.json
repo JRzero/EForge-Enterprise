@@ -214,8 +214,17 @@
         "clearCacheKey",
         "clearCacheAll"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "partial",
+      "evidence": [
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorController.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorService.java",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorContracts.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/CacheMonitorControllerTest.java",
+        "server/scripts/verify-cache-monitor-integration.ps1",
+        "docs/security-review-cache-monitor-v1.md",
+        "web/tests/unit/cache-monitor-api.test.ts",
+        "contracts/openapi/api-v1.json"
+      ]
     },
     {
       "source": "ruoyi-ui/src/api/monitor/job.js",

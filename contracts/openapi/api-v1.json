@@ -46,6 +46,62 @@
         ],
         "type": "object"
       },
+      "CacheName": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "name"
+        ],
+        "type": "object"
+      },
+      "CacheStatistics": {
+        "properties": {
+          "commands": {
+            "items": {
+              "$ref": "#/components/schemas/CommandStatistic"
+            },
+            "type": "array"
+          },
+          "info": {
+            "$ref": "#/components/schemas/RedisInformation"
+          },
+          "keyCount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "commands",
+          "info",
+          "keyCount"
+        ],
+        "type": "object"
+      },
+      "CacheValue": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "value"
+        ],
+        "type": "object"
+      },
       "ChangePasswordRequest": {
         "properties": {
           "newPassword": {
@@ -65,6 +121,40 @@
         "required": [
           "newPassword",
           "oldPassword"
+        ],
+        "type": "object"
+      },
+      "ClearCacheKeyRequest": {
+        "properties": {
+          "key": {
+            "maxLength": 4096,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "pattern": "(?:login_tokens|sys_config|sys_dict|captcha_codes|repeat_submit|rate_limit|pwd_err_cnt):",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name"
+        ],
+        "type": "object"
+      },
+      "CommandStatistic": {
+        "properties": {
+          "calls": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "calls",
+          "name"
         ],
         "type": "object"
       },
@@ -1889,6 +1979,50 @@
         ],
         "type": "object"
       },
+      "RedisInformation": {
+        "properties": {
+          "aofEnabled": {
+            "type": "string"
+          },
+          "connectedClients": {
+            "type": "string"
+          },
+          "inputKbps": {
+            "type": "string"
+          },
+          "maxMemory": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "outputKbps": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          },
+          "rdbLastSaveStatus": {
+            "type": "string"
+          },
+          "uptimeDays": {
+            "type": "string"
+          },
+          "usedMemory": {
+            "type": "string"
+          },
+          "usedMemoryBytes": {
+            "type": "string"
+          },
+          "userChildrenCpuSeconds": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ResetUserPasswordRequest": {
         "properties": {
           "password": {
@@ -2739,6 +2873,180 @@
         },
         "tags": [
           "profile-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/cache": {
+      "delete": {
+        "operationId": "clearAllCache",
+        "responses": {
+          "204": {
+            "description": "All keys in the selected Redis database cleared, including login sessions"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      },
+      "get": {
+        "operationId": "getCacheStatistics",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheStatistics"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/cache/keys": {
+      "delete": {
+        "operationId": "clearCacheKey",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClearCacheKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Key cleared (already absent also succeeds)"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      },
+      "get": {
+        "operationId": "listCacheKeys",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "(?:login_tokens|sys_config|sys_dict|captcha_codes|repeat_submit|rate_limit|pwd_err_cnt):",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/cache/names": {
+      "get": {
+        "operationId": "listCacheNames",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CacheName"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/cache/names/{name}": {
+      "delete": {
+        "operationId": "clearCacheName",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "(?:login_tokens|sys_config|sys_dict|captcha_codes|repeat_submit|rate_limit|pwd_err_cnt):",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Namespace snapshot cleared"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/cache/value": {
+      "get": {
+        "operationId": "getCacheValue",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "pattern": "(?:login_tokens|sys_config|sys_dict|captcha_codes|repeat_submit|rate_limit|pwd_err_cnt):",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "maxLength": 4096,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheValue"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "cache-monitor-controller"
         ]
       }
     },

@@ -43,7 +43,7 @@ It is a work inventory, not executable proof of completion.
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
-| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Missing |
+| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client, original fields/names/grant, real special/exact values, credential boundary, Redis ACL faults and all clearing/session scopes verified locally; exact API CI and both React pages pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
@@ -885,3 +885,38 @@ remains pending.
 Cache statistics/names/keys/values/all clearing levels, authenticated or disabled
 consoles, jobs/cron, generator/form builder and complete shell/shared capabilities
 remain required. This page checkpoint does not complete the full objective.
+
+## Cache-monitor API checkpoint (2026-10-05)
+
+Seven canonical generated operations retain the original monitor:cache:list grant
+for stats, names, sorted keys, values and single-key/namespace/all clearing. All
+original displayed Redis INFO fields, command counts and seven namespace identities
+remain available; counters/bytes are exact decimal strings. Unicode/slash/ampersand
+keys use query parameters and concrete delete bodies, with namespace membership
+guards. JSON diagnostics normalize the pinned serializer's Long/Set notation as
+data without Java object restoration, redact nested session credentials and fail
+closed on malformed session values. Non-session plaintext remains readable.
+The privileged boundary is documented in `security-review-cache-monitor-v1.md`.
+
+Validation passes 312 backend cases (12 new cache cases and ten unchanged data-scope
+cases), 62 unit cases, lint/typecheck/build, generated-client reproducibility,
+production defaults, 42 fixture and 32 real browser regressions. All 151 previous
+path/schema entries are unchanged. The final live normalized OpenAPI exactly
+equals the committed snapshot. Actual Redis/MySQL acceptance checks all original
+names/grants and compatibility info, special keys/values, exact large integers,
+inert JSON/credential projection, missing keys and INFO/KEYS/DEL ACL failures with
+preserved data/sessions. Single-key clearing revokes only the chosen session;
+login-namespace clearing revokes all sessions while retaining other namespaces;
+global clearing empties the entire selected database, including unrelated keys
+and both caller/other sessions. Subsequent real login restores cleanup and later
+captcha/bootstrap checks. All earlier module/security/fault cases remain green.
+Evidence logs are `cache-api-backend.log`, `cache-api-unit.log`,
+`cache-api-fixtures.log` and `cache-api-final-runtime.log` under boot target.
+
+Exact API commit CI remains pending. Both React pages still require original
+statistics/command and memory charts, names/keys/value selection and refresh,
+each clearing level with confirmations, all-session invalidation handling,
+safe text, loading/empty/error/retry, mobile and keyboard acceptance. No cache
+React route is bound at this API checkpoint. Authenticated/disabled consoles,
+jobs/cron, generator/form builder and complete shell/shared capabilities plus
+the final original-capability audit remain required; the full goal continues.

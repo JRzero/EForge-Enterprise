@@ -91,6 +91,43 @@ export type ChangePasswordRequestWrite = {
     newPassword: string;
     oldPassword: string;
 };
+export type CommandStatistic = {
+    calls: string;
+    name: string;
+};
+export type RedisInformation = {
+    aofEnabled?: string;
+    connectedClients?: string;
+    inputKbps?: string;
+    maxMemory?: string;
+    mode?: string;
+    outputKbps?: string;
+    port?: string;
+    rdbLastSaveStatus?: string;
+    uptimeDays?: string;
+    usedMemory?: string;
+    usedMemoryBytes?: string;
+    userChildrenCpuSeconds?: string;
+    version?: string;
+};
+export type CacheStatistics = {
+    commands: CommandStatistic[];
+    info: RedisInformation;
+    keyCount: string;
+};
+export type ClearCacheKeyRequest = {
+    key: string;
+    name: string;
+};
+export type CacheName = {
+    description: string;
+    name: string;
+};
+export type CacheValue = {
+    key: string;
+    name: string;
+    value: string;
+};
 export type DeleteLogsRequest = {
     ids: string[];
 };
@@ -675,6 +712,62 @@ export function changeMyPassword(changePasswordRequest: ChangePasswordRequestWri
         method: "PUT",
         body: changePasswordRequest
     }));
+}
+export function clearAllCache(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/cache", {
+        ...opts,
+        method: "DELETE"
+    });
+}
+export function getCacheStatistics(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CacheStatistics;
+    }>("/api/v1/monitor/cache", {
+        ...opts
+    });
+}
+export function clearCacheKey(clearCacheKeyRequest: ClearCacheKeyRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/cache/keys", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: clearCacheKeyRequest
+    }));
+}
+export function listCacheKeys(name: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: string[];
+    }>(`/api/v1/monitor/cache/keys${QS.query(QS.explode({
+        name
+    }))}`, {
+        ...opts
+    });
+}
+export function listCacheNames(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CacheName[];
+    }>("/api/v1/monitor/cache/names", {
+        ...opts
+    });
+}
+export function clearCacheName(name: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/monitor/cache/names/${encodeURIComponent(name)}`, {
+        ...opts,
+        method: "DELETE"
+    });
+}
+export function getCacheValue(name: string, key: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CacheValue;
+    }>(`/api/v1/monitor/cache/value${QS.query(QS.explode({
+        name,
+        key
+    }))}`, {
+        ...opts
+    });
 }
 export function deleteLoginLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/monitor/login-logs", oazapfts.json({
