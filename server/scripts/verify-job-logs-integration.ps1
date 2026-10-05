@@ -30,6 +30,28 @@ try {
     $expired=(Request '/api/v1/monitor/jobs/cron-preview?expression=0%200%200%201%201%20%3F%202020' 'GET' '' $authorized).Content|ConvertFrom-Json
     Assert-Check ($expired.times.Count -eq 0) 'Valid exhausted year must return an empty preview.'
     Assert-Problem (Request '/api/v1/monitor/jobs/cron-preview?expression=invalid' 'GET' '' $authorized) 400 'JOB_CRON_INVALID'
+    # Exercise a real checked scheduling failure after SQL UPDATE and old-key deletion.
+    # The legacy controller accepts this policy; Quartz rejects it inside the transaction.
+    $originalTask=(Request "/monitor/job/$($ownedJobs[0])" 'GET' '' $authorized).Content|ConvertFrom-Json
+    $originalTask=$originalTask.data
+    $replacement=@{jobId=$originalTask.jobId;jobName=$originalTask.jobName;jobGroup='DEFAULT';invokeTarget="ryTask.ryParams('failed replacement')";cronExpression=$originalTask.cronExpression;misfirePolicy='9';concurrent=$originalTask.concurrent;status=$originalTask.status;remark='Must roll back'}|ConvertTo-Json -Compress
+    $failedReplacement=Request '/monitor/job' 'PUT' $replacement $authorized
+    Assert-Check (($failedReplacement.Content|ConvertFrom-Json).code -eq 500) 'Real invalid policy must fail inside Quartz scheduling.'
+    $retainedTask=((Request "/monitor/job/$($ownedJobs[0])" 'GET' '' $authorized).Content|ConvertFrom-Json).data
+    Assert-Check ($retainedTask.jobGroup -eq $originalTask.jobGroup -and $retainedTask.invokeTarget -eq $originalTask.invokeTarget -and $retainedTask.misfirePolicy -eq $originalTask.misfirePolicy -and $retainedTask.status -eq $originalTask.status -and $retainedTask.remark -eq $originalTask.remark) 'MySQL transaction must retain every original task field after scheduling failure.'
+    $oldRun=Request '/monitor/job/run' 'PUT' (@{jobId=$originalTask.jobId;jobGroup=$originalTask.jobGroup}|ConvertTo-Json -Compress) $authorized
+    Assert-Check (($oldRun.Content|ConvertFrom-Json).code -eq 200) 'Original real Quartz key must remain runnable after failed group replacement.'
+    $uncommittedRun=Request '/monitor/job/run' 'PUT' (@{jobId=$originalTask.jobId;jobGroup='DEFAULT'}|ConvertTo-Json -Compress) $authorized
+    Assert-Check (($uncommittedRun.Content|ConvertFrom-Json).code -eq 500) 'Attempted replacement key must not survive failed scheduling.'
+    $newExecution=@()
+    for($attempt=0;$attempt -lt 30;$attempt++) {
+        $afterRun=(Request "$jobLogBase`?name=$jobMarker" 'GET' '' $authorized).Content|ConvertFrom-Json
+        $newExecution=@($afterRun.items|Where-Object { $_.id -notin $actual.items.id })
+        if($newExecution.Count -eq 1){break};Start-Sleep -Milliseconds 200
+    }
+    Assert-Check ($newExecution.Count -eq 1 -and $newExecution[0].status -eq '0' -and $newExecution[0].invokeTarget -eq $originalTask.invokeTarget) 'Recovered task must actually execute the original target and produce a successful log.'
+    Assert-Check ((Request $jobLogBase 'DELETE' (@{ids=@($newExecution[0].id)}|ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Owned recovery execution cleanup failed.'
+    Write-Output 'Task replacement: real MySQL checked-exception rollback, original Quartz key/manual execution and failed-key cleanup passed.'
     $file=Join-Path $logDirectory 'owned-job-logs.xlsx'
     Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$jobLogBase/export?name=$jobMarker&pageSize=1" -Method POST -Headers $authorized -OutFile $file|Out-Null
     $archive=[IO.Compression.ZipFile]::OpenRead($file)

@@ -106,3 +106,12 @@ The phase checkboxes describe individual milestones, not completion of the full
 frontend. Track all original frontend operations, shared controls and remaining
 shell capabilities in [ruoyi-frontend-parity.md](ruoyi-frontend-parity.md) and its
 machine-readable inventory. The full parity objective remains active.
+
+Task replacement recovery checkpoint: an existing compatibility update now
+restores its original RAMJobStore schedule after replacement failure; seven
+actual Quartz tests and real MySQL checked-exception rollback/original-target
+execution pass. Full local regression is 358 backend/67 unit/57 fixture and 40
+real browser cases in each configuration, with both live OpenAPI snapshots exact.
+Cloud validation is pending. Canonical task CRUD, commit/concurrency/batch/
+precommit/persistent-fault consistency and all task/Cron/log pages remain pending;
+see security-review-task-replacement.md. The complete parity objective stays active.

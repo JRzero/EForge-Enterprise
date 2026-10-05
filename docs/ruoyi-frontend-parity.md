@@ -1078,3 +1078,36 @@ confirmed on 2026-10-05. Implementation was introduced by `de82188`; the final
 commit also contains the verified retry-fixture correction.
 The complete original frontend objective and all final capability audits remain
 active.
+
+### Task replacement recovery checkpoint — 2026-10-05
+
+An existing compatibility task update could roll back its MySQL row while
+permanently deleting its original RAMJobStore key when replacement scheduling
+failed. The service now captures the old payload, trigger keys, saved next
+execution deadline and pause states; a failed replacement removes the attempted
+key and restores the original schedule. An occupied different-group target is
+rejected before mutation. Recovery does not replay a historical trigger start.
+
+Four actual Quartz regression cases fail before the repair and pass afterwards;
+seven new actual RAMJobStore cases cover group/status variations, partial
+creation, collisions and a previously fired trigger. The owned real runtime
+harness also verifies checked-exception SQL rollback, the restored original key
+actually executing its original target successfully, and failed-key cleanup.
+See security-review-task-replacement.md for the precise boundary and remaining
+commit/concurrency/batch/precommit/persistent-fault requirements.
+
+Local verification passes 358 backend tests, including the ten unchanged
+DataScopeAspectParityTest cases, 67 unit tests, 57 fixture browsers, and all 40
+real browser cases in each enabled/default-disabled configuration. Both full
+MySQL/Redis/Quartz/OSHI/ACL/captcha regressions pass, as do lint/typecheck/build,
+hardened defaults, seeded routes and generated-client reproduction. Both live
+OpenAPI snapshots exactly match the committed contract. Evidence logs under
+boot target use task-replacement-backend/unit/build/fixtures/enabled-runtime/
+disabled-runtime prefixes. An existing dictionary browser race is corrected by
+waiting for the destination heading after returning from its data subpage,
+before filling the type-list filter; all deletion/empty-list checks remain.
+
+Canonical task CRUD, full scheduler/database mutation consistency and all
+task/Cron/log pages remain pending. Generator/form builder, complete shell and
+shared capabilities and the final full original-capability audit remain required.
+This repair does not complete the task module or the full parity objective.

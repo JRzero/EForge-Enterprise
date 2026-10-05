@@ -1,9 +1,15 @@
 package io.eforge.enterprise.quartz.service.impl;
 
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import jakarta.annotation.PostConstruct;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
+import org.quartz.TriggerKey;
+import org.quartz.spi.MutableTrigger;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -237,14 +243,54 @@ public class SysJobServiceImpl implements ISysJobService
     public void updateSchedulerJob(SysJob job, String jobGroup) throws SchedulerException, TaskException
     {
         Long jobId = job.getJobId();
-        // 判断是否存在
         JobKey jobKey = ScheduleUtils.getJobKey(jobId, jobGroup);
-        if (scheduler.checkExists(jobKey))
+        JobKey nextKey = ScheduleUtils.getJobKey(jobId, job.getJobGroup());
+        if (!jobKey.equals(nextKey) && scheduler.checkExists(nextKey))
         {
-            // 防止创建时存在数据问题 先移除，然后在执行创建操作
-            scheduler.deleteJob(jobKey);
+            throw new TaskException("Target schedule key already exists.", TaskException.Code.TASK_EXISTS);
         }
-        ScheduleUtils.createScheduleJob(scheduler, job);
+        JobDetail previous = scheduler.getJobDetail(jobKey);
+        Set<Trigger> previousTriggers = new LinkedHashSet<>();
+        Set<TriggerKey> paused = new LinkedHashSet<>();
+        if (previous != null)
+        {
+            previous = (JobDetail) previous.clone();
+            for (Trigger trigger : scheduler.getTriggersOfJob(jobKey))
+            {
+                previousTriggers.add((Trigger) ((MutableTrigger) trigger).clone());
+                if (scheduler.getTriggerState(trigger.getKey()) == Trigger.TriggerState.PAUSED) paused.add(trigger.getKey());
+            }
+        }
+        try
+        {
+            if (previous != null) scheduler.deleteJob(jobKey);
+            ScheduleUtils.createScheduleJob(scheduler, job);
+        }
+        catch (SchedulerException | TaskException | RuntimeException failure)
+        {
+            // SQL rollback cannot undo RAMJobStore changes. Restore the old
+            // payload and saved next deadline, not the attempted update.
+            try
+            {
+                scheduler.deleteJob(nextKey);
+                if (previous != null)
+                {
+                    if (!jobKey.equals(nextKey)) scheduler.deleteJob(jobKey);
+                    // Quartz recalculates the first firing when scheduling. Starting
+                    // at the saved next deadline prevents replay of an already-fired
+                    // occurrence from the original trigger's historical start time.
+                    for (Trigger trigger : previousTriggers)
+                        if (trigger.getNextFireTime() != null) ((MutableTrigger) trigger).setStartTime(trigger.getNextFireTime());
+                    scheduler.scheduleJob(previous, previousTriggers, false);
+                    for (TriggerKey trigger : paused) scheduler.pauseTrigger(trigger);
+                }
+            }
+            catch (SchedulerException | RuntimeException recoveryFailure)
+            {
+                failure.addSuppressed(recoveryFailure);
+            }
+            throw failure;
+        }
     }
 
     /**

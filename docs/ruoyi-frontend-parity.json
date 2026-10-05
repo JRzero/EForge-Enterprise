@@ -913,5 +913,18 @@
     "implementationCommit": "cb3a25033a2e5a7724ce4c4f358a43e8499a2d0b",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37273703241",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37273703194"
+  },
+  "taskReplacementRecoveryValidation": {
+    "state": "compatibility-repair-locally-verified",
+    "backendTests": 358,
+    "unitTests": 67,
+    "fixtureBrowserTests": 57,
+    "liveBrowserTestsPerConfiguration": 40,
+    "enabledRuntime": "success",
+    "disabledRuntime": "success",
+    "openApi": "exact-match",
+    "ci": "pending",
+    "scope": "Failed existing-task replacement preserves the original RAMJobStore payload, keys, saved next deadline and pause states, rejects target-key collisions and removes a partially created replacement. Real MySQL checked-exception rollback and actual original-target execution verified. Canonical task CRUD, commit/concurrency/batch/precommit/persistent-fault consistency and all task/Cron/log pages remain pending.",
+    "evidence": ["docs/security-review-task-replacement.md", "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/TaskScheduleReplacementTest.java", "server/scripts/verify-job-logs-integration.ps1"]
   }
 }
