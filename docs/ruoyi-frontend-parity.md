@@ -43,7 +43,7 @@ It is a work inventory, not executable proof of completion.
 | Online sessions | username/IP filters, active session list, force logout with real Redis revocation | Canonical API/client and React page verified locally and in exact-head CI, including twelve-session paging, scoped/self force logout and isolation; final capability audit pending |
 | Scheduled jobs | filters/CRUD, invocation validation, enable/disable, run once, details, cron expression editor, logs/filter/detail/delete/clear/export | Missing |
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
-| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client passed exact-head CI; both React pages passed complete local regression, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; page CI and final capability audit pending |
+| Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Missing UI; production defaults already hardened |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
@@ -958,8 +958,11 @@ checks. It also proves the browser's global clear invalidates the harness's old
 session and fresh login restores authentication before subsequent module checks.
 Production security defaults remain protected. Evidence logs are
 `cache-page-backend.log`, `cache-page-unit.log`, `cache-page-fixtures.log` and
-`cache-page-accepted-runtime.log` under boot target. Exact commit cloud acceptance
-remains pending.
+`cache-page-accepted-runtime.log` under boot target. Page commit
+`c597d44aa2f3f0140ab11d4695675a00e615399c` passes exact-head server CI
+`37259840797` (verify, runtime-integration and auth-runtime-integration) and web
+CI `37259840781`, confirmed on 2026-10-05. Cloud acceptance includes Linux real
+MySQL/Redis browser regression and exact live OpenAPI equality.
 Consoles, jobs/cron, generator/form builder, complete shell/shared capabilities
 and the final original-capability audit remain required. This page checkpoint
 does not complete the full goal.

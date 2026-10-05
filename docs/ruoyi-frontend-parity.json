@@ -242,8 +242,16 @@
         "liveBrowser": 37,
         "conclusion": "local-success",
         "runtime": "success",
-        "ci": "pending",
-        "scope": "Original Redis fields and exact counters; lazy rose/gauge SVG charts, inert keyboard tooltip, zero readings/resizing/disposal; names/keys/value reads and refresh/retry/abort; scoped/global confirmations, special values/keys, SQL retention and actual Redis caller/other-session revocation; full MySQL/Redis/ACL/security/captcha regression and exact live OpenAPI. Page CI and final original-capability audit pending."
+        "ci": "success",
+        "scope": "Original Redis fields and exact counters; lazy rose/gauge SVG charts, inert keyboard tooltip, zero readings/resizing/disposal; names/keys/value reads and refresh/retry/abort; scoped/global confirmations, special values/keys, SQL retention and actual Redis caller/other-session revocation; full MySQL/Redis/ACL/security/captcha regression and exact live OpenAPI. Exact-commit server/web CI succeeds; final original-capability audit remains pending."
+      },
+      "lastVerifiedCachePage": {
+        "implementationCommit": "c597d44aa2f3f0140ab11d4695675a00e615399c",
+        "date": "2026-10-05",
+        "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37259840797",
+        "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37259840781",
+        "conclusion": "success",
+        "scope": "All three server jobs and web verification, including Linux real MySQL/Redis/browser regression and exact OpenAPI equality. The full parity objective and final original-capability audit remain incomplete."
       }
     },
     {
