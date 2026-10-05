@@ -981,7 +981,7 @@
     "evidence": ["docs/security-review-cron-editor.md", "web/features/jobs/CronEditor.tsx", "web/features/jobs/cron-model.ts", "web/tests/unit/cron-model.test.ts", "web/tests/unit/job-api.test.ts", "web/tests/e2e/cron-editor.spec.ts", "web/tests/live/jobs.spec.ts"]
   },
   "generatorReadApiValidation": {
-    "state": "read-api-locally-verified",
+    "state": "read-api-verified",
     "backendTests": 388,
     "unitTests": 73,
     "fixtureBrowserTests": 64,
@@ -989,7 +989,10 @@
     "enabledRuntime": "success",
     "disabledRuntime": "success",
     "openApi": "exact-match",
-    "ci": "pending",
+    "ci": "success",
+    "implementationCommit": "2ca49b1d66e4be513de5873f765c9e00060af06e",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37315345511",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37315345434",
     "scope": "Canonical imported/database table lists, detailed configuration/table choices and columns with original split list/query grants and generated client. Seventeen MVC cases plus actual MySQL schema/import exclusion, exact long IDs/flags/tree/subtable settings, filters/calendar/order before paging, injection-as-data, no-role/anonymous denial, malformed stored JSON and recoverable SQL faults pass. All generator mutations, React/EForge outputs and UI, end-to-end generation and final capability audit remain pending."
   }
 }

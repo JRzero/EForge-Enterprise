@@ -139,5 +139,6 @@ shared capabilities and final original-capability audits continue next.
 Generator read checkpoint: canonical imported/database lists, configuration/detail
 choices and fields plus generated client pass 388 backend/73 unit/64 fixture and
 both configurations' 43 existing real browsers/full runtime, exact live OpenAPI.
-Exact-head CI is pending. All generator mutations/output/templates/UI and generated
+Exact implementation 2ca49b1 passes server 37315345511 all three jobs and web
+37315345434. All generator mutations/output/templates/UI and generated
 reference module end-to-end proof remain required; full original parity stays active.

@@ -1263,7 +1263,10 @@ page, injection as data, anonymous/no-role denial and actual SQL fault recovery
 without metadata loss. Both live OpenAPI snapshots exactly match the new contract;
 generated client reproduction, lint/typecheck/build and hardened defaults pass.
 Evidence logs use generator-read-backend/unit/build/fixtures/disabled-runtime/
-enabled-runtime under boot target. Exact-head cloud acceptance is pending.
+enabled-runtime under boot target. Exact implementation
+2ca49b1d66e4be513de5873f765c9e00060af06e passes server 37315345511 all
+three jobs and web 37315345434, confirmed on 2026-10-05. Both Linux console
+configurations pass the full real regression and exact live OpenAPI checks.
 
 Import/create/edit/delete/sync/preview/download/custom-path APIs, React/EForge
 outputs with canonical contracts and static route/page generation, complete
