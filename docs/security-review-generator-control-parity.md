@@ -68,3 +68,30 @@ This matrix expands CRUD controls. Tree/subtable control permutations, required/
 disabled/autokey variants, date/timezone/XLSX edge cases, shared-shell parity and the
 final active-capability audit remain active. Form builder is deferred, not complete.
 The specific previously rejected Quartz runtime scheme remains untouched.
+
+## Expanded root and child matrix checkpoint
+
+The deployment fixture now emits all nine control kinds and seven Java types on
+all three CRUD/tree/sub root pages and on the actual subtable row. Child physical
+columns and typed record fields are compiled from real metadata. The child PK and
+parent FK retain their original identity/ownership behavior; added fields do not
+replace that relationship.
+
+The actual browser adds and edits a sub row with independent dictionary choices,
+multi-selection, Unicode multiline text, rich text, PNG and UTF-8 file uploads,
+millisecond dates, Long and BigDecimal beyond JavaScript integer precision, numeric
+zero and Boolean false, and a legal __proto__ field. It serves and compares child
+file contents, clears optional child strings/uploads/rich text, clears the child
+date to a real SQL null through the original delete/reinsert transaction, verifies
+changed exact Long/decimal and zero/false values, and retains the exact parent FK.
+Every root page also executes its own actual select/radio wire-filter/reset checks,
+including the tree's list response rather than a PageResponse assumption.
+
+Root-only observer64197 passed default; it is superseded by final expanded
+observer69262, terminal0 for default and enabled-console/custom-output profiles.
+Generator-child-control-matrix-disabled/enabled-runtime.log prove actual Java and
+TypeScript compilation, host production build, browser CRUD/tree/sub behavior,
+HTTP/client/SQL/Redis authorization and audit. The two changed verification
+sources pass lint; production templates remain the prior709865e implementation.
+Exact expanded-matrix cloud is pending. Required/disabled/auto-PK variants and
+other remaining groups above have not been marked complete.

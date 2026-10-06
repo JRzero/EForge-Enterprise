@@ -8,6 +8,31 @@ import {chromium, expect} from '@playwright/test';
 async function readDetail(page,id) {
   return JSON.parse(await page.evaluate(async value => JSON.stringify(await window.probeDetail(value)),id));
 }
+async function fillChildControls(scope,root) {
+  await scope.getByLabel('childNotes',{exact:true}).fill('子表多行\n中文');
+  await scope.locator('label').filter({hasText:/^childSelectedStatus/}).locator('select').selectOption('1');
+  await scope.locator('label').filter({hasText:/^childRadioStatus/}).getByRole('radio').first().check();
+  const checks=scope.locator('label').filter({hasText:/^childCheckedStatuses/}).getByRole('checkbox');await checks.first().check();await checks.last().check();
+  await scope.getByLabel('childEventTime',{exact:true}).fill('2026-10-07T01:02:03.456');
+  await scope.getByLabel('childQuantity',{exact:true}).fill('17');await scope.getByLabel('childRatio',{exact:true}).fill('0.125');await scope.getByLabel('childEnabled',{exact:true}).fill('true');
+  await scope.getByLabel('childPrototype',{exact:true}).fill('子行合法字段');await scope.getByLabel('childLong',{exact:true}).fill('9007199254741001');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.00001');
+  await scope.getByRole('textbox',{name:'公告内容',exact:true}).fill('子表富文本');
+  await scope.locator('label').filter({hasText:/^childImagePaths/}).locator('input[type=file]').setInputFiles(join(root,'tests/fixtures/avatar.png'));await expect(scope.locator('label').filter({hasText:/^childImagePaths/})).toContainText('移除文件');
+  await scope.locator('label').filter({hasText:/^childFilePaths/}).locator('input[type=file]').setInputFiles({name:'子表文本.txt',mimeType:'text/plain',buffer:Buffer.from('子表实际文件')});await expect(scope.locator('label').filter({hasText:/^childFilePaths/})).toContainText('移除文件');
+}
+async function clearChildControls(scope) {
+  await scope.locator('label').filter({hasText:/^childNotes/}).locator('textarea').fill('');await scope.getByLabel('childPrototype',{exact:true}).fill('');
+  await scope.locator('label').filter({hasText:/^childSelectedStatus/}).locator('select').selectOption('');await scope.locator('label').filter({hasText:/^childRadioStatus/}).getByRole('radio').last().check();
+  const checks=scope.locator('label').filter({hasText:/^childCheckedStatuses/}).getByRole('checkbox');await checks.first().uncheck();await checks.last().uncheck();
+  await scope.getByLabel('childQuantity',{exact:true}).fill('0');await scope.getByLabel('childRatio',{exact:true}).fill('0');await scope.getByLabel('childEnabled',{exact:true}).fill('false');await scope.getByLabel('childEventTime',{exact:true}).fill('');
+  await scope.getByLabel('childLong',{exact:true}).fill('9007199254741007');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.12500');await scope.getByRole('textbox',{name:'公告内容',exact:true}).fill('');
+  for(const name of ['childImagePaths','childFilePaths'])await scope.locator('label').filter({hasText:new RegExp('^'+name)}).getByRole('button',{name:'移除文件',exact:true}).click();
+}
+async function verifyChildControls(page,row) {
+  assert.equal(row.childNotes,'子表多行\n中文');assert.equal(row.childSelectedStatus,'1');assert.equal(row.childRadioStatus,'0');assert.equal(row.childCheckedStatuses,'0,1');assert.equal(row.childEnabled,true);assert.equal(row.childQuantity,17);assert.equal(row.childRatio,0.125);assert.equal(row.__proto__,'子行合法字段');assert.equal(row.childLong,'9007199254741001');assert.equal(row.childAmount,'9007199254740993.00001');assert(row.childRichContent.includes('子表富文本'));
+  assert.equal(new Date(row.childEventTime).getTime(),await page.evaluate(()=>new Date('2026-10-07T01:02:03.456').getTime()));
+  for(const key of ['childImagePaths','childFilePaths']) {assert(row[key].startsWith('/profile/upload/'));const response=await page.request.get(new URL(row[key],page.url()).href);assert.equal(response.status(),200);if(key==='childFilePaths')assert.equal(await response.text(),'子表实际文件');}
+}
 export async function verifyBrowser(root, owned, backend, noRoleUser) {
   assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(backend), 'Owned backend URL required.');
   for (const category of ['crud', 'tree', 'sub']) {
@@ -62,8 +87,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         if (category === 'sub') {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
           await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表');
+          await fillChildControls(dialog.locator('section[aria-label="子表明细"]'),root);
         }
-        if (category === 'crud') {
+        {
           await dialog.getByLabel('notes', {exact:true}).fill('多行中文\n<script>保持文本</script>');
           await dialog.locator('label').filter({hasText:/^selectedStatus/}).locator('select').selectOption('1');
           await dialog.locator('label').filter({hasText:/^radioStatus/}).getByRole('radio').first().check();
@@ -72,7 +98,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await dialog.getByLabel('eventTime', {exact:true}).fill('2026-10-07T01:02:03.456');
           await dialog.getByLabel('enabled', {exact:true}).fill('true'); await dialog.getByLabel('quantity', {exact:true}).fill('17');await dialog.getByLabel('ratio', {exact:true}).fill('0.125');
           await dialog.getByLabel('__proto__', {exact:true}).fill('合法字段保持精确');
-          await dialog.getByRole('textbox', {name:'公告内容', exact:true}).fill('生成富文本中文');
+          await dialog.getByRole('textbox', {name:'公告内容', exact:true}).first().fill('生成富文本中文');
           await dialog.locator('label').filter({hasText:/^imagePaths/}).locator('input[type=file]').setInputFiles(join(root,'tests/fixtures/avatar.png'));
           await expect(dialog.locator('label').filter({hasText:/^imagePaths/})).toContainText('移除文件');
           await dialog.locator('label').filter({hasText:/^filePaths/}).locator('input[type=file]').setInputFiles({name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
@@ -85,7 +111,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const detail = await readDetail(page,id);
         assert.equal(detail.status, 200); assert.equal(detail.data.oRderKey, id);
         assert.equal(detail.data.amount, '9007199254740993.00001');
-        if(category==='crud') {
+        {
           assert.equal(detail.data.notes,'多行中文\n<script>保持文本</script>');assert.equal(detail.data.selectedStatus,'1');assert.equal(detail.data.radioStatus,'0');
           assert.equal(detail.data.enabled,true);assert.equal(detail.data.checkedStatuses,'0,1');assert.equal(detail.data.quantity,17);assert.equal(detail.data.ratio,0.125);
           assert.equal(detail.data.__proto__,'合法字段保持精确');assert(detail.data.richContent.includes('生成富文本中文'));
@@ -96,33 +122,34 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         if (category === 'sub') {
           assert.equal(detail.data.fixtureLineList[0].label, '浏览器子表');
           assert.equal(detail.data.fixtureLineList[0].ownerReference, id);
+          await verifyChildControls(page,detail.data.fixtureLineList[0]);
         }
         const row = page.getByRole('row').filter({has:page.getByText(label, {exact:true})});
         await row.getByRole('button', {name:'修改', exact:true}).click();
         await dialog.getByLabel('label', {exact:true}).first().fill(label + '-修改');
-        if (category === 'sub') await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表-修改');
-        if(category==='crud') {
+        if(category==='sub') {await dialog.getByLabel('label',{exact:true}).last().fill('浏览器子表-修改');await clearChildControls(dialog.locator('section[aria-label="子表明细"]'));}
+        {
           await dialog.locator('label').filter({hasText:/^notes/}).locator('textarea').fill('');
           await dialog.getByLabel('__proto__',{exact:true}).fill('');
           await dialog.locator('label').filter({hasText:/^selectedStatus/}).locator('select').selectOption('');
           await dialog.locator('label').filter({hasText:/^radioStatus/}).getByRole('radio').last().check();
           const checks=dialog.locator('label').filter({hasText:/^checkedStatuses/}).getByRole('checkbox');await checks.first().uncheck();await checks.last().uncheck();
           await dialog.getByLabel('enabled',{exact:true}).fill('false');await dialog.getByLabel('quantity',{exact:true}).fill('0');await dialog.getByLabel('ratio',{exact:true}).fill('0');
-          await dialog.getByRole('textbox',{name:'公告内容',exact:true}).fill('');
+          await dialog.getByRole('textbox',{name:'公告内容',exact:true}).first().fill('');
           for(const field of ['imagePaths','filePaths'])await dialog.locator('label').filter({hasText:new RegExp('^'+field)}).getByRole('button',{name:'移除文件',exact:true}).click();
         }
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         const updated = page.getByRole('row').filter({has:page.getByText(label + '-修改', {exact:true})});
         await expect(updated).toBeVisible();
-        if(category==='crud') {
+        {
           const changed=await readDetail(page,id);assert.equal(changed.status,200);
           for(const key of ['notes','__proto__','selectedStatus','checkedStatuses','imagePaths','filePaths','richContent'])assert.equal(changed.data[key],'','Cleared field '+key+' must persist');
           assert.equal(changed.data.enabled,false);assert.equal(changed.data.radioStatus,'1');assert.equal(changed.data.quantity,0);assert.equal(changed.data.ratio,0);
           for(const key of ['selectedStatus','radioStatus']) {
             const choice=key==='selectedStatus'?'1':'0';await page.getByRole('combobox',{name:key,exact:true}).selectOption(choice);
-            const response=page.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/v1/business/fixture/crud'&&url.searchParams.get('q_'+key)===choice&&response.request().method()==='GET';});
-            await page.getByRole('button',{name:'搜索',exact:true}).click();const filtered=await response;assert.equal(filtered.status(),200);assert.equal((await filtered.json()).items.length,0);await expect(updated).toHaveCount(0);
+            const response=page.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/v1/business/fixture/'+category&&url.searchParams.get('q_'+key)===choice&&response.request().method()==='GET';});
+            await page.getByRole('button',{name:'搜索',exact:true}).click();const filtered=await response;assert.equal(filtered.status(),200);const result=await filtered.json();assert.equal(Array.isArray(result)?result.length:result.items.length,0);await expect(updated).toHaveCount(0);
             await page.getByRole('button',{name:'重置',exact:true}).click();await expect(updated).toBeVisible();
           }
         }
@@ -135,6 +162,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           assert.equal(saved.data.fixtureLineList.length, 1);
           assert.equal(saved.data.fixtureLineList[0].label, '浏览器子表-修改');
           assert.equal(saved.data.fixtureLineList[0].ownerReference, id);
+          const child=saved.data.fixtureLineList[0];
+          for(const key of ['childNotes','__proto__','childSelectedStatus','childCheckedStatuses','childImagePaths','childFilePaths','childRichContent'])assert.equal(child[key],'','Cleared child field '+key+' must persist');
+          assert.equal(child.childEventTime,null);assert.equal(child.childLong,'9007199254741007');assert.equal(child.childAmount,'9007199254740993.12500');assert.equal(child.childEnabled,false);assert.equal(child.childRadioStatus,'1');assert.equal(child.childQuantity,0);assert.equal(child.childRatio,0);
         }
         const absent = 'no-match-' + id;
         await page.getByRole('textbox', {name:'label', exact:true}).fill(absent);

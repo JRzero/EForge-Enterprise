@@ -27,10 +27,10 @@ class GeneratorBusinessDeploymentCompiler {
                 table.getSubTable().setTableName("boot_fixture_lines");table.setSubTableName("boot_fixture_lines");}
             for(var column:table.getColumns())column.setColumnComment(column.getJavaField());
             if(table.isSub())for(var column:table.getSubTable().getColumns())column.setColumnComment(column.getJavaField());
-            if(category.equals("crud")) {
+            {
                 var controlFactory=fixtureType.getDeclaredMethod("field",String.class,String.class,String.class,String.class);controlFactory.setAccessible(true);
                 var controls=new ArrayList<io.eforge.enterprise.generator.domain.GenTableColumn>(table.getColumns());
-                for(var spec:List.of(
+                var controlSpecs=List.of(
                     new String[]{"notes","String","textarea",""},
                     new String[]{"selectedStatus","String","select","sys_common_status"},
                     new String[]{"radioStatus","String","radio","sys_common_status"},
@@ -42,12 +42,24 @@ class GeneratorBusinessDeploymentCompiler {
                     new String[]{"quantity","Integer","input",""},
                     new String[]{"ratio","Double","input",""},
                     new String[]{"enabled","Boolean","input",""},
-                    new String[]{"__proto__","String","input",""})) {
+                    new String[]{"__proto__","String","input",""});
+                for(var spec:controlSpecs) {
                     var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,spec[0],spec[0],spec[1],null);
                     column.setColumnComment(spec[0]);column.setHtmlType(spec[2]);column.setDictType(spec[3]);
                     if(spec[2].equals("select")||spec[2].equals("radio"))column.setIsQuery("1");controls.add(column);
                 }
                 table.setColumns(controls);
+                if(table.isSub()) {
+                    var childControls=new ArrayList<io.eforge.enterprise.generator.domain.GenTableColumn>(table.getSubTable().getColumns());
+                    var childSpecs=new ArrayList<String[]>(controlSpecs);childSpecs.add(new String[]{"long","Long","input",""});childSpecs.add(new String[]{"amount","BigDecimal","input",""});
+                    for(var spec:childSpecs) {
+                        String childName="child"+(spec[0].equals("__proto__")?"Prototype":Character.toUpperCase(spec[0].charAt(0))+spec[0].substring(1));
+                        String fieldName=spec[0].equals("__proto__")?"__proto__":childName;
+                        var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,childName,fieldName,spec[1],null);
+                        column.setColumnComment(childName);column.setHtmlType(spec[2]);column.setDictType(spec[3]);childControls.add(column);
+                    }
+                    table.getSubTable().setColumns(childControls);
+                }
             }
             var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
             for(var file:bundle.files()) {
@@ -69,8 +81,8 @@ class GeneratorBusinessDeploymentCompiler {
                 }
             }
             ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3));\n");
-            if(category.equals("crud"))ddl.append("ALTER TABLE boot_fixture_crud ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD __proto__ VARCHAR(255);\n");
-            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL);\n");
+            ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD __proto__ VARCHAR(255);\n");
+            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
         }
         var options=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",System.getProperty("java.class.path"),"-d",output.toString()));options.addAll(sourceFiles);
         var errors=new java.io.ByteArrayOutputStream();

@@ -1519,16 +1519,19 @@
     "quartzMutationBoundary": "prior-specific-rejection-preserved"
 },
   "generatorControlParity": {
-    "status": "local-two-profile-passed-exact-cloud-pending",
+    "status": "local-two-profile-root-and-child-passed-exact-cloud-pending",
     "review": "docs/security-review-generator-control-parity.md",
     "backendTests": 618,
     "frontendUnitTests": 89,
     "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "rootTemplateKinds": ["crud", "tree", "sub"],
+    "actualChildMatrix": "all-nine-controls-seven-types-exact-values-clear-and-parent-fk",
+    "localEvidence": ["generator-child-control-matrix-disabled-runtime.log", "generator-child-control-matrix-enabled-runtime.log"],
     "crudControls": ["input", "textarea", "select", "radio", "checkbox", "datetime", "imageUpload", "fileUpload", "editor"],
     "crudJavaTypes": ["String", "Long", "Integer", "Double", "BigDecimal", "Date", "Boolean"],
     "emptyStringRegression": "actual-installed-browser-failed-before-passed-after",
     "queryDictionaryParity": "original-select-radio-dictionary-dropdown-real-wire-filter-reset",
     "specialField": "legal-__proto__-exact-persist-and-clear",
-    "remaining": ["tree-sub-control-permutations", "required-disabled-autokey-variants", "date-timezone-xlsx-edges", "shared-shell-parity", "final-active-audit"]
+    "remaining": ["required-disabled-autokey-variants", "date-timezone-xlsx-edges", "shared-shell-parity", "final-active-audit"]
   }
 }
