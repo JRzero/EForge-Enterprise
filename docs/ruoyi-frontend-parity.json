@@ -1239,16 +1239,38 @@
     ]
   },
   "generatorOriginalPreviewJavaValidation": {
-    "state": "original-preview-java-contexts-local-verified",
+    "state": "original-preview-java-contexts-cloud-verified",
     "review": "docs/security-review-generator-preview-snapshot.md",
     "backendTests": 521,
     "targetedTests": 41,
     "actualJavaGenerationCompilerCases": 3,
     "mysqlCaseMode0SpringAssertions": 32,
     "mysqlCaseMode1SpringAssertions": 32,
-    "currentCloud": "pending",
-    "finalRealBrowsers": "pending-exact-cloud",
+    "currentCloud": "success",
+    "finalRealBrowsers": "both-profiles-43-passed",
     "runtime": "Both final default/enabled complete APIs and exact live OpenAPI passed. Original compatibility success and safe 401/403/404/503 body codes, no-data refusal, real SQL fault privacy/recovery, configured detail output and no mutation-guard blocking passed.",
-    "scope": "Original preview uses consistent metadata and isolated working graphs. Shared original Java templates encode free-form comments/Excel/audit/export text; full real Java generation compilation and reflection. No canonical output, safe SQL/XML/JS/TS or identifier/ZIP/path/custom-output boundary, React/EForge template or management UI completion."
+    "scope": "Original preview uses consistent metadata and isolated working graphs. Shared original Java templates encode free-form comments/Excel/audit/export text; full real Java generation compilation and reflection. No canonical output, safe SQL/XML/JS/TS or identifier/ZIP/path/custom-output boundary, React/EForge template or management UI completion.",
+    "implementationCommit": "841e3aed8a55268713306e27a7e3319dc0e5d015",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37429057075"
+  },
+  "generatorMapperXmlValidation": {
+    "state": "original-mapper-physical-names-local-verified",
+    "review": "docs/security-review-generator-mapper-xml.md",
+    "backendTests": 531,
+    "actualMyBatisParsingCases": 10,
+    "mysqlMode0Assertions": 132,
+    "mysqlMode1Assertions": 132,
+    "nativeSnapshotAssertions": [
+      32,
+      32
+    ],
+    "completeRuntime": "both-complete-api-profiles-success",
+    "currentCloud": "pending-exact-commit",
+    "scope": "Actual original physical SQL identifiers and XML column attributes only. Java/OGNL/other output contexts, canonical bundle/path/output/React/UI remain pending.",
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201"
   }
 }

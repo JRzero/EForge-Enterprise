@@ -71,3 +71,10 @@ and generator-preview-java-disabled/enabled-runtime.log under server/eforge-boot
 The preceding preview-only candidate's two 43-browser profiles remain preceding
 source evidence. Final exact-commit cloud including both final 43 profiles is
 pending; no final-browser/whole-generator completion is claimed before it passes.
+Exact-cloud acceptance: implementation 841e3aed8a55268713306e27a7e3319dc0e5d015,
+server run https://github.com/JRzero/EForge-Enterprise/actions/runs/37429057075
+finished SUCCESS in all three jobs. Direct generator-preview-java-cloud-accepted.log
+shows final521 backend tests, both32 snapshot profiles, both23 text profiles,
+default/enabled each43 real browser tests, both complete real API regressions and
+both unchanged live OpenAPI checks. This accepts the original-preview/Java stage
+only. It does not accept the later Mapper XML change or complete generator output.

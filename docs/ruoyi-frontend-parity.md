@@ -1560,3 +1560,27 @@ OpenAPI is unchanged. See security-review-generator-preview-snapshot.md.
 Exact final cloud/two final43 browsers are pending. SQL/XML/JS/TS, identifiers,
 paths/ZIP/custom output, React/EForge output, full generator UI and actual business
 runtime/browser acceptance remain. Form builder stays deferred.
+Original Mapper XML physical-name integration (2026-10-06): actual original
+CRUD/tree/sub XML now composes MySQL identifier and XML encoding, while result
+column attributes preserve physical names independently. Whole531 backend tests,
+10 real MyBatis parsing/binding cases, both actual MySQL modes each132 statements/
+assertions and both native snapshots each32 pass. The JDBC mode-switch fixture
+failure was corrected by initializing/verifying each connection's mode; exact
+value assertions and client prepared statements remain. Final two complete API/
+browser profiles and exact cloud are pending. See security-review-generator-mapper-xml.md.
+Java/OGNL identifiers, other SQL/JS/TS contexts, immutable file bundles/ZIP/custom
+paths, true React/EForge templates and full generator management/runtime acceptance
+remain unfinished; form builder remains deferred.
+Exact-cloud acceptance: implementation 841e3aed8a55268713306e27a7e3319dc0e5d015,
+server run https://github.com/JRzero/EForge-Enterprise/actions/runs/37429057075
+finished SUCCESS in all three jobs. Direct generator-preview-java-cloud-accepted.log
+shows final521 backend tests, both32 snapshot profiles, both23 text profiles,
+default/enabled each43 real browser tests, both complete real API regressions and
+both unchanged live OpenAPI checks. This accepts the original-preview/Java stage
+only. It does not accept the later Mapper XML change or complete generator output.
+Final local Mapper XML acceptance: authority6963 terminal exit0; default and
+enabled profiles each43 actual browsers and all complete API/SQL/Redis/Quartz/
+OSHI/ACL/captcha/permission/concurrency regressions pass. Both live OpenAPI exports
+match contract SHA256481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
+New implementation exact cloud remains pending. Local stage acceptance does not
+complete the generator output/UI or the full current goal.
