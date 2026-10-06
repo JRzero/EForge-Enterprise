@@ -12,11 +12,28 @@ export function CacheCharts({data}: {data: CacheStatistics}) {
   const [error, setError] = useState(false), [version, setVersion] = useState(0);
   useEffect(() => {
     const first = commands.current, second = memory.current; if (!first || !second) return;
-    const instances: echarts.EChartsType[] = []; const observer = new ResizeObserver(() => instances.forEach(instance => instance.resize()));
+    const instances: echarts.EChartsType[] = [];
+    const activeTips = new Map<echarts.EChartsType, {seriesIndex: number; dataIndex: number}>();
+    const rememberTip = (instance: echarts.EChartsType) => {
+      instance.on('showTip', (event: unknown) => {
+        if (event && typeof event === 'object' && 'seriesIndex' in event && 'dataIndex' in event &&
+            typeof event.seriesIndex === 'number' && typeof event.dataIndex === 'number') {
+          activeTips.set(instance, {seriesIndex: event.seriesIndex, dataIndex: event.dataIndex});
+        }
+      });
+      instance.on('hideTip', () => {activeTips.delete(instance);});
+    };
+    const observer = new ResizeObserver(() => instances.forEach(instance => {
+      if (instance.isDisposed()) return;
+      const tip = activeTips.get(instance);
+      instance.resize();
+      // ECharts queues tooltip refresh; restore the current value in this resize turn.
+      if (tip) instance.dispatchAction({type: 'showTip', ...tip});
+    }));
     try {
       setError(false); const options = cacheChartOptions(data);
-      const pie = echarts.init(first, undefined, {renderer: 'svg'}); instances.push(pie); chart.current = pie; pie.setOption(options.commands);
-      const gauge = echarts.init(second, undefined, {renderer: 'svg'}); instances.push(gauge); gauge.setOption(options.memory);
+      const pie = echarts.init(first, undefined, {renderer: 'svg'}); instances.push(pie); chart.current = pie; rememberTip(pie); pie.setOption(options.commands);
+      const gauge = echarts.init(second, undefined, {renderer: 'svg'}); instances.push(gauge); rememberTip(gauge); gauge.setOption(options.memory);
       observer.observe(first); observer.observe(second);
     } catch {setError(true);}
     return () => {observer.disconnect(); chart.current = null; instances.forEach(instance => instance.dispose());};

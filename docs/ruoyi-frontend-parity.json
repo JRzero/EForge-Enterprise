@@ -1180,7 +1180,23 @@
     "frontendUnitTests": 73,
     "simulatedBrowserTests": 64,
     "runtime": "Default and explicitly enabled complete real API runs are terminal success, including creation faults/recovery/concurrency/audit and full MySQL/Redis/Quartz/OSHI/ACL/captcha regression. Both live OpenAPI exports exactly match the committed candidate. Final real-browser and exact-commit cloud acceptance remain pending.",
-    "currentCloud": "not-submitted",
+    "currentCloud": "server-success-initial-web-failed-cache-fix-pending",
     "scope": "Shared admin canonical creation and original form endpoint, physical outcomes and independent metadata import, safe typed partial errors and generated client. Complete generator UI/output and final acceptance remain pending. Form builder remains deferred."
+  }
+,
+  "cacheTooltipResizeRegression": {
+    "state": "local-fix-verified-cloud-pending",
+    "review": "docs/security-review-cache-tooltip-resize.md",
+    "initialCreationCommit": "27a26e48128eb99322b932860828e0f311fca553",
+    "creationServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37408353480",
+    "creationServerState": "all-three-jobs-success",
+    "initialWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37408353499",
+    "initialWebState": "failed-existing-cache-tooltip-resize",
+    "realBrowserProfilesAtCreationCommit": [43, 43],
+    "controlledRaceBeforeFix": "failed-real-DIV-overflow",
+    "controlledRaceAfterFix": "passed",
+    "repeatCasesPassed": 8,
+    "frontendUnitTests": 73,
+    "simulatedBrowserTests": 64
   }
 }

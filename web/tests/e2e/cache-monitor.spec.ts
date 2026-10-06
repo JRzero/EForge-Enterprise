@@ -17,9 +17,22 @@ test('cache statistics retain all fields, exact counters, rose/gauge graphics, s
   for (const label of ['Redis 命令统计玫瑰图', 'Redis 内存消耗仪表图']) {await expect(page.getByRole('img', {name: label}).locator('svg')).toBeVisible(); expect(await page.getByRole('img', {name: label}).locator('svg path').count()).toBeGreaterThan(0);}
   await page.getByRole('button', {name: `${unsafe}：9007199254740993 次（50.00%）`, exact: true}).focus(); await page.keyboard.press('Enter');
   await expect(page.locator('.cache-chart-tooltip')).toContainText(`${unsafe}：9007199254740993 次（50.00%）`); expect(await page.locator('.cache-statistics-page img').count()).toBe(0);
-  await page.setViewportSize({width: 390, height: 844}); await expect.poll(async () => page.getByRole('img', {name: 'Redis 命令统计玫瑰图'}).evaluate(element => element.querySelector('svg')!.getBoundingClientRect().width <= element.clientWidth + 1)).toBe(true);
-  expect(await page.evaluate(() => Array.from(document.querySelectorAll('body *')).filter(element => element.getBoundingClientRect().right > innerWidth + 1).map(element => ({tag: element.tagName, class: element.getAttribute('class'), right: element.getBoundingClientRect().right})).slice(0, 15))).toEqual([]);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const resizeSession = await page.context().newCDPSession(page); await resizeSession.send('Emulation.setCPUThrottlingRate', {rate: 6});
+  // Delay queued tooltip refresh to exercise resizing before its next event-loop turn.
+  await page.evaluate(() => {
+    const nativeTimeout = window.setTimeout.bind(window);
+    const state = window as Window & {restoreCacheTimers?: () => void};
+    state.restoreCacheTimers = () => {window.setTimeout = nativeTimeout;};
+    window.setTimeout = ((handler: TimerHandler, timeout?: number, ...args: unknown[]) => nativeTimeout(handler, timeout == null || timeout === 0 ? 250 : timeout, ...args)) as typeof window.setTimeout;
+  });
+  for (const width of [390, 1100, 360, 800, 390]) {
+    await page.keyboard.press('Enter'); await page.setViewportSize({width, height: 844});
+    await expect.poll(async () => page.getByRole('img', {name: 'Redis 命令统计玫瑰图'}).evaluate(element => element.querySelector('svg')!.getBoundingClientRect().width <= element.clientWidth + 1)).toBe(true);
+    expect(await page.evaluate(() => Array.from(document.querySelectorAll('body *')).filter(element => element.getBoundingClientRect().right > innerWidth + 1).map(element => ({tag: element.tagName, class: element.getAttribute('class'), right: element.getBoundingClientRect().right})).slice(0, 15))).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect(page.locator('.cache-chart-tooltip')).toContainText(`${unsafe}：9007199254740993 次（50.00%）`);
+  }
+  await page.evaluate(() => (window as Window & {restoreCacheTimers?: () => void}).restoreCacheTimers?.());
   value = {...stats, keyCount: '0', commands: [], info: {...stats.info, usedMemory: '0B', usedMemoryBytes: '0'}}; await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.getByText('暂无命令统计', {exact: true})).toBeVisible(); await expect(page.locator('dd').filter({hasText: /^0$/})).toBeVisible();
   await page.getByRole('link', {name: '工作台', exact: true}).click(); await page.getByRole('link', {name: '缓存监控', exact: true}).click(); await expect(page.locator('.cache-chart svg')).toHaveCount(2); expect(errors).toEqual([]);
 });

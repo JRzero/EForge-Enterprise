@@ -16,13 +16,13 @@ export function cacheChartOptions(data: CacheStatistics): {commands: CacheChartO
   const memoryMiB = Number(bytes / 1048576n) + Number(bytes % 1048576n) / 1048576;
   const memoryMax = Math.max(1000, Math.ceil(memoryMiB / 1000) * 1000);
   return {
-    commands: {animationDuration: 1000, tooltip: {trigger: 'item', confine: true, extraCssText: 'max-width: calc(100% - 24px); white-space: normal; overflow-wrap: anywhere;', formatter: params => {
+    commands: {animationDuration: 1000, tooltip: {trigger: 'item', confine: true, transitionDuration: 0, extraCssText: 'max-width: calc(100% - 24px); white-space: normal; overflow-wrap: anywhere;', formatter: params => {
       const item = Array.isArray(params) ? params[0] : params;
       return commandTooltip(data, item?.dataIndex ?? -1);
     }}, series: [{name: '命令', type: 'pie', roseType: 'radius', stillShowZeroSum: false, radius: [15, 95], center: ['50%', '38%'],
       // Shapes use bounded proportions; the labels/tooltip retain the exact decimal counters.
       data: data.commands.map(command => ({name: command.name, value: total === 0n ? 0 : Number(integer(command.calls) * 1000000000n / total)}))}]},
-    memory: {tooltip: {confine: true, extraCssText: 'max-width: calc(100% - 24px); white-space: normal; overflow-wrap: anywhere;', formatter: () => {const element = document.createElement('div'); element.className = 'cache-chart-tooltip'; element.setAttribute('role', 'tooltip'); element.textContent = `内存消耗：${data.info.usedMemory ?? '—'}`; return element;}},
+    memory: {tooltip: {confine: true, transitionDuration: 0, extraCssText: 'max-width: calc(100% - 24px); white-space: normal; overflow-wrap: anywhere;', formatter: () => {const element = document.createElement('div'); element.className = 'cache-chart-tooltip'; element.setAttribute('role', 'tooltip'); element.textContent = `内存消耗：${data.info.usedMemory ?? '—'}`; return element;}},
       series: [{name: '使用内存', type: 'gauge', min: 0, max: memoryMax, detail: {formatter: () => data.info.usedMemory ?? '—', fontSize: 22}, data: [{value: memoryMiB, name: '内存消耗'}]}]}
   };
 }

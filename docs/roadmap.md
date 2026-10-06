@@ -324,3 +324,20 @@ defaults pass. Final real-browser and exact-commit cloud acceptance remain pendi
 See security-review-generator-create-http.md.
 This phase does not complete generator output/UI or the overall objective.
 Form builder remains deferred; all other current requirements remain.
+
+### Creation server acceptance and cache tooltip regression repair
+
+Creation/client 27a26e4 passed exact server-ci 37408353480 in all three jobs,
+including both 47-case Spring/MyBatis probes, both 43-case real browser profiles,
+both complete HTTP creation/configuration/sync/monitoring regressions and exact
+OpenAPI checks. Initial web-ci 37408353499 failed the existing cache tooltip
+mobile resize scenario. Its actual cloud trace and a controlled local timer/
+resize test reproduced HTML tooltip overflow before the fix.
+
+The fix restores the active tooltip during resize and removes tooltip position
+transitions. Original security, exact-counter, keyboard and full DOM-boundary
+assertions remain. The same gated scenario passes after the fix and eight repeats;
+all frontend checks, 73 unit and 64 simulated browser tests pass. Final exact
+patch cloud acceptance remains pending. See security-review-cache-tooltip-resize.md.
+No generator UI/output or full-objective completion is claimed; form builder
+remains deferred and every other current requirement remains.
