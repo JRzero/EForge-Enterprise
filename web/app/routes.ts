@@ -23,10 +23,13 @@ const CacheEntriesPage = lazy(() => import('../features/cache-monitor/CacheEntri
 const DruidConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.DruidConsolePage})));
 const ApiDocsConsolePage = lazy(() => import('../features/consoles/ConsolePage').then(module => ({default: module.ApiDocsConsolePage})));
 const DictionaryEntriesPage = lazy(() => import('../features/dictionaries/DictionariesPage').then(module => ({default: module.DictionaryEntriesPage})));
+const GeneratorPage = lazy(() => import('../features/generator/GeneratorPage').then(module => ({default: module.GeneratorPage})));
 const JobsPage = lazy(() => import('../features/jobs/JobsPage').then(module => ({default: module.JobsPage})));
 const JobLogsPage = lazy(() => import('../features/jobs/JobsPage').then(module => ({default: module.JobLogsPage})));
 const jobs = contracts.find(route => route.id === 'monitor-jobs'), jobLogs = internalContracts.find(route => route.id === 'job-logs');
 if (!jobs || !jobLogs) throw new Error('Missing task route contracts.');
+const generator = contracts.find(route => route.id === 'tool-generator');
+if (!generator) throw new Error('Missing generator route contract.');
 const dashboard = contracts.find(route => route.id === 'dashboard');
 if (!dashboard) throw new Error('Missing dashboard route contract.');
 const posts = contracts.find(route => route.id === 'system-posts');
@@ -114,6 +117,8 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: apiDocs.id, path: apiDocs.path, title: '接口文档', access: {permission: apiDocs.permission}, component: ApiDocsConsolePage
 }, {
   id: jobs.id, path: jobs.path, title: '定时任务', access: {permission: jobs.permission}, component: JobsPage
+}, {
+  id: generator.id, path: generator.path, title: '代码生成', access: {permission: generator.permission}, component: GeneratorPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

@@ -197,3 +197,20 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .cron-summary {display:flex; flex-wrap:wrap; gap:12px; margin:0;}
 .cron-summary div {min-width:38px; max-width:100%;} .cron-summary dd {margin:4px 0; overflow-wrap:anywhere;}
 .cron-editor li, .cron-editor p {overflow-wrap:anywhere;}
+.generator-page {min-width:0;}
+.generator-page .post-dialog {width:min(1100px,calc(100vw - 32px));box-sizing:border-box;}
+.generator-page .post-dialog [role=tabpanel][hidden] {display:none;}
+.generator-page .post-dialog table {border-collapse:collapse;width:100%;}
+.generator-page .post-dialog th,.generator-page .post-dialog td {padding:10px;border-bottom:1px solid #dfe9e5;text-align:left;vertical-align:top;}
+.generator-page .post-dialog td .ef-input {min-width:150px;}
+.generator-page .post-dialog td label {white-space:nowrap;}
+.generator-page .post-dialog pre {max-height:55vh;overflow:auto;white-space:pre;}
+.generator-page .post-dialog textarea {width:100%;min-height:180px;box-sizing:border-box;}
+.generator-page .post-dialog li,.generator-page .post-dialog p {overflow-wrap:anywhere;}
+.generator-page .post-dialog [role=tab] {padding:8px 12px;border:1px solid #ccdcd6;border-radius:6px;background:white;cursor:pointer;}
+.generator-page .post-dialog [role=tab][aria-selected=true] {background:#e8f1ed;font-weight:600;}
+.generator-code-keyword {color:#7c3a9c;font-weight:600;}
+.generator-code-string {color:#236840;}
+.generator-code-comment {color:#677981;font-style:italic;}
+.generator-code-number {color:#92531a;}
+.generator-page [aria-label="自定义输出结果"] {min-width:0;overflow-wrap:anywhere;}

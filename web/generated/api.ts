@@ -756,6 +756,12 @@ export type ImportedTable = {
 export type ImportResponse = {
     tables: ImportedTable[];
 };
+export type MenuChoice = {
+    id: string;
+    kind: string;
+    name: string;
+    parentId: string;
+};
 export type DeleteGeneratorTablesRequest = {
     ids: string[];
 };
@@ -766,6 +772,7 @@ export type TableSummary = {
     createdAt?: string;
     id: string;
     name?: string;
+    outputType?: string;
     updatedAt?: string;
     webType?: string;
 };
@@ -2346,6 +2353,14 @@ export function importGeneratorTables(importRequest: ImportRequest, opts?: Oazap
         method: "POST",
         body: importRequest
     }));
+}
+export function getGeneratorMenuOptions(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: MenuChoice[];
+    }>("/api/v1/tool/generator/menu-options", {
+        ...opts
+    });
 }
 export function deleteGeneratorTables(deleteGeneratorTablesRequest: DeleteGeneratorTablesRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/tool/generator/tables", oazapfts.json({

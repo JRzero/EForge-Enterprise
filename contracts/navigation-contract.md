@@ -302,3 +302,10 @@ errors and rolls back failures. The menu script encloses the complete set in one
 transaction. Reinstallation conflicts instead of overwriting existing menu data.
 Assign the original role/menu grants through canonical administration. GROUP nodes
 remain groups; their labels never become synthetic routes.
+## Implemented generator manager
+
+V026 binds tool-generator to the static tool-generator route at /gen. Original
+tool:gen:list controls route access; individual original grants control actions
+and authoritative backend endpoints. The deferred tool-form-builder remains
+unbound. The manager imports a statically registered React component through the
+pinned EForge integration; database values cannot resolve component modules.

@@ -1493,4 +1493,25 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251402",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251594",
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
-  }}
+  },
+  "generatorManagerUi": {
+  "status": "local-validation-in-progress-exact-cloud-pending",
+  "route": "/gen",
+  "routeId": "tool-generator",
+  "review": "docs/security-review-generator-manager-ui.md",
+  "backendTests": 618,
+  "targetMvcTests": 20,
+  "frontendUnitTests": 89,
+  "mockedBrowserTests": 71,
+  "defaultRealBrowsers": 47,
+  "fullRealProfiles": "pending-terminal-two-profile-sequence",
+  "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
+  "remaining": [
+    "all-generated-control-variants",
+    "shared-shell-parity",
+    "final-active-capability-audit"
+  ],
+  "formBuilder": "deferred-not-complete",
+  "quartzMutationBoundary": "prior-specific-rejection-preserved"
+}
+}

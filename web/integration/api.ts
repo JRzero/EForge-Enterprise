@@ -33,7 +33,10 @@ import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openAp
 import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
 
 import {previewGeneratorTable, downloadGeneratorTables, writeGeneratorCustomOutput, type DownloadRequest} from '../generated/api';
-import {GeneratorCustomOutputError} from './generator-errors';
+import {GeneratorCustomOutputError, GeneratorCreationError} from './generator-errors';
+import {getGeneratorMenuOptions, listGeneratorTables, listGeneratorDatabaseTables, getGeneratorTable, updateGeneratorTable,
+  importGeneratorTables, deleteGeneratorTables, synchronizeGeneratorTable, createGeneratorTables,
+  type GeneratorConfigurationUpdate, type GeneratorCreationRequestWrite} from '../generated/api';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
@@ -81,6 +84,25 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
         if (cause instanceof ApiError) throw cause;
         // A cancelled/lost response cannot revoke file writes already accepted by the server.
         throw new ApiError(0, 'GENERATOR_CUSTOM_OUTPUT_UNCONFIRMED');
+      }
+    },
+    async getGeneratorMenuOptions(signal?: AbortSignal) {return (await getGeneratorMenuOptions({baseUrl:'',fetch:transport(true),signal})).data;},
+    async listGeneratorTables(query: Parameters<typeof listGeneratorTables>[0], signal?: AbortSignal) {return (await listGeneratorTables(query, {baseUrl:'', fetch:transport(true), signal})).data;},
+    async listGeneratorDatabaseTables(query: Parameters<typeof listGeneratorDatabaseTables>[0], signal?: AbortSignal) {return (await listGeneratorDatabaseTables(query, {baseUrl:'', fetch:transport(true), signal})).data;},
+    async getGeneratorTable(id: string, signal?: AbortSignal) {return (await getGeneratorTable(id, {baseUrl:'', fetch:transport(true), signal})).data;},
+    async updateGeneratorTable(id: string, body: GeneratorConfigurationUpdate, signal?: AbortSignal) {await updateGeneratorTable(id, body, {baseUrl:'', fetch:transport(true), signal});},
+    async importGeneratorTables(names: string[], signal?: AbortSignal) {return (await importGeneratorTables({names}, {baseUrl:'', fetch:transport(true,60000), signal})).data;},
+    async deleteGeneratorTables(ids: string[], signal?: AbortSignal) {await deleteGeneratorTables({ids}, {baseUrl:'', fetch:transport(true), signal});},
+    async synchronizeGeneratorTable(id: string, signal?: AbortSignal) {await synchronizeGeneratorTable(id, {baseUrl:'', fetch:transport(true,60000), signal});},
+    async createGeneratorTables(body: GeneratorCreationRequestWrite, signal?: AbortSignal) {
+      try {
+        const response=await createGeneratorTables(body, {baseUrl:'', fetch:transport(true,60000,'omit',[400,409,500,503]), signal});
+        if(response.status===201) return response.data;
+        if(response.data.creation) throw new GeneratorCreationError(response.status,response.data.code ?? 'GENERATOR_CREATE_FAILED',response.data.creation);
+        throw new ApiError(response.status,response.data.code ?? 'HTTP_ERROR');
+      } catch(cause) {
+        if(cause instanceof ApiError) throw cause;
+        throw new ApiError(0,'GENERATOR_CREATE_UNCONFIRMED');
       }
     },
     async previewGeneratorTable(id: string, signal?: AbortSignal) {return (await previewGeneratorTable(id, {baseUrl: '', fetch: transport(true, 60000), signal})).data;},

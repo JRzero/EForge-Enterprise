@@ -1734,6 +1734,29 @@
         },
         "type": "object"
       },
+      "MenuChoice": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "parentId"
+        ],
+        "type": "object"
+      },
       "MenuResponse": {
         "properties": {
           "cached": {
@@ -3363,6 +3386,9 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "outputType": {
             "type": "string"
           },
           "updatedAt": {
@@ -8921,6 +8947,29 @@
         },
         "tags": [
           "generator-import-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/menu-options": {
+      "get": {
+        "operationId": "getGeneratorMenuOptions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MenuChoice"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "generator-read-controller"
         ]
       }
     },

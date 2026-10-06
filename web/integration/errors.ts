@@ -4,6 +4,10 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'GENERATOR_CREATE_DDL_FAILED') return '部分数据库表创建失败，请查看建表结果；已创建的表仍然保留。';
+  if (code === 'GENERATOR_IMPORT_FAILED') return '生成配置导入失败，请查看已创建的表并通过导入表恢复配置。';
+  if (code === 'GENERATOR_CREATE_TARGET_EXISTS') return '目标表已存在，请检查现有表后通过导入表管理配置。';
+  if (code === 'GENERATOR_CREATE_UNCONFIRMED') return '无法确认建表结果，请先检查数据库和生成配置，再决定是否重试。';
   if (code === 'GENERATOR_CUSTOM_OUTPUT_UNCONFIRMED') return '无法确认文件输出结果，请检查目录后再决定是否重新生成。';
   if (code === 'GENERATOR_CUSTOM_OUTPUT_PARTIAL') return '部分文件可能已写入，请查看文件结果后再决定是否重新生成。';
   if (code === 'GENERATOR_CUSTOM_OUTPUT_DISABLED') return '服务器未启用自定义文件输出。';

@@ -42,6 +42,7 @@ class GeneratorReadControllerTest {
     static final long ID=9007199254740993L;
     @Autowired MockMvc mvc;
     @MockitoBean GenTableMapper tables;
+    @MockitoBean io.eforge.enterprise.system.service.ISysMenuService menus;
     @MockitoBean GenTableColumnMapper columns;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
@@ -56,7 +57,7 @@ class GeneratorReadControllerTest {
     }
     void actor(Set<String> grants){var user=new SysUser(2L);user.setUserName("reader");when(tokens.getLoginUser(any())).thenReturn(new LoginUser(2L,103L,user,grants));}
     @Test void typedListsRetainStringIdsDatesWithoutLegacyFields() throws Exception {
-        actor(Set.of("tool:gen:list"));mvc.perform(get(PATH+"/tables")).andExpect(status().isOk()).andExpect(jsonPath("$.items[0].id").value(Long.toString(ID))).andExpect(jsonPath("$.items[0].createdAt").value("2026-10-05T00:00:00Z")).andExpect(jsonPath("$.items[0].createBy").doesNotExist()).andExpect(jsonPath("$.items[0].options").doesNotExist()).andExpect(jsonPath("$.rows").doesNotExist()).andExpect(jsonPath("$.pageSize").value(10));
+        actor(Set.of("tool:gen:list"));mvc.perform(get(PATH+"/tables")).andExpect(status().isOk()).andExpect(jsonPath("$.items[0].id").value(Long.toString(ID))).andExpect(jsonPath("$.items[0].createdAt").value("2026-10-05T00:00:00Z")).andExpect(jsonPath("$.items[0].outputType").value("1")).andExpect(jsonPath("$.items[0].createBy").doesNotExist()).andExpect(jsonPath("$.items[0].options").doesNotExist()).andExpect(jsonPath("$.rows").doesNotExist()).andExpect(jsonPath("$.pageSize").value(10));
         mvc.perform(get(PATH+"/database-tables")).andExpect(status().isOk()).andExpect(jsonPath("$.items[0].name").value("owned_table")).andExpect(jsonPath("$.items[0].id").doesNotExist());
         mvc.perform(get(PATH+"/tables/"+ID)).andExpect(status().isForbidden());
         mvc.perform(get(PATH+"/tables/"+ID+"/columns")).andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(Long.toString(ID+1))).andExpect(jsonPath("$[0].tableId").value(Long.toString(ID))).andExpect(jsonPath("$[0].primaryKey").value(true)).andExpect(jsonPath("$[0].editable").value(false)).andExpect(jsonPath("$[0].queryType").value("BETWEEN"));
@@ -83,6 +84,21 @@ class GeneratorReadControllerTest {
         mvc.perform(get(PATH+"/tables/1")).andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("GENERATOR_TABLE_NOT_FOUND"));mvc.perform(get(PATH+"/tables/1/columns")).andExpect(status().isNotFound());
         table.setOptions("{private malformed");mvc.perform(get(PATH+"/tables/"+ID)).andExpect(status().isInternalServerError()).andExpect(jsonPath("$.code").value("GENERATOR_CONFIGURATION_INVALID")).andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private"))));
         table.setOptions(null);mvc.perform(get(PATH+"/tables/"+ID)).andExpect(status().isOk()).andExpect(jsonPath("$.configuration.options.generateDetail").value(false));
+    }
+        @Test void menuChoicesKeepOriginalAuthenticatedScopeAndExactIds() throws Exception {
+        actor(Set.of());var menu=new io.eforge.enterprise.common.core.domain.entity.SysMenu();menu.setMenuId(ID);menu.setParentId(3L);menu.setMenuName("<img>目录");menu.setMenuType("M");menu.setCreateBy("private actor");menu.getParams().put("private","secret");
+        when(menus.selectMenuList(any(io.eforge.enterprise.common.core.domain.entity.SysMenu.class),eq(2L))).thenReturn(List.of(menu));
+        mvc.perform(get(PATH+"/menu-options")).andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(Long.toString(ID))).andExpect(jsonPath("$[0].parentId").value("3")).andExpect(jsonPath("$[0].name").value("<img>目录")).andExpect(jsonPath("$[0].kind").value("M")).andExpect(jsonPath("$[0].params").doesNotExist()).andExpect(jsonPath("$[0].createBy").doesNotExist());
+        verify(menus).selectMenuList(any(io.eforge.enterprise.common.core.domain.entity.SysMenu.class),eq(2L));verifyNoInteractions(tables,columns);
+    }
+    @Test void anonymousMenuChoicesNeverReadSqlAndScopedEmptyIsValid() throws Exception {
+        actor(Set.of());when(menus.selectMenuList(any(io.eforge.enterprise.common.core.domain.entity.SysMenu.class),eq(2L))).thenReturn(List.of());
+        mvc.perform(get(PATH+"/menu-options")).andExpect(status().isOk()).andExpect(content().json("[]"));clearInvocations(menus);
+        when(tokens.getLoginUser(any())).thenReturn(null);mvc.perform(get(PATH+"/menu-options")).andExpect(status().isUnauthorized());verifyNoInteractions(menus,tables,columns);
+    }
+    @Test void menuChoiceSqlFaultDoesNotExposeDriverDetails() throws Exception {
+        when(menus.selectMenuList(any(io.eforge.enterprise.common.core.domain.entity.SysMenu.class),anyLong())).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private database driver secret"));
+        mvc.perform(get(PATH+"/menu-options")).andExpect(status().isInternalServerError()).andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private"))));
     }
     @TestConfiguration static class Configuration {
         @Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}

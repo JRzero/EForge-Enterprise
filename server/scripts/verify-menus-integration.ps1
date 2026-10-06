@@ -64,7 +64,8 @@ $badRoute=Menu-Patch $postRoute;$badRoute.routeId='account-profile'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
 $badRoute=Menu-Patch $postRoute;$badRoute.permission='system:user:list'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
-$pending=$menuRows | Where-Object key -eq 'tool-generator';$pendingPatch=Menu-Patch $pending
+$implementedGenerator=$menuRows | Where-Object key -eq 'tool-generator';Assert-Check ($implementedGenerator.routeId -eq 'tool-generator' -and (Menu-Update $implementedGenerator.id (Menu-Patch $implementedGenerator)).StatusCode -eq 204) 'Implemented generator binding must remain editable with its canonical route.'
+$pending=$menuRows | Where-Object key -eq 'tool-form-builder';$pendingPatch=Menu-Patch $pending
 Assert-Check (!$pending.routeId -and (Menu-Update $pending.id $pendingPatch).StatusCode -eq 204) 'Existing pending legacy route must remain editable without inventing a React binding.'
 
 $menuRole=Create-Role 'menu-session' @('system','system-posts','system-post-query','system-menus','system-menu-query','system-menu-add','system-menu-edit','system-menu-remove')

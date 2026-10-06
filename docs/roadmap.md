@@ -743,3 +743,19 @@ units passing; it is not accepted as a complete manager or real page regression.
 Remaining parent/dictionary pickers, original controls, migration/real browser
 verification, generated control variants, shell and final active parity remain.
 Form builder remains deferred and the specific Quartz approval boundary persists.
+
+### Generator manager implementation and local verification
+The static /gen manager and V026 route binding now implement discovery/import,
+admin batch creation with honest partial DDL outcomes, metadata/field/output
+editing, drag ordering, scoped parent and dictionary choices, tree/sub relations,
+synchronization, inert highlighted preview/copy, ZIP and configured output,
+confirmed deletion, filters/calendar/order/paging and column visibility.
+Menu choices use the original authenticated user-scoped SQL projection and generated
+contracts; JWT remains in headers. See security-review-generator-manager-ui.md.
+Full local Maven618 (608boot+10scope), targeted20 MVC,89 frontend units,71 mocked
+browser, lint/types/build/reproducible client pass. Default full47 real browsers
+have passed and SQL proves retained original rows/created tables with failed,
+unattempted and unauthorized tables absent. The full two-profile API/browser
+sequence and exact new cloud remain pending; no full acceptance is claimed yet.
+All emitted control variants, shared shell and final active parity still remain.
+Form builder is deferred, not completed; the specific Quartz boundary persists.

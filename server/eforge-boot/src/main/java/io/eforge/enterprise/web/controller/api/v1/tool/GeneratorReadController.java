@@ -12,7 +12,14 @@ import static io.eforge.enterprise.web.controller.api.v1.tool.GeneratorReadContr
 @RestController @RequestMapping("/api/v1/tool/generator")
 public class GeneratorReadController {
     private final GeneratorReadService generator;
-    public GeneratorReadController(GeneratorReadService generator){this.generator=generator;}
+    private final io.eforge.enterprise.system.service.ISysMenuService menus;
+    public GeneratorReadController(GeneratorReadService generator,io.eforge.enterprise.system.service.ISysMenuService menus){this.generator=generator;this.menus=menus;}
+    // The original treeselect is authenticated and scoped by the current user, with no menu-administration grant.
+    @GetMapping("/menu-options") @PreAuthorize("isAuthenticated()") @Operation(operationId="getGeneratorMenuOptions")
+    public List<MenuChoice> menuOptions(){
+        return menus.selectMenuList(new io.eforge.enterprise.common.core.domain.entity.SysMenu(),io.eforge.enterprise.common.utils.SecurityUtils.getUserId())
+            .stream().map(row->new MenuChoice(row.getMenuId().toString(),row.getParentId()==null?"0":row.getParentId().toString(),row.getMenuName(),row.getMenuType())).toList();
+    }
     @GetMapping("/tables") @PreAuthorize("@ss.hasPermi('tool:gen:list')") @Operation(operationId="listGeneratorTables")
     public PageResponse<TableSummary> list(@Valid @ModelAttribute @ParameterObject TableQuery query){return generator.list(query);}
     @GetMapping("/database-tables") @PreAuthorize("@ss.hasPermi('tool:gen:list')") @Operation(operationId="listGeneratorDatabaseTables")

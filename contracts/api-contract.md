@@ -434,3 +434,11 @@ choices survive metadata save and subsequent read/preview. The field cannot name
 an arbitrary template resource. Original edit permission and transaction/physical
 identity guards apply; business rows are not rewritten by template selection.
 The generated TypeScript request carries this exact optional enum.
+## Generator manager menu choices
+
+GET /api/v1/tool/generator/menu-options requires authentication and returns concrete
+MenuChoice records with exact string id/parentId, name and kind. It uses the
+original user-scoped menu query, including an empty result for a no-grant user;
+this picker does not grant management access. Generator list summaries expose
+outputType to preserve original row ZIP/custom output behavior. Both additions
+are represented in the reproducible generated TypeScript client.

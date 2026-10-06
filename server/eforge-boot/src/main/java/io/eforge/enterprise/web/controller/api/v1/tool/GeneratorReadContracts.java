@@ -18,8 +18,8 @@ public final class GeneratorReadContracts {
         @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,
         @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to,Sort sort,Direction direction) {}
     public record TableSummary(@Schema(requiredMode=REQUIRED) String id,String name,String comment,
-        String className,String category,String webType,Instant createdAt,Instant updatedAt) {
-        static TableSummary from(GenTable row){return new TableSummary(identifierText(row.getTableId()),row.getTableName(),row.getTableComment(),row.getClassName(),row.getTplCategory(),row.getTplWebType(),instant(row.getCreateTime()),instant(row.getUpdateTime()));}
+        String className,String category,String webType,Instant createdAt,Instant updatedAt,String outputType) {
+        static TableSummary from(GenTable row){return new TableSummary(identifierText(row.getTableId()),row.getTableName(),row.getTableComment(),row.getClassName(),row.getTplCategory(),row.getTplWebType(),instant(row.getCreateTime()),instant(row.getUpdateTime()),row.getGenType());}
     }
     public record DatabaseTable(@Schema(requiredMode=REQUIRED) String name,String comment,Instant createdAt,Instant updatedAt) {
         static DatabaseTable from(GenTable row){return new DatabaseTable(row.getTableName(),row.getTableComment(),instant(row.getCreateTime()),instant(row.getUpdateTime()));}
@@ -30,6 +30,7 @@ public final class GeneratorReadContracts {
         String queryType,String controlType,String dictionaryType,Integer order) {
         static ColumnResponse from(GenTableColumn row,Long tableId){return new ColumnResponse(identifierText(row.getColumnId()),identifierText(row.getTableId()==null?tableId:row.getTableId()),row.getColumnName(),row.getColumnComment(),row.getColumnType(),row.getJavaType(),row.getJavaField(),row.isPk(),row.isIncrement(),row.isRequired(),row.isInsert(),row.isEdit(),row.isList(),row.isQuery(),row.getQueryType(),row.getHtmlType(),row.getDictType(),row.getSort());}
     }
+    public record MenuChoice(@Schema(requiredMode=REQUIRED) String id,@Schema(requiredMode=REQUIRED) String parentId,@Schema(requiredMode=REQUIRED) String name,@Schema(requiredMode=REQUIRED) String kind) {}
     public record Options(String treeCode,String treeParentCode,String treeName,String parentMenuId,String parentMenuName,boolean generateDetail) {}
     public record Configuration(String packageName,String moduleName,String businessName,String functionName,String author,
         Integer formColumns,String outputType,String outputPath,String subTableName,String subTableForeignKey,String remark,
