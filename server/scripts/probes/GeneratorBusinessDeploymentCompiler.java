@@ -22,7 +22,7 @@ class GeneratorBusinessDeploymentCompiler {
             String suffix=category.substring(0,1).toUpperCase()+category.substring(1);
             table.setClassName("Fixture"+suffix);table.setPackageName("io.eforge.enterprise.generated.fixture."+category);
             var options=com.alibaba.fastjson2.JSON.parseObject(table.getOptions());options.put("genView",true);table.setOptions(options.toJSONString());
-            table.setModuleName("fixture");table.setBusinessName(category);table.setTableName("boot_fixture_"+category);
+            table.setFunctionName("Installed "+category);table.setModuleName("fixture");table.setBusinessName(category);table.setTableName("boot_fixture_"+category);
             if(table.isSub()) {table.getSubTable().setClassName("FixtureLine");table.getSubTable().setPackageName(table.getPackageName());
                 table.getSubTable().setTableName("boot_fixture_lines");table.setSubTableName("boot_fixture_lines");}
             for(var column:table.getColumns())column.setColumnComment(column.getJavaField());
@@ -32,6 +32,12 @@ class GeneratorBusinessDeploymentCompiler {
                 if(file.path().endsWith(".java")) {
                     var path=output.resolve(file.path()).normalize();if(!path.startsWith(output))throw new IllegalArgumentException("Unexpected generated source path.");
                     Files.createDirectories(path.getParent());Files.writeString(path,file.content(),StandardCharsets.UTF_8);sourceFiles.add(path.toString());
+                } else if(file.template().equals("vm/json/eforge-route.json.vm")) {
+                    var path=output.resolve(file.path().substring("main/resources/".length())).normalize();
+                    if(!path.startsWith(output))throw new IllegalArgumentException("Unexpected generated manifest path.");
+                    Files.createDirectories(path.getParent());Files.writeString(path,file.content(),StandardCharsets.UTF_8);
+                } else if(file.template().equals("vm/sql/eforge-menu.sql.vm")) {
+                    Files.writeString(output.resolve("menu-"+category+".sql"),file.content(),StandardCharsets.UTF_8);
                 } else if(file.template().startsWith("vm/react/")) {
                     var path=output.resolve(file.path()).normalize();
                     if(!path.startsWith(output))throw new IllegalArgumentException("Unexpected generated React path.");

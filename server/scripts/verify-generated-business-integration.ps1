@@ -33,6 +33,16 @@ try {
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-business-client.mjs') $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployCategory ('fixture'+(Get-Culture).TextInfo.ToTitleCase($generatedDeployCategory))
         Assert-Check ($LASTEXITCODE -eq 0) 'Actual Boot generated client HTTP verification failed.'
     }
+    $generatedDeployCatalog=(Request '/api/v1/system/menus/routes' 'GET' '' $generatedDeployActorHeaders).Content|ConvertFrom-Json
+    $generatedDeployBootstrapResponse=Request '/api/v1/app/bootstrap' 'GET' '' $generatedDeployActorHeaders
+    Assert-Check ($generatedDeployBootstrapResponse.StatusCode -eq 200) 'Actual generated bootstrap request failed.'
+    $generatedDeployBootstrap=$generatedDeployBootstrapResponse.Content
+    [IO.File]::WriteAllText((Join-Path $repoRoot 'server/eforge-boot/target/generator-route-bootstrap-diagnostic.json'),$generatedDeployBootstrap,[Text.UTF8Encoding]::new($false))
+    foreach($generatedDeployCategory in @('crud','tree','sub')) {
+        $generatedDeployDeclared=@($generatedDeployCatalog|Where-Object {$_.path -ceq "/business/fixture/$generatedDeployCategory"})
+        Assert-Check ($generatedDeployDeclared.Count -eq 1) 'Actual Boot did not load the installed compiled route declaration.'
+        Assert-Check ($generatedDeployBootstrap.Contains($generatedDeployDeclared[0].id)) 'Actual bootstrap omitted the installed canonical SQL menu.'
+    }
     if ($VerifyGeneratedReact) {
         Copy-Item -LiteralPath $generatedDeployContractPath -Destination (Join-Path $repoRoot 'server/eforge-boot/target/generator-react-captured-openapi.json') -Force
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-react-pages.mjs') $generatedBusinessDirectory $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployUser.username

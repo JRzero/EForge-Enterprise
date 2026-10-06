@@ -1,4 +1,5 @@
 import {defineAppRoutes, type AppRoute} from '@eforge/app';
+import {appendGeneratedRoutes, generatedBusinessRoutes} from './generated-business-routes';
 import contracts from './route-contract.json';
 import internalContracts from './internal-route-contract.json';
 import {DashboardPage} from '../features/dashboard/DashboardPage';
@@ -62,7 +63,7 @@ if (!cacheStatistics || !cacheEntries) throw new Error('Missing cache monitor ro
 const druid = contracts.find(route => route.id === 'monitor-druid'), apiDocs = contracts.find(route => route.id === 'tool-openapi');
 if (!druid || !apiDocs) throw new Error('Missing diagnostic console route contracts.');
 if (!dictionaryData) throw new Error('Missing dictionary data route contract.');
-export const routes: readonly AppRoute[] = defineAppRoutes([{
+const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: dashboard.id, path: dashboard.path, title: '工作台',
   access: {permission: dashboard.permission}, component: DashboardPage
 }, {
@@ -124,3 +125,5 @@ export const routes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: jobLogs.id, path: jobLogs.path, title: '调度日志', access: {permission: jobLogs.permission}, component: JobLogsPage
 }]);
+
+export const routes: readonly AppRoute[] = defineAppRoutes(appendGeneratedRoutes(baseRoutes, generatedBusinessRoutes));

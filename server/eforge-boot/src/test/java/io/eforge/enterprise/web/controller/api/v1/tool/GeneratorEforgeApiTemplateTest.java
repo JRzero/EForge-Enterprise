@@ -40,7 +40,27 @@ class GeneratorEforgeApiTemplateTest {
         }
         return root;
     }
-    void compile(List<String> sources,String classpath) {
+    @org.junit.jupiter.api.Test
+    void actualReactBundleDeclaresOneStableIdentityAcrossCompiledRoutesAndMenuSql() throws Exception {
+        var table=fixture("crud");table.setModuleName("模块_一");table.setBusinessName("业务_二");
+        var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
+        String id=io.eforge.enterprise.generator.util.VelocityUtils.reactRouteId(table.getModuleName(),table.getBusinessName());
+        assertTrue(id.matches("business-gen-[a-f0-9]{64}"));assertTrue((id+"-export").length()<=100);
+        assertEquals(id,io.eforge.enterprise.generator.util.VelocityUtils.reactRouteId("模块_一","业务_二"));
+        assertNotEquals(io.eforge.enterprise.generator.util.VelocityUtils.reactRouteId("a_b","c"),io.eforge.enterprise.generator.util.VelocityUtils.reactRouteId("a","b_c"));
+        var manifest=bundle.files().stream().filter(file->file.path().endsWith("/"+id+".json")).findFirst().orElseThrow();
+        var declaration=new ObjectMapper().readTree(manifest.content()).get(0);
+        assertEquals(id,declaration.get("id").asText());
+        assertEquals("/business/模块_一/业务_二",java.net.URI.create(declaration.get("path").asText()).getPath());
+        assertEquals("模块_一:业务_二:list",declaration.get("permission").asText());
+        var route=bundle.files().stream().filter(file->file.path().endsWith("/route.ts")).findFirst().orElseThrow();
+        assertTrue(route.content().contains(id));assertTrue(route.content().contains(declaration.get("path").asText()));
+        var sql=bundle.files().stream().filter(file->file.path().endsWith("Menu.sql")).findFirst().orElseThrow();
+        assertTrue(sql.content().contains("menu_key, route_id"));
+        assertTrue(sql.content().contains(io.eforge.enterprise.generator.rendering.GeneratorOutputText.INSTANCE.mysqlLiteral(id)));
+        assertTrue(sql.content().contains("START TRANSACTION"));assertTrue(sql.content().contains("LAST_INSERT_ID()"));
+        assertFalse(sql.content().contains("$react"));assertFalse(sql.content().contains("$outputText"));
+    }    void compile(List<String> sources,String classpath) {
         var args=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",classpath,"-d",directory.toString()));args.addAll(sources);
         var diagnostics=new java.io.ByteArrayOutputStream();
         assertEquals(0,ToolProvider.getSystemJavaCompiler().run(null,diagnostics,diagnostics,args.toArray(String[]::new)),diagnostics.toString(StandardCharsets.UTF_8));

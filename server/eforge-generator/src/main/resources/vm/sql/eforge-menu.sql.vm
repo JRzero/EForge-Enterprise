@@ -1,0 +1,11 @@
+-- Install the declared compiled React route. Keep the whole menu set atomic.
+START TRANSACTION;
+insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark, menu_key, route_id)
+values($outputText.mysqlLiteral($functionName), $outputText.mysqlLiteral($parentMenuId), '1', $outputText.mysqlLiteral($reactMenuPath), null, 1, 0, 'C', '0', '0', $outputText.mysqlLiteral($permissionPrefix.concat(":list")), '#', 'admin', sysdate(), '', null, '', $outputText.mysqlLiteral($reactRouteId), $outputText.mysqlLiteral($reactRouteId));
+SELECT @parentId := LAST_INSERT_ID();
+#set($labels = ["查询","新增","修改","删除","导出"])
+#foreach($action in ["query","add","edit","remove","export"])
+insert into sys_menu (menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark, menu_key, route_id)
+values($outputText.mysqlLiteral($functionName.concat($labels.get($foreach.index))), @parentId, $foreach.count, '', null, 1, 0, 'F', '0', '0', $outputText.mysqlLiteral($permissionPrefix.concat(":").concat($action)), '#', 'admin', sysdate(), '', null, '', $outputText.mysqlLiteral($reactRouteId.concat("-").concat($action)), null);
+#end
+COMMIT;

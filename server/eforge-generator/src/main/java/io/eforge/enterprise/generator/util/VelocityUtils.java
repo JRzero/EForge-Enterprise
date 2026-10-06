@@ -71,6 +71,12 @@ public class VelocityUtils
         velocityContext.put("pkJavaAccessor", primaryAccessor);
         velocityContext.put("importList", getImportList(genTable));
         velocityContext.put("permissionPrefix", getPermissionPrefix(moduleName, businessName));
+        if ("eforge-react".equals(genTable.getTplWebType()))
+        {
+            velocityContext.put("reactRouteId", reactRouteId(moduleName, businessName));
+            velocityContext.put("reactRoutePath", reactRoutePath(moduleName, businessName));
+            velocityContext.put("reactMenuPath", "business/" + moduleName + "/" + businessName);
+        }
         velocityContext.put("columns", genTable.getColumns());
         velocityContext.put("table", genTable);
         velocityContext.put("dicts", getDicts(genTable));
@@ -94,6 +100,23 @@ public class VelocityUtils
         return velocityContext;
     }
 
+    /** Stable compiled route identity; field separators and legal underscores cannot collide. */
+    public static String reactRouteId(String module, String business)
+    {
+        var text = io.eforge.enterprise.generator.rendering.GeneratorOutputText.INSTANCE;
+        String framed = "[" + text.jsonLiteral(module) + "," + text.jsonLiteral(business) + "]";
+        try
+        {
+            return "business-gen-" + java.util.HexFormat.of().formatHex(
+                java.security.MessageDigest.getInstance("SHA-256").digest(framed.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        }
+        catch (java.security.NoSuchAlgorithmException impossible) {throw new IllegalStateException(impossible);}
+    }
+    public static String reactRoutePath(String module, String business)
+    {
+        try {return new java.net.URI(null, null, "/business/" + module + "/" + business, null).toASCIIString();}
+        catch(java.net.URISyntaxException invalid) {throw new io.eforge.enterprise.common.exception.ApiFailure(400, "GENERATOR_ROUTE_PATH_INVALID", "Invalid compiled route path.");}
+    }
     private static String reactTreeField(GenTable table, String physical)
     {
         var exact = table.getColumns().stream().filter(column -> physical != null && physical.equals(column.getColumnName())).toList();
@@ -213,11 +236,12 @@ public class VelocityUtils
             templates.add("vm/java/eforge-api-controller.java.vm");
         }
         templates.add("vm/xml/mapper.xml.vm");
-        templates.add("vm/sql/sql.vm");
+        templates.add(StringUtils.equals("eforge-react", tplWebType) ? "vm/sql/eforge-menu.sql.vm" : "vm/sql/sql.vm");
         if (StringUtils.equals("eforge-react", tplWebType))
         {
             templates.add("vm/react/Page.tsx.vm");
             templates.add("vm/react/route.ts.vm");
+            templates.add("vm/json/eforge-route.json.vm");
             templates.add("vm/react/generate-client.mjs.vm");
         }
         else templates.add(apiTemplate);
@@ -265,6 +289,8 @@ public class VelocityUtils
         String javaPath = PROJECT_PATH + "/" + StringUtils.replace(packageName, ".", "/");
         String mybatisPath = MYBATIS_PATH + "/" + moduleName;
         String vuePath = "vue";
+        if (template.equals("vm/json/eforge-route.json.vm"))
+            return "main/resources/META-INF/eforge/routes/" + reactRouteId(moduleName, businessName) + ".json";
         if (template.startsWith("vm/react/"))
         {
             String name = template.substring("vm/react/".length(), template.length() - ".vm".length());

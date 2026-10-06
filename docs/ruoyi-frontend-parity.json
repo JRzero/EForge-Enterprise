@@ -1459,5 +1459,18 @@
     "review": "docs/security-review-generator-react-pages.md",
     "remaining": ["static-route-and-canonical-menu-install", "all-dictionary-upload-richtext-control-variants", "full-generator-management-ui", "remaining-active-parity"],
     "formBuilder": "deferred-not-complete"
-  }
-}
+  },
+  "generatorRouteInstallValidation": {
+    "state": "local-real-installed-host-proven-exact-cloud-pending",
+    "mockedBrowserTests": 64,
+    "backendTests": 610,
+    "frontendUnitTests": 83,
+    "realHostProfiles": ["default", "enabled-console-custom-output"],
+    "realPageKinds": ["crud", "tree", "sub"],
+    "review": "docs/security-review-generator-route-install.md",
+    "evidence": ["generator-route-host-correct-disabled-runtime.log", "generator-route-host-correct-enabled-runtime.log"],
+    "menuSql": "actual-post-root-fault-row-rollback-and-duplicate-no-overwrite",
+    "cloud": "pending-for-new-implementation",
+    "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"],
+    "formBuilder": "deferred-not-complete"
+  }}

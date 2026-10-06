@@ -1,0 +1,5 @@
+[{
+  "id": $outputText.jsonLiteral($reactRouteId),
+  "path": $outputText.jsonLiteral($reactRoutePath),
+  "permission": $outputText.jsonLiteral($permissionPrefix.concat(":list"))
+}]

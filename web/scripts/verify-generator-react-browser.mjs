@@ -9,7 +9,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     writeFileSync(join(owned, category, 'index.html'), '<div id="root"></div><script type="module" src="./probe.tsx"></script>');
     writeFileSync(join(owned, category, 'probe.tsx'), [
       "import {createRoot} from 'react-dom/client';",
-      "import {useSyncExternalStore} from 'react';",
+      "import {createMemoryRouterAdapter} from '@eforge/app';",
       "import {createMemoryStorage} from '@eforge/core';",
       "import {EForgeProvider} from '@eforge/ui';",
       "import {PermissionProvider} from '@eforge/patterns';",
@@ -17,10 +17,12 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "import {ApiContext, BootstrapContext} from '../../../app/context';",
       "import {createSessionRuntime} from '../../../integration/session';",
       "import {toEForgePermissions} from '../../../integration/permissions';",
-      "import {GeneratedPage} from './Page';",
-      "const runtime = createSessionRuntime(createMemoryStorage());",
+      "import {Application} from '../../../app/Application';",
+      "import {generatedRoute} from './route';",
+      "const runtime = createSessionRuntime(createMemoryStorage()); const router=createMemoryRouterAdapter('/dashboard');",
       "Object.assign(window, {probeLogin:runtime.login, probeLogout:runtime.logout, probeDetail:async (id:string) => {try {const response = await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/' + id); return {status:response.status, data:await response.json()};} catch(error) {return {status:(error as {status:number}).status};}}});",
-      "function Probe() {const session = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot); if (session.phase !== 'authenticated') return <p>正在等待实际登录</p>; return <EForgeProvider><ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={session.bootstrap}><PermissionProvider permissions={toEForgePermissions(session.bootstrap.permissions)}><GeneratedPage /></PermissionProvider></BootstrapContext.Provider></ApiContext.Provider></EForgeProvider>;}",
+      "function Probe() {return <EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider>;}",
+      "Object.assign(window,{probeNavigate:()=>router.navigate(generatedRoute.path),probeHref:router.getCurrentHref});",
       "createRoot(document.getElementById('root')!).render(<Probe />);",
     ].join('\n'));
   }
@@ -39,6 +41,10 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await page.goto('http://127.0.0.1:' + address.port + '/features/' + basename(owned) + '/' + category + '/index.html');
         await page.waitForFunction(() => typeof window.probeLogin === 'function');
         await page.evaluate(() => window.probeLogin({username:'admin', password:'admin123'}));
+        const installedLink = page.getByRole('link', {name:'Installed ' + category, exact:true});
+        await expect(installedLink).toBeVisible();
+        await installedLink.click();
+        assert((await page.evaluate(() => window.probeHref())).startsWith('/business/fixture/'));
         await expect(page.getByRole('button', {name:'新增', exact:true})).toBeVisible();
         const id = String(9007199254741001n + BigInt(ordinal));
         const label = '浏览器-' + category + '-<img src=x onerror=window.injected=true>';
@@ -140,6 +146,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         assert.deepEqual(errors, []);
         await page.evaluate(() => window.probeLogout());
         await page.evaluate(username => window.probeLogin({username, password:'admin123'}), noRoleUser);
+        await expect(page.getByRole('link', {name:'Installed ' + category, exact:true})).toHaveCount(0);
+        await page.evaluate(() => window.probeNavigate());
+        await expect(page.getByRole('heading', {name:'暂无访问权限'})).toBeVisible();
         await expect(page.getByRole('button', {name:'新增', exact:true})).toHaveCount(0);
         assert.equal((await page.evaluate(id => window.probeDetail(id), id)).status, 403);
         await page.evaluate(() => window.probeLogout());

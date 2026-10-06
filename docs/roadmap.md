@@ -706,3 +706,12 @@ plus both focused real generated CRUD/tree/sub pages/clients/auth/SQL/audit and 
 installed schemas. This accepts the actual page stage, not full generator parity.
 Production static routes/canonical menu install, all dictionary/upload/rich-text
 variants, full generator manager and remaining original capabilities still required.
+### Generated React host and canonical menu installation
+Actual emitted packaged route declarations, static host registry and transactional
+menu SQL now integrate CRUD/tree/sub pages with original Application navigation.
+Local Maven610 (600boot+10scope),83 units and both actual installed-host profiles
+pass, including production builds, MySQL post-root rollback/duplicate protection,
+navigation, no-role host403 and backend403, original generated actions/audit.
+See security-review-generator-route-install.md. Exact new cloud is pending.
+This is an installation stage; full generator manager, control variants, shared
+shell and final active parity remain required. Form builder remains deferred.

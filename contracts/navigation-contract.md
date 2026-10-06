@@ -276,3 +276,29 @@ metadata; completing their shell behavior remains tracked in the parity inventor
 
 Icon previews use only names in the attributed, pinned asset manifest described
 by ADR-0014. An arbitrary database icon string cannot resolve a component or URL.
+
+## Installed generated business routes
+
+React generation emits one code-owned route declaration in
+main/resources/META-INF/eforge/routes/<routeId>.json and one statically imported
+web/features/<module>/<business>/route.ts. The backend loads packaged declarations
+alongside the built-in contract; duplicate identities/paths, dynamic paths and
+malformed declarations fail closed. Menu administration uses this same catalog.
+The frontend registers only compiled source imports, never database component
+strings.
+
+The stable identity is business-gen- plus SHA-256 of the JSON-framed module/business
+tuple. Legal underscores and Unicode names remain data, while identities and
+function-key suffixes fit the existing 100-character navigation columns.
+Browser/catalog paths are URI encoded; compatibility menu paths retain decoded
+text. Generated menu SQL binds the C node to that route ID and gives F nodes stable
+keys with null route IDs. It preserves the configured parent and original list/
+query/add/edit/remove/export permissions.
+
+Install generated backend sources/resources, obtain the actual installed OpenAPI
+and run the emitted client generator, place frontend output under its emitted
+features directory, and apply the emitted menu SQL with a client that stops on
+errors and rolls back failures. The menu script encloses the complete set in one
+transaction. Reinstallation conflicts instead of overwriting existing menu data.
+Assign the original role/menu grants through canonical administration. GROUP nodes
+remain groups; their labels never become synthetic routes.

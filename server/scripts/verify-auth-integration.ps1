@@ -126,6 +126,22 @@ try {
         Get-Content -LiteralPath (Join-Path $generatedBusinessDirectory 'physical-fixtures.sql') -Raw -Encoding utf8 |
             & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
         Assert-Check ($LASTEXITCODE -eq 0) 'Owned generated physical fixture initialization failed.'
+        foreach($generatedMenuCategory in @('crud','tree','sub')) {
+            $generatedMenuSql=Get-Content -LiteralPath (Join-Path $generatedBusinessDirectory "menu-$generatedMenuCategory.sql") -Raw -Encoding utf8
+            $generatedMenuBefore=(Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT * FROM sys_menu ORDER BY menu_id') -join [Environment]::NewLine
+            $generatedMenuFaultSql=$generatedMenuSql.Replace('SELECT @parentId := LAST_INSERT_ID();',"SELECT @parentId := LAST_INSERT_ID();"+[Environment]::NewLine+"SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Owned install fault';")
+            $generatedMenuFaultSql | & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise 2> (Join-Path $generatedBusinessDirectory "menu-fault-$generatedMenuCategory.log")
+            Assert-Check ($LASTEXITCODE -ne 0) 'Owned post-root menu SQL fault did not occur.'
+            $generatedMenuAfter=(Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT * FROM sys_menu ORDER BY menu_id') -join [Environment]::NewLine
+            Assert-Check ($generatedMenuAfter -ceq $generatedMenuBefore) 'Partial menu SQL installation did not roll back every row.'
+            $generatedMenuSql | & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
+            Assert-Check ($LASTEXITCODE -eq 0) 'Actual generated menu SQL installation failed.'
+            $generatedMenuInstalled=(Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT * FROM sys_menu ORDER BY menu_id') -join [Environment]::NewLine
+            $generatedMenuSql | & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise 2> (Join-Path $generatedBusinessDirectory "menu-duplicate-$generatedMenuCategory.log")
+            Assert-Check ($LASTEXITCODE -ne 0) 'Duplicate generated menu installation unexpectedly overwrote identities.'
+            $generatedMenuRepeated=(Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT * FROM sys_menu ORDER BY menu_id') -join [Environment]::NewLine
+            Assert-Check ($generatedMenuRepeated -ceq $generatedMenuInstalled) 'Duplicate menu installation changed existing rows.'
+        }
         $appArguments=@("`"-Dloader.path=$generatedBusinessDirectory`"", '-cp', "`"$jar`"", 'org.springframework.boot.loader.launch.PropertiesLauncher')
     }
     $startArgs = @{ FilePath = 'java'; ArgumentList = $appArguments; PassThru = $true
