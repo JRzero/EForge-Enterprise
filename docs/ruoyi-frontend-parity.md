@@ -1959,3 +1959,18 @@ independent local work; its first default actual run now passes after fixture-on
 JSON transport and absolute file-request fixes, with no product source change.
 All control variants, shared shell and final active audit remain; form builder is
 deferred and the specific Quartz runtime rejection remains effective.
+
+### Generated controls and explicit empty-string correction
+Actual installed generated CRUD now covers all nine original control kinds and
+seven Java types, including dictionary query select/radio, PNG/text upload with
+real serving, millisecond dates, numeric zero/Boolean false, rich text and legal
+__proto__. A real optional String clear failed before the template correction and
+passes after; optional input/select now retain explicit empty strings instead of
+omitting them. Original Vue dictionary-query dropdown behavior is preserved.
+Full Maven618/89 frontend units/lint/types/repro/build and both default/enabled
+installed Java/TS/EForge production host/browser/HTTP/MySQL/Redis/audit profiles
+passed; sequential observer99052 ended0. See control-parity review and
+control-clear-locator-before/fixed-disabled/fixed-enabled-runtime logs.
+Exact new cloud is pending. Tree/sub control permutations, required/disabled/auto
+key variants, calendar/XLSX edges, shared shell and final active audit remain.
+Form builder stays deferred; the specific Quartz runtime boundary is unchanged.

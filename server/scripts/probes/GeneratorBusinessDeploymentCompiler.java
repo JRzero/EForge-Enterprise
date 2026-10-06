@@ -27,6 +27,28 @@ class GeneratorBusinessDeploymentCompiler {
                 table.getSubTable().setTableName("boot_fixture_lines");table.setSubTableName("boot_fixture_lines");}
             for(var column:table.getColumns())column.setColumnComment(column.getJavaField());
             if(table.isSub())for(var column:table.getSubTable().getColumns())column.setColumnComment(column.getJavaField());
+            if(category.equals("crud")) {
+                var controlFactory=fixtureType.getDeclaredMethod("field",String.class,String.class,String.class,String.class);controlFactory.setAccessible(true);
+                var controls=new ArrayList<io.eforge.enterprise.generator.domain.GenTableColumn>(table.getColumns());
+                for(var spec:List.of(
+                    new String[]{"notes","String","textarea",""},
+                    new String[]{"selectedStatus","String","select","sys_common_status"},
+                    new String[]{"radioStatus","String","radio","sys_common_status"},
+                    new String[]{"checkedStatuses","String","checkbox","sys_common_status"},
+                    new String[]{"eventTime","Date","datetime",""},
+                    new String[]{"imagePaths","String","imageUpload",""},
+                    new String[]{"filePaths","String","fileUpload",""},
+                    new String[]{"richContent","String","editor",""},
+                    new String[]{"quantity","Integer","input",""},
+                    new String[]{"ratio","Double","input",""},
+                    new String[]{"enabled","Boolean","input",""},
+                    new String[]{"__proto__","String","input",""})) {
+                    var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,spec[0],spec[0],spec[1],null);
+                    column.setColumnComment(spec[0]);column.setHtmlType(spec[2]);column.setDictType(spec[3]);
+                    if(spec[2].equals("select")||spec[2].equals("radio"))column.setIsQuery("1");controls.add(column);
+                }
+                table.setColumns(controls);
+            }
             var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
             for(var file:bundle.files()) {
                 if(file.path().endsWith(".java")) {
@@ -47,6 +69,7 @@ class GeneratorBusinessDeploymentCompiler {
                 }
             }
             ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3));\n");
+            if(category.equals("crud"))ddl.append("ALTER TABLE boot_fixture_crud ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD __proto__ VARCHAR(255);\n");
             if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL);\n");
         }
         var options=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",System.getProperty("java.class.path"),"-d",output.toString()));options.addAll(sourceFiles);

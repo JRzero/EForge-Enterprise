@@ -1,8 +1,13 @@
+import {Buffer} from 'node:buffer';
 import {writeFileSync} from 'node:fs';
 import {join, basename} from 'node:path';
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
 import {chromium, expect} from '@playwright/test';
+// Cross the browser automation boundary as JSON text so legal prototype-like keys stay own data properties.
+async function readDetail(page,id) {
+  return JSON.parse(await page.evaluate(async value => JSON.stringify(await window.probeDetail(value)),id));
+}
 export async function verifyBrowser(root, owned, backend, noRoleUser) {
   assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(backend), 'Owned backend URL required.');
   for (const category of ['crud', 'tree', 'sub']) {
@@ -58,12 +63,35 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
           await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表');
         }
+        if (category === 'crud') {
+          await dialog.getByLabel('notes', {exact:true}).fill('多行中文\n<script>保持文本</script>');
+          await dialog.locator('label').filter({hasText:/^selectedStatus/}).locator('select').selectOption('1');
+          await dialog.locator('label').filter({hasText:/^radioStatus/}).getByRole('radio').first().check();
+          const checks=dialog.locator('label').filter({hasText:/^checkedStatuses/}).getByRole('checkbox');
+          await checks.first().check();await checks.last().check();
+          await dialog.getByLabel('eventTime', {exact:true}).fill('2026-10-07T01:02:03.456');
+          await dialog.getByLabel('enabled', {exact:true}).fill('true'); await dialog.getByLabel('quantity', {exact:true}).fill('17');await dialog.getByLabel('ratio', {exact:true}).fill('0.125');
+          await dialog.getByLabel('__proto__', {exact:true}).fill('合法字段保持精确');
+          await dialog.getByRole('textbox', {name:'公告内容', exact:true}).fill('生成富文本中文');
+          await dialog.locator('label').filter({hasText:/^imagePaths/}).locator('input[type=file]').setInputFiles(join(root,'tests/fixtures/avatar.png'));
+          await expect(dialog.locator('label').filter({hasText:/^imagePaths/})).toContainText('移除文件');
+          await dialog.locator('label').filter({hasText:/^filePaths/}).locator('input[type=file]').setInputFiles({name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
+          await expect(dialog.locator('label').filter({hasText:/^filePaths/})).toContainText('移除文件');
+          await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
+        }
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         await expect(page.getByText(label, {exact:true})).toBeVisible();
-        const detail = await page.evaluate(id => window.probeDetail(id), id);
+        const detail = await readDetail(page,id);
         assert.equal(detail.status, 200); assert.equal(detail.data.oRderKey, id);
         assert.equal(detail.data.amount, '9007199254740993.00001');
+        if(category==='crud') {
+          assert.equal(detail.data.notes,'多行中文\n<script>保持文本</script>');assert.equal(detail.data.selectedStatus,'1');assert.equal(detail.data.radioStatus,'0');
+          assert.equal(detail.data.enabled,true);assert.equal(detail.data.checkedStatuses,'0,1');assert.equal(detail.data.quantity,17);assert.equal(detail.data.ratio,0.125);
+          assert.equal(detail.data.__proto__,'合法字段保持精确');assert(detail.data.richContent.includes('生成富文本中文'));
+          assert.equal(new Date(detail.data.eventTime).getTime(),await page.evaluate(() => new Date('2026-10-07T01:02:03.456').getTime()));
+          for(const key of ['imagePaths','filePaths']) {assert(detail.data[key].startsWith('/profile/upload/'));const served=await page.request.get(new URL(detail.data[key],page.url()).href);assert.equal(served.status(),200);if(key==='filePaths')assert.equal(await served.text(),'实际文件内容');}
+        }
         if (category === 'tree') assert.equal(detail.data.parentId, '0');
         if (category === 'sub') {
           assert.equal(detail.data.fixtureLineList[0].label, '浏览器子表');
@@ -73,16 +101,37 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await row.getByRole('button', {name:'修改', exact:true}).click();
         await dialog.getByLabel('label', {exact:true}).first().fill(label + '-修改');
         if (category === 'sub') await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表-修改');
+        if(category==='crud') {
+          await dialog.locator('label').filter({hasText:/^notes/}).locator('textarea').fill('');
+          await dialog.getByLabel('__proto__',{exact:true}).fill('');
+          await dialog.locator('label').filter({hasText:/^selectedStatus/}).locator('select').selectOption('');
+          await dialog.locator('label').filter({hasText:/^radioStatus/}).getByRole('radio').last().check();
+          const checks=dialog.locator('label').filter({hasText:/^checkedStatuses/}).getByRole('checkbox');await checks.first().uncheck();await checks.last().uncheck();
+          await dialog.getByLabel('enabled',{exact:true}).fill('false');await dialog.getByLabel('quantity',{exact:true}).fill('0');await dialog.getByLabel('ratio',{exact:true}).fill('0');
+          await dialog.getByRole('textbox',{name:'公告内容',exact:true}).fill('');
+          for(const field of ['imagePaths','filePaths'])await dialog.locator('label').filter({hasText:new RegExp('^'+field)}).getByRole('button',{name:'移除文件',exact:true}).click();
+        }
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         const updated = page.getByRole('row').filter({has:page.getByText(label + '-修改', {exact:true})});
         await expect(updated).toBeVisible();
+        if(category==='crud') {
+          const changed=await readDetail(page,id);assert.equal(changed.status,200);
+          for(const key of ['notes','__proto__','selectedStatus','checkedStatuses','imagePaths','filePaths','richContent'])assert.equal(changed.data[key],'','Cleared field '+key+' must persist');
+          assert.equal(changed.data.enabled,false);assert.equal(changed.data.radioStatus,'1');assert.equal(changed.data.quantity,0);assert.equal(changed.data.ratio,0);
+          for(const key of ['selectedStatus','radioStatus']) {
+            const choice=key==='selectedStatus'?'1':'0';await page.getByRole('combobox',{name:key,exact:true}).selectOption(choice);
+            const response=page.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/v1/business/fixture/crud'&&url.searchParams.get('q_'+key)===choice&&response.request().method()==='GET';});
+            await page.getByRole('button',{name:'搜索',exact:true}).click();const filtered=await response;assert.equal(filtered.status(),200);assert.equal((await filtered.json()).items.length,0);await expect(updated).toHaveCount(0);
+            await page.getByRole('button',{name:'重置',exact:true}).click();await expect(updated).toBeVisible();
+          }
+        }
         await updated.getByRole('button', {name:'详情', exact:true}).click();
         await expect(dialog).toContainText(label + '-修改');
         await expect(dialog.getByRole('button', {name:'保存', exact:true})).toHaveCount(0);
         await dialog.getByRole('button', {name:'取消', exact:true}).click();
         if (category === 'sub') {
-          const saved = await page.evaluate(id => window.probeDetail(id), id);
+          const saved = await readDetail(page,id);
           assert.equal(saved.data.fixtureLineList.length, 1);
           assert.equal(saved.data.fixtureLineList[0].label, '浏览器子表-修改');
           assert.equal(saved.data.fixtureLineList[0].ownerReference, id);
@@ -113,7 +162,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await page.getByRole('button', {name:'展开全部', exact:true}).click();
           const childRow = page.getByRole('row').filter({has:page.getByText(childLabel, {exact:true})});
           await expect(childRow).toBeVisible();
-          assert.equal((await page.evaluate(id => window.probeDetail(id), childId)).data.parentId, id);
+          assert.equal((await readDetail(page,childId)).data.parentId, id);
           await page.getByRole('button', {name:'收起全部', exact:true}).click();
           await expect(childRow).toHaveCount(0);
           await page.getByRole('button', {name:'展开全部', exact:true}).click();
@@ -150,7 +199,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await page.evaluate(() => window.probeNavigate());
         await expect(page.getByRole('heading', {name:'暂无访问权限'})).toBeVisible();
         await expect(page.getByRole('button', {name:'新增', exact:true})).toHaveCount(0);
-        assert.equal((await page.evaluate(id => window.probeDetail(id), id)).status, 403);
+        assert.equal((await readDetail(page,id)).status, 403);
         await page.evaluate(() => window.probeLogout());
       } finally {await context.close();}
     }
