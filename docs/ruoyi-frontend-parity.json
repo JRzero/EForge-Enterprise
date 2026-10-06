@@ -1550,13 +1550,18 @@
     "scope": "optional-string-clear-and-original-select-radio-query-parity"
   },
   "generatorBooleanDictionary": {
-    "status": "exact-cloud-failed-logout-race-correction-pending",
+    "implementationCommit": "6b1e375ffd1c41012e93c0af0194399d8aebf650",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "acceptedFullFrameworkProfiles": [48,48],
+    "status": "exact-correction-cloud-accepted-full-goal-incomplete",
     "failedImplementationCommit": "3266157bdaf7ed91174cc1c01cb5372d80747cf5",
     "failedServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37539853310",
     "passingWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37539853411",
     "review": "docs/security-review-generator-boolean-dictionary.md",
     "backendTests": 618,
-    "frontendUnitTests": 89,
+    "frontendUnitTests": 91,
     "actualHostProfiles": ["default", "enabled-console-custom-output"],
     "scope": "numeric-0-1-select-radio-persist-refill-display-query-and-invalid-scalar-rejection",
     "rootTemplateKinds": ["crud", "tree", "sub"],
@@ -1565,7 +1570,12 @@
     "fullGoalComplete": false
   },
   "generatorRequiredControls": {
-    "status": "local-final-generated-profiles-passed-exact-cloud-pending",
+    "implementationCommit": "6b1e375ffd1c41012e93c0af0194399d8aebf650",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "acceptedFullFrameworkProfiles": [48,48],
+    "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-generator-required-controls.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
@@ -1578,7 +1588,12 @@
     "fullGoalComplete": false
   },
   "sessionLogoutRace": {
-    "status": "local-real-before-failed-both-focused-after-passed-exact-cloud-pending",
+    "implementationCommit": "6b1e375ffd1c41012e93c0af0194399d8aebf650",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "acceptedFullFrameworkProfiles": [48,48],
+    "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-session-logout-race.md",
     "scope": "captured-token-revocation-finishes-through-concurrent-401-or-new-login-with-generation-guards",
     "beforeEvidence": "session-logout-real-race-selected-before-runtime.log",

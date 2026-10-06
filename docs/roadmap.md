@@ -858,3 +858,14 @@ Full47-browser framework profiles passed before this final template/live-test
 change; the updated complete live suite has48 cases and requires exact CI proof.
 Continue automatic-key variants and the remaining original capabilities.
 Form builder is deferred and the specific Quartz runtime rejection is preserved.
+## Exact correction accepted
+
+6b1e375ffd1c41012e93c0af0194399d8aebf650: server37547032711 all three jobs and
+web37547032673 terminal SUCCESS. Unique observer83989 ended0. Direct
+generator-required-logout-cloud-accepted-server/web.log prove618 backend
+(608Boot +10scope),91 units/71 mocked browsers, both48 real framework browser and
+complete API profiles, both actual installed generated host profiles, native
+MySQL checks and both exact OpenAPI contract gates. The controlled real logout
+test passes in both full live suites. Old3266157 remains failed; the corrected
+exact source supersedes it. Automatic-key expansion is separate uncommitted work
+and is not included in this acceptance. Full active parity goal remains incomplete.
