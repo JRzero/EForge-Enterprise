@@ -1400,7 +1400,7 @@
     "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
   },
   "generatorEforgeApiTemplatesValidation": {
-    "state": "module-templates-local-checkpoint-in-progress",
+    "state": "module-templates-cloud-verified-network-react-incomplete",
     "review": "docs/security-review-generator-eforge-api-templates.md",
     "backendTests": 606,
     "compiledModuleCategories": [
@@ -1417,9 +1417,12 @@
     "actualLateParentFaultChildRollback": "passed",
     "generatedModuleOpenApiClient": "not-yet-verified",
     "reactTemplate": "still-vue-fallback-incomplete",
-    "currentCloud": "pending-exact-server-workflow",
+    "currentCloud": "template-source-all-three-server-success-native-script-workflow-pending",
+    "nativeSnapshotAssertions": [66,66],
+    "nativeSqlScriptCommit": "e8a637fffba3487a1357c9f393435f2be7dbeebc",
+    "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
-    "scope": "Concrete generated API templates are actual output, but real SQL transactions/audit/deployment, React/EForge templates, full generator manager and generated HTTP/browser remain required."
+    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/network deployment, React/EForge templates, full generator manager and generated HTTP/browser remain required."
   }
 }

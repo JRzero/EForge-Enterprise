@@ -595,3 +595,19 @@ then missing mapper factory import); no product logic was altered to pass them.
 The previous implementation87b3f3f cloud still runs;79642 observation alone failed
 with annotations unexpected EOF while authoritative GH jobs remained live. A single
 reconnected observer now follows the same workflow; no tests were rerun or restarted.
+
+Exact template-source cloud acceptance (2026-10-07):87b3f3f391614f0bd4cef247d663f79c95669d5e,
+server37489735710 all three jobs SUCCESS. Direct generator-eforge-api-cloud-accepted.log
+proves606 backend (596boot+10scope, one OS-specific skip), both MySQL modes each66
+actual snapshot assertions (two new template outputs increase the former64),
+each474 output contexts, default/enabled each43 real browsers, complete existing
+APIs and exact committed OpenAPI comparisons. Original observer79642 ended1 only
+because GH annotations returned unexpected EOF; authority stayed live. Reconnected
+observer77573 ended0 after the same run succeeded; no tests were rerun.
+
+The newer native SQL scripts/CI are commit e8a637fffba3487a1357c9f393435f2be7dbeebc;
+they have local modes0/1 each52 actual generated module SQL/rollback assertions,
+but their own server37492073073 remains pending. They are not covered by the older
+87b source cloud acceptance. Its unique observer43975 follows
+ generator-business-module-cloud-server.log. Complete generator/network/client/React/
+UI acceptance remains incomplete. No frontend source changed or new web workflow.
