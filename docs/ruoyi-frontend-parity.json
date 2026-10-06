@@ -1368,8 +1368,10 @@
     "scope": "Typed canonical preview/download and generated authenticated transports; custom output, full semantics, React/EForge/UI/business HTTP-browser remain required."
   },
   "generatorPrimaryKeyAccessorValidation": {
-    "state": "local-final-runtime-verified-cloud-pending",
+    "state": "cloud-verified",
     "review": "docs/security-review-generator-pk-accessor.md",
+    "implementationCommit": "bd83767f99f7b07a8ff54debda5c71c6f4d38088",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37461230715",
     "backendTests": 589,
     "actualJavaCompileExecutionCases": 10,
     "beforeFailures": 1,
