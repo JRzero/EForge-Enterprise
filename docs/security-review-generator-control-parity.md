@@ -95,3 +95,8 @@ HTTP/client/SQL/Redis authorization and audit. The two changed verification
 sources pass lint; production templates remain the prior709865e implementation.
 Exact expanded-matrix cloud is pending. Required/disabled/auto-PK variants and
 other remaining groups above have not been marked complete.
+
+The expanded matrix uses representative valid field types for each control kind.
+It does not prove every supported type/control/dictionary-value combination.
+Boolean dictionary choices using original numeric0/1 values, required/readonly
+flags and auto-generated keys remain explicit next verification requirements.
