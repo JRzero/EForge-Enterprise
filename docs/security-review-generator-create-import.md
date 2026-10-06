@@ -76,3 +76,12 @@ Frontend/contracts remain exactly unchanged from b7d78bf. Its exact server run
 37401957208 is now all-three successful, with actual 88/86 SQL phase assertions
 and both 43-live-browser profiles confirmed from workflow logs. Both old watches
 are terminal; none of that older CI proves the new import-service cloud acceptance.
+Exact implementation afde85813221b2ad9320bdcf73306547a883ca08 is accepted for this
+metadata phase: server 37403883802 all three jobs completed successfully. Cloud
+logs confirm both actual Spring/MyBatis profiles pass 27 assertions and both
+existing live-browser profiles pass 43. Complete MySQL/Redis/Quartz/OSHI/ACL/captcha
+regressions and both exact OpenAPI checks succeed. The final local packaged Maven
+classpath also passes both 27-case profiles (generator-create-import-packaged-*
+logs), not merely the compile-phase classpath. Watch 22533 is terminal success.
+This supersedes the earlier newest-cloud pending checkpoint. No physical/import
+HTTP command or creation UI acceptance is claimed; those routes remain unassembled.

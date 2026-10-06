@@ -1471,3 +1471,12 @@ passes server 37401957208 all three jobs, actual 88/86 JDBC and both 43-browser
 profiles. Both old watches are terminal. New metadata import-service exact cloud
 acceptance and assembled HTTP creation remain pending; do not substitute old
 physical/preflight checks for this new acceptance.
+Exact implementation afde85813221b2ad9320bdcf73306547a883ca08 is accepted for this
+metadata phase: server 37403883802 all three jobs completed successfully. Cloud
+logs confirm both actual Spring/MyBatis profiles pass 27 assertions and both
+existing live-browser profiles pass 43. Complete MySQL/Redis/Quartz/OSHI/ACL/captcha
+regressions and both exact OpenAPI checks succeed. The final local packaged Maven
+classpath also passes both 27-case profiles (generator-create-import-packaged-*
+logs), not merely the compile-phase classpath. Watch 22533 is terminal success.
+This supersedes the earlier newest-cloud pending checkpoint. No physical/import
+HTTP command or creation UI acceptance is claimed; those routes remain unassembled.
