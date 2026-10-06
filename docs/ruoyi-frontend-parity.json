@@ -1479,7 +1479,7 @@
     "formBuilder": "deferred-not-complete"
   },
   "generatorTemplateChoice": {
-    "status": "local-real-sql-preview-proven-exact-cloud-pending",
+    "status": "exact-commit-cloud-accepted-full-generator-incomplete",
     "choices": ["eforge-react", "element-ui", "element-plus", "element-plus-typescript"],
     "omittedValue": "previous-canonical-eforge-react-default",
     "backendTests": 615,
@@ -1488,6 +1488,9 @@
     "fullRealFrameworkBrowserProfiles": [43,43],
     "mainOpenApiSha256": "7C431ED9D0876F95649E9432A6B06759BF741E93BE8B58BE9AD1FC33B4EE5E5D",
     "review": "docs/security-review-generator-template-choice.md",
-    "cloud": "pending-for-new-implementation",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "implementationCommit": "4664f31556edf7428bf2eb9cd7b324c9b78781c8",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251402",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251594",
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
   }}

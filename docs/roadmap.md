@@ -732,3 +732,14 @@ See security-review-generator-template-choice.md. Main live/committed schema has
 7C431ED9D0876F95649E9432A6B06759BF741E93BE8B58BE9AD1FC33B4EE5E5D.
 Exact new cloud is pending. This prerequisite does not implement the full manager
 page or prove all generated control variants; those remain active.
+### Generator template selection accepted; manager implementation in progress
+Exact4664f31556edf7428bf2eb9cd7b324c9b78781c8 server37526251402 all three
+jobs and web37526251594 succeeded. Direct accepted logs prove615 backend,
+83 unit/64 mocked browser, both43 real framework profiles, actual four-choice
+metadata/preview retention, installed generated-host profiles and identical
+main OpenAPI. Observer78862 terminated0. See template-choice security review.
+Uncommitted manager UI now has four preliminary mocked browser checks and85
+units passing; it is not accepted as a complete manager or real page regression.
+Remaining parent/dictionary pickers, original controls, migration/real browser
+verification, generated control variants, shell and final active parity remain.
+Form builder remains deferred and the specific Quartz approval boundary persists.
