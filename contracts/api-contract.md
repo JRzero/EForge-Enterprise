@@ -136,6 +136,7 @@ Rules:
 ## OpenAPI rules
 
 - `/api/v1` is the canonical OpenAPI surface
+- The `api-v1` documentation group selects `/api/v1/**` paths, including installed generated business controllers; it must not exclude them by a framework-only package filter. Compatibility paths stay outside this group. OpenAPI enablement and authentication remain separate authoritative server controls.
 - public request/response bodies use concrete DTO classes
 - generated TypeScript code lives under `web/generated/`
 - generated files are never manually edited

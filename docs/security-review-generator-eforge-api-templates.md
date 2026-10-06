@@ -237,3 +237,35 @@ Both live OpenAPI hashes equal committed D3161897413EDBBE68548E6CA5FB73B00E1E562
 No live local app remains. This verifies existing product APIs, while generated
 module network/client evidence remains the independent two116 native checks;
 production auth/group integration and full React generator remain pending.
+
+
+Exact client-contract cloud acceptance:764d36b2fe9fdf556c389b29f7eb0d35683d731b,
+server37496589462 all three SUCCESS and web37496589426 SUCCESS. Direct accepted logs
+prove606 backend/one OS-specific skip, two66 snapshots/two474 text, two116 actual
+HTTP/SQL/OpenAPI assertions and all CRUD/tree/sub generated client tests, default/
+enabled each43 real browsers/full API/OpenAPI, frontend79 unit/64 mocked browser,
+reproducible client/lint/types/build. Observer41384 ended0. This accepts that preceding
+contract/client checkpoint and cannot be reused for the later YAML group fix below.
+
+Actual canonical group configuration checkpoint (2026-10-07):
+The probe now loads the real application.yml through YamlPropertySourceLoader and
+uses SpringDoc's actual multi-group resources. Its external generated package fell
+outside the framework-only packages-to-scan filter: actual /v3/api-docs/api-v1 returned
+no generated business path and the regression failed before the fix (38755 ended1,
+generator-business-canonical-group-before.log). The production api-v1 group now
+selects its already-contractual /api/v1/** path without excluding installed generated
+business packages. The default compatibility group and all OpenAPI enablement,
+console authentication, production-disabled defaults and SecurityConfig are unchanged.
+The API contract documents path-based canonical membership.
+
+Both final modes each122 assertions pass through actual production group configuration,
+real generated canonical AND original compatibility controllers, and generated client
+CRUD/filter/XLSX. Compatibility /test/entry/list stays callable but is excluded from
+canonical docs. Both explicit group/native processes exit cleanly (36810/60491), logs
+generator-business-canonical-group-after-0/1.log. Full Maven606 and sequential default/
+enabled/custom complete real existing API regression60491 exited0; both live OpenAPI
+hashes remain committed D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+No local app is live; final jar matches this YAML. The new group change has not yet
+received its own cloud acceptance. Controlled native LoginUser still does not prove
+actual generated module JWT/Redis/persisted audit/concurrent write installation or
+React frontend/browser/manager completion; those remain explicit remaining work.

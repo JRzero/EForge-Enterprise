@@ -642,3 +642,15 @@ Both live OpenAPI hashes equal committed D3161897413EDBBE68548E6CA5FB73B00E1E562
 No live local app remains. This verifies existing product APIs, while generated
 module network/client evidence remains the independent two116 native checks;
 production auth/group integration and full React generator remain pending.
+
+
+2026-10-07 generated client764d36b server37496589462 three jobs/web37496589426 all
+SUCCESS; direct logs verify two116+three actual generated client checks each mode,
+606backend/two66/two474/two43 main real browser/frontend79units64mock/full API.
+New production canonical documentation fix: actual YAML/multi-group regression failed
+before the package filter was removed and passed after; /api/v1/** includes installed
+generated packages while original compatibility remains usable and excluded. Both
+modes122 checks, Maven606 and both complete actual API profiles pass; live contracts
+remain exactly D316... . Its own cloud acceptance is pending; JWT/Redis generated
+module/audit/concurrency/React templates/generator manager/browser remain incomplete.
+Form builder is still deferred, not completed.

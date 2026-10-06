@@ -30,14 +30,22 @@ class GeneratorBusinessModuleMysqlProbe {
     @org.springframework.web.servlet.config.annotation.EnableWebMvc
     @org.springframework.boot.context.properties.EnableConfigurationProperties(org.springdoc.core.properties.SpringDocConfigProperties.class)
     @org.springframework.context.annotation.Import({org.springdoc.core.configuration.SpringDocConfiguration.class,
-            org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration.class})
+            org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration.class,
+            org.springdoc.webmvc.core.configuration.MultipleOpenApiSupportConfiguration.class})
     static class NetworkMvc {}
     static int checks;
     static void verifyNetwork(org.springframework.context.ApplicationContext parent, ClassLoader loader,
                               JdbcTemplate jdbc, String category, ObjectMapper json) throws Exception {
         var grants = new java.util.concurrent.atomic.AtomicReference<Set<String>>(Set.of());
         var web = new org.springframework.web.context.support.GenericWebApplicationContext();
+        var defaultsLoader = new org.springframework.boot.env.YamlPropertySourceLoader();
+        var defaultSources = defaultsLoader.load("actual-product-defaults", new org.springframework.core.io.FileSystemResource(
+                Path.of(System.getProperty("eforge.probe.repo")).resolve("server/eforge-boot/src/main/resources/application.yml")));
+        for (var source : defaultSources) web.getEnvironment().getPropertySources().addLast(source);
+        web.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("owned-probe-docs", Map.of("springdoc.api-docs.enabled", true)));
         web.setParent(parent); web.setClassLoader(loader); new org.springframework.context.annotation.AnnotatedBeanDefinitionReader(web).register(NetworkMvc.class);
+        web.registerBean("networkLegacyController", (Class)loader.loadClass("generated.controller.ApiRootController"),
+                () -> parent.getBean("apiRootLegacyController"));
         web.registerBean("networkApiController", (Class) loader.loadClass("generated.api.ApiRootApiController"),
                 () -> parent.getBean("apiRootApiController"));
         var factory = new org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory(0);
@@ -46,7 +54,7 @@ class GeneratorBusinessModuleMysqlProbe {
             var filter = servletContext.addFilter("probeAuthentication", new jakarta.servlet.Filter() {
                 public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
                                      jakarta.servlet.FilterChain chain) throws java.io.IOException, jakarta.servlet.ServletException {
-                    if (((jakarta.servlet.http.HttpServletRequest)request).getRequestURI().equals("/v3/api-docs")
+                    if (((jakarta.servlet.http.HttpServletRequest)request).getRequestURI().startsWith("/v3/api-docs")
                             && !grants.get().contains("test:entry:query")) {
                         ((jakarta.servlet.http.HttpServletResponse)response).sendError(403); return;
                     }
@@ -76,7 +84,7 @@ class GeneratorBusinessModuleMysqlProbe {
             check(created.statusCode() == 201, "Actual network create failed: " + created.body());
             check(json.readTree(created.body()).get("oRderKey").textValue().equals(id), "Network JSON lost exact identifier.");
             check(jdbc.queryForObject("SELECT label FROM module_" + category, String.class).equals("网络中文"), "Actual network create did not persist.");
-            var docsRequest = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://127.0.0.1:" + server.getPort() + "/v3/api-docs")).GET().build();
+            var docsRequest = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://127.0.0.1:" + server.getPort() + "/v3/api-docs/api-v1")).GET().build();
             var docsResponse = client.send(docsRequest, java.net.http.HttpResponse.BodyHandlers.ofString());
             check(docsResponse.statusCode() == 200, "Actual generated OpenAPI HTTP failed: " + docsResponse.body());
             var spec = json.readTree(docsResponse.body());
@@ -84,6 +92,7 @@ class GeneratorBusinessModuleMysqlProbe {
             Path contractOutput = Path.of(System.getProperty("eforge.probe.repo")).resolve("server/eforge-boot/target/generated-business-openapi");
             Files.createDirectories(contractOutput);
             Files.writeString(contractOutput.resolve(category + ".json"), json.writerWithDefaultPrettyPrinter().writeValueAsString(spec), StandardCharsets.UTF_8);
+            check(!spec.path("paths").has("/test/entry/list"), "Canonical group included original compatibility API.");
             check(spec.path("paths").has("/api/v1/business/test/entry"), "Generated business API missing from actual OpenAPI.");
             check(spec.path("paths").path("/api/v1/business/test/entry").path("post").path("operationId").asText().equals("test_entry_create"), "Generated OpenAPI create operation identity changed.");
             check(spec.path("components").path("schemas").path("test_ApiRootApiModel").path("properties").path("oRderKey").path("type").asText().equals("string"), "Actual generated OpenAPI exact ID schema was not string.");
@@ -97,6 +106,8 @@ class GeneratorBusinessModuleMysqlProbe {
             for (var param : params) if (param.path("name").asText().equals("q_begin_amount")) decimalQueryString = param.path("schema").path("type").asText().equals("string");
             check(decimalQueryString, "Generated decimal query schema would lose precision in client.");
             grants.set(Set.of("test:entry:add", "test:entry:query", "test:entry:remove", "test:entry:edit", "test:entry:list", "test:entry:export"));
+            var originalList = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://127.0.0.1:" + server.getPort() + "/test/entry/list")).GET().build();
+            check(client.send(originalList, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 200, "Original generated API was unavailable while excluded from canonical docs.");
             var clientLogPath = contractOutput.resolve(category + ".client.log");
             var clientProcess = new ProcessBuilder("node", Path.of(System.getProperty("eforge.probe.repo")).resolve("web/scripts/verify-generator-business-client.mjs").toString(),
                     contractOutput.resolve(category + ".json").toString(), "http://127.0.0.1:" + server.getPort(), category).redirectErrorStream(true).redirectOutput(clientLogPath.toFile()).start();
@@ -160,6 +171,7 @@ class GeneratorBusinessModuleMysqlProbe {
                     var mapperType=loader.loadClass("generated.mapper.ApiRootMapper");
                     context.registerBean("apiRootMapper",MapperFactoryBean.class,()->{var mapper=new MapperFactoryBean(mapperType);mapper.setSqlSessionFactory(sessions);return mapper;});
                     context.registerBean("apiRootService",(Class)loader.loadClass("generated.service.impl.ApiRootServiceImpl"));
+                    context.registerBean("apiRootLegacyController",(Class)loader.loadClass("generated.controller.ApiRootController"));
                     context.registerBean("apiRootApiController",(Class)loader.loadClass("generated.api.ApiRootApiController"));context.refresh();
                     var mvc=MockMvcBuilders.standaloneSetup(context.getBean("apiRootApiController")).build();
                     String route="/api/v1/business/test/entry";long id=9007199254740993L;
