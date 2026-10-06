@@ -119,19 +119,41 @@ public class VelocityUtils
         }
     }
 
+    private static io.eforge.enterprise.common.exception.ApiFailure invalidSubtableField()
+    {
+        return new io.eforge.enterprise.common.exception.ApiFailure(409, "GENERATOR_SUBTABLE_FIELD_INVALID", "The associated foreign key must identify one configured field.");
+    }
+
     public static void setSubVelocityContext(VelocityContext context, GenTable genTable)
     {
         GenTable subTable = genTable.getSubTable();
         String subTableName = genTable.getSubTableName();
         String subTableFkName = genTable.getSubTableFkName();
-        String subClassName = genTable.getSubTable().getClassName();
-        String subTableFkClassName = StringUtils.convertToCamelCase(subTableFkName);
+        if (subTable == null || subTable.getColumns() == null || StringUtils.isBlank(subTableFkName))
+        {
+            throw invalidSubtableField();
+        }
+        // SQL column identity and configured Java property are different contexts.
+        var exact = subTable.getColumns().stream()
+            .filter(column -> subTableFkName.equals(column.getColumnName())).toList();
+        var matches = exact.isEmpty() ? subTable.getColumns().stream()
+            .filter(column -> column.getColumnName() != null && subTableFkName.equalsIgnoreCase(column.getColumnName())).toList() : exact;
+        if (matches.size() != 1)
+        {
+            throw invalidSubtableField();
+        }
+        String subClassName = subTable.getClassName();
+        var foreignKey = matches.get(0);
+        String foreignJavaField = io.eforge.enterprise.generator.rendering.GeneratorOutputText.javaIdentifier(foreignKey.getJavaField());
+        // Match the original domain templates' JavaBeans accessor spelling.
+        String subTableFkClassName = foreignJavaField.length() > 2 && foreignJavaField.substring(1, 2).matches("[A-Z]")
+            ? foreignJavaField : foreignJavaField.substring(0, 1).toUpperCase() + foreignJavaField.substring(1);
 
         context.put("subTable", subTable);
         context.put("subTableName", subTableName);
-        context.put("subTableFkName", subTableFkName);
+        context.put("subTableFkName", foreignKey.getColumnName());
         context.put("subTableFkClassName", subTableFkClassName);
-        context.put("subTableFkclassName", StringUtils.uncapitalize(subTableFkClassName));
+        context.put("subTableFkclassName", foreignJavaField);
         context.put("subClassName", subClassName);
         context.put("subclassName", StringUtils.uncapitalize(subClassName));
         context.put("subImportList", getImportList(genTable.getSubTable()));

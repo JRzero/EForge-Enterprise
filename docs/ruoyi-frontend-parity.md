@@ -1603,3 +1603,20 @@ actual browsers and both full real API regressions pass. Both live OpenAPI
 exports exactly match SHA256481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
 Exact new-commit cloud is pending. This stage does not complete generator output,
 React/EForge templates, management UI or the full active goal.
+Exact menu/SpEL cloud acceptance:42b0a0d5de41fe4726f80a4e243dd96e54475d16,
+https://github.com/JRzero/EForge-Enterprise/actions/runs/37435846617 all three jobs
+SUCCESS. Direct generator-menu-spel-cloud-accepted.log proves533 backend tests,
+both230 native output/Mapper/menu checks, both32 snapshots, default/enabled each43
+real browsers, full APIs and unchanged live OpenAPI. Observer80201 ended1 only
+because its final GitHub API poll returned unexpected EOF; authoritative run/jobs
+and direct logs prove success. No rerun/source change was needed. This accepts
+that exact menu/SpEL stage, not the later FK alias change.
+Actual subtable FK alias fix (2026-10-06): original generation failed all three
+actual Java compiler cases with saved custom foreign-key Java fields. Rendering
+now separates physical SQL identity, saved Java property and original getter/
+setter spelling. All three now compile; actual generated service bytecode assigns
+exact parent data before batch persistence.538 backend tests, both474 real native
+statements/assertions, both32 actual snapshots and actual MVC safe no-write errors
+pass. Final default/enabled profiles each43 real browsers and complete APIs pass; both live OpenAPI files exactly match the contract. Session58628 ended0. Exact new-source cloud remains pending.
+See security-review-generator-fk-java-field.md. Broader identifiers/tree aliases,
+complete bundle/paths/canonical output/React/EForge/UI/end-to-end remain required.

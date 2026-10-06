@@ -1276,7 +1276,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37432111694"
   },
   "generatorMenuSpelValidation": {
-    "state": "actual-menu-and-annotation-contexts-local-verified",
+    "state": "actual-menu-and-annotation-contexts-cloud-verified",
     "review": "docs/security-review-generator-menu-spel.md",
     "backendTests": 533,
     "generatedJavaCompilerCases": 4,
@@ -1290,12 +1290,36 @@
       32
     ],
     "completeRuntime": "both-complete-api-profiles-success",
-    "currentCloud": "pending-exact-commit",
+    "currentCloud": "success",
     "scope": "Actual original menu SQL and route/Java-embedded SpEL text. Lexical/semantic identifiers, FK mapping, frontend text, canonical bundles/output/paths/React/UI/business HTTP-browser remain pending.",
     "realBrowserProfiles": [
       43,
       43
     ],
-    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201"
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201",
+    "implementationCommit": "42b0a0d5de41fe4726f80a4e243dd96e54475d16",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37435846617"
+  },
+  "generatorForeignJavaFieldValidation": {
+    "state": "actual-subtable-fk-java-mapping-local-verified",
+    "review": "docs/security-review-generator-fk-java-field.md",
+    "backendTests": 538,
+    "actualGeneratedJavaCases": 7,
+    "compilerFailuresBefore": 3,
+    "compilerCasesAfter": "all-pass",
+    "actualCompiledServiceAssignments": 3,
+    "nativeAssertions": [
+      474,
+      474
+    ],
+    "snapshotAssertions": [
+      32,
+      32
+    ],
+    "completeRuntime": "both-complete-api-profiles-success",
+    "realBrowserProfiles": [43, 43],
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201",
+    "currentCloud": "not-yet-committed",
+    "scope": "Actual persisted FK property mapping, original accessor rule and MyBatis parameters only. Broader output/bundle/paths/React/UI/business HTTP-browser still required."
   }
 }

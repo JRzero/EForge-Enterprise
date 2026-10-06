@@ -68,5 +68,19 @@ class GeneratorSynchronizationControllerTest {
     @Test void originalPreviewRejectsListOnlyBeforeMetadataQuery() throws Exception {
         actor(Set.of("tool:gen:list"));mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(403)).andExpect(jsonPath("$.data").doesNotExist());verifyNoInteractions(tables,columns);
     }
+    GenTable associationFixture(boolean child) {
+        var table=new GenTable();table.setTableId(child?2L:1L);table.setTableName(child?"child_table":"root_table");table.setClassName(child?"ChildFixture":"RootFixture");table.setTplCategory(child?"crud":"sub");table.setTplWebType("element-plus");table.setPackageName("generated");table.setModuleName("test");table.setBusinessName("entry");table.setOptions("{}");table.setFormColNum(1);
+        var field=new GenTableColumn();field.setColumnId(child?2L:1L);field.setTableId(table.getTableId());field.setColumnName(child?"parent_id":"id");field.setJavaField(child?"owner;private_secret":"id");field.setJavaType("Long");field.setIsPk("1");table.setColumns(List.of(field));return table;
+    }
+    @Test void actualOriginalPreviewRejectsAbsentAssociatedConfigurationSafely() throws Exception {
+        actor(Set.of("tool:gen:preview"));var root=associationFixture(false);root.setSubTableFkName("parent_id");when(tables.selectGenTableById(1L)).thenReturn(root);
+        mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(409)).andExpect(jsonPath("$.msg").value("The associated foreign key must identify one configured field.")).andExpect(jsonPath("$.data").doesNotExist());
+        verify(tables,never()).updateGenTable(any());verifyNoInteractions(columns);
+    }
+    @Test void actualOriginalPreviewRejectsInvalidAssociatedJavaNameWithoutEchoOrWrite() throws Exception {
+        actor(Set.of("tool:gen:preview"));var root=associationFixture(false);root.setSubTableName("child_table");root.setSubTableFkName("parent_id");when(tables.selectGenTableById(1L)).thenReturn(root);when(tables.selectGenTableByName("child_table")).thenReturn(associationFixture(true));
+        mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(400)).andExpect(jsonPath("$.msg").value("Generator metadata cannot be represented in the selected output context.")).andExpect(jsonPath("$.data").doesNotExist());
+        verify(tables,never()).updateGenTable(any());verifyNoInteractions(columns);
+    }
     @TestConfiguration static class Configuration {@Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}@Bean CorsFilter corsFilter(){return new CorsFilter(new UrlBasedCorsConfigurationSource());}}
 }

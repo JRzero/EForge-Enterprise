@@ -19,9 +19,12 @@ class GeneratorOutputTextMysqlProbe {
  static int assertions;
  static void check(boolean value,String message){assertions++;if(!value)throw new AssertionError(message);}
  public static class Entry {
-  Long id,parentId;String label;List<Entry> childLineList;
+  Long id,parentId,ownerReference,oWnerReference,所有者引用;String label;List<Entry> childLineList;
   public Long getId(){return id;}public void setId(Long value){id=value;}
   public Long getParentId(){return parentId;}public void setParentId(Long value){parentId=value;}
+  public Long getOwnerReference(){return ownerReference;}public void setOwnerReference(Long value){ownerReference=value;}
+  public Long getoWnerReference(){return oWnerReference;}public void setoWnerReference(Long value){oWnerReference=value;}
+  public Long get所有者引用(){return 所有者引用;}public void set所有者引用(Long value){所有者引用=value;}
   public String getLabel(){return label;}public void setLabel(String value){label=value;}
   public List<Entry> getChildLineList(){return childLineList;}public void setChildLineList(List<Entry> value){childLineList=value;}
  }
@@ -36,14 +39,18 @@ class GeneratorOutputTextMysqlProbe {
   var label=field("列`\"<&. --","label","String");table.setColumns(List.of(id,label));table.setPkColumn(id);return table;
  }
  static void actualMapper(Connection connection)throws Exception{
-  for(String category:List.of("crud","tree","sub")){
-   var root=table(category,"实际_"+category+"`\"<&. select");
-   var child=table("crud","子表`\"<&. select");child.setClassName("ChildLine");
-   var parent=field("parent_id","parentId","Long");child.setColumns(List.of(child.getPkColumn(),parent,child.getColumns().get(1)));
-   root.setSubTable(child);root.setSubTableName(child.getTableName());root.setSubTableFkName("parent_id");
+  for(String scenario:List.of("crud","tree","sub","subAlias","subAcronym","subUnicode","subQuoted","subCase")){
+   String category=scenario.startsWith("sub")?"sub":scenario;
+   var root=table(category,"实际_"+scenario+"`\"<&. select");
+   var child=table("crud","子表_"+scenario+"`\"<&. select");child.setClassName("ChildLine");
+   String foreignPhysical=scenario.equals("subQuoted")?"父键`\"<&.值":"parent_id";
+   String foreignJava=scenario.equals("subAcronym")?"oWnerReference":scenario.equals("subUnicode")?"所有者引用":scenario.equals("subAlias")||scenario.equals("subQuoted")?"ownerReference":"parentId";
+   String foreignAccessor=scenario.equals("subAcronym")?"oWnerReference":scenario.equals("subUnicode")?"所有者引用":scenario.equals("subAlias")||scenario.equals("subQuoted")?"OwnerReference":"ParentId";
+   var parent=field(foreignPhysical,foreignJava,"Long");child.setColumns(List.of(child.getPkColumn(),parent,child.getColumns().get(1)));
+   root.setSubTable(child);root.setSubTableName(child.getTableName());root.setSubTableFkName(scenario.equals("subCase")?"PARENT_ID":foreignPhysical);
    try(var sql=connection.createStatement()){
     sql.execute("CREATE TABLE "+GeneratorOutputText.mysqlIdentifier(root.getTableName())+" ("+GeneratorOutputText.mysqlIdentifier(root.getPkColumn().getColumnName())+" BIGINT PRIMARY KEY AUTO_INCREMENT,"+GeneratorOutputText.mysqlIdentifier(root.getColumns().get(1).getColumnName())+" TEXT CHARACTER SET utf8mb4)");
-    if(category.equals("sub"))sql.execute("CREATE TABLE "+GeneratorOutputText.mysqlIdentifier(child.getTableName())+" ("+GeneratorOutputText.mysqlIdentifier(child.getPkColumn().getColumnName())+" BIGINT PRIMARY KEY AUTO_INCREMENT,parent_id BIGINT,"+GeneratorOutputText.mysqlIdentifier(child.getColumns().get(2).getColumnName())+" TEXT CHARACTER SET utf8mb4)");
+    if(category.equals("sub"))sql.execute("CREATE TABLE "+GeneratorOutputText.mysqlIdentifier(child.getTableName())+" ("+GeneratorOutputText.mysqlIdentifier(child.getPkColumn().getColumnName())+" BIGINT PRIMARY KEY AUTO_INCREMENT,"+GeneratorOutputText.mysqlIdentifier(foreignPhysical)+" BIGINT,"+GeneratorOutputText.mysqlIdentifier(child.getColumns().get(2).getColumnName())+" TEXT CHARACTER SET utf8mb4)");
    }
    VelocityInitializer.initVelocity();var writer=new StringWriter();Velocity.getTemplate("vm/xml/mapper.xml.vm","UTF-8").merge(VelocityUtils.prepareContext(root),writer);
    var configuration=new Configuration();configuration.getTypeAliasRegistry().registerAlias("RootText",Entry.class);configuration.getTypeAliasRegistry().registerAlias("ChildLine",Entry.class);
@@ -63,18 +70,19 @@ class GeneratorOutputTextMysqlProbe {
      entry.label="updated\t<&`😀";check(session.update(namespace+"updateRootText",entry)==1,"Generated update failed.");
      read=session.selectOne(namespace+"selectRootTextById",entry.id);check(entry.label.equals(read.label),"Generated update/result mapping changed text.");
      if(category.equals("sub")){
-      var line=new Entry();line.parentId=entry.id;line.label="child中文'\\<&😀";
+      var line=new Entry();line.parentId=entry.id;line.ownerReference=entry.id;line.oWnerReference=entry.id;line.所有者引用=entry.id;line.label="child中文'\\<&😀";
       check(session.insert(namespace+"batchChildLine",Map.of("list",List.of(line)))==1,"Generated child insert failed.");
       read=session.selectOne(namespace+"selectRootTextById",entry.id);
       check(read.childLineList.size()==1&&line.label.equals(read.childLineList.get(0).label),"Generated nested child mapping failed.");
-      check(session.delete(namespace+"deleteChildLineByParentIds",Map.of("array",new Long[]{entry.id}))==1,"Generated child delete failed.");
+      check(entry.id.equals(Entry.class.getMethod("get"+foreignAccessor).invoke(read.childLineList.get(0))),"Configured foreign key Java property changed.");
+      check(session.delete(namespace+"deleteChildLineBy"+foreignAccessor+"s",Map.of("array",new Long[]{entry.id}))==1,"Generated child delete failed.");
      }
      check(session.delete(namespace+"deleteRootTextByIds",Map.of("array",new Long[]{entry.id}))==1,"Generated batch delete failed.");
      check(session.selectOne(namespace+"selectRootTextById",entry.id)==null,"Generated delete did not target exact row.");
     }
    }
   }
-  try(var sql=connection.createStatement();var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==5,"Generated mapper executed an unintended DDL side effect.");}
+  try(var sql=connection.createStatement();var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==15,"Generated mapper executed an unintended DDL side effect.");}
  }
  static void actualMenu(Connection connection,Path repository)throws Exception{
   var baseline=SQLUtils.parseStatements(Files.readString(repository.resolve("sql/upstream/ry_20260417.sql")),DbType.mysql);
@@ -116,7 +124,7 @@ class GeneratorOutputTextMysqlProbe {
     }
    }
    try(var result=sql.executeQuery("SELECT COUNT(*) FROM sys_menu")){check(result.next()&&result.getInt(1)==24,"Generated menu has unexpected row side effects.");}
-   try(var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==6,"Generated menu has unintended DDL side effects.");}
+   try(var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==16,"Generated menu has unintended DDL side effects.");}
   }
  }
  public static void main(String[] args)throws Exception{

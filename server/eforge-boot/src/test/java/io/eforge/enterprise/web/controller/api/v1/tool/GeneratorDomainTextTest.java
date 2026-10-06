@@ -38,6 +38,7 @@ class GeneratorDomainTextTest {
   var diagnostics=new java.io.ByteArrayOutputStream();
   assertEquals(0,ToolProvider.getSystemJavaCompiler().run(null,diagnostics,diagnostics,arguments.toArray(String[]::new)),diagnostics.toString(StandardCharsets.UTF_8));
   try(var classes=new URLClassLoader(new java.net.URL[]{directory.toUri().toURL()},getClass().getClassLoader())){
+   if(table.getClassName().equals("AliasedRoot")) inspectGeneratedForeignAssignment(classes,table);
    for(String name:table.isSub()?List.of(table.getClassName(),table.getSubTable().getClassName()):List.of(table.getClassName())){
     var type=classes.loadClass("generated.domain."+name);
     assertThrows(NoSuchFieldException.class,()->type.getDeclaredField("injected"));
@@ -62,6 +63,24 @@ class GeneratorDomainTextTest {
    }
   }
  }
+ void inspectGeneratedForeignAssignment(URLClassLoader classes,GenTable table)throws Exception{
+  var rootType=classes.loadClass("generated.domain.AliasedRoot");var childType=classes.loadClass("generated.domain.AliasedLine");
+  var root=rootType.getConstructor().newInstance();rootType.getMethod("setLabel",String.class).invoke(root,"真实父键/中文");
+  var line=childType.getConstructor().newInstance();childType.getMethod("setLabel",String.class).invoke(line,"子行");
+  rootType.getMethod("setAliasedLineList",List.class).invoke(root,List.of(line));
+  String field=table.getSubTable().getColumns().get(1).getJavaField();
+  String getter="get"+Map.of("ownerReference","OwnerReference","oWnerReference","oWnerReference","所有者引用","所有者引用").get(field);
+  assertNull(childType.getMethod(getter).invoke(line));var batchCalls=new java.util.concurrent.atomic.AtomicInteger();
+  var mapperType=classes.loadClass("generated.mapper.AliasedRootMapper");
+  var mapper=java.lang.reflect.Proxy.newProxyInstance(classes,new Class<?>[]{mapperType},(proxy,method,args)->{
+   if(method.getName().equals("insertAliasedRoot")){assertSame(root,args[0]);return 1;}
+   if(method.getName().equals("batchAliasedLine")){var items=(List<?>)args[0];assertEquals(1,items.size());assertSame(line,items.get(0));assertEquals("真实父键/中文",childType.getMethod(getter).invoke(items.get(0)));batchCalls.incrementAndGet();return 1;}
+   throw new AssertionError("Unexpected generated mapper invocation: "+method.getName());
+  });
+  var service=classes.loadClass("generated.service.impl.AliasedRootServiceImpl").getConstructor().newInstance();
+  org.springframework.test.util.ReflectionTestUtils.setField(service,"aliasedRootMapper",mapper);
+  assertEquals(1,service.getClass().getMethod("insertAliasedRoot",rootType).invoke(service,root));assertEquals(1,batchCalls.get());
+ }
  @Test void rootTemplateContainsHostileLabelsAsAnnotationData()throws Exception{compileAndInspect(table("crud","RootText"),ATTACK,"");}
  @Test void rootAndChildTemplatePreserveOriginalConverterSemanticsWithEscapedValues()throws Exception{
   var root=table("sub","RootLines");var child=table("crud","ChildLine");String comment=ATTACK+"（0正常\"\\u000a 1停用）";
@@ -74,6 +93,14 @@ class GeneratorDomainTextTest {
   String permission="x');T(java.lang.System).setProperty('"+marker+"','yes');('";
   var root=table("crud","PermissionText");root.setModuleName("模块\"\\文本");root.setBusinessName("业务'文本");
   compileAndInspect(root,ATTACK,"",permission);assertNull(System.getProperty(marker));
+ }
+ @org.junit.jupiter.params.ParameterizedTest
+ @org.junit.jupiter.params.provider.ValueSource(strings={"ownerReference","oWnerReference","所有者引用"})
+ void configuredForeignKeyJavaNameCompilesInActualRootAndChildSources(String javaField)throws Exception{
+  var root=table("sub","AliasedRoot");var child=table("crud","AliasedLine");
+  var foreign=new GenTableColumn();foreign.setColumnName("parent_id");foreign.setJavaField(javaField);foreign.setJavaType("String");foreign.setIsPk("0");foreign.setIsList("0");
+  child.setColumns(List.of(child.getColumns().get(0),foreign));root.setSubTable(child);root.setSubTableName(child.getTableName());root.setSubTableFkName("parent_id");
+  compileAndInspect(root,ATTACK,"");
  }
  @Test void treeTemplateCompilesWithHostileMetadataWithoutNewMembers()throws Exception{compileAndInspect(table("tree","TreeText"),ATTACK,"");}
 }
