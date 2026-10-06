@@ -1,5 +1,5 @@
 # Pure prepared-SQL fidelity probe. Owns only its uniquely named disposable container.
-param([string]$MavenRepository = (Join-Path $env:USERPROFILE '.m2/repository'))
+param([string]$MavenRepository = (Join-Path ([Environment]::GetFolderPath('UserProfile')) '.m2/repository'))
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $policySource = Join-Path $PSScriptRoot 'probes/GeneratorCreationPolicyMysqlProbe.java'

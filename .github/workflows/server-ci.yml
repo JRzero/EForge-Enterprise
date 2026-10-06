@@ -85,6 +85,10 @@ jobs:
       - name: Verify server
         run: mvn -B -ntp -f server/pom.xml verify
 
+      - name: Verify prepared creation SQL fidelity on isolated MySQL
+        shell: pwsh
+        run: ./server/scripts/verify-generator-creation-policy.ps1
+
   runtime-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 35

@@ -196,3 +196,8 @@ application ports, waits for the final MySQL TCP server and removes only its own
 unique container. The committed runner also passes; see
 `generator-create-policy-mysql-reproducible.log`. The probe is independent of the
 full application/API regressions and does not claim endpoint creation acceptance.
+The isolated prepared-SQL fidelity probe is now also a required server-ci verify
+step after Maven verification. Its default repository path uses the platform
+user profile rather than Windows-only USERPROFILE; the updated runner passes
+locally (`generator-create-policy-mysql-portable-runner.log`). Linux/cloud execution
+must still be checked at the precise workflow commit before claiming cloud success.
