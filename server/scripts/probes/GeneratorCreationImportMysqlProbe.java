@@ -47,6 +47,7 @@ class GeneratorCreationImportMysqlProbe {
   @Bean GenTableColumnMapper columns(SqlSessionFactory factory){return new SqlSessionTemplate(factory).getMapper(GenTableColumnMapper.class);}
   @Bean GeneratorMetadataBoundary boundary(JdbcTemplate jdbc){return new GeneratorMetadataBoundary(jdbc);}
   @Bean GeneratorCreationMetadataImport importer(JdbcTemplate jdbc,GeneratorMetadataBoundary boundary,GenTableMapper tables,GenTableColumnMapper columns){return new GeneratorCreationMetadataImport(jdbc,boundary,tables,columns);}
+  @Bean GeneratorCreationCommand creation(DataSource source,GeneratorCreationMetadataImport importer){return new GeneratorCreationCommand(source,importer);}
   @Bean(name="ss") PermissionService permissions(){return new PermissionService();}
  }
  static GeneratorCreationExecution.Result create(DataSource source,String sql) throws SQLException {
@@ -122,6 +123,46 @@ class GeneratorCreationImportMysqlProbe {
    } finally {jdbc.execute("RENAME TABLE unavailable_guard TO gen_metadata_guard");}
    check(count("gen_table")==5&&count("gen_table_column")==6,"Guard SQL failure changed metadata.");
    check(jdbc.queryForObject("SELECT COUNT(*) FROM guard_failure_created",Integer.class)==0,"Guard failure dropped physical target.");
+   var command=context.getBean(GeneratorCreationCommand.class);
+   login("ordinary",Set.of("tool:gen:import","tool:gen:edit"));
+   try{command.create("CREATE TABLE command_denied(id INT)","eforge-react");throw new AssertionError("Creation role bypassed.");}
+   catch(AccessDeniedException denied){assertions++;}
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='command_denied'",Integer.class)==0,"Role denial happened after DDL.");
+   login("admin",Set.of());
+   try{command.create("CREATE TABLE command_bad_template(id INT)","unknown");throw new AssertionError("Invalid template accepted.");}
+   catch(ApiFailure failure){check(failure.code().equals("VALIDATION_ERROR"),"Unexpected template error.");}
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='command_bad_template'",Integer.class)==0,"Template validation happened after DDL.");
+   try{command.create("CREATE TABLE command_bad_batch(id INT);DELETE FROM ImportMix","eforge-react");throw new AssertionError("Mixed batch accepted.");}
+   catch(ApiFailure failure){check(failure.status()==400,"Mixed batch not rejected by complete preflight.");}
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='command_bad_batch'",Integer.class)==0,"Mixed batch partially executed.");
+   var completed=command.create("CREATE TABLE command_complete(id INT PRIMARY KEY AUTO_INCREMENT,label VARCHAR(20))","element-plus");
+   check(completed.importState()==GeneratorCreationCommand.ImportState.IMPORTED&&completed.imported().size()==1&&completed.physical().get(0).state()==GeneratorCreationExecution.State.CREATED,"Shared command did not complete both phases.");
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM gen_table_column WHERE table_id=?",Integer.class,Long.parseLong(completed.imported().get(0).id()))==2,"Shared command lost actual fields.");
+   long commandBeforeTables=count("gen_table"),commandBeforeColumns=count("gen_table_column");
+   try{command.create("CREATE TABLE command_partial_first(id INT);CREATE TABLE command_partial_bad(value VARCHAR(70000));CREATE TABLE command_partial_last(id INT)","eforge-react");throw new AssertionError("Invalid physical DDL succeeded.");}
+   catch(GeneratorCreationCommand.Failure failure){
+    check(failure.status()==500&&failure.code().equals("GENERATOR_CREATE_DDL_FAILED"),"Unexpected partial physical status.");
+    check(failure.creation().physical().stream().map(GeneratorCreationExecution.Outcome::state).toList().equals(List.of(GeneratorCreationExecution.State.CREATED,GeneratorCreationExecution.State.FAILED,GeneratorCreationExecution.State.UNATTEMPTED)),"Physical outcomes lost.");
+    check(failure.creation().importState()==GeneratorCreationCommand.ImportState.UNATTEMPTED&&failure.creation().imported().isEmpty(),"Partial physical batch imported.");
+   }
+   check(count("gen_table")==commandBeforeTables&&count("gen_table_column")==commandBeforeColumns,"Partial DDL modified metadata.");
+   jdbc.update("INSERT INTO command_partial_first VALUES(63)");
+   check(jdbc.queryForObject("SELECT id FROM command_partial_first",Integer.class)==63,"Acknowledged physical target not retained.");
+   jdbc.execute("CREATE TRIGGER command_import_fault BEFORE INSERT ON gen_table_column FOR EACH ROW SET NEW.column_name=IF((SELECT table_name FROM gen_table WHERE table_id=NEW.table_id)='command_import_second',REPEAT('x',300),NEW.column_name)");
+   try{command.create("CREATE TABLE command_import_first(id INT);CREATE TABLE command_import_second(id INT)","eforge-react");throw new AssertionError("Import SQL fault succeeded.");}
+   catch(GeneratorCreationCommand.Failure failure){
+    check(failure.code().equals("GENERATOR_IMPORT_FAILED")&&failure.getMessage().equals("Created table metadata could not be saved."),"Command exposed SQL failure details.");
+    check(failure.creation().physical().size()==2&&failure.creation().physical().stream().allMatch(t->t.state()==GeneratorCreationExecution.State.CREATED)&&failure.creation().importState()==GeneratorCreationCommand.ImportState.FAILED,"Import failure lost physical acknowledgements.");
+   } finally{jdbc.execute("DROP TRIGGER command_import_fault");}
+   check(count("gen_table")==commandBeforeTables&&count("gen_table_column")==commandBeforeColumns,"Command import failure did not roll back complete metadata batch.");
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('command_import_first','command_import_second')",Integer.class)==2,"Command compensated physical DDL.");
+   try{command.create("CREATE TABLE IF NOT EXISTS command_import_first(id INT)","eforge-react");throw new AssertionError("Retry claimed existing physical target.");}
+   catch(ApiFailure failure){check(failure.status()==409,"Retry did not report existing target.");}
+   new TransactionTemplate(context.getBean(PlatformTransactionManager.class)).execute(status->{
+    command.create("CREATE TABLE command_parent_rollback(id INT)","eforge-react");status.setRollbackOnly();return null;
+   });
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM gen_table WHERE table_name='command_parent_rollback'",Integer.class)==1,"Command joined caller transaction.");
+   check(jdbc.queryForObject("SELECT COUNT(*) FROM command_parent_rollback",Integer.class)==0,"Parent rollback removed acknowledged physical target.");
    System.out.println("PASS: "+assertions+" actual Spring/MyBatis creation import assertions; role, exact case/fields, long IDs, audit, checked rollback/retry and REQUIRES_NEW isolation.");
   } finally {SecurityContextHolder.clearContext();}
  }

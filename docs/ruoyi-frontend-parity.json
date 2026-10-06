@@ -1169,4 +1169,18 @@
     "scope": "Admin role, authenticated audit, exact native table/field identity, checked IDs/writes, independent guarded transaction, real late SQL batch rollback/retry and concurrent serialization. No assembled creation HTTP/client or generated output/UI acceptance.",
     "implementationCommit": "afde85813221b2ad9320bdcf73306547a883ca08",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37403883802"
-  }}
+  },
+  "generatorCreationHttpValidation": {
+    "state": "local-http-client-verified-cloud-pending",
+    "review": "docs/security-review-generator-create-http.md",
+    "mvcTests": 8,
+    "backendTests": 488,
+    "mysqlCaseMode0SpringAssertions": 47,
+    "mysqlCaseMode1SpringAssertions": 47,
+    "frontendUnitTests": 73,
+    "simulatedBrowserTests": 64,
+    "runtime": "Default and explicitly enabled complete real API runs are terminal success, including creation faults/recovery/concurrency/audit and full MySQL/Redis/Quartz/OSHI/ACL/captcha regression. Both live OpenAPI exports exactly match the committed candidate. Final real-browser and exact-commit cloud acceptance remain pending.",
+    "currentCloud": "not-submitted",
+    "scope": "Shared admin canonical creation and original form endpoint, physical outcomes and independent metadata import, safe typed partial errors and generated client. Complete generator UI/output and final acceptance remain pending. Form builder remains deferred."
+  }
+}

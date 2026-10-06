@@ -416,6 +416,69 @@
         ],
         "type": "object"
       },
+      "Creation": {
+        "properties": {
+          "importState": {
+            "enum": [
+              "IMPORTED",
+              "FAILED",
+              "UNATTEMPTED"
+            ],
+            "type": "string"
+          },
+          "imported": {
+            "items": {
+              "$ref": "#/components/schemas/Imported"
+            },
+            "type": "array"
+          },
+          "physical": {
+            "items": {
+              "$ref": "#/components/schemas/Outcome"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CreationProblem": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "creation": {
+            "$ref": "#/components/schemas/Creation"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instance": {
+            "format": "uri",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CronPreviewResponse": {
         "properties": {
           "times": {
@@ -1109,6 +1172,24 @@
         ],
         "type": "object"
       },
+      "GeneratorCreationRequest": {
+        "properties": {
+          "sql": {
+            "maxLength": 65536,
+            "minLength": 0,
+            "type": "string",
+            "writeOnly": true
+          },
+          "template": {
+            "pattern": "element-ui|element-plus|element-plus-typescript|eforge-react",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ],
+        "type": "object"
+      },
       "GeneratorFieldUpdate": {
         "properties": {
           "comment": {
@@ -1257,6 +1338,24 @@
         "required": [
           "tables"
         ],
+        "type": "object"
+      },
+      "Imported": {
+        "properties": {
+          "actualName": {
+            "type": "string"
+          },
+          "columnCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "requestedName": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ImportedTable": {
@@ -2104,6 +2203,26 @@
             "type": "string"
           },
           "treeParentCode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Outcome": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "CREATED",
+              "FAILED",
+              "UNATTEMPTED",
+              "UNCONFIRMED"
+            ],
             "type": "string"
           }
         },
@@ -8414,6 +8533,97 @@
         },
         "tags": [
           "user-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/creations": {
+      "post": {
+        "description": "Creates the prevalidated SQL batch and imports metadata. Physical DDL is not rolled back on partial failure; inspect the returned outcomes.",
+        "operationId": "createGeneratorTables",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratorCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Creation"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationProblem"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "tags": [
+          "generator-creation-controller"
         ]
       }
     },

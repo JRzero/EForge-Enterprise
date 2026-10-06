@@ -304,3 +304,23 @@ classpath also passes both 27-case profiles (generator-create-import-packaged-*
 logs), not merely the compile-phase classpath. Watch 22533 is terminal success.
 This supersedes the earlier newest-cloud pending checkpoint. No physical/import
 HTTP command or creation UI acceptance is claimed; those routes remain unassembled.
+
+### Shared generator creation HTTP — local validation complete, cloud pending
+
+Canonical POST /api/v1/tool/generator/creations and original form creation now
+share the admin command, complete-batch preflight, separate physical DDL and
+checked independent metadata import. Partial failures preserve truthful physical
+and import outcomes, without compensating DROP or SQL input auditing. The real
+OpenAPI candidate and generated client include this operation.
+
+Local Maven passed 488 tests including 10 data-scope cases; 8 creation MVC/security
+cases passed. Actual Spring/MyBatis MySQL probes passed 47 assertions in each
+native case mode. Frontend lint/typecheck/reproduction/build, 73 unit tests and
+64 simulated browser cases passed. Final default/enabled complete HTTP runs
+are terminal success, including actual SQL failure/recovery, concurrent creation,
+audit, configuration/sync and full MySQL/Redis/Quartz/OSHI/ACL/captcha regression.
+Both exported OpenAPI snapshots exactly match the contract. Production security
+defaults pass. Final real-browser and exact-commit cloud acceptance remain pending.
+See security-review-generator-create-http.md.
+This phase does not complete generator output/UI or the overall objective.
+Form builder remains deferred; all other current requirements remain.

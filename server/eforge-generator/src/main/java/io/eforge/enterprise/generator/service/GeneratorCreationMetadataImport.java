@@ -31,7 +31,7 @@ public class GeneratorCreationMetadataImport {
     public List<Imported> importCreated(GeneratorCreationExecution.Result physical,String template) {
         if(physical==null||!physical.allCreated()||physical.tables().size()>100)
             throw new ApiFailure(409,"GENERATOR_CREATE_IMPORT_NOT_READY","Only a fully acknowledged physical batch can be imported.");
-        if(template==null||!TEMPLATES.contains(template))throw new ApiFailure(400,"VALIDATION_ERROR","Select a supported generator template.");
+        validateTemplate(template);
         String actor=SecurityUtils.getUsername();
         try {
             boundary.lock();
@@ -67,6 +67,9 @@ public class GeneratorCreationMetadataImport {
             return List.copyOf(result);
         } catch(DuplicateKeyException duplicate){throw conflict();}
         catch(DataAccessException unavailable){throw writeFailed();}
+    }
+    public static void validateTemplate(String template) {
+        if(template==null||!TEMPLATES.contains(template))throw new ApiFailure(400,"VALIDATION_ERROR","Select a supported generator template.");
     }
     private static ApiFailure schemaChanged(){return new ApiFailure(409,"GENERATOR_SCHEMA_CHANGED","Created table metadata is unavailable or changed.");}
     private static ApiFailure conflict(){return new ApiFailure(409,"GENERATOR_TABLE_ALREADY_IMPORTED","Created table metadata is already imported.");}

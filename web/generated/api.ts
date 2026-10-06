@@ -698,6 +698,38 @@ export type UserRolesRequest = {
 export type UserStatusRequest = {
     status: string;
 };
+export type GeneratorCreationRequest = {
+    template?: string;
+};
+export type GeneratorCreationRequestWrite = {
+    sql: string;
+    template?: string;
+};
+export type Imported = {
+    actualName?: string;
+    columnCount?: number;
+    id?: string;
+    requestedName?: string;
+};
+export type Outcome = {
+    code?: string;
+    name?: string;
+    state?: "CREATED" | "FAILED" | "UNATTEMPTED" | "UNCONFIRMED";
+};
+export type Creation = {
+    importState?: "IMPORTED" | "FAILED" | "UNATTEMPTED";
+    imported?: Imported[];
+    physical?: Outcome[];
+};
+export type CreationProblem = {
+    code?: string;
+    creation?: Creation;
+    detail?: string | null;
+    instance?: string | null;
+    status?: number;
+    title?: string | null;
+    "type"?: string;
+};
 export type DatabaseTable = {
     comment?: string;
     createdAt?: string;
@@ -2206,6 +2238,37 @@ export function setUserStatus(id: string, userStatusRequest: UserStatusRequest, 
         ...opts,
         method: "PUT",
         body: userStatusRequest
+    }));
+}
+/**
+ * Creates the prevalidated SQL batch and imports metadata. Physical DDL is not rolled back on partial failure; inspect the returned outcomes.
+ */
+export function createGeneratorTables(generatorCreationRequest: GeneratorCreationRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: Creation;
+    } | {
+        status: 400;
+        data: CreationProblem;
+    } | {
+        status: 401;
+        data: CreationProblem;
+    } | {
+        status: 403;
+        data: CreationProblem;
+    } | {
+        status: 409;
+        data: CreationProblem;
+    } | {
+        status: 500;
+        data: CreationProblem;
+    } | {
+        status: 503;
+        data: CreationProblem;
+    }>("/api/v1/tool/generator/creations", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: generatorCreationRequest
     }));
 }
 export function listGeneratorDatabaseTables({ page, pageSize, name, comment, $from, to, sort, direction }: {
