@@ -1716,3 +1716,34 @@ generated reproduction/lint/typecheck/build. The corrected D3161897... contract
 is accepted. Earlier missing200 exports are superseded, not accepted evidence.
 This accepts custom output/API/client only; true React/EForge templates, full
 manager UI and actual generated business deployment remain required.
+
+EForge generated business API template stage (uncommitted, 2026-10-06): actual
+CRUD/tree/sub bundles now additionally render concrete /api/v1 business DTO/read/
+write/export controllers, keeping original permissions and compatibility routes.
+Actual source compilation and Spring MVC+MethodSecurity/XLSX validation pass for
+all three categories; business compilation excludes boot classes, API compilation
+uses boot assembly. Full verify606 (596boot+10scope, one OS skip) passes. These
+service-witness tests do not prove actual SQL module deployment/transactions or
+new generated OpenAPI/client/React flows. Existing API regression is sequential
+session67710, no-browser default then enabled consoles/custom output, still pending.
+React frontend remains Vue fallback and must be replaced, complete generator UI
+and generated real CRUD/tree/sub HTTP/browser remain incomplete. See
+security-review-generator-eforge-api-templates.md; form builder remains deferred.
+
+Existing API regression progress: default generator-eforge-api-disabled-runtime.log
+ends in complete PASS; actual exported OpenAPI exactly matches existing contract
+D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+The same sequential authority67710 is now running the explicit enabled profile.
+Do not restart or package while its local app is live. This first regression has
+no browsers and does not deploy the newly generated business module API routes.
+
+Final existing API regression:67710 ended0. Both default and explicit enabled
+consoles/custom-output profiles end in complete API PASS, and both exported
+OpenAPI files exactly equal D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+No local app is retained. This was a no-browser regression of the framework and
+existing generator endpoints; generated business modules were not installed.
+Frontend source/contracts remain unchanged from accepted7d05634 (79units/64mocked/
+two43real browser profiles). The new three-category actual module compiler/MVC/
+method-security/XLSX tests and full606 verify are green. Saving this template
+checkpoint does not accept module SQL/transactions/audit/deployment, new module
+OpenAPI/client, actual React/EForge output or complete generator UI.

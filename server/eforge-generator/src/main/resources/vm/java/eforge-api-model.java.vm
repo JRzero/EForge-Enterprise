@@ -1,0 +1,189 @@
+package ${packageName}.api;
+
+import java.util.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import ${packageName}.domain.${ClassName};
+#if($table.sub)
+import ${packageName}.domain.${subClassName};
+#end
+
+/** $outputText.javaComment($functionName) canonical response; no legacy entity inheritance. */
+@Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}ApiModel"))
+public record ${ClassName}ApiModel(
+#foreach($column in $columns)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')
+    @JsonSerialize(using=ToStringSerializer.class) @Schema(type="string")
+#elseif($column.javaType == 'Date')
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",timezone="UTC") @Schema(type="string",format="date-time")
+#end
+    $column.javaType $field#if($foreach.hasNext || $table.sub),#end
+#end
+#if($table.sub)
+    List<Child> ${subclassName}List
+#end
+) {
+    public static ${ClassName}ApiModel from(${ClassName} row) {
+        return new ${ClassName}ApiModel(
+#foreach($column in $columns)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($field.length() > 2 && $field.substring(1,2).matches("[A-Z]"))
+#set($accessor=$field)
+#else
+#set($accessor=$field.substring(0,1).toUpperCase()+$field.substring(1))
+#end
+            row.get${accessor}()#if($foreach.hasNext || $table.sub),#end
+#end
+#if($table.sub)
+            row.get${subClassName}List()==null?List.of():row.get${subClassName}List().stream().map(Child::from).toList()
+#end
+        );
+    }
+
+    @Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}WriteRequest"))
+    public record Write(
+#set($firstWriteField=true)
+#foreach($column in $columns)
+#if($column.insert || $column.edit || $column.pk)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if(!$firstWriteField)        ,#end
+#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')
+        @Schema(type="string")
+#elseif($column.javaType == 'Date')
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",timezone="UTC") @Schema(type="string",format="date-time")
+#end
+        $column.javaType $field
+#set($firstWriteField=false)
+#end
+#end
+#if($table.sub)
+        ,@NotNull List<@jakarta.validation.Valid ChildWrite> ${subclassName}List
+#end
+    ) {
+        public ${ClassName} domain(boolean creating) {
+            var row=new ${ClassName}();
+#foreach($column in $columns)
+#if($column.insert || $column.edit || $column.pk)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($field.length() > 2 && $field.substring(1,2).matches("[A-Z]"))
+#set($accessor=$field)
+#else
+#set($accessor=$field.substring(0,1).toUpperCase()+$field.substring(1))
+#end
+#if($column.pk)
+            row.set${accessor}($field);
+#elseif($column.insert && $column.edit)
+            row.set${accessor}($field);
+#elseif($column.insert)
+            if(creating)row.set${accessor}($field);
+#else
+            if(!creating)row.set${accessor}($field);
+#end
+#end
+#end
+#if($table.sub)
+            row.set${subClassName}List(${subclassName}List.stream().map(ChildWrite::domain).toList());
+#end
+            return row;
+        }
+    }
+#if($table.sub)
+    @Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}ChildWriteRequest"))
+    public record ChildWrite(
+#foreach($column in $subTable.columns)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')
+        @Schema(type="string")
+#elseif($column.javaType == 'Date')
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",timezone="UTC") @Schema(type="string",format="date-time")
+#end
+        $column.javaType $field#if($foreach.hasNext),#end
+#end
+    ) {
+        public ${subClassName} domain() {
+            var row=new ${subClassName}();
+#foreach($column in $subTable.columns)
+#if($column.insert || $column.edit || $column.pk)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($field.length() > 2 && $field.substring(1,2).matches("[A-Z]"))
+#set($accessor=$field)
+#else
+#set($accessor=$field.substring(0,1).toUpperCase()+$field.substring(1))
+#end
+            row.set${accessor}($field);
+#end
+#end
+            return row;
+        }
+    }
+#end
+    @Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}Query"))
+    public record Query(@Min(1) Integer page,@Min(1) @Max(100) Integer pageSize
+#foreach($column in $columns)
+#if($column.query)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($column.queryType == 'BETWEEN')
+        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_begin_${field}
+        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_end_${field}
+#else
+        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_${field}
+#end
+#end
+#end
+    ) {
+        public ${ClassName} domain() {
+            var row=new ${ClassName}();
+#foreach($column in $columns)
+#if($column.query)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($field.length() > 2 && $field.substring(1,2).matches("[A-Z]"))
+#set($accessor=$field)
+#else
+#set($accessor=$field.substring(0,1).toUpperCase()+$field.substring(1))
+#end
+#if($column.queryType == 'BETWEEN')
+            row.getParams().put($outputText.javaLiteral("begin${column.capJavaField}"),q_begin_${field});
+            row.getParams().put($outputText.javaLiteral("end${column.capJavaField}"),q_end_${field});
+#else
+            row.set${accessor}(q_${field});
+#end
+#end
+#end
+            return row;
+        }
+    }
+#if($table.sub)
+    @Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}ChildApiModel"))
+    public record Child(
+#foreach($column in $subTable.columns)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')
+        @JsonSerialize(using=ToStringSerializer.class) @Schema(type="string")
+#elseif($column.javaType == 'Date')
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",timezone="UTC") @Schema(type="string",format="date-time")
+#end
+        $column.javaType $field#if($foreach.hasNext),#end
+#end
+    ) {
+        public static Child from(${subClassName} row) {
+            return new Child(
+#foreach($column in $subTable.columns)
+#set($field=$outputText.javaIdentifier($column.javaField))
+#if($field.length() > 2 && $field.substring(1,2).matches("[A-Z]"))
+#set($accessor=$field)
+#else
+#set($accessor=$field.substring(0,1).toUpperCase()+$field.substring(1))
+#end
+                row.get${accessor}()#if($foreach.hasNext),#end
+#end
+            );
+        }
+    }
+#end
+}

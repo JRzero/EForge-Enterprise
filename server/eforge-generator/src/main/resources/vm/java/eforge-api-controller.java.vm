@@ -1,0 +1,139 @@
+package ${packageName}.api;
+
+import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.dao.DataAccessException;
+import org.springdoc.core.annotations.ParameterObject;
+import io.swagger.v3.oas.annotations.Operation;
+import io.eforge.enterprise.common.exception.ApiFailure;
+import io.eforge.enterprise.web.controller.api.v1.PageResponse;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import ${packageName}.service.I${ClassName}Service;
+
+/** $outputText.javaComment($functionName) canonical read boundary. */
+@RestController
+@RequestMapping($outputText.javaLiteral("/api/v1/business/${moduleName}/${businessName}"))
+public class ${ClassName}ApiController {
+    private final I${ClassName}Service service;
+    public ${ClassName}ApiController(I${ClassName}Service service){this.service=service;}
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:list"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @GetMapping
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_list"))
+#if($table.tree)
+    public ResponseEntity<List<${ClassName}ApiModel>> list(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query) {
+        try {
+            var result=service.select${ClassName}List(query.domain()).stream().map(${ClassName}ApiModel::from).toList();
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result);
+        } catch(DataAccessException failure){throw unavailable();}
+    }
+#else
+    public ResponseEntity<PageResponse<${ClassName}ApiModel>> list(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query) {
+        int page=query.page()==null?1:query.page();int size=query.pageSize()==null?10:query.pageSize();
+        try {
+            PageHelper.startPage(page,size);
+            var rows=service.select${ClassName}List(query.domain());
+            long total=new PageInfo<>(rows).getTotal();
+            var result=new PageResponse<>(rows.stream().map(${ClassName}ApiModel::from).toList(),total,page,size);
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result);
+        } catch(DataAccessException failure){throw unavailable();}
+        finally {PageHelper.clearPage();}
+    }
+#end
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:query"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @GetMapping("/{id}")
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_detail"))
+    public ResponseEntity<${ClassName}ApiModel> detail(@PathVariable("id") ${pkColumn.javaType} id) {
+        try {
+            var row=service.select${ClassName}By${pkColumn.capJavaField}(id);
+            if(row==null)throw new ApiFailure(404,"RESOURCE_NOT_FOUND","The requested record was not found.");
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(row));
+        } catch(DataAccessException failure){throw unavailable();}
+    }
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:add"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @PostMapping
+    @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
+    @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.INSERT)
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_create"))
+    public ResponseEntity<${ClassName}ApiModel> create(@Valid @RequestBody ${ClassName}ApiModel.Write input) {
+        try {
+            var row=input.domain(true);
+            row.setCreateBy(io.eforge.enterprise.common.utils.SecurityUtils.getUsername());
+            if(service.insert${ClassName}(row)!=1)throw conflict();
+            var result=service.select${ClassName}By${pkColumn.capJavaField}(row.get${pkJavaAccessor}());
+            if(result==null)throw conflict();
+            return ResponseEntity.status(201).cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(result));
+        } catch(DataAccessException failure){throw unavailable();}
+    }
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:edit"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @PutMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
+    @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.UPDATE)
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_update"))
+    public ResponseEntity<${ClassName}ApiModel> update(@PathVariable("id") ${pkColumn.javaType} id,@Valid @RequestBody ${ClassName}ApiModel.Write input) {
+        try {
+            var row=input.domain(false);
+            if(row.get${pkJavaAccessor}()!=null&&!java.util.Objects.equals(id,row.get${pkJavaAccessor}()))
+                throw new ApiFailure(400,"VALIDATION_ERROR","The record identifier does not match the path.");
+            row.set${pkJavaAccessor}(id);
+            row.setUpdateBy(io.eforge.enterprise.common.utils.SecurityUtils.getUsername());
+            if(service.update${ClassName}(row)!=1)throw conflict();
+            var result=service.select${ClassName}By${pkColumn.capJavaField}(id);
+            if(result==null)throw conflict();
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(result));
+        } catch(DataAccessException failure){throw unavailable();}
+    }
+    public record DeleteRequest(@jakarta.validation.constraints.NotEmpty @jakarta.validation.constraints.Size(max=100) List<@jakarta.validation.constraints.NotNull ${pkColumn.javaType}> ids) {}
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:remove"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @DeleteMapping
+    @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
+    @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.DELETE)
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_delete"))
+    public ResponseEntity<Void> delete(@Valid @RequestBody DeleteRequest input) {
+        if(new java.util.HashSet<>(input.ids()).size()!=input.ids().size())throw new ApiFailure(400,"VALIDATION_ERROR","Select distinct records.");
+        try {
+            service.delete${ClassName}By${pkColumn.capJavaField}s(input.ids().toArray(${pkColumn.javaType}[]::new));
+            return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
+        } catch(DataAccessException failure){throw unavailable();}
+    }
+    private static ApiFailure conflict(){return new ApiFailure(409,"RESOURCE_CHANGED","The requested record could not be saved. Reload before retrying.");}
+#set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:export"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
+    @PostMapping(value="/export",produces="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.EXPORT)
+    @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_export"))
+    public void export(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query,jakarta.servlet.http.HttpServletResponse response) {
+        try {
+            // Export the whole filtered selection, never a stale PageHelper thread-local page.
+            PageHelper.clearPage();
+            var rows=service.select${ClassName}List(query.domain());
+            response.setHeader("Cache-Control","no-store");
+            new io.eforge.enterprise.common.utils.poi.ExcelUtil<>(${packageName}.domain.${ClassName}.class)
+                .exportExcel(response,rows,$outputText.javaLiteral("${ClassName}"));
+        } catch(DataAccessException failure){throw unavailable();}
+        finally {PageHelper.clearPage();}
+    }
+    @ExceptionHandler(ApiFailure.class)
+    public ResponseEntity<ProblemDetail> apiFailure(ApiFailure failure) {
+        var problem=ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(failure.status()),failure.getMessage());
+        problem.setProperty("code",failure.code());
+        return ResponseEntity.status(failure.status()).contentType(MediaType.APPLICATION_PROBLEM_JSON).cacheControl(CacheControl.noStore()).body(problem);
+    }
+    @ExceptionHandler({org.springframework.validation.BindException.class,org.springframework.beans.TypeMismatchException.class,org.springframework.http.converter.HttpMessageNotReadableException.class})
+    public ResponseEntity<ProblemDetail> invalidInput(Exception ignored) {
+        return apiFailure(new ApiFailure(400,"VALIDATION_ERROR","The request contains invalid fields."));
+    }
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ProblemDetail> denied(org.springframework.security.access.AccessDeniedException ignored) {
+        return apiFailure(new ApiFailure(403,"ACCESS_DENIED","Access to this resource is denied."));
+    }
+    private static ApiFailure unavailable(){return new ApiFailure(503,"RESOURCE_UNAVAILABLE","The requested data is temporarily unavailable.");}
+}

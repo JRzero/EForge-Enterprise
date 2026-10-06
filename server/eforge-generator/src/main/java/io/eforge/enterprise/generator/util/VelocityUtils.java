@@ -193,6 +193,11 @@ public class VelocityUtils
         templates.add("vm/java/service.java.vm");
         templates.add("vm/java/serviceImpl.java.vm");
         templates.add("vm/java/controller.java.vm");
+        if (StringUtils.equals("eforge-react", tplWebType))
+        {
+            templates.add("vm/java/eforge-api-model.java.vm");
+            templates.add("vm/java/eforge-api-controller.java.vm");
+        }
         templates.add("vm/xml/mapper.xml.vm");
         templates.add("vm/sql/sql.vm");
         templates.add(apiTemplate);
@@ -240,6 +245,10 @@ public class VelocityUtils
         String javaPath = PROJECT_PATH + "/" + StringUtils.replace(packageName, ".", "/");
         String mybatisPath = MYBATIS_PATH + "/" + moduleName;
         String vuePath = "vue";
+        if (template.equals("vm/java/eforge-api-model.java.vm"))
+            return StringUtils.format("{}/api/{}ApiModel.java", javaPath, className);
+        if (template.equals("vm/java/eforge-api-controller.java.vm"))
+            return StringUtils.format("{}/api/{}ApiController.java", javaPath, className);
 
         if (template.contains("domain.java.vm"))
         {

@@ -1398,5 +1398,24 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37470491224",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37470491110",
     "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
+  },
+  "generatorEforgeApiTemplatesValidation": {
+    "state": "module-templates-local-checkpoint-in-progress",
+    "review": "docs/security-review-generator-eforge-api-templates.md",
+    "backendTests": 606,
+    "compiledModuleCategories": [
+      "crud",
+      "tree",
+      "sub"
+    ],
+    "moduleCompile": "business-excludes-boot-api-in-boot-assembly",
+    "methodSecurity": "actual-original-permission-service-and-proxies-passed",
+    "mvc": "read-write-export-error-boundaries-passed-with-service-witness",
+    "runtime": "both-existing-api-profiles-success-no-browser-no-generated-deployment",
+    "generatedModuleSqlDeployment": "not-yet-verified",
+    "generatedModuleOpenApiClient": "not-yet-verified",
+    "reactTemplate": "still-vue-fallback-incomplete",
+    "currentCloud": "not-submitted",
+    "scope": "Concrete generated API templates are actual output, but real SQL transactions/audit/deployment, React/EForge templates, full generator manager and generated HTTP/browser remain required."
   }
 }
