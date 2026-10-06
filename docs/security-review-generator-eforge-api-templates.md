@@ -269,3 +269,10 @@ No local app is live; final jar matches this YAML. The new group change has not 
 received its own cloud acceptance. Controlled native LoginUser still does not prove
 actual generated module JWT/Redis/persisted audit/concurrent write installation or
 React frontend/browser/manager completion; those remain explicit remaining work.
+
+Exact canonical group cloud acceptance (2026-10-07): 08771cd604d9f17c321884cede68850bc2e7b472,
+server37499013614 all three jobs SUCCESS. Observer24489 ended0; direct
+generator-business-group-cloud-accepted.log proves both122 generated HTTP/SQL/
+group assertions, actual generated clients, both43 real browsers/full API and both
+unchanged canonical OpenAPI comparisons. This accepts the YAML group fix only,
+not the later actual Boot deployment and user-session changes.

@@ -127,6 +127,9 @@ jobs:
         run: |
           ./server/scripts/verify-generator-output-text.ps1 -LowerCaseTableNames 0
           ./server/scripts/verify-generator-output-text.ps1 -LowerCaseTableNames 1
+      - name: Verify generated modules in original Boot JWT Redis and audit
+        shell: pwsh
+        run: ./server/scripts/verify-auth-integration.ps1 -VerifyGeneratedBusiness
   runtime-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 35

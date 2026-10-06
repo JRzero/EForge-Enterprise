@@ -1402,7 +1402,7 @@
   "generatorEforgeApiTemplatesValidation": {
     "state": "generated-business-openapi-client-locally-verified-react-incomplete",
     "review": "docs/security-review-generator-eforge-api-templates.md",
-    "backendTests": 606,
+    "backendTests": 607,
     "compiledModuleCategories": [
       "crud",
       "tree",
@@ -1411,19 +1411,22 @@
     "moduleCompile": "business-excludes-boot-api-in-boot-assembly",
     "methodSecurity": "actual-original-permission-service-and-proxies-passed",
     "mvc": "read-write-export-error-boundaries-passed-with-service-witness",
-    "runtime": "latest-existing-api-default-and-enabled-custom-profiles-success-no-local-browser",
+    "runtime": "actual-generated-boot-jwt-redis-and-complete-api-default-enabled-custom-success-no-local-browser",
     "generatedModuleSqlDeployment": "actual-mysql-generated-spring-transactions-and-loopback-http-passed",
     "actualSqlAssertions": [52,52],
     "actualSqlAndNetworkAssertions": [80,80],
     "actualSqlNetworkOpenApiClientAssertions": [116,116],
     "actualProductCanonicalGroupAssertions": [122,122],
+    "canonicalGroupCommit": "08771cd604d9f17c321884cede68850bc2e7b472",
+    "canonicalGroupServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37499013614",
+    "actualBootReview": "docs/security-review-generated-business-boot.md",
     "generatedClientReproducibility": "twice-identical-strict-type-check-and-real-http-crud-filter-xlsx-passed",
-    "networkAuthentication": "controlled-test-login-user-product-jwt-redis-chain-not-yet-verified",
+    "networkAuthentication": "actual-original-boot-jwt-redis-generated-client-grant-withdrawal-logout-and-persisted-audit-passed",
     "actualLateParentFaultChildRollback": "passed",
     "generatedModuleOpenApiClient": "actual-standalone-springdoc-http-and-pinned-generated-client-locally-verified",
     "productCanonicalOpenApiRegistration": "actual-production-yaml-group-configuration-external-generated-controller-and-legacy-exclusion-passed",
     "reactTemplate": "still-vue-fallback-incomplete",
-    "currentCloud": "client-contract-server-and-web-success-latest-group-yaml-fix-pending",
+    "currentCloud": "client-contract-and-canonical-group-success-latest-boot-user-session-patch-pending",
     "clientContractCommit": "764d36b2fe9fdf556c389b29f7eb0d35683d731b",
     "clientContractServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37496589462",
     "clientContractWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37496589426",
@@ -1434,6 +1437,6 @@
     "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
-    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/product generated module JWT-Redis authentication and installation, React/EForge templates, full generator manager and generated browser remain required."
+    "scope": "Actual Boot JWT/Redis installation and successful persisted mutation/export audit are locally proven. Final patch cloud, generated concurrent HTTP writes, React/EForge templates, full generator manager and generated browser remain required."
   }
 }

@@ -1,6 +1,6 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '')
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness)
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
@@ -15,6 +15,7 @@ $appProcess = $null
 $logDirectory = Join-Path $repoRoot 'server/eforge-boot/target/auth-integration'
 $uploadDirectory = Join-Path $logDirectory "uploads-$runId"
 $customOutputDirectory = Join-Path $logDirectory "custom-output-$runId"
+$generatedBusinessDirectory = Join-Path $logDirectory "generated-business-$runId"
 New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 
 function Invoke-Docker {
@@ -112,7 +113,19 @@ try {
         $previousEnv[$key] = [Environment]::GetEnvironmentVariable($key, 'Process')
         [Environment]::SetEnvironmentVariable($key, $testEnv[$key], 'Process')
     }
-    $startArgs = @{ FilePath = 'java'; ArgumentList = @('-jar', "`"$jar`""); PassThru = $true
+    $appArguments=@('-jar', "`"$jar`"")
+    if ($VerifyGeneratedBusiness) {
+        [xml]$generatedBuildReport=Get-Content -LiteralPath (Join-Path $repoRoot 'server/eforge-boot/target/surefire-reports/TEST-io.eforge.enterprise.web.controller.api.v1.tool.GeneratorEforgeApiTemplateTest.xml') -Raw
+        $generatedBuildClasspath=($generatedBuildReport.testsuite.properties.property | Where-Object {$_.name -eq 'java.class.path'}).value
+        Assert-Check (![string]::IsNullOrWhiteSpace($generatedBuildClasspath)) 'Generated deployment needs the resolved verified compiler classpath.'
+        & java '-Dfile.encoding=UTF-8' --class-path $generatedBuildClasspath (Join-Path $PSScriptRoot 'probes/GeneratorBusinessDeploymentCompiler.java') $generatedBusinessDirectory $logDirectory
+        Assert-Check ($LASTEXITCODE -eq 0) 'Generated business deployment compilation failed.'
+        Get-Content -LiteralPath (Join-Path $generatedBusinessDirectory 'physical-fixtures.sql') -Raw -Encoding utf8 |
+            & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
+        Assert-Check ($LASTEXITCODE -eq 0) 'Owned generated physical fixture initialization failed.'
+        $appArguments=@("`"-Dloader.path=$generatedBusinessDirectory`"", '-cp', "`"$jar`"", 'org.springframework.boot.loader.launch.PropertiesLauncher')
+    }
+    $startArgs = @{ FilePath = 'java'; ArgumentList = $appArguments; PassThru = $true
         RedirectStandardOutput = (Join-Path $logDirectory 'application.log')
         RedirectStandardError = (Join-Path $logDirectory 'application-error.log') }
     if ($IsWindows) { $startArgs.WindowStyle = 'Hidden' }
@@ -144,6 +157,9 @@ try {
     Assert-Check ($sessions.Count -eq 1) 'Expected exactly one Redis login session.'
     $ttl = Invoke-Docker exec $redisName redis-cli ttl $sessions[0]
     Assert-Check ([int]$ttl -gt 0) 'Login session must expire.'
+    if ($VerifyGeneratedBusiness) {
+        . (Join-Path $PSScriptRoot 'verify-generated-business-integration.ps1')
+    }
     $bootstrapResponse = Request '/api/v1/app/bootstrap' 'GET' '' $authorized
     Assert-Check ($bootstrapResponse.StatusCode -eq 200 -and ($bootstrapResponse.Headers['Cache-Control'] -join ';') -eq 'no-store') 'Bootstrap must succeed without caching.'
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
@@ -289,6 +305,12 @@ finally {
         $resolvedLog = [IO.Path]::GetFullPath($logDirectory)
         Assert-Check ($resolvedUpload.StartsWith($resolvedLog + [IO.Path]::DirectorySeparatorChar) -and [IO.Path]::GetFileName($resolvedUpload) -eq "uploads-$runId") 'Unsafe owned upload cleanup target.'
         Remove-Item -LiteralPath $resolvedUpload -Recurse -Force
+    }
+    if (Test-Path -LiteralPath $generatedBusinessDirectory) {
+        $resolvedGenerated=[IO.Path]::GetFullPath($generatedBusinessDirectory)
+        $resolvedGeneratedParent=[IO.Path]::GetFullPath($logDirectory)
+        Assert-Check ($resolvedGenerated.StartsWith($resolvedGeneratedParent+[IO.Path]::DirectorySeparatorChar) -and [IO.Path]::GetFileName($resolvedGenerated) -eq "generated-business-$runId") 'Unsafe owned generated deployment cleanup target.'
+        Remove-Item -LiteralPath $generatedBusinessDirectory -Recurse -Force
     }
     if (Test-Path -LiteralPath $customOutputDirectory) {
         $resolvedCustom = [IO.Path]::GetFullPath($customOutputDirectory)

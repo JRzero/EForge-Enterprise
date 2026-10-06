@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.*;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.core.domain.entity.*;
@@ -42,9 +44,10 @@ public class UserController
     private final ISysPostService posts;
     private final ISysConfigService configuration;
     private final DepartmentMutationMapper mutations;
+    private final RoleSessionRefresher sessions;
     public UserController(ISysUserService users, ISysDeptService departments, ISysRoleService roles,
-            ISysPostService posts, ISysConfigService configuration, DepartmentMutationMapper mutations)
-    { this.users = users; this.departments = departments; this.roles = roles; this.posts = posts; this.configuration = configuration; this.mutations = mutations; }
+            ISysPostService posts, ISysConfigService configuration, DepartmentMutationMapper mutations, RoleSessionRefresher sessions)
+    { this.users = users; this.departments = departments; this.roles = roles; this.posts = posts; this.configuration = configuration; this.mutations = mutations; this.sessions = sessions; }
 
     @GetMapping
     @PreAuthorize("@ss.hasPermi('system:user:list')")
@@ -125,6 +128,7 @@ public class UserController
         user.setUpdateBy(SecurityUtils.getUsername());
         try { if (users.updateUser(user) != 1) throw missing(); }
         catch (DuplicateKeyException exception) { throw conflict(); }
+        refreshAfterCommit(Set.of(user.getUserId()));
         return UserResponse.from(require(user.getUserId()));
     }
 
@@ -142,7 +146,7 @@ public class UserController
             if (id.equals(SecurityUtils.getUserId())) throw failure(409, "USER_SELF_DELETE", "The current user cannot be deleted.");
             mutable(id);
         }
-        users.deleteUserByIds(ids); return ResponseEntity.noContent().build();
+        users.deleteUserByIds(ids); refreshAfterCommit(Set.copyOf(Arrays.asList(ids))); return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/status")
@@ -156,6 +160,7 @@ public class UserController
     {
         lockMutations(); SysUser user = mutable(identifier(id)); user.setStatus(request.status());
         user.setUpdateBy(SecurityUtils.getUsername()); if (users.updateUserStatus(user) != 1) throw missing();
+        refreshAfterCommit(Set.of(user.getUserId()));
         return ResponseEntity.noContent().build();
     }
 
@@ -190,7 +195,7 @@ public class UserController
     {
         lockMutations(); SysUser user = mutable(identifier(id)); Long[] ids = identifiers(request.roleIds());
         validateRoles(ids, roles.selectRoleListByUserId(user.getUserId()));
-        users.insertUserAuth(user.getUserId(), ids); return ResponseEntity.noContent().build();
+        users.insertUserAuth(user.getUserId(), ids); refreshAfterCommit(Set.of(user.getUserId())); return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/export", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -222,6 +227,16 @@ public class UserController
         SysUser user = require(id);
         if (user.isAdmin()) throw failure(409, "USER_ADMIN_PROTECTED", "The super administrator cannot be modified.");
         users.checkUserAllowed(user); return user;
+    }
+    private void refreshAfterCommit(Set<Long> userIds)
+    {
+        // Read committed SQL permissions; preserve TTL and never recreate a logged-out session.
+        if (TransactionSynchronizationManager.isSynchronizationActive())
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()
+            {
+                @Override public void afterCommit() { sessions.refresh(userIds); }
+            });
+        else sessions.refresh(userIds);
     }
     private void lockMutations()
     {

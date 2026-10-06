@@ -1830,3 +1830,22 @@ modes122 checks, Maven606 and both complete actual API profiles pass; live contr
 remain exactly D316... . Its own cloud acceptance is pending; JWT/Redis generated
 module/audit/concurrency/React templates/generator manager/browser remain incomplete.
 Form builder is still deferred, not completed.
+
+Exact canonical group cloud acceptance (2026-10-07): 08771cd604d9f17c321884cede68850bc2e7b472,
+server37499013614 all three jobs SUCCESS. Observer24489 ended0; direct
+generator-business-group-cloud-accepted.log proves both122 generated HTTP/SQL/
+group assertions, actual generated clients, both43 real browsers/full API and both
+unchanged canonical OpenAPI comparisons. This accepts the YAML group fix only,
+not the later actual Boot deployment and user-session changes.
+Actual original Boot generated deployment (2026-10-07, final cloud pending):
+The actual generator-rendered CRUD/tree/sub Java and mapper XML compile and install
+into the original Boot assembly through a disposable owned classpath. Original
+JWT/Redis/method permission/MyBatis/LogAspect chains and actual canonical group
+produce real generated clients with exact long/decimal HTTP CRUD/filter/XLSX.
+Real no-role grant initially failed because canonical user allocation left cached
+permissions stale. UserController now reuses the existing refresher after commit
+for allocation/update/status/delete, preserving TTL and logout and skipping rollback.
+Full Maven607 (one OS skip), frontend79/repro/lint/types/build and both122 native
+generated client regressions pass. Final default and enabled/custom complete API regressions both pass; session19503 ended0. No local app remains. New exact-commit cloud/browser acceptance remains pending.
+See security-review-generated-business-boot.md. React frontend templates, full
+generator management and generated browser flows remain incomplete.

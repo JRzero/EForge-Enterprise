@@ -51,6 +51,7 @@ class UserControllerTest
     @MockitoBean UserImportService importer;
     @MockitoBean io.eforge.enterprise.system.mapper.DepartmentMutationMapper mutations;
     @MockitoBean TokenService tokens;
+    @MockitoBean RoleSessionRefresher sessions;
     @MockitoBean LogoutSuccessHandlerImpl logout;
     @BeforeEach void authenticate()
     {
@@ -73,6 +74,33 @@ class UserControllerTest
         when(roles.selectRoleAll()).thenReturn(List.of());
         when(posts.selectPostAll()).thenReturn(List.of());
         when(configuration.selectConfigByKey(anyString())).thenReturn("Test12345");
+    }
+    @Test void roleAssignmentWaitsForCommitAndRollbackNeverRefreshes() throws Exception
+    {
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try
+        {
+            mvc.perform(put(PATH + "/2/roles").contentType(MediaType.APPLICATION_JSON).content("{\"roleIds\":[]}"))
+                    .andExpect(status().isNoContent());
+            verifyNoInteractions(sessions);
+            var callbacks = org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations();
+            org.junit.jupiter.api.Assertions.assertEquals(1, callbacks.size());
+            callbacks.forEach(callback -> callback.afterCompletion(
+                    org.springframework.transaction.support.TransactionSynchronization.STATUS_ROLLED_BACK));
+            verifyNoInteractions(sessions);
+        }
+        finally { org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization(); }
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try
+        {
+            mvc.perform(put(PATH + "/2/roles").contentType(MediaType.APPLICATION_JSON).content("{\"roleIds\":[]}"))
+                    .andExpect(status().isNoContent());
+            verifyNoInteractions(sessions);
+            org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(org.springframework.transaction.support.TransactionSynchronization::afterCommit);
+            verify(sessions).refresh(Set.of(2L));
+        }
+        finally { org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization(); }
     }
     private static SysUser row(long id)
     {

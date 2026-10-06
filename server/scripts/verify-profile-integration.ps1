@@ -61,7 +61,8 @@ Assert-Check (@($passwordRaces | Where-Object Status -eq 204).Count -eq 1 -and @
 $credentialAudit = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e "SELECT COUNT(*) FROM sys_oper_log WHERE title IN ('个人密码','个人信息','用户头像') AND (oper_param LIKE '%Changed12345%' OR oper_param LIKE '%Concurrent12345%' OR json_result LIKE '%Changed12345%' OR json_result LIKE '%Concurrent12345%');"
 Assert-Check ([int]$credentialAudit -eq 0) 'Self-service audit records must not contain credentials.'
 Assert-Check ((Request "/api/v1/system/users/$profileId/status" 'PUT' '{"status":"1"}' $authorized).StatusCode -eq 204) 'Disabling the profile fixture failed.'
-Assert-Problem (Request '/api/v1/me' 'GET' '' $changedHeaders) 401 'AUTHENTICATION_FAILED'
+# Canonical disable now invalidates cached sessions at commit, before any profile request.
+Assert-Problem (Request '/api/v1/me' 'GET' '' $changedHeaders) 401 'AUTHENTICATION_REQUIRED'
 Assert-Problem (Request '/api/v1/me' 'GET' '' $changedHeaders) 401 'AUTHENTICATION_REQUIRED'
 Assert-Check ((Request "/api/v1/system/users/$profileId/status" 'PUT' '{"status":"0"}' $authorized).StatusCode -eq 204) 'Re-enabling the fixture failed.'
 Request '/logout' 'POST' '' $profileHeaders | Out-Null
