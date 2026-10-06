@@ -127,8 +127,7 @@ literal data are tested. Logs use generator-create-parser-* under boot target.
 Both final real API regressions pass from the resulting jar and their normalized
 OpenAPI snapshots exactly match the contract. Frontend and contract trees are
 unchanged from accepted ff67dd4 (73 units, 64 fixture and both final 43 browsers);
-client reproduction and production-default checks pass. Exact-head cloud is
-pending for this parser foundation. No
+client reproduction and production-default checks pass. Exact-head server run 37392720300 at 6bcce42c0e8c5a63be603f73ba207d942250e736 is now successful in all three jobs, including both browser/runtime configurations. This proves the parser foundation regression only. No
 physical creation or final AST execution policy acceptance is claimed.
 
 MySQL's single-statement atomic DDL does not combine a sequence of CREATEs with a
@@ -145,3 +144,55 @@ application failure alone cannot prove whether the server completed CREATE. This
 is a recovery design inference. Do not label it rolled back or infer ownership
 from an existence check that may observe a competing request. Recovery may use
 explicit inspection/import of existing physical tables, with no automatic DROP.
+## AST policy and pinned parser fidelity checkpoint (2026-10-06)
+
+The pure, currently unwired AST policy prepares immutable SQL/name/reference
+results after whole-batch validation. It checks native function names, variables,
+assignment, SELECT INTO and locking, external storage/engines and partition paths.
+Database source resolution (including CTE scope and views), SQL mode, native
+function compatibility coverage, live ownership and partial DDL/import outcomes
+remain prerequisites for endpoint wiring. No physical creation API acceptance is
+claimed by these tests.
+
+Actual failing tests exposed three pinned AST fidelity gaps: clone() dropped CTAS
+WITH queries; serializing a snapshot dropped subpartition attributes; default AST
+visitors missed generated expressions and parts of partition metadata. Snapshots
+now retain the immutable original batch and reparse copies; the request text is
+never itself an execution plan. Explicit policy traversal inspects those omitted
+expressions and metadata.
+
+Further failing tests showed the output visitor dropped lawful subpartition
+options/comments and inferred RANGE COLUMNS from an identifier, while the MySQL
+parser itself did not preserve its COLUMNS flag. A local parser extension records
+the lexical distinction and a local output visitor preserves it and emits the
+validated native subpartition ENGINE/MAX_ROWS/MIN_ROWS/COMMENT options. The pinned
+Druid version is unchanged. Both RANGE and RANGE COLUMNS, computed YEAR bounds,
+CTAS CTEs and unsafe special function parameters have targeted tests. The final
+range repair passes 30 targeted tests (14 parser, 16 policy); full latest backend
+and runtime regression is being verified separately. Logs are
+`generator-create-policy-*-test.log`, `generator-create-policy-render-fixed.log`
+and `generator-create-policy-range-final-test.log` under boot target. A red log is
+a reproduced defect, not final acceptance evidence.
+
+The user deferred the online form builder on 2026-10-06. Its inventory is retained,
+but it is excluded from current development/acceptance. All other generator,
+task, shell/shared and final acceptance requirements remain active.
+An isolated, uniquely owned MySQL 8.4 container (no published ports or network)
+executed the actual prepared SQL, not handwritten equivalents. Its partition
+metadata proves `range_plain=RANGE`, `range_columns=RANGE COLUMNS` and computed
+YEAR bounds=RANGE; SHOW CREATE retains the subpartition comment. CTAS WITH copies
+the expected row, LIKE copies schema without rows, and the original source row
+remains intact. The probe container was removed afterward. See
+`generator-create-policy-prepared.sql`, `GeneratorCreationPolicyMysqlProbe.java`,
+`generator-create-policy-mysql-probe.ps1` and the final PASS log
+`generator-create-policy-mysql-probe.log` under boot target. This proves those SQL
+rendering cases on real MySQL, not canonical/legacy endpoint behavior, concurrent
+ownership, metadata import, partial outcome safety or final creation acceptance.
+The MySQL fidelity probe is reproducible after Maven verify using
+`server/scripts/verify-generator-creation-policy.ps1` with its committed Java
+source in `server/scripts/probes/GeneratorCreationPolicyMysqlProbe.java`. It takes
+an optional MavenRepository for non-default local dependency caches, uses no
+application ports, waits for the final MySQL TCP server and removes only its own
+unique container. The committed runner also passes; see
+`generator-create-policy-mysql-reproducible.log`. The probe is independent of the
+full application/API regressions and does not claim endpoint creation acceptance.

@@ -233,3 +233,22 @@ Attempt 1 could not acquire hosted runners for two jobs; those jobs had no test
 steps, and the same-run failed-job retry passed without a source change. The
 successful original runtime job is retained. This accepts synchronization only;
 physical creation, generator output/templates/pages and full parity remain active.
+### 2026-10-06: generator creation AST policy and fidelity foundation
+
+- Pure, unwired whole-batch AST policy and immutable parser snapshots now have
+  30 targeted cases. Reproduced clone/visitor/renderer omissions are repaired,
+  including CTAS WITH, unsafe generated/partition expressions, subpartition
+  options/comments and distinct RANGE/RANGE COLUMNS syntax without a pin change.
+- Full Maven verify passes 474 cases (464 boot plus ten data-scope cases). Both
+  final real API configurations pass and exact normalized OpenAPI matches the
+  contract; generated client reproduction passes. Frontend/contract trees remain
+  unchanged, with prior accepted browser evidence; new cloud acceptance is pending.
+- The committed isolated MySQL fidelity probe executes actual prepared SQL and
+  proves partition kinds/comments, CTAS WITH/LIKE and source retention.
+- Creation API/executor, live source/CTE/view resolution, SQL modes, native-function
+  compatibility coverage, honest partial DDL/import outcomes and concurrency still
+  require implementation and real acceptance before endpoint wiring. Generator
+  React output/pages, task mutations, shell/shared and final acceptance remain.
+- Online form builder stays deferred by the user's current scope decision.
+
+See `proposed-generator-create-boundary.md` for exact evidence and limitations.

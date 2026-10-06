@@ -26,7 +26,7 @@ class GeneratorCreationBatchParserTest {
     }
     @Test void cteAndForeignKeyReferencesAreTraversed() {
         var result=parse("CREATE TABLE owned_child(id BIGINT,parent_id BIGINT,CONSTRAINT fk FOREIGN KEY(parent_id) REFERENCES eforge_enterprise.owned_parent(id));CREATE TABLE owned_cte AS WITH q AS (SELECT id FROM owned_source) SELECT id FROM q");
-        assertEquals(Set.of("owned_parent"),result.get(0).references());assertTrue(result.get(1).references().contains("owned_source"));
+        assertEquals(Set.of("owned_parent"),result.get(0).references());assertTrue(result.get(1).references().contains("owned_source"));assertTrue(result.get(1).astCopy().toString().contains("WITH"));
     }
     @Test void foreignSchemasCannotHideInLikeJoinsSubqueriesCtesOrForeignKeys() {
         for(var sql:List.of("CREATE TABLE owned LIKE private_schema.source","CREATE TABLE owned AS SELECT a.id FROM owned_source a JOIN private_schema.source b ON a.id=b.id","CREATE TABLE owned AS SELECT (SELECT id FROM private_schema.source LIMIT 1)","CREATE TABLE owned AS WITH q AS (SELECT id FROM private_schema.source) SELECT id FROM q","CREATE TABLE owned(id INT,p INT,FOREIGN KEY(p) REFERENCES private_schema.source(id))")) refuses(sql);

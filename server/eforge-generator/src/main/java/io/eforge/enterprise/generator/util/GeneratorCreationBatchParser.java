@@ -13,6 +13,8 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitorAdapter;
 import com.alibaba.druid.sql.parser.ParserException;
 import com.alibaba.druid.sql.parser.Token;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlLexer;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlCreateTableParser;
 import io.eforge.enterprise.common.exception.ApiFailure;
 
 /** Parsing foundation only. Not an execution policy; no endpoint calls this yet. */
@@ -24,14 +26,18 @@ public final class GeneratorCreationBatchParser {
     /** AST copies protect the parsed snapshot from later caller mutations. */
     public static final class ParsedTable {
         private final String name;
-        private final MySqlCreateTableStatement ast;
+        private final String originalBatch;
+        private final int statementIndex;
         private final Set<String> references;
-        private ParsedTable(String name, MySqlCreateTableStatement ast, Set<String> references) {
-            this.name = name; this.ast = ast.clone();
+        private ParsedTable(String name, String originalBatch, int statementIndex, Set<String> references) {
+            this.name = name; this.originalBatch = originalBatch; this.statementIndex = statementIndex;
             this.references = Collections.unmodifiableSet(new LinkedHashSet<>(references));
         }
         public String name() { return name; }
-        public MySqlCreateTableStatement astCopy() { return ast.clone(); }
+        public MySqlCreateTableStatement astCopy() {
+            // Both clone() and rendering omit some pinned AST fields; reparse immutable input.
+            return (MySqlCreateTableStatement) parseAstBatch(originalBatch).get(statementIndex);
+        }
         public Set<String> references() { return references; }
     }
 
@@ -40,11 +46,12 @@ public final class GeneratorCreationBatchParser {
                 || currentSchema == null || currentSchema.isBlank()) throw invalid();
         rejectExecutableCommentsAndDeepBrackets(sql);
         final List<SQLStatement> statements;
-        try { checkTokenComplexity(sql); statements = SQLUtils.parseStatements(sql, DbType.mysql); }
+        try { checkTokenComplexity(sql); statements = parseAstBatch(sql); }
         catch (ParserException | IllegalArgumentException malformed) { throw invalid(); }
         if (statements.isEmpty() || statements.size() > MAX_TABLES) throw invalid();
         var names = new HashSet<String>();
         var result = new ArrayList<ParsedTable>();
+        int statementIndex = 0;
         for (var statement : statements) {
             if (!(statement instanceof MySqlCreateTableStatement table)) throw invalid();
             String name = localName(table.getName(), currentSchema);
@@ -66,11 +73,38 @@ public final class GeneratorCreationBatchParser {
                 }
                 @Override public void postVisit(SQLObject node) { --depth; }
             });
-            result.add(new ParsedTable(name, table, references));
+            result.add(new ParsedTable(name, sql, statementIndex++, references));
         }
         return List.copyOf(result);
     }
 
+    /** Keep the lexical RANGE/COLUMNS distinction lost by the pinned MySQL parser. */
+    private static List<SQLStatement> parseAstBatch(String sql) {
+        return new MySqlStatementParser(sql) {
+            @Override public MySqlCreateTableStatement parseCreateTable() {
+                return getSQLCreateTableParser().parseCreateTable();
+            }
+            @Override public MySqlCreateTableParser getSQLCreateTableParser() {
+                return new MySqlCreateTableParser(exprParser) {
+                    private boolean rangeColumns() {
+                        var position = lexer.mark();
+                        if (lexer.identifierEquals("RANGE")) lexer.nextToken();
+                        boolean columns = lexer.identifierEquals("COLUMNS");
+                        lexer.reset(position);
+                        return columns;
+                    }
+                    @Override protected SQLPartitionByRange partitionByRange() {
+                        boolean columns = rangeColumns();
+                        var range = super.partitionByRange(); range.setColumns(columns); return range;
+                    }
+                    @Override protected SQLPartitionByRange partitionByRange1() {
+                        boolean columns = rangeColumns();
+                        var range = super.partitionByRange1(); range.setColumns(columns); return range;
+                    }
+                };
+            }
+        }.parseStatementList();
+    }
     /** Lexer is iterative: reject recursive prefixes/CASE before the recursive parser. */
     private static void checkTokenComplexity(String sql) {
         var lexer = new MySqlLexer(sql);
@@ -78,7 +112,7 @@ public final class GeneratorCreationBatchParser {
         do {
             lexer.nextToken();
             var token = lexer.token();
-            if (++tokens > 20_000 || token == Token.ERROR) throw invalid();
+            if (++tokens > 20_000 || token == Token.ERROR || token == Token.VARIANT || token == Token.COLONEQ) throw invalid();
             if (token == Token.SEMI) recursiveTokens = 0;
             if (token == Token.CASE || token == Token.NOT || token == Token.BANG || token == Token.TILDE || token == Token.PLUS || token == Token.SUB)
                 if (++recursiveTokens > 256) throw invalid();
