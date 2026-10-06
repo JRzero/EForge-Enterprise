@@ -49,7 +49,7 @@ try {
     $configPreviewReply=Request $configPreviewPath 'GET' '' $authorized
     $configPreview=$configPreviewReply.Content|ConvertFrom-Json -AsHashtable
     Assert-Check ($configPreviewReply.StatusCode -eq 200 -and $configPreview.code -eq 200) 'Original preview must keep the successful compatibility response.'
-    Assert-Check ($configPreview.data.Count -ge 9 -and $configPreview.data['vm/java/domain.java.vm'].Contains('class ConfiguredEntry') -and $configPreview.data['vm/java/controller.java.vm'].Contains('配置') -and $configPreview.data.ContainsKey('vm/vue/view.vue.vm')) 'Original preview must render actual configured Java, Unicode labels and detail template.'
+    Assert-Check ($configPreview.data.Count -ge 9 -and $configPreview.data['vm/java/domain.java.vm'].Contains('class ConfiguredEntry') -and $configPreview.data['vm/java/controller.java.vm'].Contains('配置') -and $configPreview.data.ContainsKey('vm/react/Page.tsx.vm') -and $configPreview.data['vm/react/Page.tsx.vm'].Contains('editor.viewing') -and !$configPreview.data.ContainsKey('vm/vue/index.vue.vm')) 'Original preview must render actual configured Java, Unicode labels and detail template.'
     $configMissingPreview=Request '/tool/gen/preview/9223372036854775807' 'GET' '' $authorized
     $configMissingPreviewBody=$configMissingPreview.Content|ConvertFrom-Json
     Assert-Check ($configMissingPreview.StatusCode -eq 200 -and $configMissingPreviewBody.code -eq 404 -and !$configMissingPreviewBody.data) 'Missing original preview must keep a safe compatibility error.'

@@ -54,6 +54,23 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async authenticatedFetch(input: RequestInfo | URL, init?: RequestInit) {
+      const origin = typeof window === 'undefined' ? 'http://eforge.local' : window.location.origin;
+      const target = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url, origin);
+      if (target.origin !== origin || !target.pathname.startsWith('/api/v1/business/'))
+        throw new ApiError(400, 'GENERATED_API_TARGET_INVALID');
+      return transport(true)(input, init);
+    },
+    // Original authenticated upload remains behind the compatibility boundary.
+    async uploadGeneratedFile(file: File, signal?: AbortSignal) {
+      const data = new FormData(); data.append('file', file);
+      const response = await transport(true)('/common/upload', {method: 'POST', body: data, signal});
+      const body = record(await response.json());
+      if (body.code !== 200 || typeof body.fileName !== 'string' ||
+          !body.fileName.startsWith('/profile/upload/') || /[?#\\]/.test(body.fileName) ||
+          body.fileName.split('/').some(part => part === '..' || part === '.')) throw new ApiError(400, 'UPLOAD_FAILED');
+      return body.fileName;
+    },
     async writeGeneratorCustomOutput(id: string, signal?: AbortSignal) {
       try {
         const response = await writeGeneratorCustomOutput(id, {baseUrl: '', fetch: transport(true, 60000, 'omit', [503]), signal});

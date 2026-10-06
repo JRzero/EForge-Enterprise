@@ -1,7 +1,10 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness)
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness, [switch]$VerifyGeneratedReact, [switch]$VerifyGeneratedReactOnly)
 $ErrorActionPreference = 'Stop'
+if ($VerifyGeneratedReactOnly -and $VerifyWeb) {throw 'Focused generated mode cannot be combined with the complete framework browser flag.'}
+if ($VerifyGeneratedReactOnly) { $VerifyGeneratedReact = $true }
+if ($VerifyGeneratedReact) { $VerifyGeneratedBusiness = $true }
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
 if (!(Test-Path -LiteralPath $jar)) { throw 'Package the server before running integration verification.' }
@@ -159,6 +162,14 @@ try {
     Assert-Check ([int]$ttl -gt 0) 'Login session must expire.'
     if ($VerifyGeneratedBusiness) {
         . (Join-Path $PSScriptRoot 'verify-generated-business-integration.ps1')
+    }
+    if ($VerifyGeneratedReactOnly) {
+        if ($OpenApiOutputPath) {
+            & node (Join-Path $repoRoot 'web/scripts/normalize-openapi.mjs') $generatedDeployContractPath $OpenApiOutputPath
+            Assert-Check ($LASTEXITCODE -eq 0) 'Installed generated OpenAPI export failed.'
+        }
+        Write-Output 'PASS: focused generated React and original Boot module verification completed.'
+        return
     }
     $bootstrapResponse = Request '/api/v1/app/bootstrap' 'GET' '' $authorized
     Assert-Check ($bootstrapResponse.StatusCode -eq 200 -and ($bootstrapResponse.Headers['Cache-Control'] -join ';') -eq 'no-store') 'Bootstrap must succeed without caching.'

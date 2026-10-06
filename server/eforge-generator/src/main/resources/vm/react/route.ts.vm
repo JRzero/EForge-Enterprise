@@ -1,0 +1,9 @@
+import type {AppRoute} from '@eforge/app';
+import {GeneratedPage} from './Page';
+export const generatedRoute: AppRoute = {
+  id: $outputText.jsonLiteral("business-${moduleName}-${businessName}"),
+  path: $outputText.jsonLiteral("/business/${moduleName}/${businessName}"),
+  title: $outputText.jsonLiteral($functionName),
+  access: {permission: $outputText.jsonLiteral("${permissionPrefix}:list")},
+  component: GeneratedPage,
+};

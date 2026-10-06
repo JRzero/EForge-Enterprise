@@ -79,6 +79,13 @@ public class VelocityUtils
         if (GenConstants.TPL_TREE.equals(tplCategory))
         {
             setTreeVelocityContext(velocityContext, genTable);
+            if ("eforge-react".equals(genTable.getTplWebType()))
+            {
+                var treeOptions = JSONObject.parseObject(genTable.getOptions());
+                velocityContext.put("reactTreeCode", reactTreeField(genTable, treeOptions.getString(GenConstants.TREE_CODE)));
+                velocityContext.put("reactTreeParent", reactTreeField(genTable, treeOptions.getString(GenConstants.TREE_PARENT_CODE)));
+                velocityContext.put("reactTreeName", reactTreeField(genTable, treeOptions.getString(GenConstants.TREE_NAME)));
+            }
         }
         if (GenConstants.TPL_SUB.equals(tplCategory))
         {
@@ -87,6 +94,13 @@ public class VelocityUtils
         return velocityContext;
     }
 
+    private static String reactTreeField(GenTable table, String physical)
+    {
+        var exact = table.getColumns().stream().filter(column -> physical != null && physical.equals(column.getColumnName())).toList();
+        var matches = exact.isEmpty() ? table.getColumns().stream().filter(column -> physical != null && physical.equalsIgnoreCase(column.getColumnName())).toList() : exact;
+        if (matches.size() != 1) throw new io.eforge.enterprise.common.exception.ApiFailure(409, "GENERATOR_TREE_FIELD_INVALID", "Tree fields must identify configured physical columns.");
+        return matches.get(0).getJavaField();
+    }
     public static void setExtensionsContext(VelocityContext context, String options)
     {
         JSONObject paramsObj = JSONObject.parseObject(options);
@@ -200,26 +214,32 @@ public class VelocityUtils
         }
         templates.add("vm/xml/mapper.xml.vm");
         templates.add("vm/sql/sql.vm");
-        templates.add(apiTemplate);
+        if (StringUtils.equals("eforge-react", tplWebType))
+        {
+            templates.add("vm/react/Page.tsx.vm");
+            templates.add("vm/react/route.ts.vm");
+            templates.add("vm/react/generate-client.mjs.vm");
+        }
+        else templates.add(apiTemplate);
         if (StringUtils.equals(ELEMENT_PLUS_TYPESSRIPT, tplWebType))
         {
             templates.add("vm/ts/type.ts.vm");
             templates.add("vm/ts/index.ts.vm");
         }
-        if (GenConstants.TPL_CRUD.equals(tplCategory))
+        if (!StringUtils.equals("eforge-react", tplWebType) && GenConstants.TPL_CRUD.equals(tplCategory))
         {
             templates.add(useWebType + "/index.vue.vm");
         }
-        else if (GenConstants.TPL_TREE.equals(tplCategory))
+        else if (!StringUtils.equals("eforge-react", tplWebType) && GenConstants.TPL_TREE.equals(tplCategory))
         {
             templates.add(useWebType + "/index-tree.vue.vm");
         }
         else if (GenConstants.TPL_SUB.equals(tplCategory))
         {
-            templates.add(useWebType + "/index.vue.vm");
+            if (!StringUtils.equals("eforge-react", tplWebType)) templates.add(useWebType + "/index.vue.vm");
             templates.add("vm/java/sub-domain.java.vm");
         }
-        if (isView)
+        if (isView && !StringUtils.equals("eforge-react", tplWebType))
         {
             templates.add(useWebType + "/view.vue.vm");
         }
@@ -245,6 +265,11 @@ public class VelocityUtils
         String javaPath = PROJECT_PATH + "/" + StringUtils.replace(packageName, ".", "/");
         String mybatisPath = MYBATIS_PATH + "/" + moduleName;
         String vuePath = "vue";
+        if (template.startsWith("vm/react/"))
+        {
+            String name = template.substring("vm/react/".length(), template.length() - ".vm".length());
+            return StringUtils.format("web/features/{}/{}/{}", moduleName, businessName, name);
+        }
         if (template.equals("vm/java/eforge-api-model.java.vm"))
             return StringUtils.format("{}/api/{}ApiModel.java", javaPath, className);
         if (template.equals("vm/java/eforge-api-controller.java.vm"))

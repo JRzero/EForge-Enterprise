@@ -1425,8 +1425,8 @@
     "actualLateParentFaultChildRollback": "passed",
     "generatedModuleOpenApiClient": "actual-standalone-springdoc-http-and-pinned-generated-client-locally-verified",
     "productCanonicalOpenApiRegistration": "actual-production-yaml-group-configuration-external-generated-controller-and-legacy-exclusion-passed",
-    "reactTemplate": "still-vue-fallback-incomplete",
-    "currentCloud": "client-contract-and-canonical-group-success-latest-boot-user-session-patch-pending",
+    "reactTemplate": "actual-crud-tree-sub-output-local-types-browser-proven-full-control-manager-acceptance-pending",
+    "currentCloud": "boot-user-session-patch-41ce1b4-server-and-web-terminal-success-react-page-stage-cloud-pending",
     "clientContractCommit": "764d36b2fe9fdf556c389b29f7eb0d35683d731b",
     "clientContractServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37496589462",
     "clientContractWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37496589426",
@@ -1437,6 +1437,22 @@
     "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
-    "scope": "Actual Boot JWT/Redis installation and successful persisted mutation/export audit are locally proven. Final patch cloud, generated concurrent HTTP writes, React/EForge templates, full generator manager and generated browser remain required."
+    "scope": "Actual Boot JWT/Redis installation and successful persisted mutation/export audit are locally proven. Final patch41ce1b4 cloud server37505004687 all three jobs and web37505004677 are accepted; generated concurrent HTTP writes, complete React/EForge templates, full generator manager and generated browser remain required."
+  },
+  "generatorReactPages": {
+    "status": "local-output-types-and-real-generated-pages-proven-full-generator-incomplete",
+    "backendTests": 607,
+    "frontendUnitTests": 81,
+    "realGeneratedPageProfiles": ["default", "enabled-console-custom-output"],
+    "realGeneratedPageKinds": ["crud", "tree", "sub"],
+    "realGeneratedAssertions": ["create", "edit", "detail-read-only", "real-http-search", "reset", "tree-child-parent", "expand-collapse", "subtable-update-fk", "selection-edit", "two-row-delete", "xlsx", "long-id-decimal", "hostile-text", "no-role"],
+    "focusedProcess": "42073-terminal-0",
+    "fullDefaultBrowserTestsBeforeFinalRootTemplatePatch": 43,
+    "fullEnabledBeforeFinalRootTemplatePatch": "red-null-versus-zero-root-regression",
+    "installedOpenApiSha256": "615CC71032F927B354D75BCEE40AD7D17713B158331768461D96C55A1B72D7E9",
+    "currentCloud": "new-exact-commit-pending",
+    "review": "docs/security-review-generator-react-pages.md",
+    "remaining": ["static-route-and-canonical-menu-install", "all-dictionary-upload-richtext-control-variants", "full-generator-management-ui", "remaining-active-parity"],
+    "formBuilder": "deferred-not-complete"
   }
 }

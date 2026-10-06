@@ -1,0 +1,293 @@
+import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent} from 'react';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
+import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {Button} from '@eforge/ui';
+import {useApi} from '../../../app/context';
+import {ResourceDialog} from '../../../app/components/ResourceDialog';
+import {useDictionary, DictionaryOptions, DictionaryNotice} from '../../../app/useDictionary';
+import {DictionaryTag} from '../../../app/components/DictionaryTag';
+import {RichTextEditor} from '../../notices/RichTextEditor';
+import {NoticeRichContent} from '../../notices/NoticeRichContent';
+import {errorMessage} from '../../../integration/errors';
+import * as client from './generated-client';
+import {queryKeys} from './generated-query-keys';
+
+type Model = Extract<Awaited<ReturnType<typeof client.detail>>, {status: 200}>['data'];
+type Write = Parameters<typeof client.create>[0];
+type Query = NonNullable<Parameters<typeof client.list>[0]>;
+type Id = Parameters<typeof client.detail>[0];
+type Field = {key: string; label: string | null; type: string; html: string | null; dict: string | null;
+  required: boolean; insert: boolean; edit: boolean; list: boolean; query: boolean; between: boolean; pk: boolean; auto: boolean};
+const title = $outputText.jsonLiteral($functionName);
+const permission = $outputText.jsonLiteral($permissionPrefix);
+const pk = $outputText.jsonLiteral($pkColumn.javaField) satisfies keyof Model;
+#if($table.tree)
+const treeCode = $outputText.jsonLiteral($reactTreeCode) satisfies keyof Model;
+const treeParent = $outputText.jsonLiteral($reactTreeParent) satisfies keyof Model;
+const treeName = $outputText.jsonLiteral($reactTreeName) satisfies keyof Model;
+#end
+#if($table.sub)
+const childKey = $outputText.jsonLiteral("${subclassName}List") satisfies keyof Write;
+type ChildWrite = NonNullable<Write[typeof childKey]>[number];
+const childFields: readonly (Field & {key: keyof ChildWrite})[] = [
+#foreach($column in $subTable.columns)
+  {key: $outputText.jsonLiteral($column.javaField), label: $outputText.jsonLiteral($column.columnComment), type: $outputText.jsonLiteral($column.javaType),
+   html: $outputText.jsonLiteral($column.htmlType), dict: $outputText.jsonLiteral($column.dictType), required: $column.required,
+   insert: $column.insert, edit: $column.edit, list: $column.list, query: false, between: false, pk: $column.pk, auto: $column.increment},
+#end
+];
+const childForeignKey = $outputText.jsonLiteral($subTableFkclassName) satisfies keyof ChildWrite;
+#end
+const idOf = (row: Model) => row[pk] as Id;
+const fields: readonly (Field & {key: keyof Model})[] = [
+#foreach($column in $columns)
+  {key: $outputText.jsonLiteral($column.javaField), label: $outputText.jsonLiteral($column.columnComment), type: $outputText.jsonLiteral($column.javaType),
+   html: $outputText.jsonLiteral($column.htmlType), dict: $outputText.jsonLiteral($column.dictType),
+   required: $column.required, insert: $column.insert, edit: $column.edit, list: $column.list,
+   query: $column.query, between: #if($column.queryType == 'BETWEEN')true#else false#end, pk: $column.pk, auto: $column.increment},
+#end
+];
+const UploadContext = createContext<(delta: number) => void>(() => undefined);
+const text = (value: unknown) => value === null || value === undefined ? '' : String(value);
+function valueFor(field: Field, value: string): unknown {
+  if (value === '') return undefined;
+  if (field.type === 'Date') return new Date(value).toISOString();
+  if (['Integer', 'Double', 'Float', 'Short', 'Byte'].includes(field.type)) {
+    const number = Number(value); if (!Number.isFinite(number) || field.type !== 'Double' && field.type !== 'Float' && !Number.isSafeInteger(number)) throw new Error('请输入有效数字。');
+    return number;
+  }
+  if (field.type === 'Boolean') return value === 'true';
+  // Long IDs and BigDecimal are deliberately kept as exact strings.
+  return value;
+}
+function displayDate(value: unknown) {
+  if (!value) return '';
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('zh-CN');
+}
+function localDate(value: unknown) {
+  if (!value) return '';
+  const date = new Date(String(value)); return Number.isNaN(date.getTime()) ? '' :
+    new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 23);
+}
+function FieldDisplay({field, value}: {field: Field; value: unknown}) {
+  if (field.dict) return <DictDisplay field={field} value={value} />;
+  if (field.type === 'Date') return <>{displayDate(value)}</>;
+  if (field.html === 'editor') return <NoticeRichContent html={text(value)} />;
+  if (field.html === 'imageUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <img key={path} src={path} alt={field.label ?? field.key} width={80} />)}</>;
+  if (field.html === 'fileUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <a key={path} href={path} download rel="noopener">{path.split('/').at(-1)}</a>)}</>;
+  return <>{text(value) || '—'}</>;
+}
+function DictDisplay({field, value}: {field: Field; value: unknown}) {
+  const dictionary = useDictionary(field.dict ?? '');
+  return <><DictionaryNotice dictionary={dictionary} /><DictionaryTag options={dictionary.options} value={text(value)} /></>;
+}
+function DictControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
+  const dictionary = useDictionary(field.dict ?? ''), current = text(value), group = useId();
+  return <><DictionaryNotice dictionary={dictionary} />
+    {field.html === 'radio' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="radio" name={group} checked={current === option.value} required={field.required} onChange={() => onChange(valueFor(field, option.value))} />{option.label}</label>)}</fieldset>
+    : field.html === 'checkbox' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="checkbox" checked={current.split(',').includes(option.value)} onChange={event => {const selected = new Set(current.split(',').filter(Boolean)); if (event.target.checked) selected.add(option.value); else selected.delete(option.value); onChange([...selected].join(','));}} />{option.label}</label>)}</fieldset>
+    : <select value={current} disabled={disabled || dictionary.loading} required={field.required} onChange={event => onChange(valueFor(field, event.target.value))}><option value="">请选择</option><DictionaryOptions options={dictionary.options} current={current} /></select>}
+  </>;
+}
+function FieldControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
+  const changeUploads = useContext(UploadContext);
+  const api = useApi(), [uploading, setUploading] = useState(false), [error, setError] = useState('');
+  const pending = useRef<AbortController | null>(null); useEffect(() => () => pending.current?.abort(), []);
+  if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange}} />;
+  if (field.html === 'editor') return <RichTextEditor value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
+  if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
+    <input type="file" multiple disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
+      const files = [...(event.target.files ?? [])]; event.target.value = ''; setError('');
+      if (files.length + text(value).split(',').filter(Boolean).length > 5 || files.some(file => file.size > 5 * 1024 * 1024)) {setError('最多上传五个文件，每个不超过 5 MB。'); return;}
+      pending.current?.abort(); const controller = new AbortController(); pending.current = controller; setUploading(true); changeUploads(1);
+      try {const paths = text(value).split(',').filter(Boolean); for (const file of files) {paths.push(await api.uploadGeneratedFile(file, controller.signal)); if (!controller.signal.aborted) onChange(paths.join(','));}}
+      catch (cause) {if (!controller.signal.aborted) setError(errorMessage(cause));} finally {changeUploads(-1); if (!controller.signal.aborted) setUploading(false);}
+    }} />
+    {uploading ? <p role="status">正在上传…</p> : null}{error ? <p role="alert">{error}</p> : null}
+    {text(value).split(',').filter(Boolean).map(path => <div key={path}><span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(item => item !== path).join(','))} /></div>)}
+  </div>;
+  if (field.html === 'textarea') return <textarea value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
+  return <input value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}
+    type={field.type === 'Date' ? 'datetime-local' : 'text'} step={field.type === 'Date' ? '.001' : undefined}
+    inputMode={field.type === 'Long' || field.type === 'BigDecimal' ? 'decimal' : undefined}
+    onChange={event => {try {onChange(valueFor(field, event.target.value));} catch {onChange(event.target.value);}}} />;
+}
+const initial = (): Write => ({
+#if($table.tree)
+  [treeParent]: valueFor(fields.find(field => field.key === treeParent)!, '0') as Write[typeof treeParent],
+#end
+#if($table.sub)
+  $outputText.jsonLiteral("${subclassName}List"): [],
+#end
+});
+export function GeneratedPage() {
+  const api = useApi(), options = useMemo(() => ({baseUrl: '', fetch: api.authenticatedFetch}), [api]);
+  const [draft, setDraft] = useState<Record<string, string>>({}), [filters, setFilters] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1), [size#if(!$table.tree), setSize#end] = useState(10), [version, setVersion] = useState(0), [showFilters, setShowFilters] = useState(true);
+  const [rows, setRows] = useState<Model[]>([]), [total, setTotal] = useState(0), [loading, setLoading] = useState(true), [error, setError] = useState('');
+  const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
+  const [editor, setEditor] = useState<{id?: Id; form: Write; model?: Model; viewing: boolean} | null>(null);
+  const [uploadCount, setUploadCount] = useState(0);
+  const changeUploads = useCallback((delta: number) => setUploadCount(value => Math.max(0, value + delta)), []);
+  const [deleting, setDeleting] = useState<Id[] | null>(null), [operationBusy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
+  const busy = operationBusy || uploadCount > 0;
+#if($table.tree)
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const tree = useMemo(() => {
+    const codes = new Set(rows.map(row => text(row[treeCode]))), children = new Map<string, Model[]>();
+    for (const row of rows) {const key = text(row[treeParent]); const values = children.get(key) ?? []; values.push(row); children.set(key, values);}
+    const roots = rows.filter(row => !codes.has(text(row[treeParent])) || text(row[treeParent]) === text(row[treeCode]));
+    const visible: Model[] = [], levels = new Map<string, number>(), visited = new Set<string>();
+    function walk(root: Model) {
+      const pending = [{row: root, depth: 0, visible: true}];
+      while (pending.length) {
+        const item = pending.pop()!, key = text(item.row[pk]); if (visited.has(key)) continue; visited.add(key);
+        if (item.visible) {visible.push(item.row); levels.set(key, item.depth);}
+        const descendants = children.get(text(item.row[treeCode])) ?? [];
+        for (let index = descendants.length - 1; index >= 0; index--) pending.push({row: descendants[index]!, depth: item.depth + 1, visible: item.visible && expanded.has(text(item.row[treeCode]))});
+      }
+    }
+    roots.forEach(walk); rows.filter(row => !visited.has(text(row[pk]))).forEach(walk);
+    return {visible, levels, children};
+  }, [rows, expanded]);
+  const parentOptions = useMemo(() => {
+    if (!editor?.model) return rows;
+    const blocked = new Set([text(editor.model[treeCode])]), pending = [text(editor.model[treeCode])];
+    while (pending.length) for (const row of tree.children.get(pending.pop()!) ?? []) {const code = text(row[treeCode]); if (!blocked.has(code)) {blocked.add(code); pending.push(code);}}
+    return rows.filter(row => !blocked.has(text(row[treeCode])));
+  }, [editor, rows, tree]);
+#end
+  const query = useMemo(() => {
+    const output: Record<string, unknown> = {page, pageSize: size};
+    for (const [wire, value] of Object.entries(filters)) if (value !== '') {
+      const key = queryKeys[wire as keyof typeof queryKeys]; if (!key) throw new Error('Missing generated query binding.');
+      output[key] = value;
+    }
+    return output as Query;
+  }, [filters, page, size]);
+  useEffect(() => {
+    const controller = new AbortController(); setLoading(true); setError(''); setSelection({});
+    client.list(query, {...options, signal: controller.signal}).then(result => {
+      if (controller.signal.aborted) return;
+#if($table.tree)
+      setRows(result.data); setTotal(result.data.length);
+#else
+      setRows(result.data.items); setTotal(result.data.total);
+#end
+      setLoading(false);
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+    return () => controller.abort();
+  }, [query, options, version]);
+  const selected = rows.filter(row => selection[String(idOf(row))]).map(idOf);
+  function refresh(message = '') {setFeedback(message); setSelection({}); setVersion(value => value + 1);}
+  const edit = useCallback(async (id: Id, viewing = false) => {
+    if (busy) return; setBusy(true); setActionError('');
+    try {
+      const row = (await client.detail(id, options)).data;
+      const form = Object.fromEntries(fields.filter(field => field.pk || field.insert || field.edit).map(field => [field.key, row[field.key]])) as Write;
+#if($table.sub)
+      form[$outputText.jsonLiteral("${subclassName}List")] = row[$outputText.jsonLiteral("${subclassName}List")] ?? [];
+#end
+      setEditor({id, form, model: row, viewing});
+    } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
+  }, [busy, options]);
+  const columns = useMemo<ColumnDef<Model>[]>(() => [
+        ...fields.filter(field => field.list || field.pk#if($table.tree) || field.key === treeName#end).map(field => ({accessorKey: field.key, header: field.label ?? field.key, cell: ({row}: {row: {original: Model}}) =>
+#if($table.tree)
+      field.key === treeName ? <span style={{paddingInlineStart: Math.min(tree.levels.get(text(row.original[pk])) ?? 0, 64) * 16}}>
+        {(tree.children.get(text(row.original[treeCode]))?.length ?? 0) > 0 ? <Button label={(expanded.has(text(row.original[treeCode])) ? '收起 ' : '展开 ') + text(row.original[treeName])} variant="ghost" size="sm" onClick={() => setExpanded(current => {const next = new Set(current); const key = text(row.original[treeCode]); if (!next.delete(key)) next.add(key); return next;})} /> : null}
+        <FieldDisplay field={field} value={row.original[field.key]} /></span> :
+#end
+      <FieldDisplay field={field} value={row.original[field.key]} />})),
+    {id: 'actions', header: '操作', cell: ({row}) => <div>
+#if($genView)
+      <PermissionGate permission={permission + ':query'}><Button label="详情" variant="ghost" isDisabled={busy} onClick={() => {void edit(idOf(row.original), true);}} /></PermissionGate>
+#end
+      <PermissionGate permission={permission + ':edit'}><Button label="修改" variant="ghost" isDisabled={busy} onClick={() => {void edit(idOf(row.original));}} /></PermissionGate>
+#if($table.tree)
+      <PermissionGate permission={permission + ':add'}><Button label="新增下级" variant="ghost" isDisabled={busy} onClick={() => setEditor({form: {...initial(), [treeParent]: row.original[treeCode]}, viewing: false})} /></PermissionGate>
+#end
+      <PermissionGate permission={permission + ':remove'}><Button label="删除" variant="ghost" isDisabled={busy} onClick={() => setDeleting([idOf(row.original)])} /></PermissionGate>
+    </div>},
+  ], [busy, edit#if($table.tree), tree, expanded#end]);
+  async function save(event: FormEvent) {
+    event.preventDefault(); if (!editor || busy || editor.viewing) return; setBusy(true); setActionError('');
+    try {
+      if (editor.id !== undefined) await client.update(editor.id, editor.form, options); else await client.create(editor.form, options);
+      setEditor(null); refresh('已保存。');
+    } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
+  }
+  async function remove() {
+    if (!deleting || busy) return; setBusy(true); setActionError('');
+    try {await client.remove({ids: deleting}, options); setDeleting(null); setPage(1); refresh('已删除。');}
+    catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
+  }
+  async function exportRows() {
+    if (busy) return; setBusy(true); setActionError('');
+    try {const blob = (await client.exportRows(query, options)).data; const url = URL.createObjectURL(blob);
+      const link = document.createElement('a'); link.href = url; link.download = 'export.xlsx'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
+  }
+  return <section><PageHeader title={title} />
+    {showFilters ? <form onSubmit={event => {event.preventDefault(); setPage(1); setFilters({...draft});}}>
+      {fields.filter(field => field.query).flatMap(field => (field.between ? ['q_begin_', 'q_end_'] : ['q_']).map(prefix => {
+        const wire = prefix + field.key;
+        return <label key={wire}>{field.label}{prefix === 'q_begin_' ? '起' : prefix === 'q_end_' ? '止' : ''}
+          <input value={draft[wire] ?? ''} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} /></label>;
+      }))}
+      <Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={() => {setDraft({}); setFilters({}); setPage(1);}} />
+    </form> : null}
+    <div><PermissionGate permission={permission + ':add'}><Button label="新增" isDisabled={busy} onClick={() => {setActionError(''); setEditor({form: initial(), viewing: false});}} /></PermissionGate>
+      <PermissionGate permission={permission + ':edit'}><Button label="修改选中" isDisabled={busy || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>
+      <PermissionGate permission={permission + ':remove'}><Button label="删除选中" isDisabled={busy || !selected.length} onClick={() => setDeleting(selected)} /></PermissionGate>
+      <PermissionGate permission={permission + ':export'}><Button label="导出" isDisabled={busy} onClick={() => {void exportRows();}} /></PermissionGate>
+      <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowFilters(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy} onClick={() => refresh()} />
+    </div>{feedback ? <p role="status">{feedback}</p> : null}{actionError ? <p role="alert">{actionError}</p> : null}
+    {error ? <div role="alert">{error}<Button label="重试" onClick={() => refresh()} /></div> : null}
+#if($table.tree)
+    <Button label="展开全部" variant="ghost" onClick={() => setExpanded(new Set(rows.map(row => text(row[treeCode]))))} />
+    <Button label="收起全部" variant="ghost" onClick={() => setExpanded(new Set())} />
+#end
+    <p>共 {total} 条</p>
+    <DataTable data={#if($table.tree)tree.visible#else rows#end} columns={columns} loading={loading} getRowId={row => String(idOf(row))}
+      selectable rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} onColumnVisibilityChange={setVisibility} showColumnVisibility
+#if($table.tree)
+      pagination={false}
+#else
+      manualPagination paginationState={{pageIndex: page - 1, pageSize: size}} pageCount={Math.max(1, Math.ceil(total / size))}
+      onPaginationChange={next => {const value = typeof next === 'function' ? next({pageIndex: page - 1, pageSize: size}) : next; setPage(value.pageIndex + 1); setSize(value.pageSize);}}
+#end
+    />
+    {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
+      <form onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
+        {fields.filter(field => editor.viewing || (editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit && !field.pk)).map(field => <label key={field.key}>{field.label}
+          {editor.viewing ? <FieldDisplay field={field} value={editor.model?.[field.key]} /> :
+#if($table.tree)
+          field.key === treeParent ? <select value={text((editor.form as Record<string, unknown>)[field.key]) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
+            <option value="0">根节点</option>{parentOptions.map(row => <option key={text(row[pk])} value={text(row[treeCode])}>{text(row[treeName])}</option>)}</select> :
+#end
+          <FieldControl field={field} value={(editor.form as Record<string, unknown>)[field.key]} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
+        </label>)}
+#if($table.sub)
+        <section aria-label="子表明细"><h3>子表明细</h3>
+          {!editor.viewing ? <Button label="新增子表行" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: [...current.form[childKey], {}]}}))} /> : null}
+          <table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
+            <tbody>{(editor.form[childKey] ?? []).map((row, index) => <tr key={index}>
+              {childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <td key={field.key}><label>{field.label}
+                {editor.viewing ? <FieldDisplay field={field} value={row[field.key]} /> : <FieldControl field={field} value={row[field.key]} disabled={operationBusy || !(editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit || field.pk && !field.auto)} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].map((item, ordinal) => ordinal === index ? {...item, [field.key]: value} : item)}}))} />}
+              </label></td>)}
+              {!editor.viewing ? <td><Button label="删除子表行" variant="ghost" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].filter((_, ordinal) => ordinal !== index)}}))} /></td> : null}
+            </tr>)}</tbody>
+          </table>
+        </section>
+#end
+        {actionError ? <p role="alert">{actionError}</p> : null}
+        {!editor.viewing ? <Button label="保存" type="submit" isDisabled={busy} /> : null}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setEditor(null)} />
+      </form>
+    </ResourceDialog></UploadContext.Provider> : null}
+    {deleting ? <ResourceDialog titleId="generated-delete-title" alert busy={busy} onCancel={() => setDeleting(null)}><h2 id="generated-delete-title">确认删除所选记录？</h2>
+      {actionError ? <p role="alert">{actionError}</p> : null}<Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setDeleting(null)} />
+    </ResourceDialog> : null}
+  </section>;
+}

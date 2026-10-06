@@ -33,6 +33,11 @@ try {
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-business-client.mjs') $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployCategory ('fixture'+(Get-Culture).TextInfo.ToTitleCase($generatedDeployCategory))
         Assert-Check ($LASTEXITCODE -eq 0) 'Actual Boot generated client HTTP verification failed.'
     }
+    if ($VerifyGeneratedReact) {
+        Copy-Item -LiteralPath $generatedDeployContractPath -Destination (Join-Path $repoRoot 'server/eforge-boot/target/generator-react-captured-openapi.json') -Force
+        & node (Join-Path $repoRoot 'web/scripts/verify-generator-react-pages.mjs') $generatedBusinessDirectory $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployUser.username
+        Assert-Check ($LASTEXITCODE -eq 0) 'Actual generated React page verification failed.'
+    }
     $generatedDeployMenus=(Request '/api/v1/system/menus' 'GET' '' $authorized).Content|ConvertFrom-Json
     $generatedDeployParent=@($generatedDeployMenus|Where-Object {$_.routeId -eq 'system-users'})[0].id
     $generatedDeployMenu=@{key="gen-query-$runId";name='Generated query';parentId=$generatedDeployParent;sort=99;type='FUNCTION';status='0';visible=$true;cached=$false;permission='fixture:crud:query'}

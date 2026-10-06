@@ -43,3 +43,13 @@ The preceding canonical-group commit08771cd is separately accepted by all three
 server37499013614 jobs and does not accept this later patch.
 React/EForge frontend templates, complete generator management UI and actual
 generated browser flows remain incomplete. Form builder is deferred.
+### Original Boot generated module acceptance (41ce1b4)
+Exact implementation 41ce1b4296a704ef72231bf030f92f58b689116d is accepted:
+server37505004687 all three jobs and web37505004677 terminal SUCCESS. Direct
+generated-business-boot-cloud-accepted.log and generated-business-boot-web-accepted.log
+prove Maven607 (597 Boot +10 data-scope, one OS-specific skip), actual generated
+module installation/JWT/Redis/MyBatis/client/persisted audit, and both configuration
+profiles with43 existing real browser cases/full API/OpenAPI. This accepts the
+user-session refresh patch and original Boot integration, not later React output
+or generated browser work. The React stage is currently uncommitted and under
+real browser validation; full generator management and remaining parity are pending.

@@ -673,3 +673,27 @@ Full Maven607 (one OS skip), frontend79/repro/lint/types/build and both122 nativ
 generated client regressions pass. Final default and enabled/custom complete API regressions both pass; session19503 ended0. No local app remains. New exact-commit cloud/browser acceptance remains pending.
 See security-review-generated-business-boot.md. React frontend templates, full
 generator management and generated browser flows remain incomplete.
+### Original Boot generated module acceptance (41ce1b4)
+Exact implementation 41ce1b4296a704ef72231bf030f92f58b689116d is accepted:
+server37505004687 all three jobs and web37505004677 terminal SUCCESS. Direct
+generated-business-boot-cloud-accepted.log and generated-business-boot-web-accepted.log
+prove Maven607 (597 Boot +10 data-scope, one OS-specific skip), actual generated
+module installation/JWT/Redis/MyBatis/client/persisted audit, and both configuration
+profiles with43 existing real browser cases/full API/OpenAPI. This accepts the
+user-session refresh patch and original Boot integration, not later React output
+or generated browser work. The React stage is currently uncommitted and under
+real browser validation; full generator management and remaining parity are pending.
+### Actual React generator page stage
+eforge-react now emits actual pinned EForge CRUD/tree/sub pages, static route exports
+and reproducible clients from installed canonical OpenAPI; Vue fallback for this
+target is removed. Strict page types/lint and real original Boot/JWT/Redis/SQL
+browser create/edit/detail/search/reset/tree/sub update/bulk selection/XLSX/delete,
+exact identifiers/decimals/root-parent/FK, hostile text and no-role denial pass in
+both focused profiles (42073 terminal0). Final Maven607 passes. Full default
+framework43/browser/API regression passes before the final template-only root
+default patch; paired enabled run intentionally exposes pre-fix null-versus0 and
+is not accepted as full enabled success. Final focused rebuilt root0 passes both.
+Installed module schemas agree at615CC710...; main contract is preserved. Exact
+new cloud acceptance is pending. See security-review-generator-react-pages.md.
+Production route/menu registration, actual dictionary/upload/rich-text variants,
+full manager UI and remaining original parity are required; form builder deferred.

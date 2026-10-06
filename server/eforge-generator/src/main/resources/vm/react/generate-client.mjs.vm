@@ -1,0 +1,53 @@
+import {readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
+import {resolve, dirname, join, sep} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+import {spawnSync} from 'node:child_process';
+import ts from 'typescript';
+const directory = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const contract = JSON.parse(readFileSync(resolve(process.argv[2]), 'utf8'));
+const path = $outputText.jsonLiteral("/api/v1/business/${moduleName}/${businessName}");
+const paths = Object.fromEntries(Object.entries(contract.paths).filter(([key]) => key === path || key === path + '/{id}' || key === path + '/export'));
+if (Object.keys(paths).length !== 3) throw new Error('Installed business canonical OpenAPI is required.');
+const names = {'get': 'list', 'post': 'create', 'put': 'update', 'delete': 'remove'};
+for (const [key, operations] of Object.entries(paths)) for (const [method, operation] of Object.entries(operations)) {
+  if (!names[method]) continue;
+  operation.operationId = key.endsWith('/export') ? 'exportRows' : key.endsWith('/{id}') && method === 'get' ? 'detail' : names[method];
+}
+const owned = mkdtempSync(join(directory, '.client-generation-'));
+try {
+  const input = join(owned, 'contract.json'); writeFileSync(input, JSON.stringify({...contract, paths}));
+  const packagePath = resolve(dirname(require.resolve('oazapfts')), '../package.json');
+  const manifest = JSON.parse(readFileSync(packagePath, 'utf8'));
+  const cli = resolve(dirname(packagePath), manifest.bin.oazapfts);
+  for (const filename of ['first.ts', 'second.ts']) {
+    const result = spawnSync(process.execPath, [cli, input, join(owned, filename), '--useUnknown'], {encoding: 'utf8'});
+    if (result.status !== 0) throw new Error('Pinned API client generation failed: ' + result.stderr);
+  }
+  const source = readFileSync(join(owned, 'first.ts'), 'utf8');
+  if (source !== readFileSync(join(owned, 'second.ts'), 'utf8')) throw new Error('API client is not reproducible.');
+  const parsed = ts.createSourceFile('generated-client.ts', source, ts.ScriptTarget.Latest, true);
+  const queryKeys = {};
+  function visit(node) {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'query') {
+      function collect(argument) {
+        if (ts.isObjectLiteralExpression(argument)) for (const item of argument.properties) {
+          if (ts.isShorthandPropertyAssignment(item)) queryKeys[item.name.text] = item.name.text;
+          else if (ts.isPropertyAssignment(item) && ts.isIdentifier(item.initializer)) queryKeys[item.name.text] = item.initializer.text;
+        }
+        // Pinned oazapfts wraps query objects in QS.explode/QS.deepObject.
+        ts.forEachChild(argument, collect);
+      }
+      for (const argument of node.arguments) collect(argument);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(parsed);
+  for (const parameter of paths[path].get.parameters ?? []) if (parameter.in === 'query' && !queryKeys[parameter.name]) throw new Error('Missing generated query binding: ' + parameter.name);
+  writeFileSync(join(directory, 'generated-client.ts'), source);
+  writeFileSync(join(directory, 'generated-query-keys.ts'), 'export const queryKeys = ' + JSON.stringify(queryKeys) + ' as const;\n');
+} finally {
+  if (!owned.startsWith(directory + sep) || !owned.slice(directory.length + 1).startsWith('.client-generation-')) throw new Error('Unexpected generation output.');
+  rmSync(owned, {recursive:true, force:true});
+}
