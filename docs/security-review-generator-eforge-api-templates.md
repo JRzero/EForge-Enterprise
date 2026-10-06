@@ -152,3 +152,28 @@ but their own server37492073073 remains pending. They are not covered by the old
 87b source cloud acceptance. Its unique observer43975 follows
  generator-business-module-cloud-server.log. Complete generator/network/client/React/
 UI acceptance remains incomplete. No frontend source changed or new web workflow.
+
+
+Actual loopback HTTP checkpoint (2026-10-07, not complete generator acceptance):
+The native probe now deploys each compiled generated CRUD/tree/sub controller
+through a real Spring DispatcherServlet and embedded Tomcat on a random loopback
+port. JDK HttpClient sends actual JSON create/detail/delete requests to the deployed
+controller, original generated mapper/service and actual MySQL transaction manager.
+Modes0/1 each80 assertions passed in generator-business-module-network-0/1.log,
+including the previous52 SQL/rollback assertions, network no-role denial before SQL,
+exact long IDs, Unicode physical writes, detail, immediate permission withdrawal,
+and physical root/child delete. Final sequential process28441 exited0 and its owned
+containers and embedded servers were cleaned. No production Java/template changed.
+
+This probe's authentication filter exists only in the disposable test process and
+installs a controlled LoginUser; it does not prove the deployed product JWT/Redis
+login chain. Persisted audit, concurrent writes, generated OpenAPI/client, React
+frontend and actual generated browser flows are still pending. No test identity
+filter is installed into production configuration or generated output.
+Initial fixture failure used an unsupported WebApplicationContext registerBean API;
+GenericWebApplicationContext fixes that assembly. The first network run completed80
+assertions but server.stop alone left Tomcat utility threads alive; inspected the
+owned process, stopped it so the owner script cleaned its database, then added the
+formal server.destroy in nested finally. Both final runs exit naturally, no System.exit
+or assertion bypass. This new HTTP probe has no cloud acceptance yet; the earlier
+nativeSQL e8a637f workflow37492073073 is still in progress and cannot cover new code.

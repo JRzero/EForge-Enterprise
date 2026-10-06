@@ -611,3 +611,13 @@ but their own server37492073073 remains pending. They are not covered by the old
 87b source cloud acceptance. Its unique observer43975 follows
  generator-business-module-cloud-server.log. Complete generator/network/client/React/
 UI acceptance remains incomplete. No frontend source changed or new web workflow.
+
+
+2026-10-07 generated module loopback HTTP checkpoint: actual compiled CRUD/tree/sub
+modules are served by embedded Tomcat with original mapper/service and real MySQL;
+both modes each80 assertions passed, including no-role network refusal, precise IDs,
+physical writes/deletes and immediate permission withdrawal. Owned servers/databases
+exit cleanly. Controlled test LoginUser does not prove deployed JWT/Redis auth;
+persisted audit/concurrent writes/OpenAPI/client/React/UI/browser remain pending.
+The new probe is locally verified only; e8a637f cloud37492073073 still runs and does
+not include this new HTTP code. Form builder remains deferred, not complete.

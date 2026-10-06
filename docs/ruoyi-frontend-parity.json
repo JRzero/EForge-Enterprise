@@ -1400,7 +1400,7 @@
     "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
   },
   "generatorEforgeApiTemplatesValidation": {
-    "state": "module-templates-cloud-verified-network-react-incomplete",
+    "state": "module-templates-cloud-verified-network-locally-verified-react-incomplete",
     "review": "docs/security-review-generator-eforge-api-templates.md",
     "backendTests": 606,
     "compiledModuleCategories": [
@@ -1412,8 +1412,10 @@
     "methodSecurity": "actual-original-permission-service-and-proxies-passed",
     "mvc": "read-write-export-error-boundaries-passed-with-service-witness",
     "runtime": "both-existing-api-profiles-success-no-browser-no-generated-deployment",
-    "generatedModuleSqlDeployment": "actual-mysql-and-generated-spring-mvc-transactions-passed-no-network-deployment",
+    "generatedModuleSqlDeployment": "actual-mysql-generated-spring-transactions-and-loopback-http-passed",
     "actualSqlAssertions": [52,52],
+    "actualSqlAndNetworkAssertions": [80,80],
+    "networkAuthentication": "controlled-test-login-user-product-jwt-redis-chain-not-yet-verified",
     "actualLateParentFaultChildRollback": "passed",
     "generatedModuleOpenApiClient": "not-yet-verified",
     "reactTemplate": "still-vue-fallback-incomplete",
@@ -1423,6 +1425,6 @@
     "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
-    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/network deployment, React/EForge templates, full generator manager and generated HTTP/browser remain required."
+    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/product JWT-Redis authentication/OpenAPI-client, React/EForge templates, full generator manager and generated browser remain required."
   }
 }

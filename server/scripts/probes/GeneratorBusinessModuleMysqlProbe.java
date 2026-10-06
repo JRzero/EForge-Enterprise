@@ -26,7 +26,60 @@ class GeneratorBusinessModuleMysqlProbe {
     @org.springframework.context.annotation.Configuration
     @EnableMethodSecurity @EnableTransactionManagement
     static class SecurityAndTransactions {}
+    @org.springframework.context.annotation.Configuration
+    @org.springframework.web.servlet.config.annotation.EnableWebMvc
+    static class NetworkMvc {}
     static int checks;
+    static void verifyNetwork(org.springframework.context.ApplicationContext parent, ClassLoader loader,
+                              JdbcTemplate jdbc, String category, ObjectMapper json) throws Exception {
+        var grants = new java.util.concurrent.atomic.AtomicReference<Set<String>>(Set.of());
+        var web = new org.springframework.web.context.support.GenericWebApplicationContext();
+        web.setParent(parent); web.setClassLoader(loader); new org.springframework.context.annotation.AnnotatedBeanDefinitionReader(web).register(NetworkMvc.class);
+        web.registerBean("networkApiController", (Class) loader.loadClass("generated.api.ApiRootApiController"),
+                () -> parent.getBean("apiRootApiController"));
+        var factory = new org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory(0);
+        factory.setAddress(java.net.InetAddress.getLoopbackAddress());
+        var server = factory.getWebServer(servletContext -> {
+            var filter = servletContext.addFilter("probeAuthentication", new jakarta.servlet.Filter() {
+                public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
+                                     jakarta.servlet.FilterChain chain) throws java.io.IOException, jakarta.servlet.ServletException {
+                    login(grants.get());
+                    try { chain.doFilter(request, response); } finally { SecurityContextHolder.clearContext(); }
+                }
+            });
+            filter.addMappingForUrlPatterns(EnumSet.of(jakarta.servlet.DispatcherType.REQUEST), false, "/*");
+            var dispatcher = servletContext.addServlet("probeDispatcher", new org.springframework.web.servlet.DispatcherServlet(web));
+            dispatcher.setLoadOnStartup(1); dispatcher.addMapping("/");
+        });
+        try {
+            server.start();
+            var client = java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build();
+            String route = "http://127.0.0.1:" + server.getPort() + "/api/v1/business/test/entry";
+            String id = "9007199254740995";
+            var input = new LinkedHashMap<String, Object>();
+            input.put("oRderKey", id); input.put("label", "网络中文"); input.put("amount", "9007199254740993.00001"); input.put("parentId", "0");
+            if (category.equals("sub")) input.put("apiLineList", List.of(Map.of("label", "网络子表", "ownerReference", "1")));
+            String body = json.writeValueAsString(input);
+            var post = java.net.http.HttpRequest.newBuilder(java.net.URI.create(route)).timeout(java.time.Duration.ofSeconds(15))
+                    .header("Content-Type", "application/json").POST(java.net.http.HttpRequest.BodyPublishers.ofString(body)).build();
+            check(client.send(post, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 403, "Network no-role create was not refused.");
+            check(jdbc.queryForObject("SELECT COUNT(*) FROM module_" + category, Integer.class) == 0, "Network denied request wrote SQL.");
+            grants.set(Set.of("test:entry:add", "test:entry:query", "test:entry:remove"));
+            var created = client.send(post, java.net.http.HttpResponse.BodyHandlers.ofString());
+            check(created.statusCode() == 201, "Actual network create failed: " + created.body());
+            check(json.readTree(created.body()).get("oRderKey").textValue().equals(id), "Network JSON lost exact identifier.");
+            check(jdbc.queryForObject("SELECT label FROM module_" + category, String.class).equals("网络中文"), "Actual network create did not persist.");
+            var detail = java.net.http.HttpRequest.newBuilder(java.net.URI.create(route + "/" + id)).GET().build();
+            check(client.send(detail, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 200, "Network detail failed.");
+            grants.set(Set.of("test:entry:remove"));
+            check(client.send(detail, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 403, "Network revoked permission remained usable.");
+            var delete = java.net.http.HttpRequest.newBuilder(java.net.URI.create(route)).header("Content-Type", "application/json")
+                    .method("DELETE", java.net.http.HttpRequest.BodyPublishers.ofString("{\"ids\":[\"" + id + "\"]}")).build();
+            check(client.send(delete, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 204, "Network delete failed.");
+            check(jdbc.queryForObject("SELECT COUNT(*) FROM module_" + category, Integer.class) == 0, "Network delete did not persist.");
+            if (category.equals("sub")) check(jdbc.queryForObject("SELECT COUNT(*) FROM module_lines", Integer.class) == 0, "Network subtable delete did not persist.");
+        } finally { try { server.stop(); } finally { try { server.destroy(); } finally { web.close(); } } }
+    }
     static void check(boolean value,String message){checks++;if(!value)throw new AssertionError(message);}
     static void login(Set<String> grants) {
         var user=new SysUser();user.setUserId(42L);user.setUserName("real_generated_actor");
@@ -99,9 +152,10 @@ class GeneratorBusinessModuleMysqlProbe {
                     var deleted=mvc.perform(MockMvcRequestBuilders.delete(route).contentType("application/json").content("{\"ids\":[\""+id+"\"]}")).andReturn().getResponse();check(deleted.getStatus()==204,"Actual delete failed.");
                     check(jdbc.queryForObject("SELECT COUNT(*) FROM module_"+category,Integer.class)==0,"Actual root delete did not persist.");
                     if(table.isSub())check(jdbc.queryForObject("SELECT COUNT(*) FROM module_lines",Integer.class)==0,"Actual child delete did not persist.");
+                    verifyNetwork(context, loader, jdbc, category, json);
                 }
             }
-            System.out.println("PASS: "+checks+" actual generated CRUD/tree/sub MySQL and Spring MVC assertions; original mapper/service, exact IDs/decimal/data, permissions and real child rollback.");
+            System.out.println("PASS: "+checks+" actual generated CRUD/tree/sub MySQL, Spring MVC and actual loopback HTTP assertions; original mapper/service, exact IDs/decimal/data, permissions and real child rollback.");
         } finally {
             SecurityContextHolder.clearContext();
             Path tempRoot=Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().normalize();
