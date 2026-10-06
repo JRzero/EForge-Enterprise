@@ -1519,7 +1519,10 @@
     "quartzMutationBoundary": "prior-specific-rejection-preserved"
 },
   "generatorControlParity": {
-    "status": "local-two-profile-root-and-child-passed-exact-cloud-pending",
+    "status": "exact-commit-cloud-accepted-full-goal-incomplete",
+    "implementationCommit": "aafa28d001dd9295471666d602823edaf0adf349",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37537425688",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37537425654",
     "review": "docs/security-review-generator-control-parity.md",
     "backendTests": 618,
     "frontendUnitTests": 89,

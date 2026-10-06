@@ -112,3 +112,15 @@ This accepts the empty-string/query correction and its CRUD representative matri
 The later expanded root/child matrixaafa28d has separate pending cloud tasks and
 must not borrow this earlier exact-SHA evidence. Current Boolean dictionary work
 is a further uncommitted correction and is not accepted by either earlier stage.
+
+## Expanded root and child exact cloud acceptance
+
+Expanded matrix aafa28d001dd9295471666d602823edaf0adf349 passed server37537425688
+all three jobs and web37537425654. Unique observer39583 ended0. Direct
+ generator-child-control-cloud-accepted-server/web logs prove both installed
+ generated-host profiles and the full framework/API profiles completed, with
+ native Java/MyBatis/TypeScript compilation, original JWT/Redis authorization,
+ persisted audit and exact OpenAPI reproducibility. This accepts the nine-control,
+ seven-type representative matrix across CRUD/tree/sub roots and actual sub rows.
+ Boolean dictionary correction, required/readonly/auto-PK variants and remaining
+ typed combinations are subsequent work; the complete goal remains unfinished.

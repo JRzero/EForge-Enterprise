@@ -834,3 +834,5 @@ installed generated hosts, original query dropdown and string-clear correction,
 main OpenAPI/client agreement. Expanded root/child matrixaafa28d remains separately
 pending under server37537425688/web37537425654 and observer39583; new Boolean
 numeric-choice correction remains local work. Full active objective is incomplete.
+
+Expanded generated root/child control matrix aafa28d cloud accepted (server37537425688 and web37537425654). Continue Boolean dictionary correctness, required/readonly/auto-PK variants and the remaining active parity inventory; form builder remains deferred.
