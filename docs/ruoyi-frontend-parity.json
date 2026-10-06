@@ -1415,7 +1415,9 @@
     "generatedModuleSqlDeployment": "not-yet-verified",
     "generatedModuleOpenApiClient": "not-yet-verified",
     "reactTemplate": "still-vue-fallback-incomplete",
-    "currentCloud": "not-submitted",
+    "currentCloud": "pending-exact-server-workflow",
+    "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
     "scope": "Concrete generated API templates are actual output, but real SQL transactions/audit/deployment, React/EForge templates, full generator manager and generated HTTP/browser remain required."
   }
 }

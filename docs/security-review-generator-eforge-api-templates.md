@@ -1,6 +1,6 @@
 # EForge generated business API templates — in progress
 
-This is an uncommitted implementation stage, not complete generator acceptance.
+This is an implementation checkpoint, not complete generator acceptance.
 For eforge-react selections, the actual immutable output bundle now additionally
 renders concrete Java API model/controller files. Original controllers and all
 other original template families remain behind their existing compatibility
