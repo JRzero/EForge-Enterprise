@@ -32,5 +32,7 @@ public final class GeneratorConfigurationContracts {
         @NotNull @Min(1) @Max(3) Integer formColumns,@NotNull @Pattern(regexp="[01]") String outputType,
         @Size(max=200) String outputPath,@Size(max=64) String subTableName,
         @Size(max=64) String subTableForeignKey,@Size(max=500) String remark,
-        @NotNull @Valid Options options,@NotNull @Size(min=1,max=4096) List<@NotNull @Valid Field> columns) {}
+        @NotNull @Valid Options options,@NotNull @Size(min=1,max=4096) List<@NotNull @Valid Field> columns,
+        @Schema(allowableValues={"eforge-react","element-ui","element-plus","element-plus-typescript"})
+        @Pattern(regexp="eforge-react|element-ui|element-plus|element-plus-typescript") String webType) {}
 }

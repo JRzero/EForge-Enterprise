@@ -71,7 +71,7 @@ public class GeneratorConfigurationService {
         }
         try {table.setOptions(json.writeValueAsString(stored));}catch(com.fasterxml.jackson.core.JsonProcessingException impossible){throw new IllegalStateException(impossible);}
         var previousName=table.getTableName();
-        table.setTableName(input.name());table.setTableComment(input.comment());table.setClassName(input.className());table.setTplCategory(input.category().name());table.setTplWebType("eforge-react");
+        table.setTableName(input.name());table.setTableComment(input.comment());table.setClassName(input.className());table.setTplCategory(input.category().name());table.setTplWebType(input.webType()==null?"eforge-react":input.webType());
         table.setPackageName(input.packageName());table.setModuleName(input.moduleName());table.setBusinessName(input.businessName());table.setFunctionName(input.functionName());table.setFunctionAuthor(input.author());
         table.setFormColNum(input.formColumns());table.setGenType(input.outputType());table.setGenPath(input.outputPath()==null||input.outputPath().isBlank()?"/":input.outputPath());table.setRemark(text(input.remark()));table.setUpdateBy(actor);
         table.setSubTableName(input.category()==Category.sub?input.subTableName():"");table.setSubTableFkName(input.category()==Category.sub?input.subTableForeignKey():"");

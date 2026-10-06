@@ -723,3 +723,12 @@ ended0. Direct generator-route-cloud-accepted-server/web.log prove610 backend,
 real installed host production-build/navigation/CRUD/tree/sub/auth/SQL/audit runs.
 The installation stage is accepted. New template-selection contracts under
 development are separate; full manager, control variants and active parity remain.
+### Canonical generator template-selection prerequisite
+The editor's fixed four template choices now survive canonical metadata updates;
+omitted/null retains the previous React default and arbitrary resource paths are
+rejected before SQL. Actual MVC19/full Maven615, reproducible generated optional
+enum,83 units/build and both complete43/browser/API/MySQL/Redis profiles pass.
+See security-review-generator-template-choice.md. Main live/committed schema hash
+7C431ED9D0876F95649E9432A6B06759BF741E93BE8B58BE9AD1FC33B4EE5E5D.
+Exact new cloud is pending. This prerequisite does not implement the full manager
+page or prove all generated control variants; those remain active.

@@ -424,3 +424,13 @@ reports lost/cancelled responses as unconfirmed and never automatically repeats
 writes. Only Java/XML backend files are installed, matching original custom output;
 SQL/frontend files remain in preview/download. Original endpoints retain their
 compatibility JSON boundary while using the same safe output pipeline.
+
+## Generator frontend template selection
+
+Canonical PUT /api/v1/tool/generator/tables/{id} accepts optional webType with the
+fixed choices eforge-react, element-ui, element-plus and element-plus-typescript.
+An omitted/null value retains the prior canonical default eforge-react. Explicit
+choices survive metadata save and subsequent read/preview. The field cannot name
+an arbitrary template resource. Original edit permission and transaction/physical
+identity guards apply; business rows are not rewritten by template selection.
+The generated TypeScript request carries this exact optional enum.

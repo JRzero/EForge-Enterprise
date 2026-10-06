@@ -37,6 +37,26 @@ try {
     Assert-Check ((Request $configPath 'PUT' $body $authorized).StatusCode -eq 204) 'Configuration retry failed.'
     $saved=(Request $configPath 'GET' '' $authorized).Content|ConvertFrom-Json
     Assert-Check ($saved.configuration.formColumns -eq 3 -and $saved.configuration.outputPath -ceq 'D:/生成输出' -and $saved.configuration.options.generateDetail -and $saved.table.webType -ceq 'eforge-react' -and $saved.columns[0].primaryKey -and $saved.columns[0].autoIncrement -and $saved.columns[0].id -ceq $detail.columns[0].id) 'Configuration fields/options/physical identity were not retained.'
+    foreach($configWebType in @('element-ui','element-plus','element-plus-typescript','eforge-react')) {
+        $configWrite.webType=$configWebType
+        Assert-Check ((Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized).StatusCode -eq 204) 'Explicit original frontend template selection failed.'
+        $configSelected=(Request $configPath 'GET' '' $authorized).Content|ConvertFrom-Json
+        Assert-Check ($configSelected.table.webType -ceq $configWebType) 'Selected frontend template was silently replaced.'
+        $configSelectedPreview=Request "$configPath/preview" 'GET' '' $authorized
+        Assert-Check ($configSelectedPreview.StatusCode -eq 200) 'Selected template did not produce actual preview output.'
+        $configSelectedFiles=($configSelectedPreview.Content|ConvertFrom-Json).files
+        if($configWebType -eq 'eforge-react') {
+            Assert-Check (@($configSelectedFiles|Where-Object template -eq 'vm/react/Page.tsx.vm').Count -eq 1 -and @($configSelectedFiles|Where-Object path -like '*.vue').Count -eq 0) 'React selection fell back to Vue output.'
+        } else {
+            Assert-Check (@($configSelectedFiles|Where-Object path -like '*.vue').Count -ge 1 -and @($configSelectedFiles|Where-Object template -eq 'vm/react/Page.tsx.vm').Count -eq 0) 'Original template choice lost its actual Vue output.'
+        }
+        Assert-Check (@(GeneratorConfig-Sql ('SELECT name FROM '+$configMarker+'_a ORDER BY entry_id'))[0] -ceq 'owned-preserve-a') 'Template selection changed physical business rows.'
+    }
+    $configWrite.webType='../../private/template'
+    $configTemplateBefore=GeneratorConfig-Snapshot $configId
+    Assert-Problem (Request $configPath 'PUT' ($configWrite|ConvertTo-Json -Depth 10 -Compress) $authorized) 400 'VALIDATION_ERROR'
+    Assert-Check ((GeneratorConfig-Snapshot $configId) -ceq $configTemplateBefore) 'Rejected template path changed metadata.'
+    $configWrite.webType='eforge-react'
     # Original preview now captures the root/child graph once, before rendering.
     $configPreviewPath="/tool/gen/preview/$configId"
     $configAnonymousPreview=Request $configPreviewPath

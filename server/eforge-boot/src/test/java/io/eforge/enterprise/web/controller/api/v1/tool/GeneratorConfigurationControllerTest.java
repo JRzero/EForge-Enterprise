@@ -67,6 +67,15 @@ class GeneratorConfigurationControllerTest {
         verify(tables).updateGenTable(argThat(row->"eforge-react".equals(row.getTplWebType())&&"editor".equals(row.getUpdateBy())&&row.getFormColNum()==3&&"D:/生成输出".equals(row.getGenPath())&&"".equals(row.getRemark())&&row.getOptions().contains("\"genView\":true")));
         verify(columns).updateGenTableColumn(argThat(row->row.getColumnId()==ID+1&&row.getTableId()==ID&&"bigint".equals(row.getColumnType())&&"entry_id".equals(row.getColumnName())&&row.isPk()&&row.isIncrement()&&"Boolean".equals(row.getJavaType())&&"GTE".equals(row.getQueryType())&&"imageUpload".equals(row.getHtmlType())&&"".equals(row.getColumnComment())));
     }
+    @ParameterizedTest @ValueSource(strings={"eforge-react","element-ui","element-plus","element-plus-typescript"})
+    void explicitOriginalTemplateChoiceSurvivesCanonicalSave(String webType) throws Exception {
+        var body=input();body.put("webType",webType);request(body).andExpect(status().isNoContent());
+        verify(tables).updateGenTable(argThat(row->webType.equals(row.getTplWebType())&&"editor".equals(row.getUpdateBy())));
+    }
+    @Test void arbitraryTemplateResourceNamesAreRejectedBeforeSql() throws Exception {
+        var body=input();body.put("webType","../../private/template");request(body).andExpect(status().isBadRequest());
+        verifyNoInteractions(tables,columns,jdbc,menus);
+    }
     @Test void moduleAndBusinessSegmentsDoNotRequireJavaIdentifiers() throws Exception {
         var body=input();body.put("moduleName","sales-api");body.put("businessName","order-line");request(body).andExpect(status().isNoContent());
         verify(tables).updateGenTable(argThat(row->"sales-api".equals(row.getModuleName())&&"order-line".equals(row.getBusinessName())));

@@ -869,6 +869,7 @@ export type GeneratorConfigurationUpdate = {
     remark?: string;
     subTableForeignKey?: string;
     subTableName?: string;
+    webType?: "eforge-react" | "element-ui" | "element-plus" | "element-plus-typescript";
 };
 export type CustomOutputOutcome = {
     path?: string;

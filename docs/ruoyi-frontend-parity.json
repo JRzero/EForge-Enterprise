@@ -1477,4 +1477,17 @@
     "exactCloudFullFrameworkBrowserProfiles": [43,43],
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"],
     "formBuilder": "deferred-not-complete"
+  },
+  "generatorTemplateChoice": {
+    "status": "local-real-sql-preview-proven-exact-cloud-pending",
+    "choices": ["eforge-react", "element-ui", "element-plus", "element-plus-typescript"],
+    "omittedValue": "previous-canonical-eforge-react-default",
+    "backendTests": 615,
+    "targetMvcTests": 19,
+    "frontendUnitTests": 83,
+    "fullRealFrameworkBrowserProfiles": [43,43],
+    "mainOpenApiSha256": "7C431ED9D0876F95649E9432A6B06759BF741E93BE8B58BE9AD1FC33B4EE5E5D",
+    "review": "docs/security-review-generator-template-choice.md",
+    "cloud": "pending-for-new-implementation",
+    "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
   }}

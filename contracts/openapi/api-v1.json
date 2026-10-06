@@ -1238,6 +1238,16 @@
             "maxLength": 64,
             "minLength": 0,
             "type": "string"
+          },
+          "webType": {
+            "enum": [
+              "eforge-react",
+              "element-ui",
+              "element-plus",
+              "element-plus-typescript"
+            ],
+            "pattern": "eforge-react|element-ui|element-plus|element-plus-typescript",
+            "type": "string"
           }
         },
         "required": [
