@@ -571,3 +571,27 @@ two43real browser profiles). The new three-category actual module compiler/MVC/
 method-security/XLSX tests and full606 verify are green. Saving this template
 checkpoint does not accept module SQL/transactions/audit/deployment, new module
 OpenAPI/client, actual React/EForge output or complete generator UI.
+
+Actual generated business SQL module stage (2026-10-06, new scripts uncommitted):
+verify-generator-business-module.ps1/probes/GeneratorBusinessModuleMysqlProbe.java
+render and compile actual CRUD/tree/sub modules into an exclusively owned temporary
+class directory, register the real generated MyBatis Mapper/Service and canonical
+controller in Spring method-security/transaction context, and issue actual MVC
+requests against isolated MySQL. Modes0/1 each52 assertions pass in
+generator-business-module-native-0/1.log. Exact Long/decimal/string SQL round trips,
+real filtered query/paging, denied create before physical writes, persisted create/
+update/delete and child FK assignment pass. A real strict parent UPDATE failure
+occurs after child deletion/reinsertion: both parent and child content roll back
+under the actual generated controller/service/DataSourceTransactionManager chain.
+Owned containers and generated directories are cleaned; cleanup validates the
+resolved temporary root and owned prefix. The new native check is included in CI.
+
+This extends the earlier service-witness evidence with actual SQL and transaction
+proof, but does not prove concurrency, persisted LogAspect audit, actual network
+server/OpenAPI/client or browser deployment. React frontend is still Vue fallback;
+complete React/EForge templates, manager UI and generated browser flows remain.
+Initial failures were only fixture startup (unquoted JVM option parsed by PowerShell,
+then missing mapper factory import); no product logic was altered to pass them.
+The previous implementation87b3f3f cloud still runs;79642 observation alone failed
+with annotations unexpected EOF while authoritative GH jobs remained live. A single
+reconnected observer now follows the same workflow; no tests were rerun or restarted.
