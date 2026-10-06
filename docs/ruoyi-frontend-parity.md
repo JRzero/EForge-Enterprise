@@ -1517,3 +1517,18 @@ all frontend checks, 73 unit and 64 simulated browser tests pass. Final exact
 patch cloud acceptance remains pending. See security-review-cache-tooltip-resize.md.
 No generator UI/output or full-objective completion is claimed; form builder
 remains deferred and every other current requirement remains.
+
+Final exact-commit acceptance (2026-10-06): implementation f5a62c7931225b86768385fbc2ffe84809f46b84.
+Server run 37409725668 is terminal success in all three jobs; web run 37409724884
+is terminal success. The server log directly proves default/enabled profiles each
+43 real browser tests, both complete creation HTTP fault/recovery/concurrency/audit
+regressions, both 47-assertion native Spring/MyBatis probes and exact live OpenAPI.
+Evidence: server/eforge-boot/target/cache-tooltip-cloud-final.log. This supersedes
+pending statements above. Generator output/UI remain incomplete; form builder is deferred.
+Generator immutable metadata snapshots (2026-10-06): internal capture and real
+permission-controlled REPEATABLE_READ/REQUIRES_NEW loader added. Final 500 backend
+tests pass; 12 capture/template-parity tests and both native MySQL modes each
+30 real Spring/MyBatis assertions pass, including concurrent root/child/field
+commits, outer-transaction isolation, safe SQL failure/recovery and empty LEFT JOIN
+field regression. See security-review-generator-rendering-snapshot.md. These are
+not output endpoints or React/EForge output/UI acceptance. Exact cloud is pending.

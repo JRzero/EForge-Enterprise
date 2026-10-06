@@ -40,3 +40,11 @@ Local logs in server/eforge-boot/target:
 The fix still requires final exact-commit web and server cloud acceptance.
 Generator output/UI and the overall objective remain unfinished; form builder
 is explicitly deferred.
+
+Final exact-commit acceptance (2026-10-06): implementation f5a62c7931225b86768385fbc2ffe84809f46b84.
+Server run 37409725668 is terminal success in all three jobs; web run 37409724884
+is terminal success. The server log directly proves default/enabled profiles each
+43 real browser tests, both complete creation HTTP fault/recovery/concurrency/audit
+regressions, both 47-assertion native Spring/MyBatis probes and exact live OpenAPI.
+Evidence: server/eforge-boot/target/cache-tooltip-cloud-final.log. This supersedes
+pending statements above. Generator output/UI remain incomplete; form builder is deferred.

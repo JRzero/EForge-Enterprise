@@ -1118,8 +1118,7 @@
     "implementationCommit": "5c843569a12758e180a8b8111ab3b037bc665b8c",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37357189557",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37357189811"
-  }
-,
+  },
   "generatorSynchronizationApiValidation": {
     "state": "synchronization-api-verified",
     "backendTests": 444,
@@ -1171,7 +1170,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37403883802"
   },
   "generatorCreationHttpValidation": {
-    "state": "local-http-client-verified-cloud-pending",
+    "state": "http-client-cloud-verified",
     "review": "docs/security-review-generator-create-http.md",
     "mvcTests": 8,
     "backendTests": 488,
@@ -1179,24 +1178,42 @@
     "mysqlCaseMode1SpringAssertions": 47,
     "frontendUnitTests": 73,
     "simulatedBrowserTests": 64,
-    "runtime": "Default and explicitly enabled complete real API runs are terminal success, including creation faults/recovery/concurrency/audit and full MySQL/Redis/Quartz/OSHI/ACL/captcha regression. Both live OpenAPI exports exactly match the committed candidate. Final real-browser and exact-commit cloud acceptance remain pending.",
-    "currentCloud": "server-success-initial-web-failed-cache-fix-pending",
-    "scope": "Shared admin canonical creation and original form endpoint, physical outcomes and independent metadata import, safe typed partial errors and generated client. Complete generator UI/output and final acceptance remain pending. Form builder remains deferred."
-  }
-,
+    "runtime": "Default/enabled profiles each 43 real browser tests, complete actual API creation fault/recovery/concurrency/audit and MySQL/Redis/Quartz/OSHI/ACL/captcha checks, exact live OpenAPI; both native MySQL modes each 47 actual Spring/MyBatis assertions.",
+    "currentCloud": "success",
+    "scope": "Shared admin canonical creation and original form endpoint, physical outcomes and independent metadata import, safe typed partial errors and generated client. Complete generator UI/output and final acceptance remain pending. Form builder remains deferred.",
+    "implementationCommit": "f5a62c7931225b86768385fbc2ffe84809f46b84",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37409725668",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37409724884"
+  },
   "cacheTooltipResizeRegression": {
-    "state": "local-fix-verified-cloud-pending",
+    "state": "cloud-verified",
     "review": "docs/security-review-cache-tooltip-resize.md",
     "initialCreationCommit": "27a26e48128eb99322b932860828e0f311fca553",
     "creationServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37408353480",
     "creationServerState": "all-three-jobs-success",
     "initialWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37408353499",
     "initialWebState": "failed-existing-cache-tooltip-resize",
-    "realBrowserProfilesAtCreationCommit": [43, 43],
+    "realBrowserProfilesAtCreationCommit": [
+      43,
+      43
+    ],
     "controlledRaceBeforeFix": "failed-real-DIV-overflow",
     "controlledRaceAfterFix": "passed",
     "repeatCasesPassed": 8,
     "frontendUnitTests": 73,
-    "simulatedBrowserTests": 64
+    "simulatedBrowserTests": 64,
+    "implementationCommit": "f5a62c7931225b86768385fbc2ffe84809f46b84",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37409725668",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37409724884"
+  },
+  "generatorRenderingSnapshotValidation": {
+    "state": "internal-snapshot-loader-local-verified",
+    "review": "docs/security-review-generator-rendering-snapshot.md",
+    "backendTests": 500,
+    "targetedTests": 12,
+    "mysqlCaseMode0SpringAssertions": 30,
+    "mysqlCaseMode1SpringAssertions": 30,
+    "currentCloud": "pending",
+    "scope": "Detached exact legacy graph and actual permission-controlled read-only REPEATABLE_READ/REQUIRES_NEW load. Concurrent real SQL root/child/fields commit, next-read visibility, caller isolation, SQL privacy/recovery, empty LEFT JOIN field regression. No output endpoint, safe generated source, React/EForge template, custom path or UI completion."
   }
 }
