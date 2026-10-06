@@ -1584,3 +1584,22 @@ OSHI/ACL/captcha/permission/concurrency regressions pass. Both live OpenAPI expo
 match contract SHA256481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
 New implementation exact cloud remains pending. Local stage acceptance does not
 complete the generator output/UI or the full current goal.
+Exact XML-stage cloud acceptance: d8eb258f48bb9a71b8bb3f055eeeaa36fac7fac4,
+https://github.com/JRzero/EForge-Enterprise/actions/runs/37432111694, all three
+jobs finished SUCCESS. Direct generator-mapper-xml-cloud-accepted.log shows531
+backend tests, both32 actual snapshots, both132 actual Mapper/literal probes,
+default/enabled each43 actual browsers, complete real APIs and unchanged OpenAPI.
+Observer43858 finished exit0. This does not accept the later menu/SpEL source.
+Actual generated menu SQL and controller annotation integration (2026-10-06):
+all original dynamic menu literals and Java route/Java-embedded SpEL permission
+arguments now use their actual contexts. Original six permissions and six menu
+rows per batch remain.533 backend tests,4 complete Java generation compiler/
+reflection/SpEL cases,1 actual SQL AST case, both230 actual native assertions and
+both32 snapshot profiles pass. Final both complete API/browser/OpenAPI profiles
+and exact new-source cloud are pending. See security-review-generator-menu-spel.md.
+No React/EForge/full output/UI completion is claimed; form builder remains deferred.
+Final local menu/SpEL acceptance:88871 terminal exit0, default/enabled each43
+actual browsers and both full real API regressions pass. Both live OpenAPI
+exports exactly match SHA256481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
+Exact new-commit cloud is pending. This stage does not complete generator output,
+React/EForge templates, management UI or the full active goal.

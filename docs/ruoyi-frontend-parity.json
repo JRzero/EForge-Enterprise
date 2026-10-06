@@ -1254,7 +1254,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37429057075"
   },
   "generatorMapperXmlValidation": {
-    "state": "original-mapper-physical-names-local-verified",
+    "state": "original-mapper-physical-names-cloud-verified",
     "review": "docs/security-review-generator-mapper-xml.md",
     "backendTests": 531,
     "actualMyBatisParsingCases": 10,
@@ -1265,8 +1265,33 @@
       32
     ],
     "completeRuntime": "both-complete-api-profiles-success",
-    "currentCloud": "pending-exact-commit",
+    "currentCloud": "success",
     "scope": "Actual original physical SQL identifiers and XML column attributes only. Java/OGNL/other output contexts, canonical bundle/path/output/React/UI remain pending.",
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201",
+    "implementationCommit": "d8eb258f48bb9a71b8bb3f055eeeaa36fac7fac4",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37432111694"
+  },
+  "generatorMenuSpelValidation": {
+    "state": "actual-menu-and-annotation-contexts-local-verified",
+    "review": "docs/security-review-generator-menu-spel.md",
+    "backendTests": 533,
+    "generatedJavaCompilerCases": 4,
+    "actualMenuAstCases": 1,
+    "nativeMysqlAssertions": [
+      230,
+      230
+    ],
+    "nativeSnapshotAssertions": [
+      32,
+      32
+    ],
+    "completeRuntime": "both-complete-api-profiles-success",
+    "currentCloud": "pending-exact-commit",
+    "scope": "Actual original menu SQL and route/Java-embedded SpEL text. Lexical/semantic identifiers, FK mapping, frontend text, canonical bundles/output/paths/React/UI/business HTTP-browser remain pending.",
     "realBrowserProfiles": [
       43,
       43

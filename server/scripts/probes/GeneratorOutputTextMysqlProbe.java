@@ -4,6 +4,10 @@ import io.eforge.enterprise.generator.rendering.GeneratorOutputText;
 import io.eforge.enterprise.generator.domain.*;
 import io.eforge.enterprise.generator.util.*;
 import java.io.*;
+import java.nio.file.*;
+import com.alibaba.druid.DbType;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.statement.*;
 import org.apache.velocity.app.Velocity;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.session.*;
@@ -72,6 +76,49 @@ class GeneratorOutputTextMysqlProbe {
   }
   try(var sql=connection.createStatement();var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==5,"Generated mapper executed an unintended DDL side effect.");}
  }
+ static void actualMenu(Connection connection,Path repository)throws Exception{
+  var baseline=SQLUtils.parseStatements(Files.readString(repository.resolve("sql/upstream/ry_20260417.sql")),DbType.mysql);
+  try(var sql=connection.createStatement()){
+   var ddl=baseline.stream().filter(statement->statement instanceof SQLCreateTableStatement table&&table.getName().getSimpleName().equals("sys_menu")).findFirst().orElseThrow();
+   sql.execute(ddl.toString());
+   // Only ALTERs from the actual migrations, never seed UPDATEs or unrelated DDL.
+   for(String migration:List.of("V001__navigation_identity.sql","V011__menu_name_uniqueness.sql")){
+    for(var statement:SQLUtils.parseStatements(Files.readString(repository.resolve("sql/migrations/"+migration)),DbType.mysql))if(statement instanceof SQLAlterTableStatement)sql.execute(statement.toString());
+   }
+   int modeIndex=0;
+   for(String mode:List.of("","ANSI_QUOTES","NO_BACKSLASH_ESCAPES","ANSI_QUOTES,NO_BACKSLASH_ESCAPES")){
+    sql.execute("SET SESSION sql_mode='"+mode+"'");
+    var table=table("crud","menu_fixture");String title="菜单"+(modeIndex++)+"'\\中文\n'); DROP TABLE q; --";
+    table.setFunctionName(title);table.setModuleName("模块'\\文本");table.setBusinessName("业务'\\中文");table.setOptions("{\"parentMenuId\":\"3\"}");
+    var writer=new StringWriter();Velocity.getTemplate("vm/sql/sql.vm","UTF-8").merge(VelocityUtils.prepareContext(table),writer);
+    var statements=SQLUtils.parseStatements(writer.toString(),DbType.mysql);check(statements.size()==7,"Generated menu changed statement count.");
+    long rootId=0;int position=0;
+    for(var statement:statements){
+     boolean query=sql.execute(statement.toString());
+     if(position==0){try(var result=sql.executeQuery("SELECT LAST_INSERT_ID()")){check(result.next(),"Generated root menu has no identifier.");rootId=result.getLong(1);}}
+     else if(query){try(var result=sql.getResultSet()){check(result.next()&&result.getLong(1)==rootId,"Generated parent capture changed.");}}
+     else check(sql.getUpdateCount()==1,"Generated button count changed.");position++;
+    }
+    try(var result=sql.executeQuery("SELECT * FROM sys_menu WHERE menu_id="+rootId)){
+     check(result.next()&&title.equals(result.getString("menu_name")),"Generated root menu label changed.");
+     check(result.getLong("parent_id")==3&&result.getInt("order_num")==1&&"C".equals(result.getString("menu_type")),"Generated root menu identity changed.");
+     check(table.getBusinessName().equals(result.getString("path"))&&(table.getModuleName()+"/"+table.getBusinessName()+"/index").equals(result.getString("component")),"Generated route/component text changed.");
+     check((table.getModuleName()+":"+table.getBusinessName()+":list").equals(result.getString("perms"))&&(title+"菜单").equals(result.getString("remark")),"Generated root permission/remark changed.");
+     check(result.getString("menu_key")==null&&result.getString("route_id")==null,"Legacy menu falsely binds a React route.");
+    }
+    try(var result=sql.executeQuery("SELECT * FROM sys_menu WHERE parent_id="+rootId+" ORDER BY order_num")){
+     int index=0;var labels=List.of("查询","新增","修改","删除","导出");var actions=List.of("query","add","edit","remove","export");
+     while(result.next()){
+      check(index<5&&"F".equals(result.getString("menu_type"))&&(title+labels.get(index)).equals(result.getString("menu_name")),"Generated child label/type changed.");
+      check((table.getModuleName()+":"+table.getBusinessName()+":"+actions.get(index)).equals(result.getString("perms")),"Generated child permission changed.");index++;
+     }
+     check(index==5,"Generated menu lost original button controls.");
+    }
+   }
+   try(var result=sql.executeQuery("SELECT COUNT(*) FROM sys_menu")){check(result.next()&&result.getInt(1)==24,"Generated menu has unexpected row side effects.");}
+   try(var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==6,"Generated menu has unintended DDL side effects.");}
+  }
+ }
  public static void main(String[] args)throws Exception{
   try(var connection=DriverManager.getConnection(System.getenv("EFORGE_POLICY_JDBC_URL"),"root",System.getenv("EFORGE_POLICY_JDBC_PASSWORD"));var sql=connection.createStatement()){
    check("中文😀".equals(new String(new int[]{0x4e2d,0x6587,0x1f600},0,3)),"Probe source Unicode was not decoded exactly.");
@@ -87,7 +134,8 @@ class GeneratorOutputTextMysqlProbe {
    try(var result=sql.executeQuery("SELECT COUNT(*) FROM "+table)){check(result.next()&&result.getInt(1)==20,"Rendered statements executed side effects or lost inserts.");}
    try(var result=sql.executeQuery("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE()")){check(result.next()&&result.getInt(1)==1,"Generated literal changed unrelated schema.");}
    actualMapper(connection);
-   System.out.println("PASS: "+assertions+" actual MySQL output context assertions; exact Unicode/NULL/control/string round trips under four SQL modes and quoted identifier containment.");
+   actualMenu(connection,Path.of(args[0]));
+   System.out.println("PASS: "+assertions+" actual MySQL output context assertions; exact Unicode/NULL/control/string round trips under four SQL modes quoted identifier containment and actual original Mapper/menu SQL execution.");
   }
  }
 }

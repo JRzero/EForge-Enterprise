@@ -31,7 +31,7 @@ import io.eforge.enterprise.common.core.page.TableDataInfo;
  * @date ${datetime}
  */
 @RestController
-@RequestMapping("/${moduleName}/${businessName}")
+@RequestMapping($outputText.javaLiteral("/${moduleName}/${businessName}"))
 public class ${ClassName}Controller extends BaseController
 {
     @Autowired
@@ -40,7 +40,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 查询$outputText.javaComment($functionName)列表
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:list')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:list"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @GetMapping("/list")
 #if($table.crud || $table.sub)
     public TableDataInfo list(${ClassName} ${className})
@@ -60,7 +61,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 导出$outputText.javaComment($functionName)列表
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:export')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:export"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @Log(title = $outputText.javaLiteral($functionName), businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ${ClassName} ${className})
@@ -73,7 +75,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 获取$outputText.javaComment($functionName)详细信息
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:query')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:query"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @GetMapping(value = "/{${pkColumn.javaField}}")
     public AjaxResult getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField})
     {
@@ -83,7 +86,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 新增$outputText.javaComment($functionName)
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:add')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:add"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @Log(title = $outputText.javaLiteral($functionName), businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ${ClassName} ${className})
@@ -94,7 +98,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 修改$outputText.javaComment($functionName)
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:edit')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:edit"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @Log(title = $outputText.javaLiteral($functionName), businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ${ClassName} ${className})
@@ -105,7 +110,8 @@ public class ${ClassName}Controller extends BaseController
     /**
      * 删除$outputText.javaComment($functionName)
      */
-    @PreAuthorize("@ss.hasPermi('${permissionPrefix}:remove')")
+#set($permissionArgument = $outputText.spelLiteral("${permissionPrefix}:remove"))
+    @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @Log(title = $outputText.javaLiteral($functionName), businessType = BusinessType.DELETE)
 	@DeleteMapping("/{${pkColumn.javaField}s}")
     public AjaxResult remove(@PathVariable ${pkColumn.javaType}[] ${pkColumn.javaField}s)

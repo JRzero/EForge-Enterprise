@@ -55,3 +55,9 @@ OSHI/ACL/captcha/permission/concurrency regressions pass. Both live OpenAPI expo
 match contract SHA256481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
 New implementation exact cloud remains pending. Local stage acceptance does not
 complete the generator output/UI or the full current goal.
+Exact XML-stage cloud acceptance: d8eb258f48bb9a71b8bb3f055eeeaa36fac7fac4,
+https://github.com/JRzero/EForge-Enterprise/actions/runs/37432111694, all three
+jobs finished SUCCESS. Direct generator-mapper-xml-cloud-accepted.log shows531
+backend tests, both32 actual snapshots, both132 actual Mapper/literal probes,
+default/enabled each43 actual browsers, complete real APIs and unchanged OpenAPI.
+Observer43858 finished exit0. This does not accept the later menu/SpEL source.
