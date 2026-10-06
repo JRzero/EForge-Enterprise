@@ -2001,3 +2001,12 @@ HTTP/client/SQL/Redis authorization and audit. The two changed verification
 sources pass lint; production templates remain the prior709865e implementation.
 Exact expanded-matrix cloud is pending. Required/disabled/auto-PK variants and
 other remaining groups above have not been marked complete.
+
+### Explicit-string correction exact cloud accepted
+709865e1e654be77fd477cd350da0bd472170f1c: server37536091699 all three and
+web37536091726 terminal SUCCESS; unique99910 ended0. Direct accepted logs prove618
+backend/89 unit/71 mocked, both47 real framework/API profiles, both actual
+installed generated hosts, original query dropdown and string-clear correction,
+main OpenAPI/client agreement. Expanded root/child matrixaafa28d remains separately
+pending under server37537425688/web37537425654 and observer39583; new Boolean
+numeric-choice correction remains local work. Full active objective is incomplete.

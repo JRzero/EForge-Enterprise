@@ -100,3 +100,15 @@ The expanded matrix uses representative valid field types for each control kind.
 It does not prove every supported type/control/dictionary-value combination.
 Boolean dictionary choices using original numeric0/1 values, required/readonly
 flags and auto-generated keys remain explicit next verification requirements.
+
+## Empty-string and original dictionary-query exact cloud acceptance
+
+Implementation709865e1e654be77fd477cd350da0bd472170f1c passed server37536091699
+all three jobs and web37536091726. Unique observer99910 ended0. Direct
+control-cloud-accepted-server/web logs prove618 backend (608boot + 10scope, one
+existing OS skip),89 unit/71 mocked browsers, both47 real framework/API profiles,
+reproducible exact main OpenAPI and both actual installed generated-host profiles.
+This accepts the empty-string/query correction and its CRUD representative matrix.
+The later expanded root/child matrixaafa28d has separate pending cloud tasks and
+must not borrow this earlier exact-SHA evidence. Current Boolean dictionary work
+is a further uncommitted correction and is not accepted by either earlier stage.

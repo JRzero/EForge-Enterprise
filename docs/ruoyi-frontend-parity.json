@@ -1533,5 +1533,17 @@
     "queryDictionaryParity": "original-select-radio-dictionary-dropdown-real-wire-filter-reset",
     "specialField": "legal-__proto__-exact-persist-and-clear",
     "remaining": ["required-disabled-autokey-variants", "supported-type-control-dictionary-combinations", "date-timezone-xlsx-edges", "shared-shell-parity", "final-active-audit"]
+  },
+  "generatorEmptyStringCorrection": {
+    "status": "exact-commit-cloud-accepted-full-goal-incomplete",
+    "implementationCommit": "709865e1e654be77fd477cd350da0bd472170f1c",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37536091699",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37536091726",
+    "backendTests": 618,
+    "frontendUnitTests": 89,
+    "mockedBrowsers": 71,
+    "fullFrameworkRealProfiles": [47,47],
+    "review": "docs/security-review-generator-control-parity.md",
+    "scope": "optional-string-clear-and-original-select-radio-query-parity"
   }
 }
