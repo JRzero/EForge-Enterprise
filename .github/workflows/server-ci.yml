@@ -97,6 +97,12 @@ jobs:
           ./server/scripts/verify-generator-creation-preflight.ps1 -LowerCaseTableNames 0
           ./server/scripts/verify-generator-creation-preflight.ps1 -LowerCaseTableNames 1
 
+      - name: Verify guarded creation metadata import on actual Spring and MyBatis
+        shell: pwsh
+        run: |
+          ./server/scripts/verify-generator-creation-import.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-generator-creation-import.ps1 -LowerCaseTableNames 1
+
   runtime-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 35

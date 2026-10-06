@@ -233,3 +233,22 @@ acknowledgement after real CREATE, and independent-connection target competition
 Shared original/canonical admin routes, checked metadata import, full compatibility,
 React output/pages and final active parity are still required. See
 `security-review-generator-create-execution.md`; form builder remains deferred.
+### 2026-10-06: separate checked creation metadata import
+
+The new admin-only service uses REQUIRES_NEW and the existing SQL metadata guard;
+it accepts only fully acknowledged physical results, resolves exact native table
+names/fields, checks every write/ID and records the authenticated actor. It preserves
+original template choices plus canonical React target, without claiming React
+output is implemented. Actual Spring/MyBatis/migration profiles pass 24 assertions
+each: case-neighbour isolation, exact long ID, original role semantics, real late
+SQL batch rollback/retry, retained physical tables, independent-parent-rollback
+isolation and concurrent one-success/one-conflict import. Shared original/canonical
+creation command/routes/client and full UI/output acceptance remain pending.
+See `security-review-generator-create-import.md`; form builder remains deferred.
+Final import-source checkpoint: both actual Spring/MyBatis profiles pass 27 cases,
+including guard SQL privacy and physical retention, and full Maven verify passes
+480 cases. Exact older physical implementation b7d78bff0fe9bba938dfd64bf39e60e2dbbe7b0a
+passes server 37401957208 all three jobs, actual 88/86 JDBC and both 43-browser
+profiles. Both old watches are terminal. New metadata import-service exact cloud
+acceptance and assembled HTTP creation remain pending; do not substitute old
+physical/preflight checks for this new acceptance.

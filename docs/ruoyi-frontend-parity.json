@@ -1155,4 +1155,12 @@
     "currentCloud": "pending-exact-implementation",
     "review": "docs/security-review-generator-create-execution.md",
     "scope": "Whole-batch preflight plus separate physical DDL with acknowledged/failed/unattempted/unconfirmed outcomes, retained rows and independent-connection ownership race. No shared admin endpoint, checked automatic metadata import, generated client, output or UI acceptance."
+  },
+  "generatorCreationMetadataPhaseValidation": {
+    "state": "unassembled-checked-metadata-phase-local-verified",
+    "mysqlCaseMode0SpringAssertions": 27,
+    "mysqlCaseMode1SpringAssertions": 27,
+    "currentCloud": "pending-exact-implementation",
+    "review": "docs/security-review-generator-create-import.md",
+    "scope": "Admin role, authenticated audit, exact native table/field identity, checked IDs/writes, independent guarded transaction, real late SQL batch rollback/retry and concurrent serialization. No assembled creation HTTP/client or generated output/UI acceptance."
   }}
