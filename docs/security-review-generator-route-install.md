@@ -61,3 +61,19 @@ both installed-host profiles and all original framework/API/native checks;
 web verification must prove the unchanged original navigation behavior.
 Form builder stays deferred. The specifically denied Quartz runtime schemes
 remain untouched.
+## Exact installation implementation cloud acceptance
+
+Commit8157b87c7bed2cf4b3e1f52d6507bb11e73c85f7:
+server37522840964 all three and web37522840972 terminal SUCCESS.
+Unique observer29769 ended0. Direct generator-route-cloud-accepted-server/web.log
+prove610 backend (600boot+10scope, one host-specific skip),83 unit/64 mocked,
+two full original43/browser/API profiles with exact main OpenAPI reproduction,
+both installed-host production builds and actual generated CRUD/tree/sub
+Application navigation/page/client/auth/SQL/audit runs, plus native generation/
+snapshot/creation/MySQL mode checks. Real post-root menu rollback and duplicate
+no-overwrite assertions are part of each installed-host run. No retry or source
+fix was needed after this implementation commit.
+
+This accepts route/menu installation only. Subsequent uncommitted template-choice
+contract changes are a separate stage and are not covered by these cloud results.
+Full manager/control/shared-shell/final active parity remains incomplete.

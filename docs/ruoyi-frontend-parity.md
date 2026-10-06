@@ -1891,3 +1891,11 @@ navigation, no-role host403 and backend403, original generated actions/audit.
 See security-review-generator-route-install.md. Exact new cloud is pending.
 This is an installation stage; full generator manager, control variants, shared
 shell and final active parity remain required. Form builder remains deferred.
+### Generated route installation exact cloud acceptance
+Implementation8157b87c7bed2cf4b3e1f52d6507bb11e73c85f7:
+server37522840964 all three and web37522840972 terminal SUCCESS, observer29769
+ended0. Direct generator-route-cloud-accepted-server/web.log prove610 backend,
+83 unit/64 mocked, both full original43/browser/API/main-OpenAPI profiles and both
+real installed host production-build/navigation/CRUD/tree/sub/auth/SQL/audit runs.
+The installation stage is accepted. New template-selection contracts under
+development are separate; full manager, control variants and active parity remain.

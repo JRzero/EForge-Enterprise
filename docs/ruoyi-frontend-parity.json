@@ -1457,11 +1457,11 @@
     "mockedBrowserTests": 64,
     "exactCloudFullFrameworkBrowserProfiles": [43,43],
     "review": "docs/security-review-generator-react-pages.md",
-    "remaining": ["static-route-and-canonical-menu-install", "all-dictionary-upload-richtext-control-variants", "full-generator-management-ui", "remaining-active-parity"],
+    "remaining": ["all-dictionary-upload-richtext-control-variants", "full-generator-management-ui", "remaining-active-parity"],
     "formBuilder": "deferred-not-complete"
   },
   "generatorRouteInstallValidation": {
-    "state": "local-real-installed-host-proven-exact-cloud-pending",
+    "state": "exact-commit-cloud-installed-host-accepted-full-generator-incomplete",
     "mockedBrowserTests": 64,
     "backendTests": 610,
     "frontendUnitTests": 83,
@@ -1470,7 +1470,11 @@
     "review": "docs/security-review-generator-route-install.md",
     "evidence": ["generator-route-host-correct-disabled-runtime.log", "generator-route-host-correct-enabled-runtime.log"],
     "menuSql": "actual-post-root-fault-row-rollback-and-duplicate-no-overwrite",
-    "cloud": "pending-for-new-implementation",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "implementationCommit": "8157b87c7bed2cf4b3e1f52d6507bb11e73c85f7",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37522840964",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37522840972",
+    "exactCloudFullFrameworkBrowserProfiles": [43,43],
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"],
     "formBuilder": "deferred-not-complete"
   }}
