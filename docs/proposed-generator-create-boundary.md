@@ -91,3 +91,57 @@ Authenticated actor attribution applies to newly imported metadata. Keep origina
 legacy template selection behind its compatibility boundary; canonical output
 uses the versioned EForge React target. Creation recovery does not imply the
 existing Vue templates already produce accepted React/EForge code.
+## Batch parser foundation (implementation in progress, 2026-10-06)
+
+GeneratorCreationBatchParser is a pure, currently unwired foundation. It parses the
+entire bounded MySQL batch before returning immutable requested-order entries with
+independent AST copies and source-reference names. It rejects mixed statement
+classes, duplicate targets, malformed names, foreign schemas (case-sensitive against
+the actual selected schema), executable comments/hints outside quoted data and
+oversized/count/deep-parenthesis inputs. Tests preserve Unicode/quoted names,
+ordinary comment/literal keyword data, original types/keys/options/partitions,
+LIKE, CTAS joins/subqueries/CTEs and independent deep AST snapshots. CTE names are
+reference syntax, not asserted physical database tables; later source resolution
+must respect their scopes.
+
+A real red test showed that Druid visits foreign-key SQLName directly rather than
+its SQLExprTableSource wrapper, which let foreign schemas escape a source-only
+visitor. Explicit table and inline foreign-key checks repair that gap. Legal
+literal test quoting and a test mutation overload were corrected as fixture/API
+usage issues. No parser test is evidence of physical creation or execution safety.
+
+Before either endpoint can use this parser, complete AST expression/function/
+variable/SELECT-INTO/storage/engine/partition-path policy, SQL-mode and additional
+parser resource/stack bounds, live existing-target/source resolution, ownership
+and actual DDL/import partial outcome handling must pass targeted and real-runtime
+checks. An AST copy is not an approved execution plan. Existing HTTP create behavior
+is unchanged; no canonical creation endpoint/client or accepted creation capability
+is introduced by the foundation. Preserve all original and remaining parity goals.
+The parser foundation now passes 14 targeted tests and all 458 backend cases,
+including the ten unchanged data-scope cases. A separate no-SQL JVM probe actually
+exhausted the parser stack at 2,048 NOT prefixes before repair. Iterative lexer
+checks now reject excessive prefixes, CASE depth and their combined per-statement
+recursive budget before recursive parsing; the same isolated 128/512/2048/5000
+probe inputs all return controlled errors. Nested combinations and long quoted
+literal data are tested. Logs use generator-create-parser-* under boot target.
+Both final real API regressions pass from the resulting jar and their normalized
+OpenAPI snapshots exactly match the contract. Frontend and contract trees are
+unchanged from accepted ff67dd4 (73 units, 64 fixture and both final 43 browsers);
+client reproduction and production-default checks pass. Exact-head cloud is
+pending for this parser foundation. No
+physical creation or final AST execution policy acceptance is claimed.
+
+MySQL's single-statement atomic DDL does not combine a sequence of CREATEs with a
+metadata transaction; implicit commits still separate the phases. This supports
+the explicit per-statement/metadata outcomes proposed here. See the official
+[atomic DDL manual](https://dev.mysql.com/doc/refman/8.4/en/atomic-ddl.html) and
+[implicit commit manual](https://dev.mysql.com/doc/refman/8.4/en/implicit-commit.html).
+The official [CTAS manual](https://dev.mysql.com/doc/refman/8.4/en/create-table-select.html)
+confirms IF NOT EXISTS can skip an existing destination, so success must not imply
+new ownership. These references support the design, not runtime acceptance.
+
+A transport timeout/disconnect also requires an explicit unconfirmed outcome:
+application failure alone cannot prove whether the server completed CREATE. This
+is a recovery design inference. Do not label it rolled back or infer ownership
+from an existence check that may observe a competing request. Recovery may use
+explicit inspection/import of existing physical tables, with no automatic DROP.
