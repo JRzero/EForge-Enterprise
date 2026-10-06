@@ -55,9 +55,12 @@ Long output paths wrap outside dialogs; the old style demonstrably overflows a
   71 mocked browser cases passed. Seven manager cases cover exact imports,
   partial DDL, failed-save draft recovery, picker retry, keyboard/discard,
   tree/subtable metadata and controlled mobile overflow regression.
-- Focused actual enabled profile passed three manager browser cases plus the full
-  API/SQL regression. Final full default/enabled runs remain pending here and
-  must be recorded only after both terminal outcomes.
+- Final default/enabled profiles each passed all 47 real browsers and the complete
+  API/SQL regression. Sequential observer94994 ended0. Four manager cases prove
+  import/edit/drag/sync/ZIP/custom output, partial DDL, grants/revocation and actual
+  tree/subtable configuration. Post-browser SQL proves original rows retained,
+  created physical tables retained, failed/unattempted/unauthorized tables absent
+  and deleted generator metadata absent. Both live OpenAPI hashes match below.
 - Current schema SHA-256:
   36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F.
 

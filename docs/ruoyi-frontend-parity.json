@@ -1495,7 +1495,7 @@
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
   },
   "generatorManagerUi": {
-  "status": "local-validation-in-progress-exact-cloud-pending",
+  "status": "local-two-profile-accepted-exact-cloud-pending",
   "route": "/gen",
   "routeId": "tool-generator",
   "review": "docs/security-review-generator-manager-ui.md",
@@ -1504,7 +1504,7 @@
   "frontendUnitTests": 89,
   "mockedBrowserTests": 71,
   "defaultRealBrowsers": 47,
-  "fullRealProfiles": "pending-terminal-two-profile-sequence",
+  "fullRealProfiles": "terminal-success-default-enabled-47-each",
   "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
   "remaining": [
     "all-generated-control-variants",

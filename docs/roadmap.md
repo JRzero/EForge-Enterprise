@@ -759,3 +759,15 @@ unattempted and unauthorized tables absent. The full two-profile API/browser
 sequence and exact new cloud remain pending; no full acceptance is claimed yet.
 All emitted control variants, shared shell and final active parity still remain.
 Form builder is deferred, not completed; the specific Quartz boundary persists.
+
+### Generator manager final local two-profile verification
+Exact implementation d569f33d2ddba9ae4a07f34115a5bcf77511388e has now passed
+both final default/enabled profiles: 47 real browsers each plus the complete API,
+MySQL/Redis/Quartz/OSHI/ACL/captcha/permission/data-consistency regression.
+Sequential observer94994 ended0; generator-manager-final-disabled/enabled-runtime.log
+and their live OpenAPI match the committed36EE572B... hash. Post-browser SQL proves
+original business rows, retained first/tree/sub tables, absent failed/unattempted/
+unauthorized tables and removed metadata. Exact web37533050094 is terminal success;
+server37533050064 remains live under unique observer62282, not yet accepted.
+Next generated-control matrix fixture is independent uncommitted verification work;
+its emitted controls are not accepted merely because the manager stage passed.
