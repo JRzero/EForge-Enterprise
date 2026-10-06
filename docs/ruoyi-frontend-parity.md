@@ -2012,3 +2012,5 @@ pending under server37537425688/web37537425654 and observer39583; new Boolean
 numeric-choice correction remains local work. Full active objective is incomplete.
 
 Expanded generated root/child representative matrix aafa28d: exact server37537425688 all three jobs and web37537425654 accepted; Boolean dictionary and remaining variants are separate pending work.
+
+Boolean dictionary0/1 select/radio correction passes both actual generated-host profiles, including root/child refill/display/query and invalid scalar400 preserving draft/SQL.618 backend and89 unit plus frontend checks pass; exact new cloud remains pending. See security-review-generator-boolean-dictionary.md.

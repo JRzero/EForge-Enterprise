@@ -57,7 +57,12 @@ function valueFor(field: Field, value: string): unknown {
     const number = Number(value); if (!Number.isFinite(number) || field.type !== 'Double' && field.type !== 'Float' && !Number.isSafeInteger(number)) throw new Error('请输入有效数字。');
     return number;
   }
-  if (field.type === 'Boolean') return value === 'true';
+  if (field.type === 'Boolean') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true' || normalized === '1') return true;
+    if (normalized === 'false' || normalized === '0') return false;
+    throw new Error('请输入有效布尔值。');
+  }
   // Long IDs and BigDecimal are deliberately kept as exact strings.
   return value;
 }
@@ -79,12 +84,17 @@ function FieldDisplay({field, value}: {field: Field; value: unknown}) {
   if (field.html === 'fileUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <a key={path} href={path} download rel="noopener">{path.split('/').at(-1)}</a>)}</>;
   return <>{text(value) || '—'}</>;
 }
+function dictionaryCurrent(field: Field, value: unknown, options: ReturnType<typeof useDictionary>['options']) {
+  const current = text(value);
+  if (field.type !== 'Boolean' || typeof value !== 'boolean') return current;
+  return options.find(option => {try {return valueFor(field, option.value) === value;} catch {return false;}})?.value ?? current;
+}
 function DictDisplay({field, value}: {field: Field; value: unknown}) {
   const dictionary = useDictionary(field.dict ?? '');
-  return <><DictionaryNotice dictionary={dictionary} /><DictionaryTag options={dictionary.options} value={text(value)} /></>;
+  return <><DictionaryNotice dictionary={dictionary} /><DictionaryTag options={dictionary.options} value={dictionaryCurrent(field, value, dictionary.options)} /></>;
 }
 function DictControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
-  const dictionary = useDictionary(field.dict ?? ''), current = text(value), group = useId();
+  const dictionary = useDictionary(field.dict ?? ''), current = dictionaryCurrent(field, value, dictionary.options), group = useId();
   return <><DictionaryNotice dictionary={dictionary} />
     {field.html === 'radio' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="radio" name={group} checked={current === option.value} required={field.required} onChange={() => onChange(valueFor(field, option.value))} />{option.label}</label>)}</fieldset>
     : field.html === 'checkbox' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="checkbox" checked={current.split(',').includes(option.value)} onChange={event => {const selected = new Set(current.split(',').filter(Boolean)); if (event.target.checked) selected.add(option.value); else selected.delete(option.value); onChange([...selected].join(','));}} />{option.label}</label>)}</fieldset>

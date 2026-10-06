@@ -42,6 +42,8 @@ class GeneratorBusinessDeploymentCompiler {
                     new String[]{"quantity","Integer","input",""},
                     new String[]{"ratio","Double","input",""},
                     new String[]{"enabled","Boolean","input",""},
+                    new String[]{"boolSelected","Boolean","select","sys_common_status"},
+                    new String[]{"boolRadio","Boolean","radio","sys_common_status"},
                     new String[]{"__proto__","String","input",""});
                 for(var spec:controlSpecs) {
                     var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,spec[0],spec[0],spec[1],null);
@@ -81,8 +83,8 @@ class GeneratorBusinessDeploymentCompiler {
                 }
             }
             ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3));\n");
-            ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD __proto__ VARCHAR(255);\n");
-            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
+            ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD boolSelected BOOLEAN, ADD boolRadio BOOLEAN, ADD __proto__ VARCHAR(255);\n");
+            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
         }
         var options=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",System.getProperty("java.class.path"),"-d",output.toString()));options.addAll(sourceFiles);
         var errors=new java.io.ByteArrayOutputStream();

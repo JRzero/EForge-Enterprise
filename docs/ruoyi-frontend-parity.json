@@ -1548,5 +1548,17 @@
     "fullFrameworkRealProfiles": [47,47],
     "review": "docs/security-review-generator-control-parity.md",
     "scope": "optional-string-clear-and-original-select-radio-query-parity"
+  },
+  "generatorBooleanDictionary": {
+    "status": "local-two-profile-passed-exact-cloud-pending",
+    "review": "docs/security-review-generator-boolean-dictionary.md",
+    "backendTests": 618,
+    "frontendUnitTests": 89,
+    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "scope": "numeric-0-1-select-radio-persist-refill-display-query-and-invalid-scalar-rejection",
+    "rootTemplateKinds": ["crud", "tree", "sub"],
+    "actualSubRows": true,
+    "evidence": ["generator-boolean-dictionary-before-runtime.log", "generator-boolean-dictionary-final-disabled-runtime.log", "generator-boolean-dictionary-final-enabled-runtime.log"],
+    "fullGoalComplete": false
   }
 }

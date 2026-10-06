@@ -836,3 +836,5 @@ pending under server37537425688/web37537425654 and observer39583; new Boolean
 numeric-choice correction remains local work. Full active objective is incomplete.
 
 Expanded generated root/child control matrix aafa28d cloud accepted (server37537425688 and web37537425654). Continue Boolean dictionary correctness, required/readonly/auto-PK variants and the remaining active parity inventory; form builder remains deferred.
+
+Generated Boolean dictionary correction: actual before-fix radio failure reproduced; after-fix default/enabled CRUD/tree/sub and child browser/HTTP/SQL/Redis/audit regressions pass. Exact cloud pending. Continue required/readonly/auto-PK variants and remaining original capability audit; full goal incomplete.
