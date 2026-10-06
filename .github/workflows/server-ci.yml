@@ -87,7 +87,15 @@ jobs:
 
       - name: Verify prepared creation SQL fidelity on isolated MySQL
         shell: pwsh
-        run: ./server/scripts/verify-generator-creation-policy.ps1
+        run: |
+          ./server/scripts/verify-generator-creation-policy.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-generator-creation-policy.ps1 -LowerCaseTableNames 1
+
+      - name: Verify read-only generator preflight on actual JDBC databases
+        shell: pwsh
+        run: |
+          ./server/scripts/verify-generator-creation-preflight.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-generator-creation-preflight.ps1 -LowerCaseTableNames 1
 
   runtime-integration:
     runs-on: ubuntu-latest

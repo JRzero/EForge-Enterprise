@@ -64,7 +64,7 @@ class GeneratorCreationBatchParserTest {
         for(var name:List.of("../private","private/name","private.name","private ")) refuses("CREATE TABLE `"+name+"`(id INT)");
     }    @Test void recursiveUnaryAndCaseInputsAreRejectedBeforeParserStackExhaustion() {
         for(var prefix:List.of("NOT ","! ","~ ","- ","+ ","NOT /* harmless comment */ "))
-            refuses("CREATE TABLE owned AS SELECT "+prefix.repeat(2048)+"1");
+            assertThrows(ApiFailure.class, () -> parse("CREATE TABLE owned AS SELECT "+prefix.repeat(2048)+"1"), "recursive prefix: " + prefix);
         refuses("CREATE TABLE owned AS SELECT "+"CASE WHEN 1 THEN ".repeat(128)+"1"+" ELSE 0 END".repeat(128));
         refuses("CREATE TABLE owned AS SELECT "+("NOT ".repeat(32)+"CASE WHEN 1 THEN ").repeat(40)+"1"+" ELSE 0 END".repeat(40));
         assertEquals("owned",parse("CREATE TABLE owned(id INT COMMENT '"+"NOT ".repeat(2048)+"')").get(0).name());

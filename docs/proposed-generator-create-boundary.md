@@ -201,3 +201,15 @@ step after Maven verification. Its default repository path uses the platform
 user profile rather than Windows-only USERPROFILE; the updated runner passes
 locally (`generator-create-policy-mysql-portable-runner.log`). Linux/cloud execution
 must still be checked at the precise workflow commit before claiming cloud success.
+### 2026-10-06: read-only creation database preflight
+
+CTE lexical scope and physical read/FK/LIKE dependencies are now distinguished.
+Whole-batch preflight checks live targets/metadata, native identifier folding,
+selected-schema sources/views, reserved names, SQL modes and engines without DDL.
+36 targeted tests and 480 full backend cases pass. Native JDBC probes pass 68/66
+assertions for case modes 0/1, including actual Unicode/outer-scope query results,
+real denied metadata access and retained source data. Prior bbd1556 cloud run
+37395625273 is all-green; it does not prove acceptance of this newer foundation.
+Current creation endpoint/executor/import/outcomes, source races and compatibility,
+React output/pages and final parity remain incomplete. See
+`security-review-generator-create-preflight.md`. Form builder remains deferred.

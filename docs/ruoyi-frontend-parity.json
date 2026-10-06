@@ -1137,4 +1137,14 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37371330417",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37371330438",
     "scope": "Shared canonical/original guarded metadata sync, checked writes, actual physical PK/auto/type changes, exact surviving IDs, original conditional settings, actor attribution, tree/subtable reference and stale full-field protection. Real SQL UPDATE/INSERT/DELETE faults prove complete metadata/audit rollback and retry, safe original/canonical public errors, and simultaneous HTTP SQL waiting with consistent 204/409 outcomes. Complete physical post-DDL rows retained. No product DDL, sync UI, physical creation API or generator output/page completion is claimed. All remaining original-capability requirements and specific task approval restrictions remain active."
+  },
+  "generatorCreationPreflightValidation": {
+    "state": "unwired-read-only-foundation-local-verified",
+    "backendTests": 480,
+    "targetedTests": 36,
+    "mysqlCaseMode0Assertions": 68,
+    "mysqlCaseMode1Assertions": 66,
+    "currentCloud": "pending-exact-head",
+    "review": "docs/security-review-generator-create-preflight.md",
+    "scope": "Read-only whole-batch source/target/metadata preflight with native identifier folding and lexical CTE resolution. No creation endpoint, DDL execution, metadata import, output or UI acceptance. Form builder remains deferred; every other current requirement remains."
   }}

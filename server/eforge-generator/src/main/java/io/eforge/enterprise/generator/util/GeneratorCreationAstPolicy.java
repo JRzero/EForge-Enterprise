@@ -27,11 +27,32 @@ public final class GeneratorCreationAstPolicy {
         +"CUME_DIST DENSE_RANK FIRST_VALUE LAG LAST_VALUE LEAD NTH_VALUE NTILE PERCENT_RANK RANK ROW_NUMBER "
         +"JSON_ARRAY JSON_OBJECT JSON_CONTAINS JSON_CONTAINS_PATH JSON_EXTRACT JSON_KEYS JSON_OVERLAPS JSON_SEARCH JSON_VALUE JSON_APPEND JSON_ARRAY_APPEND JSON_ARRAY_INSERT JSON_INSERT JSON_MERGE JSON_MERGE_PATCH JSON_MERGE_PRESERVE JSON_REMOVE JSON_REPLACE JSON_SET JSON_UNQUOTE JSON_DEPTH JSON_LENGTH JSON_TYPE JSON_VALID");
 
-    public record PreparedTable(String name, String sql, Set<String> references) {
-        public PreparedTable { references = Collections.unmodifiableSet(new LinkedHashSet<>(references)); }
+    public record PreparedTable(String name, String sql, Set<String> references,
+                                Set<String> readReferences, Set<String> foreignKeyReferences, String likeReference) {
+        public PreparedTable {
+            references = Collections.unmodifiableSet(new LinkedHashSet<>(references));
+            readReferences = Collections.unmodifiableSet(new LinkedHashSet<>(readReferences));
+            foreignKeyReferences = Collections.unmodifiableSet(new LinkedHashSet<>(foreignKeyReferences));
+        }
+    }
+    public static boolean isLocalEngine(String name) {
+        return name != null && ENGINES.contains(name.toUpperCase(Locale.ROOT));
     }
     public static List<PreparedTable> prepare(String sql, String currentSchema) {
-        var parsed = GeneratorCreationBatchParser.parse(sql, currentSchema);
+        return prepare(sql, currentSchema, 0);
+    }
+    public static List<PreparedTable> prepare(String sql, String currentSchema, int lowerCaseTableNames) {
+        if (lowerCaseTableNames < 0 || lowerCaseTableNames > 2) throw unsafe();
+        return prepare(sql,currentSchema,lowerCaseTableNames,lowerCaseTableNames==0
+            ? java.util.function.UnaryOperator.identity() : value -> {
+                var result=new StringBuilder();value.codePoints().map(Character::toLowerCase).forEach(result::appendCodePoint);return result.toString();
+            });
+    }
+    /** Production preflight supplies native database folding instead of guessing Unicode identifier rules. */
+    public static List<PreparedTable> prepare(String sql,String currentSchema,int lowerCaseTableNames,
+                                              java.util.function.UnaryOperator<String> fold) {
+        if (lowerCaseTableNames < 0 || lowerCaseTableNames > 2) throw unsafe();
+        var parsed = GeneratorCreationBatchParser.parse(sql, currentSchema, fold);
         var prepared = new ArrayList<PreparedTable>();
         for (var item : parsed) {
             var table = item.astCopy();
@@ -52,13 +73,17 @@ public final class GeneratorCreationAstPolicy {
                     if (node instanceof SQLSubPartition partition) {
                         if (partition.getDataDirectory() != null || partition.getIndexDirectory() != null || partition.getTableSpace() != null) throw unsafe();
                         engine(partition.getEngine());
+                        if (partition.getMaxRows() != null && !(partition.getMaxRows() instanceof SQLIntegerExpr)) throw unsafe();
+                        if (partition.getMinRows() != null && !(partition.getMinRows() instanceof SQLIntegerExpr)) throw unsafe();
+                        if (partition.getComment() != null && !(partition.getComment() instanceof SQLCharExpr)) throw unsafe();
                     }
                 }
             };
             visitAll(table, visitor);
             // No-op CREATE cannot establish this request's ownership after a race.
             table.setIfNotExists(false);
-            prepared.add(new PreparedTable(item.name(), render(table), item.references()));
+            var sources = GeneratorCreationSourceResolver.resolve(table, currentSchema, fold);
+            prepared.add(new PreparedTable(item.name(), render(table), sources.all(), sources.reads(), sources.foreignKeys(), sources.like()));
         }
         return List.copyOf(prepared);
     }

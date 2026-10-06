@@ -61,6 +61,34 @@ class GeneratorCreationAstPolicyTest {
         assertTrue(prepare("CREATE TABLE owned(id INT) PARTITION BY RANGE(id)(PARTITION p VALUES LESS THAN(10))").get(0).sql().contains("RANGE (id)"));
         assertTrue(prepare("CREATE TABLE owned(id INT) PARTITION BY RANGE COLUMNS(id)(PARTITION p VALUES LESS THAN(10))").get(0).sql().contains("RANGE COLUMNS (id)"));
     }
+    @Test void ordinaryCteNamesAreNotPhysicalDatabaseDependencies() {
+        assertEquals(Set.of("owned_source"), prepare("CREATE TABLE owned AS WITH q AS (SELECT id FROM owned_source) SELECT id FROM q").get(0).references());
+    }
+    @Test void nonRecursiveSameNameAndForwardNamesRemainPhysicalDependencies() {
+        assertEquals(Set.of("q"), prepare("CREATE TABLE owned AS WITH q AS (SELECT id FROM q) SELECT id FROM q").get(0).references());
+        assertEquals(Set.of("source"), prepare("CREATE TABLE owned AS WITH first_q AS (SELECT id FROM source),second_q AS (SELECT id FROM first_q) SELECT id FROM second_q").get(0).references());
+        assertEquals(Set.of("second_q","source"), prepare("CREATE TABLE owned AS WITH first_q AS (SELECT id FROM second_q),second_q AS (SELECT id FROM source) SELECT id FROM first_q").get(0).references());
+    }
+    @Test void nestedCteScopeDoesNotLeakIntoSiblingOrOuterQueries() {
+        assertEquals(Set.of("outer_source","inner_source"), prepare("CREATE TABLE owned AS WITH q AS (SELECT id FROM outer_source) SELECT q.id FROM q JOIN (WITH q AS (SELECT id FROM inner_source) SELECT id FROM q) nested_q ON q.id=nested_q.id").get(0).references());
+        assertEquals(Set.of("owned_source","q"), prepare("CREATE TABLE owned AS SELECT d.id FROM (WITH q AS (SELECT id FROM owned_source) SELECT id FROM q) d JOIN q ON d.id=q.id").get(0).references());
+    }
+    @Test void qualificationCannotBeHiddenByCteAliasAndRecursiveSelfIsNotPhysical() {
+        assertEquals(Set.of("owned_source","q"), prepare("CREATE TABLE owned AS WITH q AS (SELECT id FROM owned_source) SELECT real_q.id FROM eforge_enterprise.q real_q JOIN q ON real_q.id=q.id").get(0).references());
+        assertEquals(Set.of(), prepare("CREATE TABLE owned AS WITH RECURSIVE q(n) AS (SELECT 1 UNION ALL SELECT n+1 FROM q WHERE n<3) SELECT n FROM q").get(0).references());
+    }
+    @Test void cteIdentifierCaseFollowsDatabaseModeAndDuplicatesAreRejected() {
+        var sql = "CREATE TABLE owned AS WITH q AS (SELECT id FROM owned_source) SELECT id FROM Q";
+        assertEquals(Set.of("owned_source","Q"), GeneratorCreationAstPolicy.prepare(sql,"eforge_enterprise",0).get(0).references());
+        assertEquals(Set.of("owned_source"), GeneratorCreationAstPolicy.prepare(sql,"eforge_enterprise",1).get(0).references());
+        assertEquals(Set.of("owned_source"), GeneratorCreationAstPolicy.prepare(sql,"eforge_enterprise",2).get(0).references());
+        refuses("CREATE TABLE owned AS WITH q AS (SELECT 1),q AS (SELECT 2) SELECT * FROM q");
+        assertThrows(ApiFailure.class, () -> GeneratorCreationAstPolicy.prepare("CREATE TABLE owned(id INT)","eforge_enterprise",3));
+    }
+    @Test void quotedCteNamesAreScopedButForeignKeysRemainPhysical() {
+        assertEquals(Set.of("owned_source"), prepare("CREATE TABLE owned AS WITH `临时_查询` AS (SELECT id FROM owned_source) SELECT id FROM `临时_查询`").get(0).references());
+        assertEquals(Set.of("owned_source","q"), prepare("CREATE TABLE owned(id INT,p INT,FOREIGN KEY(p) REFERENCES q(id)) AS WITH q AS (SELECT id FROM owned_source) SELECT id,0 AS p FROM q").get(0).references());
+    }
     @Test void preparedResultsAndReferencesAreImmutable() {
         var result=prepare("CREATE TABLE owned_copy LIKE owned_source");assertThrows(UnsupportedOperationException.class,()->result.clear());assertThrows(UnsupportedOperationException.class,()->result.get(0).references().clear());
     }
