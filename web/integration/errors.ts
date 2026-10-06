@@ -4,6 +4,11 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if (code === 'GENERATOR_CUSTOM_OUTPUT_UNCONFIRMED') return '无法确认文件输出结果，请检查目录后再决定是否重新生成。';
+  if (code === 'GENERATOR_CUSTOM_OUTPUT_PARTIAL') return '部分文件可能已写入，请查看文件结果后再决定是否重新生成。';
+  if (code === 'GENERATOR_CUSTOM_OUTPUT_DISABLED') return '服务器未启用自定义文件输出。';
+  if (code === 'GENERATOR_CUSTOM_PATH_INVALID') return '输出目录或目标文件不符合服务器配置，请检查生成路径。';
+  if (code === 'GENERATOR_CUSTOM_OUTPUT_UNAVAILABLE') return '自定义输出目录暂时不可用，请稍后重试。';
   if (code === 'JOB_CRON_INVALID') return 'Cron表达式无效，请检查字段范围及日、周的指定方式。';
   if (code === 'OPERATION_LOG_NOT_FOUND') return '日志已不存在，请刷新后重试。';
   if (code === 'LOGIN_UNLOCK_UNAVAILABLE') return '账号解锁暂时未能完成，请稍后重试。';

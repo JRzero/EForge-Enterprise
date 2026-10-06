@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={GeneratorSynchronizationController.class,io.eforge.enterprise.generator.service.GeneratorSynchronizationService.class,io.eforge.enterprise.generator.controller.GenController.class,io.eforge.enterprise.generator.service.GenTableServiceImpl.class,io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class,GlobalExceptionHandler.class,PermissionService.class,
+@ContextConfiguration(classes={GeneratorSynchronizationController.class,io.eforge.enterprise.generator.service.GeneratorSynchronizationService.class,io.eforge.enterprise.generator.controller.GenController.class,io.eforge.enterprise.generator.service.GenTableServiceImpl.class,io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class,io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.class,GlobalExceptionHandler.class,PermissionService.class,
     ApiExceptionHandler.class,ApiRoutingExceptionResolver.class,SpringUtils.class,SecurityConfig.class,ApiSecurityProblemHandler.class,
     AuthenticationEntryPointImpl.class,JwtAuthenticationTokenFilter.class,GeneratorSynchronizationControllerTest.Configuration.class})
 class GeneratorSynchronizationControllerTest {

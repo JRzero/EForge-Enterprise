@@ -2,15 +2,10 @@ package io.eforge.enterprise.generator.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import io.eforge.enterprise.common.constant.Constants;
 import io.eforge.enterprise.common.constant.GenConstants;
-import io.eforge.enterprise.common.core.text.CharsetKit;
 import io.eforge.enterprise.common.exception.ServiceException;
 import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.generator.domain.GenTable;
@@ -29,7 +22,6 @@ import io.eforge.enterprise.generator.mapper.GenTableColumnMapper;
 import io.eforge.enterprise.generator.mapper.GenTableMapper;
 import io.eforge.enterprise.generator.util.GenUtils;
 import io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader;
-import io.eforge.enterprise.generator.util.VelocityInitializer;
 import io.eforge.enterprise.generator.util.VelocityUtils;
 
 /**
@@ -47,6 +39,9 @@ public class GenTableServiceImpl implements IGenTableService
 
     @Autowired
     private GeneratorRenderingSnapshotLoader renderingSnapshots;
+
+    @Autowired
+    private io.eforge.enterprise.generator.rendering.GeneratorCustomOutput customOutput;
 
     @Autowired
     private GeneratorMetadataBoundary metadataBoundary;
@@ -318,40 +313,16 @@ public class GenTableServiceImpl implements IGenTableService
     @Override
     public void generatorCode(String tableName)
     {
-        // 查询表信息
-        GenTable table = genTableMapper.selectGenTableByName(tableName);
-        // 设置主子表信息
-        setSubTable(table);
-        // 设置主键列信息
-        setPkColumn(table);
-
-        VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table);
-        for (String template : templates)
+        customOutput.requireEnabled();
+        try
         {
-            if (!StringUtils.containsAny(template, "sql.vm", "api.js.vm", "api.ts.vm", "type.ts.vm", "index.ts.vm", "index.vue.vm", "index-tree.vue.vm", "view.vue.vm"))
-            {
-                // 渲染模板
-                StringWriter sw = new StringWriter();
-                Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-                tpl.merge(context, sw);
-                try
-                {
-                    String path = getGenPath(table, template);
-                    FileUtils.writeStringToFile(new File(path), sw.toString(), CharsetKit.UTF_8);
-                }
-                catch (IOException e)
-                {
-                    throw new ServiceException("渲染模板失败，表名：" + table.getTableName());
-                }
-            }
+            customOutput.write(renderingSnapshots.loadByNames(List.of(tableName)).get(0));
+        }
+        catch (io.eforge.enterprise.common.exception.ApiFailure failure)
+        {
+            throw new ServiceException(failure.getMessage(), failure.status());
         }
     }
-
     /**
      * 同步数据库
      * 

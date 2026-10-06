@@ -1678,3 +1678,27 @@ Exact canonical cloud acceptance: implementation 67ea28c8531657f563068cfc6fc3713
 Final local acceptance: session46711 ended0; default/enabled profiles each record43 real browsers and final complete API PASS. Both live OpenAPI exports equal contract B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0. Actual SQL saved oRderKey output, original/canonical complete preview and binary ZIP, safe SQL/path failures/retry, honest audit, exact metadata and business rows pass. No local app retained. Frontend source is unchanged from accepted67ea28c (75units/lint/typecheck/build/generated reproduction and accepted web37458912762). New fix cloud acceptance remains pending its own exact commit/run.
 
 Exact cloud acceptance: bd83767f99f7b07a8ff54debda5c71c6f4d38088 server37461230715 all three jobs SUCCESS; observer6740 terminal0. Direct generator-pk-accessor-cloud-accepted.log proves589 backend (579boot+10scope), both64 snapshots/both474 output context native probes, default/enabled each43 real browsers, complete original/canonical output HTTP and MySQL/Redis/Quartz/OSHI/ACL/captcha APIs and both exact OpenAPI comparisons. Frontend unchanged from accepted67ea web37458912762. This accepts the PK fix only; later dirty custom-filesystem source is not covered.
+
+Custom filesystem output (2026-10-06, final runtime pending): canonical typed POST
+and original custom route share complete immutable output and atomic backend file
+installation within a trusted configured root. Default disabled and original code
+permission before SQL remain. Paths/links/junctions, partial retained/unconfirmed
+outcomes, safe errors/audit, Unicode destinations, flat/prefixed root settings and
+no automatic client retry are verified. Full Maven603 (593boot+10scope), targeted34
+(one host-specific symlink skip; actual Windows junction passed), frontend79 units/
+lint/typecheck/build/generated reproduction and64 mocked browsers pass. Corrected
+actual no-browser API export equals D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+Final default/enabled API+43-browser profiles run sequentially under83433. Cloud
+not yet submitted; earlier accepted PK source does not cover this implementation.
+See security-review-generator-custom-output.md. True React/EForge templates, full
+manager UI and actual generated business HTTP/browser remain required. Form builder
+is deferred; the specifically rejected Quartz runtime proposal is not implemented.
+
+Final custom output local acceptance:83433 ended0; default/enabled each43 real
+browsers and complete API PASS. Both final live OpenAPI snapshots exactly equal
+D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+Actual canonical/original backend file bytes and replacement results, disabled
+protection/path refusal/no-role/audit, full metadata/business-row retention and
+complete MySQL/Redis/Quartz/OSHI/ACL/captcha regression pass. No local app retained.
+Cloud acceptance remains pending this exact implementation's workflows. This does
+not complete React/EForge templates, generator UI or generated business deployment.

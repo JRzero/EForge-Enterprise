@@ -498,6 +498,73 @@
         ],
         "type": "object"
       },
+      "CustomOutputOutcome": {
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "CREATED",
+              "REPLACED",
+              "FAILED",
+              "UNCONFIRMED",
+              "UNATTEMPTED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomOutputProblem": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instance": {
+            "format": "uri",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "output": {
+            "$ref": "#/components/schemas/CustomOutputResult"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CustomOutputResult": {
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/CustomOutputOutcome"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "DatabaseTable": {
         "properties": {
           "comment": {
@@ -9069,6 +9136,46 @@
         },
         "tags": [
           "generator-read-controller"
+        ]
+      }
+    },
+    "/api/v1/tool/generator/tables/{id}/custom-output": {
+      "post": {
+        "operationId": "writeGeneratorCustomOutput",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomOutputResult"
+                }
+              }
+            },
+            "description": "Complete backend output"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomOutputProblem"
+                }
+              }
+            },
+            "description": "Inspect retained or unconfirmed file outcomes before retrying."
+          }
+        },
+        "tags": [
+          "generator-output-controller"
         ]
       }
     },

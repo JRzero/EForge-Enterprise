@@ -1,6 +1,6 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [string]$WebTestPattern = '')
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '')
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
@@ -14,6 +14,7 @@ $previousEnv = @{}
 $appProcess = $null
 $logDirectory = Join-Path $repoRoot 'server/eforge-boot/target/auth-integration'
 $uploadDirectory = Join-Path $logDirectory "uploads-$runId"
+$customOutputDirectory = Join-Path $logDirectory "custom-output-$runId"
 New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
 
 function Invoke-Docker {
@@ -104,6 +105,7 @@ try {
         EFORGE_CONSOLE_SECURE_COOKIE = 'false'
         EFORGE_DRUID_USERNAME = 'console-validator'; EFORGE_DRUID_PASSWORD = $testPassword
         EFORGE_DRUID_SQL_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_WEB_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
+        GEN_ALLOWOVERWRITE = "$($EnableCustomOutput.IsPresent)".ToLowerInvariant(); GEN_OUTPUTROOT = $customOutputDirectory
         EFORGE_PROFILE = $uploadDirectory
     }
     foreach ($key in $testEnv.Keys) {
@@ -288,4 +290,9 @@ finally {
         Assert-Check ($resolvedUpload.StartsWith($resolvedLog + [IO.Path]::DirectorySeparatorChar) -and [IO.Path]::GetFileName($resolvedUpload) -eq "uploads-$runId") 'Unsafe owned upload cleanup target.'
         Remove-Item -LiteralPath $resolvedUpload -Recurse -Force
     }
-}
+    if (Test-Path -LiteralPath $customOutputDirectory) {
+        $resolvedCustom = [IO.Path]::GetFullPath($customOutputDirectory)
+        $resolvedLog = [IO.Path]::GetFullPath($logDirectory)
+        Assert-Check ($resolvedCustom.StartsWith($resolvedLog + [IO.Path]::DirectorySeparatorChar) -and [IO.Path]::GetFileName($resolvedCustom) -eq "custom-output-$runId") 'Unsafe owned custom-output cleanup target.'
+        Remove-Item -LiteralPath $resolvedCustom -Recurse -Force
+    }}

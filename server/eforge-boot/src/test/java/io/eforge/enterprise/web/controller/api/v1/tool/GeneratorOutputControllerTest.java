@@ -34,6 +34,7 @@ class GeneratorOutputControllerTest {
     static final long ID=9007199254740993L;
     static final String BASE="/api/v1/tool/generator";
     @Autowired MockMvc mvc;
+    @MockitoBean io.eforge.enterprise.generator.rendering.GeneratorCustomOutput custom;
     @MockitoBean GenTableMapper tables;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
@@ -107,4 +108,21 @@ class GeneratorOutputControllerTest {
         first.setModuleName("test");var second=table(ID+10,"outputentry");second.setBusinessName("other");when(tables.selectGenTableById(ID+10)).thenReturn(second);
         mvc.perform(post(BASE+"/downloads").contentType("application/json").content(body(""+ID,""+(ID+10)))).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("GENERATOR_OUTPUT_COLLISION")).andExpect(header().doesNotExist("Content-Disposition"));
     }
-}
+    @Test void customOutputIsTypedAndCodePermissionIsRequiredBeforeSql()throws Exception{
+        var result=new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult(List.of(new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputOutcome("main/java/generated/domain/OutputEntry.java",io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.State.CREATED)));
+        when(tables.selectGenTableById(ID)).thenReturn(table(ID,"OutputEntry"));when(custom.write(any())).thenReturn(result);
+        mvc.perform(post(BASE+"/tables/"+ID+"/custom-output")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store"))
+            .andExpect(jsonPath("$.files[0].state").value("CREATED")).andExpect(jsonPath("$.data").doesNotExist());
+        clearInvocations(tables,custom);actor(Set.of("tool:gen:preview"));
+        mvc.perform(post(BASE+"/tables/"+ID+"/custom-output")).andExpect(status().isForbidden());verifyNoInteractions(tables,custom);
+    }
+    @Test void disabledCustomOutputRejectsBeforeMetadataRead()throws Exception{
+        doThrow(new io.eforge.enterprise.common.exception.ApiFailure(403,"GENERATOR_CUSTOM_OUTPUT_DISABLED","Custom file output is disabled by server configuration.")).when(custom).requireEnabled();
+        mvc.perform(post(BASE+"/tables/"+ID+"/custom-output")).andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("GENERATOR_CUSTOM_OUTPUT_DISABLED"));verifyNoInteractions(tables);
+    }
+    @Test void partialCustomFilesRemainInSafeStructuredProblem()throws Exception{
+        var partial=new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult(List.of(new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputOutcome("main/java/generated/domain/OutputEntry.java",io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.State.CREATED),new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputOutcome("main/java/generated/mapper/OutputEntryMapper.java",io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.State.FAILED)));
+        when(tables.selectGenTableById(ID)).thenReturn(table(ID,"OutputEntry"));when(custom.write(any())).thenThrow(new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure(partial));
+        mvc.perform(post(BASE+"/tables/"+ID+"/custom-output")).andExpect(status().isServiceUnavailable()).andExpect(content().contentType("application/problem+json"))
+            .andExpect(jsonPath("$.code").value("GENERATOR_CUSTOM_OUTPUT_PARTIAL")).andExpect(jsonPath("$.output.files[0].state").value("CREATED")).andExpect(jsonPath("$.output.files[1].state").value("FAILED"));
+    }}

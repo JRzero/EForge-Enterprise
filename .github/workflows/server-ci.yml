@@ -55,7 +55,7 @@ jobs:
         run: git diff --exit-code -- contracts/openapi/api-v1.json
       - name: Verify explicitly enabled diagnostic consoles
         shell: pwsh
-        run: ./server/scripts/verify-auth-integration.ps1 -EnableConsoles -VerifyWeb -OpenApiOutputPath contracts/openapi/api-v1.json
+        run: ./server/scripts/verify-auth-integration.ps1 -EnableConsoles -EnableCustomOutput -VerifyWeb -OpenApiOutputPath contracts/openapi/api-v1.json
       - name: Verify enabled-console OpenAPI remains identical
         run: git diff --exit-code -- contracts/openapi/api-v1.json
       - name: Upload integration logs on failure

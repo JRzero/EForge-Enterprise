@@ -1380,5 +1380,20 @@
     "runtime": "both-complete-api-profiles-success",
     "openApiSha256": "B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0",
     "scope": "Generated service getter calls match saved PK/domain accessor spelling while public mapper/service suffixes remain compatible. Full language semantics, tree aliases, custom output, React/EForge/UI and actual generated business deployment remain required."
+  },
+  "generatorCustomOutputValidation": {
+    "state": "implemented-local-runtime-verified-cloud-pending",
+    "review": "docs/security-review-generator-custom-output.md",
+    "backendTests": 603,
+    "targetTests": 34,
+    "localHostSpecificSkipped": 1,
+    "actualWindowsJunction": "passed",
+    "frontendUnitTests": 79,
+    "mockedBrowserTests": 64,
+    "realBrowserProfiles": [43,43],
+    "runtime": "both-complete-api-and-43-browser-profiles-success",
+    "openApiSha256": "D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3",
+    "currentCloud": "pending-exact-implementation-workflows",
+    "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
   }
 }

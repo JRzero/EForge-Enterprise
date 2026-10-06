@@ -90,11 +90,33 @@ try{
         Assert-Check (($bundleFault.Content|ConvertFrom-Json).code -eq 503 -and !$bundleFault.Content.Contains('bundle_fields_fault') -and !$bundleFault.Headers['Content-Disposition']) 'Actual SQL fault must return safe JSON without partial ZIP.'
     }finally{GeneratorBundle-Sql "RENAME TABLE bundle_fields_fault_$runId TO gen_table_column;"|Out-Null}
     Assert-Check ((GeneratorBundle-Zip "/tool/gen/download/${bundleMarker}_root").Count -eq $bundleRootZip.Count) 'Download did not recover after actual SQL failure.'
+    $bundleCustomRoute="/api/v1/tool/generator/tables/$($bundleSelection.root)/custom-output"
+    if($EnableCustomOutput){
+        $bundleCustom=Request $bundleCustomRoute 'POST' '' $authorized
+        Assert-Check ($bundleCustom.StatusCode -eq 200) 'Explicitly enabled custom output failed.'
+        $bundleCustomFiles=($bundleCustom.Content|ConvertFrom-Json).files
+        Assert-Check ($bundleCustomFiles.Count -eq 7 -and @($bundleCustomFiles|Where-Object state -ne 'CREATED').Count -eq 0) 'Complete original backend custom selection was not created.'
+        foreach($bundleCustomFile in $bundleCustomFiles){
+            $bundleWritten=[IO.File]::ReadAllText((Join-Path $customOutputDirectory $bundleCustomFile.path),[Text.UTF8Encoding]::new($false,$true))
+            Assert-Check ($bundleWritten -ceq $bundleRootZip[$bundleCustomFile.path]) 'Actual custom file differs from complete original archive.'
+        }
+        $bundleCustomAgain=(Request $bundleCustomRoute 'POST' '' $authorized).Content|ConvertFrom-Json
+        Assert-Check (@($bundleCustomAgain.files|Where-Object state -ne 'REPLACED').Count -eq 0) 'Explicit custom overwrite did not report replacements.'
+        $bundleOriginalCustom=(Request "/tool/gen/genCode/${bundleMarker}_root" 'GET' '' $authorized).Content|ConvertFrom-Json
+        Assert-Check ($bundleOriginalCustom.code -eq 200) 'Original custom route did not share completed output.'
+        GeneratorBundle-Sql "UPDATE gen_table SET gen_path='../escape' WHERE table_id=$($bundleSelection.root);"|Out-Null
+        try{Assert-Problem (Request $bundleCustomRoute 'POST' '' $authorized) 400 'GENERATOR_CUSTOM_PATH_INVALID'}finally{GeneratorBundle-Sql "UPDATE gen_table SET gen_path='/' WHERE table_id=$($bundleSelection.root);"|Out-Null}
+    }else{
+        Assert-Problem (Request $bundleCustomRoute 'POST' '' $authorized) 403 'GENERATOR_CUSTOM_OUTPUT_DISABLED'
+        Assert-Check (!(Test-Path -LiteralPath $customOutputDirectory)) 'Disabled custom output touched the filesystem.'
+        Assert-Check (((Request "/tool/gen/genCode/${bundleMarker}_root" 'GET' '' $authorized).Content|ConvertFrom-Json).code -eq 500) 'Original disabled custom output protection changed.'
+    }
     $bundleCreated=Request '/api/v1/system/users' 'POST' (@{user=@{username="gb$runId";displayName='生成输出无角色';departmentId='103';email='';phone='';sex='2';status='0';roleIds=@();postIds=@()};password='User12345'}|ConvertTo-Json -Depth 5 -Compress) $authorized
     Assert-Check ($bundleCreated.StatusCode -eq 201) 'No-role output fixture failed.';$bundleUserId=($bundleCreated.Content|ConvertFrom-Json).id
     $bundleLogin=(Request '/api/v1/auth/login' 'POST' (@{username="gb$runId";password='User12345'}|ConvertTo-Json -Compress)).Content|ConvertFrom-Json
     Assert-Problem (Request "/api/v1/tool/generator/tables/$($bundleSelection.root)/preview" 'GET' '' @{Authorization="Bearer $($bundleLogin.accessToken)"}) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root)}|ConvertTo-Json -Compress) @{Authorization="Bearer $($bundleLogin.accessToken)"}) 403 'ACCESS_DENIED'
+    Assert-Problem (Request $bundleCustomRoute 'POST' '' @{Authorization="Bearer $($bundleLogin.accessToken)"}) 403 'ACCESS_DENIED'
     $bundleDenied=Request "/tool/gen/download/${bundleMarker}_root" 'GET' '' @{Authorization="Bearer $($bundleLogin.accessToken)"}
     Assert-Check (($bundleDenied.Content|ConvertFrom-Json).code -eq 403 -and !$bundleDenied.Headers['Content-Disposition']) 'No-role original download grant must remain authoritative.'
     $bundleAfter=@(foreach($bundleId in $bundleSelection.Values){GeneratorBundle-Snapshot $bundleId}) -join "`n"

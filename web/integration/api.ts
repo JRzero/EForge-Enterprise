@@ -32,11 +32,12 @@ import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openAp
 
 import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
 
-import {previewGeneratorTable, downloadGeneratorTables, type DownloadRequest} from '../generated/api';
+import {previewGeneratorTable, downloadGeneratorTables, writeGeneratorCustomOutput, type DownloadRequest} from '../generated/api';
+import {GeneratorCustomOutputError} from './generator-errors';
 
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
-  function transport(authenticated: boolean, timeoutMs = 15000, credentials: RequestCredentials = 'omit'): typeof fetch {
+  function transport(authenticated: boolean, timeoutMs = 15000, credentials: RequestCredentials = 'omit', acceptedStatuses: readonly number[] = []): typeof fetch {
     return async (input, init) => {
       const token = authenticated ? auth.getState().session?.accessToken : undefined;
       const headers = new Headers(init?.headers);
@@ -44,7 +45,7 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
       const timeout = AbortSignal.timeout(timeoutMs);
       const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
       const response = await fetcher(input, {...init, headers, signal, cache: 'no-store', credentials});
-      if (!response.ok) {
+      if (!response.ok && !acceptedStatuses.includes(response.status)) {
         const body = record(await response.clone().json().catch(() => ({})));
         if (response.status === 401 && token) onUnauthorized(token);
         throw new ApiError(response.status, typeof body.code === 'string' ? body.code : 'HTTP_ERROR');
@@ -53,6 +54,18 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async writeGeneratorCustomOutput(id: string, signal?: AbortSignal) {
+      try {
+        const response = await writeGeneratorCustomOutput(id, {baseUrl: '', fetch: transport(true, 60000, 'omit', [503]), signal});
+        if (response.status === 200) return response.data;
+        if (response.data.code === 'GENERATOR_CUSTOM_OUTPUT_PARTIAL' && response.data.output?.files) throw new GeneratorCustomOutputError(response.data.output);
+        throw new ApiError(503, response.data.code ?? 'HTTP_ERROR');
+      } catch (cause) {
+        if (cause instanceof ApiError) throw cause;
+        // A cancelled/lost response cannot revoke file writes already accepted by the server.
+        throw new ApiError(0, 'GENERATOR_CUSTOM_OUTPUT_UNCONFIRMED');
+      }
+    },
     async previewGeneratorTable(id: string, signal?: AbortSignal) {return (await previewGeneratorTable(id, {baseUrl: '', fetch: transport(true, 60000), signal})).data;},
     async downloadGeneratorTables(tableIds: DownloadRequest['tableIds'], signal?: AbortSignal) {return (await downloadGeneratorTables({tableIds}, {baseUrl: '', fetch: transport(true, 60000), signal})).data;},
     async getDruidConsoleStatus(signal?: AbortSignal) {return (await getDruidConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},

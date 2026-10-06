@@ -238,4 +238,11 @@ public class GenController extends BaseController
         response.setContentType("application/octet-stream; charset=UTF-8");
         IOUtils.write(data, response.getOutputStream());
     }
+    @org.springframework.web.bind.annotation.ExceptionHandler(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure.class)
+    public AjaxResult customOutputFailure(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure failure)
+    {
+        AjaxResult result = AjaxResult.error(failure.getMessage());
+        result.put("data", failure.result());
+        return result;
+    }
 }

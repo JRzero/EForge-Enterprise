@@ -10,3 +10,5 @@ gen:
   tablePrefix: sys_
   # 是否允许生成文件覆盖到本地（自定义路径），默认不允许
   allowOverwrite: false
+  # 自定义输出仅允许此管理员控制的目录；保留 / 对应 src 的原行为。
+  outputRoot: ${user.dir}/src

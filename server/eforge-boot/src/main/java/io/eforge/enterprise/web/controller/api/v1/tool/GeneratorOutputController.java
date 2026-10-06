@@ -29,4 +29,26 @@ public class GeneratorOutputController {
             .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"eforge-generated.zip\"")
             .contentLength(archive.length).body(archive);
     }
+    @PostMapping("/tables/{id}/custom-output") @PreAuthorize("@ss.hasPermi('tool:gen:code')")
+    @Log(title="代码生成",businessType=BusinessType.GENCODE) @Operation(operationId="writeGeneratorCustomOutput")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses({
+        @ApiResponse(responseCode="200",description="Complete backend output",content=@Content(mediaType="application/json",schema=@Schema(implementation=io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult.class))),
+        @ApiResponse(responseCode="503",description="Inspect retained or unconfirmed file outcomes before retrying.",content=@Content(mediaType="application/problem+json",schema=@Schema(implementation=CustomOutputProblem.class)))
+    })
+    public ResponseEntity<io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult> custom(@PathVariable String id){
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(output.custom(id));
+    }
+    public static final class CustomOutputProblem extends ProblemDetail {
+        private final io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult output;
+        public CustomOutputProblem(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure failure){
+            super(503);setTitle("Service Unavailable");setDetail(failure.getMessage());output=failure.result();
+        }
+        @Override @Schema(hidden=true) public java.util.Map<String,Object> getProperties(){return super.getProperties();}
+        public String getCode(){return "GENERATOR_CUSTOM_OUTPUT_PARTIAL";}
+        public io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult getOutput(){return output;}
+    }
+    @ExceptionHandler(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure.class)
+    public ResponseEntity<CustomOutputProblem> customFailure(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure failure){
+        return ResponseEntity.status(503).contentType(MediaType.APPLICATION_PROBLEM_JSON).cacheControl(CacheControl.noStore()).body(new CustomOutputProblem(failure));
+    }
 }

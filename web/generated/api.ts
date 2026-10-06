@@ -870,6 +870,22 @@ export type GeneratorConfigurationUpdate = {
     subTableForeignKey?: string;
     subTableName?: string;
 };
+export type CustomOutputOutcome = {
+    path?: string;
+    state?: "CREATED" | "REPLACED" | "FAILED" | "UNCONFIRMED" | "UNATTEMPTED";
+};
+export type CustomOutputResult = {
+    files?: CustomOutputOutcome[];
+};
+export type CustomOutputProblem = {
+    code?: string;
+    detail?: string | null;
+    instance?: string | null;
+    output?: CustomOutputResult;
+    status?: number;
+    title?: string | null;
+    "type"?: string;
+};
 export type OutputFile = {
     content?: string;
     path?: string;
@@ -2384,6 +2400,18 @@ export function listGeneratorColumns(id: string, opts?: Oazapfts.RequestOpts) {
         data: ColumnResponse[];
     }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/columns`, {
         ...opts
+    });
+}
+export function writeGeneratorCustomOutput(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CustomOutputResult;
+    } | {
+        status: 503;
+        data: CustomOutputProblem;
+    }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/custom-output`, {
+        ...opts,
+        method: "POST"
     });
 }
 export function previewGeneratorTable(id: string, opts?: Oazapfts.RequestOpts) {

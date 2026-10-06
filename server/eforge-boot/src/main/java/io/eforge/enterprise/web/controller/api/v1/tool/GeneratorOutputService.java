@@ -10,7 +10,8 @@ import static io.eforge.enterprise.web.controller.api.v1.tool.GeneratorOutputCon
 @Service
 public class GeneratorOutputService {
     private final GeneratorRenderingSnapshotLoader snapshots;
-    public GeneratorOutputService(GeneratorRenderingSnapshotLoader snapshots){this.snapshots=snapshots;}
+    private final GeneratorCustomOutput custom;
+    public GeneratorOutputService(GeneratorRenderingSnapshotLoader snapshots,GeneratorCustomOutput custom){this.snapshots=snapshots;this.custom=custom;}
     @PreAuthorize("@ss.hasPermi('tool:gen:preview')")
     public PreviewResponse preview(String id) {
         long selected=identifier(id);
@@ -27,6 +28,8 @@ public class GeneratorOutputService {
         var input=snapshots.load(selected);
         return GeneratorRenderedBundle.combine(()->input.stream().map(GeneratorRenderedBundle::render).iterator()).zip();
     }
+    @PreAuthorize("@ss.hasPermi('tool:gen:code')")
+    public GeneratorCustomOutput.CustomOutputResult custom(String id){custom.requireEnabled();return custom.write(snapshots.load(List.of(identifier(id))).get(0));}
     private static long identifier(String id) {
         try{if(id!=null&&id.matches("[1-9][0-9]{0,18}")){long value=Long.parseLong(id);if(value>0)return value;}}catch(NumberFormatException ignored){}
         throw new ApiFailure(400,"VALIDATION_ERROR","Invalid generator identifier.");

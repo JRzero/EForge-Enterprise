@@ -392,3 +392,34 @@ Stale complete-field configuration saves must reload after synchronization.
 The original synchronization route shares this transaction behind its existing
 compatibility response boundary. Generated output and management UI stay tracked
 in the parity inventory.
+
+### Generator preview, download and custom filesystem output
+
+GET `/api/v1/tool/generator/tables/{id}/preview` uses `tool:gen:preview`
+and returns typed output files with template key, portable path and content.
+POST `/api/v1/tool/generator/downloads` uses `tool:gen:code` and accepts
+`{ "tableIds": ["..."] }`, one to100 distinct exact positive decimal IDs.
+It returns one complete `application/zip` attachment after coherent snapshot
+loading and all rendering/path/size checks. Responses are no-store; download
+and custom writes retain generation audit, including failed audited actions.
+
+POST `/api/v1/tool/generator/tables/{id}/custom-output` uses `tool:gen:code`
+and no request body. Server `allowOverwrite` defaults to false; disabled output
+returns403 `GENERATOR_CUSTOM_OUTPUT_DISABLED` before metadata reads. A configured
+`gen.outputRoot` (or legacy flat `outputRoot`) bounds saved generation destinations;
+the default is `user.dir/src`. The root belongs exclusively to trusted admins/the
+server account. Traversal and existing links/junctions/special files are refused
+with safe400 `GENERATOR_CUSTOM_PATH_INVALID`. This is not isolation from a hostile
+OS actor concurrently replacing trusted directory entries.
+
+Success is200 `CustomOutputResult` with `files: [{ path, state }]`. Paths are
+relative to the configured root. States are CREATED, REPLACED, FAILED,
+UNCONFIRMED and UNATTEMPTED. Partial output returns503 `CustomOutputProblem`
+with fixed safe detail/code `GENERATOR_CUSTOM_OUTPUT_PARTIAL` and `output`
+containing the same concrete outcome schema. Earlier completed files remain;
+there is no whole-directory rollback. Atomic replacement can commit before a
+lost acknowledgement, hence UNCONFIRMED. The client preserves partial outcomes,
+reports lost/cancelled responses as unconfirmed and never automatically repeats
+writes. Only Java/XML backend files are installed, matching original custom output;
+SQL/frontend files remain in preview/download. Original endpoints retain their
+compatibility JSON boundary while using the same safe output pipeline.
