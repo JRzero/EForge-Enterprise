@@ -1495,7 +1495,7 @@
     "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
   },
   "generatorManagerUi": {
-  "status": "local-two-profile-accepted-exact-cloud-pending",
+  "status": "exact-commit-cloud-accepted-manager-stage-full-goal-incomplete",
   "route": "/gen",
   "routeId": "tool-generator",
   "review": "docs/security-review-generator-manager-ui.md",
@@ -1512,6 +1512,10 @@
     "final-active-capability-audit"
   ],
   "formBuilder": "deferred-not-complete",
-  "quartzMutationBoundary": "prior-specific-rejection-preserved"
+  "implementationCommit": "d569f33d2ddba9ae4a07f34115a5bcf77511388e",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37533050064",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37533050094",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "quartzMutationBoundary": "prior-specific-rejection-preserved"
 }
 }

@@ -771,3 +771,15 @@ unauthorized tables and removed metadata. Exact web37533050094 is terminal succe
 server37533050064 remains live under unique observer62282, not yet accepted.
 Next generated-control matrix fixture is independent uncommitted verification work;
 its emitted controls are not accepted merely because the manager stage passed.
+
+### Generator manager exact cloud acceptance
+Implementationd569f33d2ddba9ae4a07f34115a5bcf77511388e: server37533050064 all
+three jobs and web37533050094 terminal SUCCESS; unique observer62282 ended0.
+Direct generator-manager-cloud-accepted-server/web.log prove618 backend (608boot,
+10scope, one existing OS skip),89 units/71 mocked, both47 real framework/browser/
+API profiles, actual installed generated-host profiles and matching OpenAPI.
+The manager stage is accepted. The next expanded emitted-control matrix remains
+independent local work; its first default actual run now passes after fixture-only
+JSON transport and absolute file-request fixes, with no product source change.
+All control variants, shared shell and final active audit remain; form builder is
+deferred and the specific Quartz runtime rejection remains effective.

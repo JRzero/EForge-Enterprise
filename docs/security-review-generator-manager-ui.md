@@ -66,7 +66,7 @@ Long output paths wrap outside dialogs; the old style demonstrably overflows a
 
 ## Acceptance limits
 
-Exact new cloud validation is pending. This manager stage does not prove every
+Exact d569f33d2ddba9ae4a07f34115a5bcf77511388e cloud is accepted: server37533050064 all three jobs and web37533050094 terminal SUCCESS. Unique observer62282 ended0. Direct accepted-server/web logs prove618 backend (one existing OS skip),89 units/71 mocked, both47 browser/API profiles, actual installed generated hosts and exact main OpenAPI. This manager stage does not prove every
 emitted control variant, complete shared-shell parity or final active capability
 acceptance. Form builder is deferred, not completed. The previously rejected
 Quartz runtime mutation scheme is neither implemented nor retried by this change.
