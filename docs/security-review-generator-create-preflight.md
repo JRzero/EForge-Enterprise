@@ -79,3 +79,11 @@ Enabled-console regression is continuing in the same sequential process; no new
 local live-browser run is claimed. Prepared-SQL fidelity probes pass in case
 modes 0 and 1. Both fidelity and JDBC preflight profiles are now required CI steps,
 but their newest cloud result must still be checked on this exact implementation.
+Final local checkpoint: the same sequential process completed both default and
+explicitly enabled full API regressions successfully. Both normalized OpenAPI
+snapshots exactly match the committed contract hash above. New exact-head cloud
+run 37401067568 for 67e7bc2381d7a52ada3e1b49e72c0eea61767c76 has verify (including
+both native SQL and both JDBC preflight profiles) and runtime-integration successful;
+auth-runtime-integration is still running. Final cloud browser acceptance remains
+pending. No source change or extra local live-browser run occurred after these
+local checks. This supersedes the earlier enabled-runtime pending checkpoint.

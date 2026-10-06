@@ -213,3 +213,11 @@ real denied metadata access and retained source data. Prior bbd1556 cloud run
 Current creation endpoint/executor/import/outcomes, source races and compatibility,
 React output/pages and final parity remain incomplete. See
 `security-review-generator-create-preflight.md`. Form builder remains deferred.
+Final local checkpoint: the same sequential process completed both default and
+explicitly enabled full API regressions successfully. Both normalized OpenAPI
+snapshots exactly match the committed contract hash above. New exact-head cloud
+run 37401067568 for 67e7bc2381d7a52ada3e1b49e72c0eea61767c76 has verify (including
+both native SQL and both JDBC preflight profiles) and runtime-integration successful;
+auth-runtime-integration is still running. Final cloud browser acceptance remains
+pending. No source change or extra local live-browser run occurred after these
+local checks. This supersedes the earlier enabled-runtime pending checkpoint.
