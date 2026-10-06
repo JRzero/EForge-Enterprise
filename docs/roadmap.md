@@ -697,3 +697,12 @@ Installed module schemas agree at615CC710...; main contract is preserved. Exact
 new cloud acceptance is pending. See security-review-generator-react-pages.md.
 Production route/menu registration, actual dictionary/upload/rich-text variants,
 full manager UI and remaining original parity are required; form builder deferred.
+### React page stage exact cloud acceptance
+Implementation aa5259521c8ee5779468be03c32910de160de8cb is accepted:
+server37516887733 all three and web37516887676 terminal SUCCESS, observer82771
+ended0. Direct generator-react-cloud-accepted-server/web.log prove607 backend,
+81 unit/64 mocked, both full43 real browser/API profiles and unchanged main OpenAPI,
+plus both focused real generated CRUD/tree/sub pages/clients/auth/SQL/audit and equal
+installed schemas. This accepts the actual page stage, not full generator parity.
+Production static routes/canonical menu install, all dictionary/upload/rich-text
+variants, full generator manager and remaining original capabilities still required.
