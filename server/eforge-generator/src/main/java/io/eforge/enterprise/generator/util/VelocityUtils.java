@@ -49,6 +49,7 @@ public class VelocityUtils
         String functionName = genTable.getFunctionName();
 
         VelocityContext velocityContext = new VelocityContext();
+        velocityContext.put("outputText", io.eforge.enterprise.generator.rendering.GeneratorOutputText.INSTANCE);
         velocityContext.put("tplCategory", genTable.getTplCategory());
         velocityContext.put("tableName", genTable.getTableName());
         velocityContext.put("functionName", StringUtils.isNotEmpty(functionName) ? functionName : "【请填写功能名称】");

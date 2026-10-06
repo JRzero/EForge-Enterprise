@@ -9,9 +9,9 @@ import io.eforge.enterprise.common.annotation.Excel;
 import io.eforge.enterprise.common.core.domain.BaseEntity;
 
 /**
- * ${subTable.functionName}对象 ${subTableName}
+ * $outputText.javaComment($subTable.functionName)对象 $outputText.javaComment($subTableName)
  * 
- * @author ${author}
+ * @author $outputText.javaComment($author)
  * @date ${datetime}
  */
 public class ${subClassName} extends BaseEntity
@@ -20,7 +20,7 @@ public class ${subClassName} extends BaseEntity
 
 #foreach ($column in $subTable.columns)
 #if(!$table.isSuperColumn($column.javaField))
-    /** $column.columnComment */
+    /** $outputText.javaComment($column.columnComment) */
 #if($column.list)
 #set($parentheseIndex=$column.columnComment.indexOf("（"))
 #if($parentheseIndex != -1)
@@ -29,12 +29,12 @@ public class ${subClassName} extends BaseEntity
 #set($comment=$column.columnComment)
 #end
 #if($parentheseIndex != -1)
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    @Excel(name = $outputText.javaLiteral($comment), readConverterExp = $outputText.javaLiteral($column.readConverterExp()))
 #elseif($column.javaType == 'Date')
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "${comment}", width = 30, dateFormat = "yyyy-MM-dd")
+    @Excel(name = $outputText.javaLiteral($comment), width = 30, dateFormat = "yyyy-MM-dd")
 #else
-    @Excel(name = "${comment}")
+    @Excel(name = $outputText.javaLiteral($comment))
 #end
 #end
     private $column.javaType $column.javaField;

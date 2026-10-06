@@ -136,6 +136,14 @@ class GeneratorRenderingSnapshotMysqlProbe {
    }finally{jdbc.execute("RENAME TABLE snapshot_unavailable_fields TO gen_table_column");}
    check(loader.load(List.of(root)).size()==1,"SQL recovery failed.");
    check(jdbc.queryForObject("SELECT COUNT(*) FROM gen_table",Integer.class)==3&&jdbc.queryForObject("SELECT COUNT(*) FROM gen_table_column",Integer.class)==2,"Read-only loader changed metadata.");
+   jdbc.update("UPDATE gen_table SET package_name='io.eforge.enterprise.generated',module_name='snapshot',business_name='entry',function_name='预览功能',function_author='EForge',form_col_num=2,options='{\"parentMenuId\":\"3\"}'");
+   jdbc.update("UPDATE gen_table_column SET java_type='Long',column_comment='预览字段',column_type='bigint',is_increment='0',is_required='0',is_insert='1',is_edit='1',is_list='1',is_query='0',html_type='input',query_type='EQ',dict_type=''");
+   var preview=new io.eforge.enterprise.generator.service.GenTableServiceImpl();
+   org.springframework.test.util.ReflectionTestUtils.setField(preview,"renderingSnapshots",loader);
+   login(Set.of("tool:gen:preview"));
+   var files=preview.previewCode(root);
+   check(files.get("vm/java/domain.java.vm").contains("class RootNew"),"Original preview did not render the actual root snapshot.");
+   check(files.get("vm/java/sub-domain.java.vm").contains("class ChildNew"),"Original preview did not render actual child metadata.");
    System.out.println("PASS: "+assertions+" actual Spring/MyBatis immutable snapshot assertions; permissions, REPEATABLE_READ concurrent root/child/fields, REQUIRES_NEW, SQL privacy and recovery.");
   }finally{SecurityContextHolder.clearContext();org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes();}
  }

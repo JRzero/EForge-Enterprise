@@ -35,6 +35,7 @@ import io.eforge.enterprise.generator.domain.GenTableColumn;
 import io.eforge.enterprise.generator.mapper.GenTableColumnMapper;
 import io.eforge.enterprise.generator.mapper.GenTableMapper;
 import io.eforge.enterprise.generator.util.GenUtils;
+import io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader;
 import io.eforge.enterprise.generator.util.VelocityInitializer;
 import io.eforge.enterprise.generator.util.VelocityUtils;
 
@@ -50,6 +51,9 @@ public class GenTableServiceImpl implements IGenTableService
 
     @Autowired
     private GenTableMapper genTableMapper;
+
+    @Autowired
+    private GeneratorRenderingSnapshotLoader renderingSnapshots;
 
     @Autowired
     private GeneratorMetadataBoundary metadataBoundary;
@@ -298,21 +302,15 @@ public class GenTableServiceImpl implements IGenTableService
     public Map<String, String> previewCode(Long tableId)
     {
         Map<String, String> dataMap = new LinkedHashMap<>();
-        // 查询表信息
-        GenTable table = genTableMapper.selectGenTableById(tableId);
-        // 设置主子表信息
-        setSubTable(table);
-        // 设置主键列信息
-        setPkColumn(table);
+        // Load once under a short consistent transaction, before template rendering.
+        var snapshot = renderingSnapshots.load(java.util.Collections.singletonList(tableId)).get(0);
         VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table);
+        List<String> templates = VelocityUtils.getTemplateList(snapshot.legacyWorkingTable());
         for (String template : templates)
         {
-            // 渲染模板
+            // Templates never share mutable DTOs or reread metadata during this preview.
+            VelocityContext context = VelocityUtils.prepareContext(snapshot.legacyWorkingTable());
+            context.put("datetime", snapshot.generationDate());
             StringWriter sw = new StringWriter();
             Template tpl = Velocity.getTemplate(template, Constants.UTF8);
             tpl.merge(context, sw);

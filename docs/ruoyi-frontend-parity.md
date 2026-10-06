@@ -1539,3 +1539,24 @@ tests pass; both native modes each 23 assertions pass. See
 security-review-generator-output-text.md. This helper is not yet used by templates
 or output endpoints; all renderer, React/EForge and UI work remains required.
 Exact-commit cloud is pending. Form builder stays deferred.
+Exact cloud acceptance (2026-10-06): snapshot implementation
+5567fb2e348ba6c1faa627d5a8e7a31f12514e2c, server run 37411636219,
+and text-context implementation 7c7405cec289188b911337f6f876a13b2443e7b8,
+server run 37412282095, each finished successfully in all three jobs.
+Direct logs generator-snapshot-cloud-accepted.log and
+generator-output-text-cloud-accepted.log prove both profiles each 43 real browsers,
+complete real API/MySQL/Redis/Quartz/OSHI/ACL/captcha regressions, identical live
+OpenAPI and the native assertions for their exact sources. Both modes of the text
+commit show 30 snapshot and 23 output-context assertions. These accepted commits
+are foundations; they do not prove the later uncommitted original-preview change.
+Original generator preview and Java text (2026-10-06): preview now renders one
+consistent metadata snapshot with separate working graphs per template. The old
+success/error envelope and authority are retained. Original Java domain, mapper,
+service and controller free-form comments/Excel/audit/export text now use explicit
+encodings; actual CRUD/tree/subtable Java output compiles and reflection preserves
+hostile labels and converters without injected members. Final 521 backend tests,
+41 targeted tests, both native MySQL modes each32 and both complete APIs pass;
+OpenAPI is unchanged. See security-review-generator-preview-snapshot.md.
+Exact final cloud/two final43 browsers are pending. SQL/XML/JS/TS, identifiers,
+paths/ZIP/custom output, React/EForge output, full generator UI and actual business
+runtime/browser acceptance remain. Form builder stays deferred.

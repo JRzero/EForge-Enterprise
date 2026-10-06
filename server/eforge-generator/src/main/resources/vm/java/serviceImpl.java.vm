@@ -20,9 +20,9 @@ import ${packageName}.domain.${ClassName};
 import ${packageName}.service.I${ClassName}Service;
 
 /**
- * ${functionName}Service业务层处理
+ * $outputText.javaComment($functionName)Service业务层处理
  * 
- * @author ${author}
+ * @author $outputText.javaComment($author)
  * @date ${datetime}
  */
 @Service
@@ -32,10 +32,10 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     private ${ClassName}Mapper ${className}Mapper;
 
     /**
-     * 查询${functionName}
+     * 查询$outputText.javaComment($functionName)
      * 
-     * @param ${pkColumn.javaField} ${functionName}主键
-     * @return ${functionName}
+     * @param ${pkColumn.javaField} $outputText.javaComment($functionName)主键
+     * @return $outputText.javaComment($functionName)
      */
     @Override
     public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
@@ -44,10 +44,10 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 查询${functionName}列表
+     * 查询$outputText.javaComment($functionName)列表
      * 
-     * @param ${className} ${functionName}
-     * @return ${functionName}
+     * @param ${className} $outputText.javaComment($functionName)
+     * @return $outputText.javaComment($functionName)
      */
     @Override
     public List<${ClassName}> select${ClassName}List(${ClassName} ${className})
@@ -56,9 +56,9 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 新增${functionName}
+     * 新增$outputText.javaComment($functionName)
      * 
-     * @param ${className} ${functionName}
+     * @param ${className} $outputText.javaComment($functionName)
      * @return 结果
      */
 #if($table.sub)
@@ -82,9 +82,9 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 修改${functionName}
+     * 修改$outputText.javaComment($functionName)
      * 
-     * @param ${className} ${functionName}
+     * @param ${className} $outputText.javaComment($functionName)
      * @return 结果
      */
 #if($table.sub)
@@ -106,9 +106,9 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 批量删除${functionName}
+     * 批量删除$outputText.javaComment($functionName)
      * 
-     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键
+     * @param ${pkColumn.javaField}s 需要删除的$outputText.javaComment($functionName)主键
      * @return 结果
      */
 #if($table.sub)
@@ -124,9 +124,9 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     }
 
     /**
-     * 删除${functionName}信息
+     * 删除$outputText.javaComment($functionName)信息
      * 
-     * @param ${pkColumn.javaField} ${functionName}主键
+     * @param ${pkColumn.javaField} $outputText.javaComment($functionName)主键
      * @return 结果
      */
 #if($table.sub)
@@ -143,9 +143,9 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
 #if($table.sub)
 
     /**
-     * 新增${subTable.functionName}信息
+     * 新增$outputText.javaComment($subTable.functionName)信息
      * 
-     * @param ${className} ${functionName}对象
+     * @param ${className} $outputText.javaComment($functionName)对象
      */
     public void insert${subClassName}(${ClassName} ${className})
     {

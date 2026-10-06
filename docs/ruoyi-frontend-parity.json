@@ -1213,8 +1213,14 @@
     "targetedTests": 12,
     "mysqlCaseMode0SpringAssertions": 30,
     "mysqlCaseMode1SpringAssertions": 30,
-    "currentCloud": "pending",
-    "scope": "Detached exact legacy graph and actual permission-controlled read-only REPEATABLE_READ/REQUIRES_NEW load. Concurrent real SQL root/child/fields commit, next-read visibility, caller isolation, SQL privacy/recovery, empty LEFT JOIN field regression. No output endpoint, safe generated source, React/EForge template, custom path or UI completion."
+    "currentCloud": "success",
+    "scope": "Detached exact legacy graph and actual permission-controlled read-only REPEATABLE_READ/REQUIRES_NEW load. Concurrent real SQL root/child/fields commit, next-read visibility, caller isolation, SQL privacy/recovery, empty LEFT JOIN field regression. No output endpoint, safe generated source, React/EForge template, custom path or UI completion.",
+    "implementationCommit": "5567fb2e348ba6c1faa627d5a8e7a31f12514e2c",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37411636219",
+    "realBrowserProfiles": [
+      43,
+      43
+    ]
   },
   "generatorOutputTextValidation": {
     "state": "target-context-foundation-local-verified",
@@ -1223,7 +1229,26 @@
     "targetedTests": 5,
     "mysqlCaseMode0Assertions": 23,
     "mysqlCaseMode1Assertions": 23,
+    "currentCloud": "success",
+    "scope": "Actual Java compilation, JSON/XML/SpEL parsing and MySQL literal round trips under four SQL modes. No renderer/template/output endpoint/custom path/UI acceptance.",
+    "implementationCommit": "7c7405cec289188b911337f6f876a13b2443e7b8",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37412282095",
+    "realBrowserProfiles": [
+      43,
+      43
+    ]
+  },
+  "generatorOriginalPreviewJavaValidation": {
+    "state": "original-preview-java-contexts-local-verified",
+    "review": "docs/security-review-generator-preview-snapshot.md",
+    "backendTests": 521,
+    "targetedTests": 41,
+    "actualJavaGenerationCompilerCases": 3,
+    "mysqlCaseMode0SpringAssertions": 32,
+    "mysqlCaseMode1SpringAssertions": 32,
     "currentCloud": "pending",
-    "scope": "Actual Java compilation, JSON/XML/SpEL parsing and MySQL literal round trips under four SQL modes. No renderer/template/output endpoint/custom path/UI acceptance."
+    "finalRealBrowsers": "pending-exact-cloud",
+    "runtime": "Both final default/enabled complete APIs and exact live OpenAPI passed. Original compatibility success and safe 401/403/404/503 body codes, no-data refusal, real SQL fault privacy/recovery, configured detail output and no mutation-guard blocking passed.",
+    "scope": "Original preview uses consistent metadata and isolated working graphs. Shared original Java templates encode free-form comments/Excel/audit/export text; full real Java generation compilation and reflection. No canonical output, safe SQL/XML/JS/TS or identifier/ZIP/path/custom-output boundary, React/EForge template or management UI completion."
   }
 }

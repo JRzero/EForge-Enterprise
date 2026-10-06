@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={GeneratorSynchronizationController.class,io.eforge.enterprise.generator.service.GeneratorSynchronizationService.class,io.eforge.enterprise.generator.controller.GenController.class,io.eforge.enterprise.generator.service.GenTableServiceImpl.class,GlobalExceptionHandler.class,PermissionService.class,
+@ContextConfiguration(classes={GeneratorSynchronizationController.class,io.eforge.enterprise.generator.service.GeneratorSynchronizationService.class,io.eforge.enterprise.generator.controller.GenController.class,io.eforge.enterprise.generator.service.GenTableServiceImpl.class,io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class,GlobalExceptionHandler.class,PermissionService.class,
     ApiExceptionHandler.class,ApiRoutingExceptionResolver.class,SpringUtils.class,SecurityConfig.class,ApiSecurityProblemHandler.class,
     AuthenticationEntryPointImpl.class,JwtAuthenticationTokenFilter.class,GeneratorSynchronizationControllerTest.Configuration.class})
 class GeneratorSynchronizationControllerTest {
@@ -53,5 +53,20 @@ class GeneratorSynchronizationControllerTest {
     @ParameterizedTest @ValueSource(strings={"0","-1","not-id","9223372036854775808"}) void invalidIdDoesNotLock(String id) throws Exception {mvc.perform(post(PATH+id+"/synchronize")).andExpect(status().isBadRequest());verifyNoInteractions(boundary,tables,columns);}
     @Test void sqlFailureIsSanitized() throws Exception {when(tables.selectGenTableById(any())).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private database"));mvc.perform(post(PATH+"1/synchronize")).andExpect(status().isInternalServerError()).andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private"))));}
     @Test void originalSqlFailureKeepsCompatibilityShapeWithoutPrivateDetails() throws Exception {when(tables.selectGenTableByName("owned_table")).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private SQL connection details"));mvc.perform(get("/tool/gen/synchDb/owned_table")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(500)).andExpect(jsonPath("$.msg").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private"))));}
+    @Test void originalPreviewMissingConfigurationKeepsSafeCompatibility() throws Exception {
+        actor(Set.of("tool:gen:preview"));
+        mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(404)).andExpect(jsonPath("$.data").doesNotExist());
+    }
+    @Test void originalPreviewMissingFieldsKeepsSafeCompatibility() throws Exception {
+        actor(Set.of("tool:gen:preview"));var table=new GenTable();table.setTableId(1L);table.setColumns(List.of());when(tables.selectGenTableById(1L)).thenReturn(table);
+        mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(409)).andExpect(jsonPath("$.data").doesNotExist());
+    }
+    @Test void originalPreviewRealMapperFailureKeepsSafeCompatibility() throws Exception {
+        actor(Set.of("tool:gen:preview"));when(tables.selectGenTableById(1L)).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private SQL driver secret"));
+        mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(503)).andExpect(jsonPath("$.msg").value("Generator metadata cannot be read safely.")).andExpect(jsonPath("$.data").doesNotExist());
+    }
+    @Test void originalPreviewRejectsListOnlyBeforeMetadataQuery() throws Exception {
+        actor(Set.of("tool:gen:list"));mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(403)).andExpect(jsonPath("$.data").doesNotExist());verifyNoInteractions(tables,columns);
+    }
     @TestConfiguration static class Configuration {@Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}@Bean CorsFilter corsFilter(){return new CorsFilter(new UrlBasedCorsConfigurationSource());}}
 }

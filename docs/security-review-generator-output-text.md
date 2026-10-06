@@ -48,3 +48,13 @@ exit 0; prior full build/native session 67013 is terminal exit 0. Logs are
  generator-output-text-final-verify.log and generator-output-text-mysql-0/1.log
 under server/eforge-boot/target. Exact-commit cloud is still pending. No template,
 output endpoint, path handling or UI acceptance is claimed for this foundation.
+Exact cloud acceptance (2026-10-06): snapshot implementation
+5567fb2e348ba6c1faa627d5a8e7a31f12514e2c, server run 37411636219,
+and text-context implementation 7c7405cec289188b911337f6f876a13b2443e7b8,
+server run 37412282095, each finished successfully in all three jobs.
+Direct logs generator-snapshot-cloud-accepted.log and
+generator-output-text-cloud-accepted.log prove both profiles each 43 real browsers,
+complete real API/MySQL/Redis/Quartz/OSHI/ACL/captcha regressions, identical live
+OpenAPI and the native assertions for their exact sources. Both modes of the text
+commit show 30 snapshot and 23 output-context assertions. These accepted commits
+are foundations; they do not prove the later uncommitted original-preview change.

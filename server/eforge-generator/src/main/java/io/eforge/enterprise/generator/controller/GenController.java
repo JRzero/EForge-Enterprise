@@ -148,8 +148,16 @@ public class GenController extends BaseController
     @GetMapping("/preview/{tableId}")
     public AjaxResult preview(@PathVariable("tableId") Long tableId) throws IOException
     {
-        Map<String, String> dataMap = genTableService.previewCode(tableId);
-        return success(dataMap);
+        try
+        {
+            Map<String, String> dataMap = genTableService.previewCode(tableId);
+            return success(dataMap);
+        }
+        catch (io.eforge.enterprise.common.exception.ApiFailure failure)
+        {
+            // The original endpoint retains its compatibility envelope for safe loader failures.
+            return AjaxResult.error(failure.status(), failure.getMessage());
+        }
     }
 
     /**

@@ -105,4 +105,26 @@ class GeneratorRenderingSnapshotTest {
         assertEquals(before,render(snapshot.legacyWorkingTable(),snapshot.generationDate()));
         assertTrue(before.size()>=9);assertTrue(before.keySet().stream().anyMatch(name->name.startsWith("vm/xml/mapper.xml.vm")));
     }
+    @ParameterizedTest @MethodSource("templates")
+    void originalPreviewUsesOneSnapshotAndMatchesActualTemplateOutput(String category,String webType) {
+        var input=table(category,webType);
+        var snapshot=GeneratorRenderingSnapshot.capture(input);
+        var loader=org.mockito.Mockito.mock(io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class);
+        org.mockito.Mockito.when(loader.load(List.of(input.getTableId()))).thenReturn(List.of(snapshot));
+        var service=new io.eforge.enterprise.generator.service.GenTableServiceImpl();
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"renderingSnapshots",loader);
+        // Changing the original input after capture must not change the original HTTP preview.
+        input.setClassName("ChangedAfterCapture");input.getColumns().get(0).setColumnName("changed_after_capture");
+        var actual=service.previewCode(input.getTableId());
+        VelocityInitializer.initVelocity();
+        var detached=snapshot.legacyWorkingTable();
+        assertEquals(VelocityUtils.getTemplateList(detached).size(),actual.size());
+        for(var template:VelocityUtils.getTemplateList(detached)) {
+            var context=VelocityUtils.prepareContext(snapshot.legacyWorkingTable());context.put("datetime",snapshot.generationDate());
+            var output=new StringWriter();Velocity.getTemplate(template,"UTF-8").merge(context,output);
+            assertEquals(output.toString(),actual.get(template));assertFalse(actual.get(template).contains("ChangedAfterCapture"));
+        }
+        org.mockito.Mockito.verify(loader).load(List.of(input.getTableId()));
+        org.mockito.Mockito.verifyNoMoreInteractions(loader);
+    }
 }

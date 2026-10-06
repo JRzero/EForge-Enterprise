@@ -37,6 +37,30 @@ try {
     Assert-Check ((Request $configPath 'PUT' $body $authorized).StatusCode -eq 204) 'Configuration retry failed.'
     $saved=(Request $configPath 'GET' '' $authorized).Content|ConvertFrom-Json
     Assert-Check ($saved.configuration.formColumns -eq 3 -and $saved.configuration.outputPath -ceq 'D:/生成输出' -and $saved.configuration.options.generateDetail -and $saved.table.webType -ceq 'eforge-react' -and $saved.columns[0].primaryKey -and $saved.columns[0].autoIncrement -and $saved.columns[0].id -ceq $detail.columns[0].id) 'Configuration fields/options/physical identity were not retained.'
+    # Original preview now captures the root/child graph once, before rendering.
+    $configPreviewPath="/tool/gen/preview/$configId"
+    $configAnonymousPreview=Request $configPreviewPath
+    $configAnonymousBody=$configAnonymousPreview.Content|ConvertFrom-Json
+    Assert-Check ($configAnonymousPreview.StatusCode -eq 200 -and $configAnonymousBody.code -eq 401 -and !$configAnonymousBody.data) 'Anonymous original preview must keep the legacy denial envelope and contain no generated data.'
+    $configNoRoleHeaders=@{Authorization="Bearer $(($login.Content|ConvertFrom-Json).accessToken)"}
+    $configDeniedPreview=Request $configPreviewPath 'GET' '' $configNoRoleHeaders
+    $configDeniedBody=$configDeniedPreview.Content|ConvertFrom-Json
+    Assert-Check ($configDeniedPreview.StatusCode -eq 200 -and $configDeniedBody.code -eq 403 -and !$configDeniedBody.data) 'No-role original preview must keep the legacy denial envelope and contain no generated data.'
+    $configPreviewReply=Request $configPreviewPath 'GET' '' $authorized
+    $configPreview=$configPreviewReply.Content|ConvertFrom-Json -AsHashtable
+    Assert-Check ($configPreviewReply.StatusCode -eq 200 -and $configPreview.code -eq 200) 'Original preview must keep the successful compatibility response.'
+    Assert-Check ($configPreview.data.Count -ge 9 -and $configPreview.data['vm/java/domain.java.vm'].Contains('class ConfiguredEntry') -and $configPreview.data['vm/java/controller.java.vm'].Contains('配置') -and $configPreview.data.ContainsKey('vm/vue/view.vue.vm')) 'Original preview must render actual configured Java, Unicode labels and detail template.'
+    $configMissingPreview=Request '/tool/gen/preview/9223372036854775807' 'GET' '' $authorized
+    $configMissingPreviewBody=$configMissingPreview.Content|ConvertFrom-Json
+    Assert-Check ($configMissingPreview.StatusCode -eq 200 -and $configMissingPreviewBody.code -eq 404 -and !$configMissingPreviewBody.data) 'Missing original preview must keep a safe compatibility error.'
+    GeneratorConfig-Sql "RENAME TABLE gen_table_column TO ${configMarker}_preview_fields;"|Out-Null
+    try {
+        $configFaultPreview=Request $configPreviewPath 'GET' '' $authorized
+        $configFaultPreviewBody=$configFaultPreview.Content|ConvertFrom-Json
+        Assert-Check ($configFaultPreview.StatusCode -eq 200 -and $configFaultPreviewBody.code -eq 503 -and !$configFaultPreviewBody.data -and $configFaultPreviewBody.msg -ceq 'Generator metadata cannot be read safely.') 'Actual preview SQL failure must retain the compatibility envelope without private diagnostics.'
+    } finally { GeneratorConfig-Sql "RENAME TABLE ${configMarker}_preview_fields TO gen_table_column;"|Out-Null }
+    $configRecoveredPreview=Request $configPreviewPath 'GET' '' $authorized
+    Assert-Check (($configRecoveredPreview.Content|ConvertFrom-Json).code -eq 200) 'Original preview must recover after the real SQL fault.'
     # Hold only the parent-owned generator guard in a separate real SQL transaction.
     # Canonical save and original sync must wait for rollback, then complete normally.
     foreach($guardCase in @(@{path=$configPath;method='PUT';payload=$body},@{path="$configPath/synchronize";method='POST';payload=''},@{path="/tool/gen/synchDb/${configMarker}_a";method='GET';payload=''},@{path='/api/v1/tool/generator/tables';method='DELETE';payload='{"ids": ["9223372036854775807"]}'},@{path='/tool/gen/9223372036854775807';method='DELETE';payload=''})) {
@@ -53,6 +77,12 @@ try {
                 if([int]$guardCount -gt 0){$guardHeld=$true;break};Start-Sleep -Milliseconds 100
             }
             Assert-Check $guardHeld 'Owned SQL guard must be observed live before checking HTTP serialization.'
+            if($guardCase.path -eq $configPath -and $guardCase.method -eq 'PUT') {
+                $configUnlockedPreview=Request $configPreviewPath 'GET' '' $authorized
+                Assert-Check ($configUnlockedPreview.StatusCode -eq 200 -and ($configUnlockedPreview.Content|ConvertFrom-Json).code -eq 200) 'Preview must complete while the metadata mutation guard is held.'
+                $configPreviewGuard=GeneratorConfig-Sql "SELECT COUNT(*) FROM performance_schema.data_locks WHERE OBJECT_SCHEMA='eforge_enterprise' AND OBJECT_NAME='gen_metadata_guard' AND LOCK_TYPE='RECORD' AND LOCK_STATUS='GRANTED';"
+                Assert-Check ([int]$configPreviewGuard -gt 0) 'The successful preview must precede the observed guard release.'
+            }
             $guardRequest=Start-Job -ScriptBlock {
                 param($port,$path,$method,$payload,$headers)
                 $guardHttpArgs=@{Uri="http://127.0.0.1:$port$path";Method=$method;Headers=$headers;TimeoutSec=30;SkipHttpErrorCheck=$true}

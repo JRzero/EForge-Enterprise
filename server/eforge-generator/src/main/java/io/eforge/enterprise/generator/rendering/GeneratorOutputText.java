@@ -7,6 +7,8 @@ import io.eforge.enterprise.common.exception.ApiFailure;
 
 /** Explicit target-language contexts. Never substitute one encoding for another. */
 public final class GeneratorOutputText {
+    /** Stateless fixed encoder exposed to the trusted template context. */
+    public static final GeneratorOutputText INSTANCE = new GeneratorOutputText();
     private GeneratorOutputText() {}
 
     public static String javaLiteral(String value) {
