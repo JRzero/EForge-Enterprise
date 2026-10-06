@@ -84,6 +84,16 @@ function FieldDisplay({field, value}: {field: Field; value: unknown}) {
   if (field.html === 'fileUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <a key={path} href={path} download rel="noopener">{path.split('/').at(-1)}</a>)}</>;
   return <>{text(value) || '—'}</>;
 }
+function fieldValue(values: object | null | undefined, key: string): unknown {
+  return values && Object.hasOwn(values, key) ? (values as Record<string, unknown>)[key] : undefined;
+}
+function missingRequired(value: unknown) {
+  return value === null || value === undefined || value === '' || Array.isArray(value) && value.length === 0;
+}
+function requiredMessage(candidates: Field[], values: Record<string, unknown>) {
+  const missing = candidates.find(field => field.required && missingRequired(fieldValue(values, field.key)));
+  return missing ? (missing.label ?? missing.key) + '不能为空。' : '';
+}
 function dictionaryCurrent(field: Field, value: unknown, options: ReturnType<typeof useDictionary>['options']) {
   const current = text(value);
   if (field.type !== 'Boolean' || typeof value !== 'boolean') return current;
@@ -202,7 +212,7 @@ export function GeneratedPage() {
     if (busy) return; setBusy(true); setActionError('');
     try {
       const row = (await client.detail(id, options)).data;
-      const form = Object.fromEntries(fields.filter(field => field.pk || field.insert || field.edit).map(field => [field.key, row[field.key]])) as Write;
+      const form = Object.fromEntries(fields.filter(field => field.pk || field.insert || field.edit).map(field => [field.key, fieldValue(row, field.key)])) as Write;
 #if($table.sub)
       form[$outputText.jsonLiteral("${subclassName}List")] = row[$outputText.jsonLiteral("${subclassName}List")] ?? [];
 #end
@@ -214,9 +224,9 @@ export function GeneratedPage() {
 #if($table.tree)
       field.key === treeName ? <span style={{paddingInlineStart: Math.min(tree.levels.get(text(row.original[pk])) ?? 0, 64) * 16}}>
         {(tree.children.get(text(row.original[treeCode]))?.length ?? 0) > 0 ? <Button label={(expanded.has(text(row.original[treeCode])) ? '收起 ' : '展开 ') + text(row.original[treeName])} variant="ghost" size="sm" onClick={() => setExpanded(current => {const next = new Set(current); const key = text(row.original[treeCode]); if (!next.delete(key)) next.add(key); return next;})} /> : null}
-        <FieldDisplay field={field} value={row.original[field.key]} /></span> :
+        <FieldDisplay field={field} value={fieldValue(row.original, field.key)} /></span> :
 #end
-      <FieldDisplay field={field} value={row.original[field.key]} />})),
+      <FieldDisplay field={field} value={fieldValue(row.original, field.key)} />})),
     {id: 'actions', header: '操作', cell: ({row}) => <div>
 #if($genView)
       <PermissionGate permission={permission + ':query'}><Button label="详情" variant="ghost" isDisabled={busy} onClick={() => {void edit(idOf(row.original), true);}} /></PermissionGate>
@@ -231,6 +241,15 @@ export function GeneratedPage() {
   async function save(event: FormEvent) {
     event.preventDefault(); if (!editor || busy || editor.viewing) return; setBusy(true); setActionError('');
     try {
+      const creating = editor.id === undefined;
+      const requiredError = requiredMessage(fields.filter(field => creating ? field.insert || field.pk && !field.auto : field.edit && !field.pk), editor.form as Record<string, unknown>);
+      if (requiredError) {setActionError(requiredError); return;}
+#if($table.sub)
+      for (const row of editor.form[childKey] ?? []) {
+        const requiredError = requiredMessage(childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (creating ? field.insert || field.pk : field.edit || field.pk)), row as Record<string, unknown>);
+        if (requiredError) {setActionError(requiredError); return;}
+      }
+#end
       if (editor.id !== undefined) await client.update(editor.id, editor.form, options); else await client.create(editor.form, options);
       setEditor(null); refresh('已保存。');
     } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
@@ -252,8 +271,8 @@ export function GeneratedPage() {
         const wire = prefix + field.key;
         return <label key={wire}>{field.label}{prefix === 'q_begin_' ? '起' : prefix === 'q_end_' ? '止' : ''}
           {!field.between && field.dict && ['select', 'radio'].includes(field.html ?? '') ?
-            <QueryDictionaryControl field={field} value={draft[wire] ?? ''} disabled={busy} onChange={value => setDraft(current => ({...current, [wire]: value}))} /> :
-          <input value={draft[wire] ?? ''} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} />}</label>;
+            <QueryDictionaryControl field={field} value={text(fieldValue(draft, wire))} disabled={busy} onChange={value => setDraft(current => ({...current, [wire]: value}))} /> :
+          <input value={text(fieldValue(draft, wire))} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} />}</label>;
       }))}
       <Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={() => {setDraft({}); setFilters({}); setPage(1);}} />
     </form> : null}
@@ -281,12 +300,12 @@ export function GeneratedPage() {
     {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
       <form onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
         {fields.filter(field => editor.viewing || (editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit && !field.pk)).map(field => <label key={field.key}>{field.label}
-          {editor.viewing ? <FieldDisplay field={field} value={editor.model?.[field.key]} /> :
+          {editor.viewing ? <FieldDisplay field={field} value={fieldValue(editor.model, field.key)} /> :
 #if($table.tree)
-          field.key === treeParent ? <select value={text((editor.form as Record<string, unknown>)[field.key]) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
+          field.key === treeParent ? <select value={text(fieldValue(editor.form, field.key)) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
             <option value="0">根节点</option>{parentOptions.map(row => <option key={text(row[pk])} value={text(row[treeCode])}>{text(row[treeName])}</option>)}</select> :
 #end
-          <FieldControl field={field} value={(editor.form as Record<string, unknown>)[field.key]} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
+          <FieldControl field={field} value={fieldValue(editor.form, field.key)} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
         </label>)}
 #if($table.sub)
         <section aria-label="子表明细"><h3>子表明细</h3>
@@ -294,7 +313,7 @@ export function GeneratedPage() {
           <table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
             <tbody>{(editor.form[childKey] ?? []).map((row, index) => <tr key={index}>
               {childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <td key={field.key}><label>{field.label}
-                {editor.viewing ? <FieldDisplay field={field} value={row[field.key]} /> : <FieldControl field={field} value={row[field.key]} disabled={operationBusy || !(editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit || field.pk && !field.auto)} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].map((item, ordinal) => ordinal === index ? {...item, [field.key]: value} : item)}}))} />}
+                {editor.viewing ? <FieldDisplay field={field} value={fieldValue(row, field.key)} /> : <FieldControl field={field} value={fieldValue(row, field.key)} disabled={operationBusy || !(editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit || field.pk && !field.auto)} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].map((item, ordinal) => ordinal === index ? {...item, [field.key]: value} : item)}}))} />}
               </label></td>)}
               {!editor.viewing ? <td><Button label="删除子表行" variant="ghost" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].filter((_, ordinal) => ordinal !== index)}}))} /></td> : null}
             </tr>)}</tbody>

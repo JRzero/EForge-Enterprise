@@ -70,6 +70,35 @@ describe('session lifecycle and asynchronous boundaries', () => {
     expect(runtime.getSnapshot().phase).toBe('authenticated');
     expect(JSON.parse(storage.getItem(key)!)).toEqual({accessToken: 'new'});
   });
+  it('finishes revocation when a concurrent authenticated 401 forgets the local session', async () => {
+    const storage = createMemoryStorage({[key]: JSON.stringify({accessToken:'old'})});
+    let complete!: (value: Response) => void;
+    const transport = vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot))
+      .mockImplementationOnce((_input, init) => new Promise((resolve,reject) => {
+        complete=resolve;init?.signal?.addEventListener('abort',()=>reject(init.signal?.reason),{once:true});
+      })).mockResolvedValueOnce(json({code:'AUTHENTICATION_REQUIRED'},401));
+    const runtime=createSessionRuntime(storage,transport);await runtime.restore();
+    const leaving=runtime.logout();const finished=expect(leaving).resolves.toBeUndefined();
+    await expect(runtime.api.authenticatedFetch('/api/v1/business/fixture/crud')).rejects.toThrow();
+    expect(runtime.getSnapshot().phase).toBe('signed-out');
+    complete(json({code:200}));await finished;
+    expect(storage.getItem(key)).toBeNull();
+  });
+  it('finishes old-token revocation without aborting it or clearing a newer login', async () => {
+    const storage=createMemoryStorage({[key]:JSON.stringify({accessToken:'old'})});
+    let complete!: (value:Response)=>void;
+    const transport=vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot))
+      .mockImplementationOnce((_input,init)=>new Promise((resolve,reject)=>{
+        complete=resolve;init?.signal?.addEventListener('abort',()=>reject(init.signal?.reason),{once:true});
+      })).mockResolvedValueOnce(json({accessToken:'new',tokenType:'Bearer'})).mockResolvedValueOnce(json(snapshot));
+    const runtime=createSessionRuntime(storage,transport);await runtime.restore();
+    const leaving=runtime.logout();const finished=expect(leaving).resolves.toBeUndefined();
+    await runtime.login({username:'admin',password:'password'});
+    expect(new Headers(transport.mock.calls[1]?.[1]?.headers).get('Authorization')).toBe('Bearer old');
+    complete(json({code:200}));await finished;
+    expect(runtime.getSnapshot().phase).toBe('authenticated');
+    expect(JSON.parse(storage.getItem(key)!)).toEqual({accessToken:'new'});
+  });
   it('does not persist credentials on rejected login', async () => {
     const storage = createMemoryStorage();
     const runtime = createSessionRuntime(storage, vi.fn<typeof fetch>().mockResolvedValue(json({code: 'AUTHENTICATION_FAILED'}, 401)));

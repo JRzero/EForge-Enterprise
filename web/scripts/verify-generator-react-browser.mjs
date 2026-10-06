@@ -81,9 +81,11 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const label = '浏览器-' + category + '-<img src=x onerror=window.injected=true>';
         await page.getByRole('button', {name:'新增', exact:true}).click();
         const dialog = page.getByRole('dialog');
+        await expect(dialog.getByLabel('__proto__',{exact:true})).toHaveValue('');
         await dialog.getByLabel('oRderKey', {exact:true}).fill(id);
         await dialog.getByLabel('label', {exact:true}).first().fill(label);
         await dialog.getByLabel('amount', {exact:true}).fill('9007199254740993.00001');
+        await dialog.getByLabel('insertOnly',{exact:true}).fill('新增专用保持');await expect(dialog.getByLabel('editOnly',{exact:true})).toHaveCount(0);
         if (category !== 'tree') await dialog.getByLabel('parentId', {exact:true}).fill('0');
         if (category === 'sub') {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
@@ -107,11 +109,16 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
         }
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
+        await expect(dialog.getByRole('alert')).toContainText('requiredStatuses');
+        const requiredChecks=dialog.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox');
+        await requiredChecks.first().check();
+        await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         await expect(page.getByText(label, {exact:true})).toBeVisible();
         const detail = await readDetail(page,id);
         assert.equal(detail.status, 200); assert.equal(detail.data.oRderKey, id);
         assert.equal(detail.data.amount, '9007199254740993.00001');
+        assert.equal(detail.data.insertOnly,'新增专用保持');assert.equal(detail.data.editOnly,null);
         {
           assert.equal(detail.data.notes,'多行中文\n<script>保持文本</script>');assert.equal(detail.data.selectedStatus,'1');assert.equal(detail.data.radioStatus,'0');
           assert.equal(detail.data.boolSelected,true);assert.equal(detail.data.boolRadio,true);assert.equal(detail.data.enabled,true);assert.equal(detail.data.checkedStatuses,'0,1');assert.equal(detail.data.quantity,17);assert.equal(detail.data.ratio,0.125);
@@ -130,6 +137,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         for(const key of ['boolSelected','boolRadio']) {const index=headerNames.findIndex(name=>name.trim()===key);assert(index>=0);await expect(row.getByRole('cell').nth(index)).toHaveText('失败');}
         await row.getByRole('button', {name:'修改', exact:true}).click();
         await dialog.getByLabel('label', {exact:true}).first().fill(label + '-修改');
+        await expect(dialog.getByLabel('insertOnly',{exact:true})).toHaveCount(0);await dialog.getByLabel('editOnly',{exact:true}).fill('修改专用值');
         if(category==='sub') {await dialog.getByLabel('label',{exact:true}).last().fill('浏览器子表-修改');await clearChildControls(dialog.locator('section[aria-label="子表明细"]'));}
         {
           await dialog.locator('label').filter({hasText:/^notes/}).locator('textarea').fill('');
@@ -147,7 +155,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const updated = page.getByRole('row').filter({has:page.getByText(label + '-修改', {exact:true})});
         await expect(updated).toBeVisible();
         {
-          const changed=await readDetail(page,id);assert.equal(changed.status,200);
+          const changed=await readDetail(page,id);assert.equal(changed.status,200);assert.equal(changed.data.insertOnly,'新增专用保持');assert.equal(changed.data.editOnly,'修改专用值');
           for(const key of ['notes','__proto__','selectedStatus','checkedStatuses','imagePaths','filePaths','richContent'])assert.equal(changed.data[key],'','Cleared field '+key+' must persist');
           assert.equal(changed.data.boolSelected,false);assert.equal(changed.data.boolRadio,false);assert.equal(changed.data.enabled,false);assert.equal(changed.data.radioStatus,'1');assert.equal(changed.data.quantity,0);assert.equal(changed.data.ratio,0);
           for(const key of ['selectedStatus','radioStatus','boolSelected','boolRadio']) {
@@ -195,6 +203,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await updated.getByRole('button', {name:'新增下级', exact:true}).click();
           await dialog.getByLabel('oRderKey', {exact:true}).fill(childId);
           await dialog.getByLabel('label', {exact:true}).fill(childLabel);
+          await dialog.getByLabel('insertOnly',{exact:true}).fill('新增专用保持');
+          await dialog.getByLabel('quantity',{exact:true}).fill('0');await dialog.getByLabel('ratio',{exact:true}).fill('0');await dialog.getByLabel('enabled',{exact:true}).fill('false');
+          await dialog.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox').first().check();
           await expect(dialog.getByRole('combobox', {name:'parentId', exact:true})).toHaveValue(id);
           await dialog.getByRole('button', {name:'保存', exact:true}).click();
           await expect(dialog).toHaveCount(0);
@@ -216,6 +227,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await page.getByRole('button', {name:'新增', exact:true}).click();
         await dialog.getByLabel('oRderKey', {exact:true}).fill(peerId);
         await dialog.getByLabel('label', {exact:true}).first().fill(peerLabel);
+          await dialog.getByLabel('insertOnly',{exact:true}).fill('新增专用保持');
+          await dialog.getByLabel('quantity',{exact:true}).fill('0');await dialog.getByLabel('ratio',{exact:true}).fill('0');await dialog.getByLabel('enabled',{exact:true}).fill('false');
+          await dialog.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox').first().check();
         if (category !== 'tree') await dialog.getByLabel('parentId', {exact:true}).fill('0');
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);

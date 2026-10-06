@@ -1550,7 +1550,10 @@
     "scope": "optional-string-clear-and-original-select-radio-query-parity"
   },
   "generatorBooleanDictionary": {
-    "status": "local-two-profile-passed-exact-cloud-pending",
+    "status": "exact-cloud-failed-logout-race-correction-pending",
+    "failedImplementationCommit": "3266157bdaf7ed91174cc1c01cb5372d80747cf5",
+    "failedServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37539853310",
+    "passingWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37539853411",
     "review": "docs/security-review-generator-boolean-dictionary.md",
     "backendTests": 618,
     "frontendUnitTests": 89,
@@ -1559,6 +1562,32 @@
     "rootTemplateKinds": ["crud", "tree", "sub"],
     "actualSubRows": true,
     "evidence": ["generator-boolean-dictionary-before-runtime.log", "generator-boolean-dictionary-final-disabled-runtime.log", "generator-boolean-dictionary-final-enabled-runtime.log"],
+    "fullGoalComplete": false
+  },
+  "generatorRequiredControls": {
+    "status": "local-final-generated-profiles-passed-exact-cloud-pending",
+    "review": "docs/security-review-generator-required-controls.md",
+    "backendTests": 618,
+    "frontendUnitTests": 91,
+    "mockedBrowserTests": 71,
+    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "scope": "required-checkbox-active-write-phases-zero-false-and-own-property-reads",
+    "beforeEvidence": ["generator-required-checkbox-before-runtime.log", "generator-required-own-value-before-runtime.log"],
+    "afterEvidence": ["generator-required-own-value-final-disabled-runtime.log", "generator-required-own-value-final-enabled-runtime.log"],
+    "remaining": ["automatic-key-variants", "supported-control-type-variants", "shared-shell-parity", "final-active-audit"],
+    "fullGoalComplete": false
+  },
+  "sessionLogoutRace": {
+    "status": "local-real-before-failed-both-focused-after-passed-exact-cloud-pending",
+    "review": "docs/security-review-session-logout-race.md",
+    "scope": "captured-token-revocation-finishes-through-concurrent-401-or-new-login-with-generation-guards",
+    "beforeEvidence": "session-logout-real-race-selected-before-runtime.log",
+    "afterEvidence": ["session-logout-real-race-final-disabled-runtime.log", "session-logout-real-race-final-enabled-runtime.log"],
+    "focusedRealLoginTestsPerProfile": 3,
+    "finalCompleteApiProfiles": "terminal-success-default-enabled",
+    "updatedFullFrameworkLiveSuiteTests": 48,
+    "priorFullFrameworkProfiles": [47,47],
+    "priorProfilesPrecedeFinalTemplateAndLiveTest": true,
     "fullGoalComplete": false
   }
 }

@@ -78,7 +78,8 @@ export function createSessionRuntime(storage: StorageAdapter, fetcher: typeof fe
     },
     async logout() {
       const operation = begin();
-      await api.logout(operation.signal);
+      // Revocation must finish for its captured token even if a concurrent 401 or login changes local state.
+      await api.logout();
       if (operation.id === generation) forget();
     }
   };

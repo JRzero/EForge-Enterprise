@@ -838,3 +838,23 @@ numeric-choice correction remains local work. Full active objective is incomplet
 Expanded generated root/child control matrix aafa28d cloud accepted (server37537425688 and web37537425654). Continue Boolean dictionary correctness, required/readonly/auto-PK variants and the remaining active parity inventory; form builder remains deferred.
 
 Generated Boolean dictionary correction: actual before-fix radio failure reproduced; after-fix default/enabled CRUD/tree/sub and child browser/HTTP/SQL/Redis/audit regressions pass. Exact cloud pending. Continue required/readonly/auto-PK variants and remaining original capability audit; full goal incomplete.
+
+### Generated required fields and logout correction under verification
+
+The exact Boolean3266157 server run37539853310 failed in generated logout with
+AbortError; its web and other two server jobs succeeded. This is a product race,
+not an infrastructure retry. Logout now finishes its captured-token revocation
+through the bounded transport even if a concurrent401 or new login changes local
+state; generation guards still preserve newer sessions.
+
+Generated required checkbox validation, insert-only/edit-only phases, valid
+zero/false values and own-property reads for legal __proto__ fields have actual
+before-failure/after-success browser evidence. Final618 backend and91 unit/71
+mocked browser checks pass. Final generated default/enabled profiles pass actual
+Java/TypeScript/host/browser/SQL/authorization/audit. Both real focused login
+profiles pass3 cases including the controlled logout race. Complete final enabled
+API profiles now pass (observer52071 terminal0); new exact cloud acceptance is pending.
+Full47-browser framework profiles passed before this final template/live-test
+change; the updated complete live suite has48 cases and requires exact CI proof.
+Continue automatic-key variants and the remaining original capabilities.
+Form builder is deferred and the specific Quartz runtime rejection is preserved.

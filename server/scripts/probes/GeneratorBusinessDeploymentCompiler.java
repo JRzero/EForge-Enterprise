@@ -35,6 +35,9 @@ class GeneratorBusinessDeploymentCompiler {
                     new String[]{"selectedStatus","String","select","sys_common_status"},
                     new String[]{"radioStatus","String","radio","sys_common_status"},
                     new String[]{"checkedStatuses","String","checkbox","sys_common_status"},
+                    new String[]{"requiredStatuses","String","checkbox","sys_common_status"},
+                    new String[]{"insertOnly","String","input",""},
+                    new String[]{"editOnly","String","input",""},
                     new String[]{"eventTime","Date","datetime",""},
                     new String[]{"imagePaths","String","imageUpload",""},
                     new String[]{"filePaths","String","fileUpload",""},
@@ -48,6 +51,9 @@ class GeneratorBusinessDeploymentCompiler {
                 for(var spec:controlSpecs) {
                     var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,spec[0],spec[0],spec[1],null);
                     column.setColumnComment(spec[0]);column.setHtmlType(spec[2]);column.setDictType(spec[3]);
+                    if(List.of("requiredStatuses","insertOnly","editOnly","quantity","ratio","enabled").contains(spec[0]))column.setIsRequired("1");
+                    if(spec[0].equals("insertOnly"))column.setIsEdit("0");
+                    if(spec[0].equals("editOnly"))column.setIsInsert("0");
                     if(spec[2].equals("select")||spec[2].equals("radio"))column.setIsQuery("1");controls.add(column);
                 }
                 table.setColumns(controls);
@@ -83,8 +89,8 @@ class GeneratorBusinessDeploymentCompiler {
                 }
             }
             ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3));\n");
-            ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD boolSelected BOOLEAN, ADD boolRadio BOOLEAN, ADD __proto__ VARCHAR(255);\n");
-            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
+            ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD requiredStatuses VARCHAR(32), ADD insertOnly VARCHAR(64), ADD editOnly VARCHAR(64), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD boolSelected BOOLEAN, ADD boolRadio BOOLEAN, ADD __proto__ VARCHAR(255);\n");
+            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childRequiredStatuses VARCHAR(32),childInsertOnly VARCHAR(64),childEditOnly VARCHAR(64),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
         }
         var options=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",System.getProperty("java.class.path"),"-d",output.toString()));options.addAll(sourceFiles);
         var errors=new java.io.ByteArrayOutputStream();

@@ -32,3 +32,12 @@ test corrections, not additional product behavior changes. Exact new cloud accep
 Required/readonly/auto-key variants, other supported typed dictionary combinations,
 date/timezone/XLSX, complete shared shell and final per-capability audit remain.
 Form builder is deferred. The specific prior Quartz runtime rejection is preserved.
+## Exact cloud failure and correction
+
+3266157 server37539853310 ended FAILURE in verify at the real generated logout;
+runtime/auth jobs and web37539853411 passed. It is not accepted. The new logout
+race correction and required/own-property field work are reviewed separately in
+security-review-session-logout-race.md and
+security-review-generator-required-controls.md. Their final generated profiles
+also re-exercise the numeric Boolean control matrix. New exact cloud acceptance
+is still pending; no infrastructure-only retry is used for this product failure.
