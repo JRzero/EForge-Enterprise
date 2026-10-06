@@ -127,4 +127,69 @@ class GeneratorRenderingSnapshotTest {
         org.mockito.Mockito.verify(loader).load(List.of(input.getTableId()));
         org.mockito.Mockito.verifyNoMoreInteractions(loader);
     }
+    private Map<String,String> archive(byte[] bytes) throws Exception {
+        var files=new LinkedHashMap<String,String>();
+        try(var zip=new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(bytes),java.nio.charset.StandardCharsets.UTF_8)) {
+            for(var entry=zip.getNextEntry();entry!=null;entry=zip.getNextEntry()) {
+                assertFalse(entry.isDirectory());assertNull(files.put(entry.getName(),new String(zip.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8)));
+            }
+        }
+        return files;
+    }
+    @ParameterizedTest @MethodSource("templates")
+    void immutableBundleAndActualDownloadKeepEveryOriginalFileAndContent(String category,String webType)throws Exception {
+        var input=table(category,webType);var snapshot=GeneratorRenderingSnapshot.capture(input);
+        var original=render(input,snapshot.generationDate());
+        var expected=new LinkedHashMap<String,String>();original.forEach((key,value)->expected.put(key.substring(key.indexOf('|')+1),value));
+        var bundle=io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.render(snapshot);
+        input.setClassName("ChangedAfterSnapshot");input.getColumns().clear();
+        assertEquals(expected,archive(bundle.zip()));assertThrows(UnsupportedOperationException.class,()->bundle.files().clear());
+        assertThrows(UnsupportedOperationException.class,()->bundle.legacyPreview().clear());
+        byte[] first=bundle.zip();first[0]=0;assertEquals(expected,archive(bundle.zip()));
+        var loader=org.mockito.Mockito.mock(io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class);
+        org.mockito.Mockito.when(loader.loadByNames(List.of(input.getTableName()))).thenReturn(List.of(snapshot));
+        var service=new io.eforge.enterprise.generator.service.GenTableServiceImpl();
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"renderingSnapshots",loader);
+        assertEquals(expected,archive(service.downloadCode(input.getTableName())));
+        org.mockito.Mockito.verify(loader).loadByNames(List.of(input.getTableName()));org.mockito.Mockito.verifyNoMoreInteractions(loader);
+    }
+    @Test void batchDownloadCombinesOnlyTheOriginalSharedTypescriptExportIndex()throws Exception {
+        var first=table("crud","element-plus-typescript");var second=table("tree","element-plus-typescript");
+        second.setClassName("OtherEntry");second.setBusinessName("other");second.setTableName("other_entries");
+        var snapshots=List.of(GeneratorRenderingSnapshot.capture(first),GeneratorRenderingSnapshot.capture(second));
+        var bundles=snapshots.stream().map(io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle::render).toList();
+        var combined=io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.combine(bundles);
+        var files=archive(combined.zip());assertEquals(bundles.get(0).files().size()+bundles.get(1).files().size()-1,files.size());
+        String index="vue/types/api/index-bak.ts";String expected=bundles.get(0).files().stream().filter(file->file.path().equals(index)).findFirst().orElseThrow().content();
+        for(String line:bundles.get(1).files().stream().filter(file->file.path().equals(index)).findFirst().orElseThrow().content().split("\n"))if(line.startsWith("export * from"))expected+="\n"+line;
+        assertEquals(expected,files.get(index));assertTrue(files.containsKey("main/java/io/eforge/enterprise/generated/domain/OtherEntry.java"));
+        var loader=org.mockito.Mockito.mock(io.eforge.enterprise.generator.rendering.GeneratorRenderingSnapshotLoader.class);
+        org.mockito.Mockito.when(loader.loadByNames(List.of(first.getTableName(),second.getTableName()))).thenReturn(snapshots);
+        var service=new io.eforge.enterprise.generator.service.GenTableServiceImpl();org.springframework.test.util.ReflectionTestUtils.setField(service,"renderingSnapshots",loader);
+        assertEquals(files,archive(service.downloadCode(new String[]{first.getTableName(),second.getTableName()})));
+        org.mockito.Mockito.verify(loader).loadByNames(List.of(first.getTableName(),second.getTableName()));org.mockito.Mockito.verifyNoMoreInteractions(loader);
+    }
+    @Test void conflictingFilesRejectTheWholeBundleBeforeReturningAnArchive() {
+        var first=table("crud","element-ui");var second=table("crud","element-ui");second.setClassName("snapshotentry");second.setBusinessName("other");
+        var bundles=List.of(first,second).stream().map(GeneratorRenderingSnapshot::capture).map(io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle::render).toList();
+        var failure=assertThrows(ApiFailure.class,()->io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.combine(bundles));
+        assertEquals(409,failure.status());assertEquals("GENERATOR_OUTPUT_COLLISION",failure.code());assertFalse(failure.getMessage().contains("snapshotentry"));
+    }
+    @ParameterizedTest @ValueSource(strings={"../Secret","/absolute","x\\escape","x:stream","NUL","CON.txt","trailing.","trailing ","x\u0000y","x\ud800y"})
+    void unsafePersistedOutputSegmentsCannotBecomeArchiveEntries(String module) {
+        var input=table("crud","element-ui");input.setModuleName(module);
+        var failure=assertThrows(ApiFailure.class,()->io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(input)));
+        assertEquals("GENERATOR_OUTPUT_PATH_INVALID",failure.code());assertEquals(400,failure.status());assertFalse(failure.getMessage().contains(module));
+    }
+    @Test void validUnicodeOutputFileNamesRemainExact()throws Exception {
+        var input=table("crud","element-ui");input.setClassName("条目");input.setModuleName("模块");input.setBusinessName("业务");
+        var files=archive(io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(input)).zip());
+        assertTrue(files.containsKey("main/java/io/eforge/enterprise/generated/domain/条目.java"));
+        assertTrue(files.containsKey("main/resources/mapper/模块/条目Mapper.xml"));assertTrue(files.containsKey("vue/views/模块/业务/index.vue"));
+    }
+    @Test void actualTemplateOutputLimitFailsWithoutReturningABundleOrEchoingContent() {
+        var input=table("crud","element-ui");input.setFunctionAuthor("private-large-author:"+"x".repeat(4*1024*1024));
+        var failure=assertThrows(ApiFailure.class,()->io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(input)));
+        assertEquals(413,failure.status());assertEquals("GENERATOR_OUTPUT_TOO_LARGE",failure.code());assertEquals("Generated output exceeds the supported size.",failure.getMessage());
+    }
 }

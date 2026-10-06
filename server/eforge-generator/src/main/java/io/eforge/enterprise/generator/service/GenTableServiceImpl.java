@@ -1,20 +1,13 @@
 package io.eforge.enterprise.generator.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -301,22 +294,8 @@ public class GenTableServiceImpl implements IGenTableService
     @Override
     public Map<String, String> previewCode(Long tableId)
     {
-        Map<String, String> dataMap = new LinkedHashMap<>();
-        // Load once under a short consistent transaction, before template rendering.
         var snapshot = renderingSnapshots.load(java.util.Collections.singletonList(tableId)).get(0);
-        VelocityInitializer.initVelocity();
-        List<String> templates = VelocityUtils.getTemplateList(snapshot.legacyWorkingTable());
-        for (String template : templates)
-        {
-            // Templates never share mutable DTOs or reread metadata during this preview.
-            VelocityContext context = VelocityUtils.prepareContext(snapshot.legacyWorkingTable());
-            context.put("datetime", snapshot.generationDate());
-            StringWriter sw = new StringWriter();
-            Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-            tpl.merge(context, sw);
-            dataMap.put(template, sw.toString());
-        }
-        return dataMap;
+        return io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.render(snapshot).legacyPreview();
     }
 
     /**
@@ -403,88 +382,11 @@ public class GenTableServiceImpl implements IGenTableService
     @Override
     public byte[] downloadCode(String[] tableNames)
     {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ZipOutputStream zip = new ZipOutputStream(outputStream);
-        Map<String, StringBuffer> typeFiles = new HashMap<>();
-        for (String tableName : tableNames)
-        {
-            generatorCode(tableName, zip, typeFiles);
-        }
-        for (Map.Entry<String, StringBuffer> entry : typeFiles.entrySet())
-        {
-            writeToZip(zip, entry.getKey(), entry.getValue().toString());
-        }
-        IOUtils.closeQuietly(zip);
-        return outputStream.toByteArray();
+        var names = tableNames == null ? null : java.util.Arrays.asList(tableNames);
+        var snapshots = renderingSnapshots.loadByNames(names);
+        return io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle.combine(
+            () -> snapshots.stream().map(io.eforge.enterprise.generator.rendering.GeneratorRenderedBundle::render).iterator()).zip();
     }
-
-    /**
-     * 查询表信息并生成代码
-     */
-    private void generatorCode(String tableName, ZipOutputStream zip, Map<String, StringBuffer> typeFiles)
-    {
-        // 查询表信息
-        GenTable table = genTableMapper.selectGenTableByName(tableName);
-        // 设置主子表信息
-        setSubTable(table);
-        // 设置主键列信息
-        setPkColumn(table);
-
-        VelocityInitializer.initVelocity();
-
-        VelocityContext context = VelocityUtils.prepareContext(table);
-
-        // 获取模板列表
-        List<String> templates = VelocityUtils.getTemplateList(table);
-        for (String template : templates)
-        {
-            // 渲染模板
-            StringWriter sw = new StringWriter();
-            Template tpl = Velocity.getTemplate(template, Constants.UTF8);
-            tpl.merge(context, sw);
-            String fileName = VelocityUtils.getFileName(template, table);
-            // index-bak.ts 模版，追加内容
-            if (fileName.contains("index-bak.ts"))
-            {
-                if (!typeFiles.containsKey(fileName))
-                {
-                    typeFiles.put(fileName, new StringBuffer(sw.toString()));
-                }
-                else
-                {
-                    Arrays.stream(sw.toString().split("\n")).filter(line -> line.startsWith("export * from")).forEach(line -> typeFiles.get(fileName).append("\n").append(line));
-                }
-            }
-            else
-            {
-                // 其他文件正常添加
-                writeToZip(zip, fileName, sw.toString());
-            }
-        }
-    }
-
-    /**
-     * 将字符串内容写入ZIP输出流
-     * 
-     * @param zip ZIP输出流
-     * @param fileName ZIP条目名称（即文件名）
-     * @param content 要写入的内容
-     */
-    private void writeToZip(ZipOutputStream zip, String fileName, String content)
-    {
-        try
-        {
-            zip.putNextEntry(new ZipEntry(fileName));
-            IOUtils.write(content, zip, Constants.UTF8);
-            zip.flush();
-            zip.closeEntry();
-        }
-        catch (IOException e)
-        {
-            log.error("写入ZIP文件失败，文件名: " + fileName, e);
-        }
-    }
-
     /**
      * 修改保存参数校验
      * 

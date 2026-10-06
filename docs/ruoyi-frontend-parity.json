@@ -1301,7 +1301,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37435846617"
   },
   "generatorForeignJavaFieldValidation": {
-    "state": "actual-subtable-fk-java-mapping-local-verified",
+    "state": "actual-subtable-fk-java-mapping-cloud-verified",
     "review": "docs/security-review-generator-fk-java-field.md",
     "backendTests": 538,
     "actualGeneratedJavaCases": 7,
@@ -1317,9 +1317,36 @@
       32
     ],
     "completeRuntime": "both-complete-api-profiles-success",
-    "realBrowserProfiles": [43, 43],
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
     "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201",
+    "currentCloud": "all-three-server-jobs-success",
+    "scope": "Actual persisted FK property mapping, original accessor rule and MyBatis parameters only. Broader output/bundle/paths/React/UI/business HTTP-browser still required.",
+    "implementationCommit": "660fb4be282d113f127cf0b317fb1b4ea1b89987",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37440030951"
+  },
+  "generatorOutputBundleValidation": {
+    "state": "original-output-integrated-local-runtime-verified-cloud-pending",
+    "review": "docs/security-review-generator-output-bundle.md",
+    "backendTests": 565,
+    "originalTemplateFamilies": 9,
+    "actualMvcDownloadFailuresBefore": 3,
+    "actualMvcCasesAfter": 19,
+    "nativeSnapshotAssertions": [
+      64,
+      64
+    ],
+    "completeRuntime": "both-complete-api-profiles-success",
     "currentCloud": "not-yet-committed",
-    "scope": "Actual persisted FK property mapping, original accessor rule and MyBatis parameters only. Broader output/bundle/paths/React/UI/business HTTP-browser still required."
+    "scope": "Actual immutable pure output and original preview/single/batch ZIP integration. Canonical output, custom filesystem, language semantics/React/EForge/UI/full generated HTTP/browser remain required.",
+    "frontendChecks": "generated-reproducible-lint-typecheck-73-unit-build-success",
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
+    "additionalOutputLimitTargetCases": 44,
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201"
   }
 }

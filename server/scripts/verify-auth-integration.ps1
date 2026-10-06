@@ -197,6 +197,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-generator-creation-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-generator-configuration-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-generator-sync-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-generator-output-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-online-sessions-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-server-monitor-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-consoles-integration.ps1')

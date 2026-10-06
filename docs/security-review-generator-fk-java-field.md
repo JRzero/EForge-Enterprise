@@ -47,3 +47,9 @@ canonical preview/download/custom output, ZIP/path boundaries, true React/EForge
 output (current type still falls back to Vue), complete generator UI and actual
 generated CRUD/tree/sub HTTP/browser remain. All other original active capability
 requirements remain; online form builder is explicitly deferred, not complete.
+Exact cloud acceptance (2026-10-06): implementation
+660fb4be282d113f127cf0b317fb1b4ea1b89987, server37440030951 all three jobs
+SUCCESS. Sole observer29040 ended0. Direct generator-fk-cloud-accepted.log proves
+538 backend (528 boot +10 scope), modes0/1 each474 native output checks and each32
+snapshots, default/enabled each43 real browsers, full APIs and exact unchanged
+OpenAPI. This accepts the FK stage, not subsequent bundle changes.

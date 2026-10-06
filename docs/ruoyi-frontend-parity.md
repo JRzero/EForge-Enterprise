@@ -49,7 +49,7 @@ It is a work inventory, not executable proof of completion.
 | Server monitoring | CPU/memory/JVM/disk/host data, loading/error states and refresh | Canonical API/client and React page passed local and exact-head CI; original fields/thresholds, safe text, refresh/retry/abort, navigation and no-role denial verified; final capability audit pending |
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
-| Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Canonical read/import/configuration/deletion/sync API stages accepted; pure creation parser/AST policy foundation locally verified but unwired; physical creation API, React output and complete UI remain pending |
+| Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Canonical read/import/configuration/deletion/sync and physical creation API stages accepted; immutable metadata snapshots and actual Java/XML/menu/FK rendering stages accepted. Original immutable preview/ZIP bundle integration is locally verified with final runtime pending. Canonical output/custom paths, true React/EForge output and complete UI/business end-to-end acceptance remain pending |
 | Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Deferred by user on 2026-10-06; excluded from current development and acceptance; original inventory retained, not implemented |
 | Shared controls | dictionary tags, paging, reset/date ranges, toolbar column/search toggle, image/file upload and preview, rich editor, icon picker, cron editor, keyboard/focus and empty/loading/error/retry states | Missing complete parity |
 
@@ -1620,3 +1620,39 @@ statements/assertions, both32 actual snapshots and actual MVC safe no-write erro
 pass. Final default/enabled profiles each43 real browsers and complete APIs pass; both live OpenAPI files exactly match the contract. Session58628 ended0. Exact new-source cloud remains pending.
 See security-review-generator-fk-java-field.md. Broader identifiers/tree aliases,
 complete bundle/paths/canonical output/React/EForge/UI/end-to-end remain required.
+FK exact cloud accepted: 660fb4be282d113f127cf0b317fb1b4ea1b89987,
+server37440030951 all three jobs SUCCESS. Direct generator-fk-cloud-accepted.log
+proves538 backend, both474 native checks/both32 snapshots, two43 real browsers,
+complete APIs and exact OpenAPI. Observer29040 ended0. Later bundle integration
+is independent and not covered by this accepted SHA.
+Original output bundle integration (2026-10-06, local runtime verified/cloud pending):
+Original preview and single/batch downloads now share pure snapshot rendering and
+immutable complete file output. The entire name selection uses one short
+REPEATABLE_READ/REQUIRES_NEW read with original code permission; preview-only is
+insufficient for downloads. Preserve original template keys, all CRUD/tree/sub
+and UI/Plus/Plus-TypeScript files and original shared index export append rules.
+Reject unsafe portable relative paths and conflicting files before returning ZIP;
+return safe legacy JSON failures and retain failed audit instead of partial ZIP.
+565 backend tests pass (555 boot +10 scope). Actual original download MVC cases
+initially expose three failure-envelope regressions; targeted controller adapter
+fix keeps all19 green. Nine original template families retain every ZIP file and
+content; Unicode names remain exact, collisions/path refusals and immutable
+output verified. Real MySQL modes0/1 each64 assertions prove original and named
+snapshot permissions before SQL, concurrent table/field commit coherence,
+caller transaction suspension, SQL fault privacy/recovery, pure render without
+DB reads and actual original service ZIP/preview content agreement. Session44960
+completed both final full API and43-browser profiles sequentially, including new
+actual HTTP binary single/batch output, safe failure, audit and row retention.
+Both live OpenAPI snapshots match the contract. Exact new cloud remains pending.
+Canonical output/client, custom filesystem paths, true React/EForge templates,
+complete generator UI and generated business HTTP/browser remain outstanding.
+See security-review-generator-output-bundle.md. Form builder remains deferred.
+Final local runtime acceptance (2026-10-06):44960 ended0. Default and enabled
+profiles each43 real browsers and complete real API regression pass, including
+actual single/batch binary output/preview agreement, saved FK field, TS export
+merge, unsafe/missing/duplicate/SQL errors and retry, no-role, honest audit and
+full metadata/business-row equality. Both live OpenAPI snapshots equal contract
+SHA256 481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
+No local integration app is retained. Full frontend generated/lint/typecheck/
+73-unit/build pass. Output-limit target44 passes after the full565 build with
+only an additional test, no production jar/source changes. Exact cloud pending.

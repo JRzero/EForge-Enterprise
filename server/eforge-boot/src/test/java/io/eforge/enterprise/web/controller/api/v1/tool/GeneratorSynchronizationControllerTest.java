@@ -82,5 +82,26 @@ class GeneratorSynchronizationControllerTest {
         mvc.perform(get("/tool/gen/preview/1")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(400)).andExpect(jsonPath("$.msg").value("Generator metadata cannot be represented in the selected output context.")).andExpect(jsonPath("$.data").doesNotExist());
         verify(tables,never()).updateGenTable(any());verifyNoInteractions(columns);
     }
+    @Test void originalDownloadRejectsPreviewOnlyBeforeSql()throws Exception {
+        actor(Set.of("tool:gen:preview"));mvc.perform(get("/tool/gen/download/root_table")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(403));verifyNoInteractions(tables,columns);
+    }
+    @Test void originalDownloadMissingConfigurationKeepsSafeJsonWithoutArchiveHeaders()throws Exception {
+        actor(Set.of("tool:gen:code"));mvc.perform(get("/tool/gen/download/missing_secret_table")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(404)).andExpect(jsonPath("$.msg").value("The generator configuration does not exist.")).andExpect(header().doesNotExist("Content-Disposition"));
+    }
+    @Test void originalDownloadSqlFaultKeepsSafeJsonWithoutArchiveHeaders()throws Exception {
+        actor(Set.of("tool:gen:code"));when(tables.selectGenTableByName("root_table")).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private driver password"));
+        mvc.perform(get("/tool/gen/download/root_table")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(503)).andExpect(jsonPath("$.msg").value("Generator metadata cannot be read safely.")).andExpect(header().doesNotExist("Content-Disposition"));
+    }
+    @Test void originalBatchDownloadDuplicateSelectionKeepsSafeJsonBeforeSql()throws Exception {
+        actor(Set.of("tool:gen:code"));mvc.perform(get("/tool/gen/batchGenCode").param("tables","root_table,root_table")).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(400)).andExpect(header().doesNotExist("Content-Disposition"));verifyNoInteractions(tables,columns);
+    }
+    @Test void originalDownloadReturnsACompleteArchiveFromActualSnapshotRender()throws Exception {
+        actor(Set.of("tool:gen:code"));var table=associationFixture(false);table.setTplCategory("crud");when(tables.selectGenTableByName("root_table")).thenReturn(table);
+        var response=mvc.perform(get("/tool/gen/download/root_table")).andExpect(status().isOk()).andExpect(header().string("Content-Disposition","attachment; filename=\"ruoyi.zip\"")).andReturn().getResponse();
+        var files=new LinkedHashMap<String,String>();try(var zip=new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(response.getContentAsByteArray()),java.nio.charset.StandardCharsets.UTF_8)){
+            for(var entry=zip.getNextEntry();entry!=null;entry=zip.getNextEntry())assertNull(files.put(entry.getName(),new String(zip.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8)));
+        }
+        assertEquals(9,files.size());assertTrue(files.get("main/java/generated/domain/RootFixture.java").contains("class RootFixture"));verify(tables).selectGenTableByName("root_table");verify(tables,never()).updateGenTable(any());verifyNoInteractions(columns);
+    }
     @TestConfiguration static class Configuration {@Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}@Bean CorsFilter corsFilter(){return new CorsFilter(new UrlBasedCorsConfigurationSource());}}
 }

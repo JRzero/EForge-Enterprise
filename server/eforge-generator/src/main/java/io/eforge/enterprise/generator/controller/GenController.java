@@ -168,7 +168,7 @@ public class GenController extends BaseController
     @GetMapping("/download/{tableName}")
     public void download(HttpServletResponse response, @PathVariable("tableName") String tableName) throws IOException
     {
-        byte[] data = genTableService.downloadCode(tableName);
+        byte[] data = downloadFiles(new String[] { tableName });
         genCode(response, data);
     }
 
@@ -209,13 +209,25 @@ public class GenController extends BaseController
     public void batchGenCode(HttpServletResponse response, String tables) throws IOException
     {
         String[] tableNames = Convert.toStrArray(tables);
-        byte[] data = genTableService.downloadCode(tableNames);
+        byte[] data = downloadFiles(tableNames);
         genCode(response, data);
     }
 
     /**
      * 生成zip文件
      */
+    private byte[] downloadFiles(String[] tableNames)
+    {
+        try
+        {
+            return genTableService.downloadCode(tableNames);
+        }
+        catch (io.eforge.enterprise.common.exception.ApiFailure failure)
+        {
+            // Legacy JSON failure envelope, with failed audit and no partial ZIP response.
+            throw new io.eforge.enterprise.common.exception.ServiceException(failure.getMessage(), failure.status());
+        }
+    }
     private void genCode(HttpServletResponse response, byte[] data) throws IOException
     {
         response.reset();

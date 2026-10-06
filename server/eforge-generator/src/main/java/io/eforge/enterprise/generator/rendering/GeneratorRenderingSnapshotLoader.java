@@ -26,18 +26,41 @@ public class GeneratorRenderingSnapshotLoader {
             for(Long id:ids) {
                 GenTable table=tables.selectGenTableById(id);
                 if(table==null)throw new ApiFailure(404,"GENERATOR_TABLE_NOT_FOUND","The generator configuration does not exist.");
-                attachKey(table);
-                if(table.getSubTableName()!=null&&!table.getSubTableName().isBlank()) {
-                    GenTable child=tables.selectGenTableByName(table.getSubTableName());
-                    if(child==null)throw new ApiFailure(409,"GENERATOR_SUBTABLE_NOT_FOUND","An associated generator configuration is missing.");
-                    attachKey(child);table.setSubTable(child);
-                }
-                snapshots.add(GeneratorRenderingSnapshot.capture(table));
+                snapshots.add(captureTable(table));
             }
             return List.copyOf(snapshots);
         } catch(DataAccessException unavailable) {
             throw new ApiFailure(503,"GENERATOR_SNAPSHOT_UNAVAILABLE","Generator metadata cannot be read safely.");
         }
+    }
+    @PreAuthorize("@ss.hasPermi('tool:gen:code')")
+    @Transactional(readOnly=true,isolation=Isolation.REPEATABLE_READ,propagation=Propagation.REQUIRES_NEW)
+    public List<GeneratorRenderingSnapshot> loadByNames(List<String> names) {
+        if(names==null||names.isEmpty()||names.size()>100||names.stream().anyMatch(name->name==null||name.isBlank())
+            ||new HashSet<>(names).size()!=names.size())
+            throw new ApiFailure(400,"GENERATOR_SNAPSHOT_SELECTION_INVALID","Select distinct valid generator configurations.");
+        try {
+            var snapshots=new ArrayList<GeneratorRenderingSnapshot>();var identities=new HashSet<Long>();
+            for(String name:names) {
+                GenTable table=tables.selectGenTableByName(name);
+                if(table==null)throw new ApiFailure(404,"GENERATOR_TABLE_NOT_FOUND","The generator configuration does not exist.");
+                if(table.getTableId()==null||!identities.add(table.getTableId()))
+                    throw new ApiFailure(400,"GENERATOR_SNAPSHOT_SELECTION_INVALID","Select distinct valid generator configurations.");
+                snapshots.add(captureTable(table));
+            }
+            return List.copyOf(snapshots);
+        } catch(DataAccessException unavailable) {
+            throw new ApiFailure(503,"GENERATOR_SNAPSHOT_UNAVAILABLE","Generator metadata cannot be read safely.");
+        }
+    }
+    private GeneratorRenderingSnapshot captureTable(GenTable table) {
+        attachKey(table);
+        if(table.getSubTableName()!=null&&!table.getSubTableName().isBlank()) {
+            GenTable child=tables.selectGenTableByName(table.getSubTableName());
+            if(child==null)throw new ApiFailure(409,"GENERATOR_SUBTABLE_NOT_FOUND","An associated generator configuration is missing.");
+            attachKey(child);table.setSubTable(child);
+        }
+        return GeneratorRenderingSnapshot.capture(table);
     }
     private void attachKey(GenTable table) {
         // The legacy LEFT JOIN maps table_id into an otherwise empty child row.
