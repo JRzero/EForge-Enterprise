@@ -1532,3 +1532,10 @@ tests pass; 12 capture/template-parity tests and both native MySQL modes each
 commits, outer-transaction isolation, safe SQL failure/recovery and empty LEFT JOIN
 field regression. See security-review-generator-rendering-snapshot.md. These are
 not output endpoints or React/EForge output/UI acceptance. Exact cloud is pending.
+Generator target-language text foundation (2026-10-06): actual Java compiler,
+JSON/XML/SpEL parsing and both native MySQL case modes (four SQL modes) prove
+literal fidelity and injection containment. Full Maven 505 tests and five targeted
+tests pass; both native modes each 23 assertions pass. See
+security-review-generator-output-text.md. This helper is not yet used by templates
+or output endpoints; all renderer, React/EForge and UI work remains required.
+Exact-commit cloud is pending. Form builder stays deferred.

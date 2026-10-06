@@ -1215,5 +1215,15 @@
     "mysqlCaseMode1SpringAssertions": 30,
     "currentCloud": "pending",
     "scope": "Detached exact legacy graph and actual permission-controlled read-only REPEATABLE_READ/REQUIRES_NEW load. Concurrent real SQL root/child/fields commit, next-read visibility, caller isolation, SQL privacy/recovery, empty LEFT JOIN field regression. No output endpoint, safe generated source, React/EForge template, custom path or UI completion."
+  },
+  "generatorOutputTextValidation": {
+    "state": "target-context-foundation-local-verified",
+    "review": "docs/security-review-generator-output-text.md",
+    "backendTests": 505,
+    "targetedTests": 5,
+    "mysqlCaseMode0Assertions": 23,
+    "mysqlCaseMode1Assertions": 23,
+    "currentCloud": "pending",
+    "scope": "Actual Java compilation, JSON/XML/SpEL parsing and MySQL literal round trips under four SQL modes. No renderer/template/output endpoint/custom path/UI acceptance."
   }
 }

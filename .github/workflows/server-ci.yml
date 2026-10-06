@@ -108,6 +108,11 @@ jobs:
         run: |
           ./server/scripts/verify-generator-rendering-snapshot.ps1 -LowerCaseTableNames 0
           ./server/scripts/verify-generator-rendering-snapshot.ps1 -LowerCaseTableNames 1
+      - name: Verify generated text contexts against actual MySQL modes
+        shell: pwsh
+        run: |
+          ./server/scripts/verify-generator-output-text.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-generator-output-text.ps1 -LowerCaseTableNames 1
   runtime-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 35
