@@ -221,3 +221,15 @@ both native SQL and both JDBC preflight profiles) and runtime-integration succes
 auth-runtime-integration is still running. Final cloud browser acceptance remains
 pending. No source change or extra local live-browser run occurred after these
 local checks. This supersedes the earlier enabled-runtime pending checkpoint.
+### 2026-10-06: physical creation execution foundation
+
+An unwired physical executor now validates the entire batch before DDL, requires
+an owned writable autocommit connection, and reports immutable requested-order
+CREATED/FAILED/UNATTEMPTED/UNCONFIRMED outcomes. It stops on failure/uncertainty,
+never writes metadata or automatically drops tables, and removes IF NOT EXISTS
+before dispatch to avoid ownership no-ops. Real JDBC profiles pass 88/86 combined
+assertions, including actual partial DDL, retained business rows, injected lost
+acknowledgement after real CREATE, and independent-connection target competition.
+Shared original/canonical admin routes, checked metadata import, full compatibility,
+React output/pages and final active parity are still required. See
+`security-review-generator-create-execution.md`; form builder remains deferred.

@@ -3,6 +3,9 @@ import java.util.*;
 import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.generator.service.GeneratorCreationPreflight;
 class GeneratorCreationPreflightMysqlProbe {
+ static Object delegate(Object target,java.lang.reflect.Method method,Object[] arguments) throws Throwable {
+  try{return method.invoke(target,arguments);}catch(java.lang.reflect.InvocationTargetException failure){throw failure.getCause();}
+ }
  static Connection db;
  static int assertions;
  static GeneratorCreationPreflight.Plan inspect(String sql) {return GeneratorCreationPreflight.inspect(db,sql);}
@@ -75,6 +78,56 @@ class GeneratorCreationPreflightMysqlProbe {
     if(nativeBinding) check(inspect(candidate).tables().get(0).readReferences().equals(Set.of("owned_source")),"Unicode CTE folding differs from native binding.");
     else refuses(candidate,404,"GENERATOR_CREATE_SOURCE_NOT_FOUND");
    }
+   var physical=io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(db,"CREATE TABLE phase_first(id INT);CREATE TABLE phase_fail(v VARCHAR(70000));CREATE TABLE phase_last(id INT)");
+   check(physical.tables().stream().map(t->t.state().name()).toList().equals(List.of("CREATED","FAILED","UNATTEMPTED")),"Partial DDL acknowledgement states lost.");
+   check(!physical.allCreated(),"Partial creation presented as complete.");
+   absent("phase_fail");absent("phase_last");
+   execute("INSERT INTO phase_first VALUES(41)");
+   try {io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(db,"CREATE TABLE phase_first(id INT)");throw new AssertionError("Existing target incorrectly owned on retry.");}
+   catch(ApiFailure conflict){check(conflict.code().equals("GENERATOR_CREATE_TARGET_EXISTS"),"Wrong ownership conflict on retry.");}
+   try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT id FROM phase_first")){check(rows.next()&&rows.getInt(1)==41&&!rows.next(),"Partial DDL/retry erased business data.");}
+   var completed=io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(db,"CREATE TABLE phase_retry(id INT);CREATE TABLE phase_child LIKE phase_retry");
+   check(completed.allCreated()&&completed.tables().size()==2,"Successful physical batch failed.");
+   try{completed.tables().clear();throw new AssertionError("Mutable physical outcomes.");}catch(UnsupportedOperationException immutable){assertions++;}
+   try{io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(db,"CREATE TABLE mixed_first(id INT);DROP TABLE owned_source");throw new AssertionError("Mixed batch executed.");}
+   catch(ApiFailure invalid){check(invalid.code().equals("GENERATOR_CREATE_SQL_INVALID"),"Wrong mixed batch refusal.");}
+   absent("mixed_first");
+   db.setAutoCommit(false);
+   try{io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(db,"CREATE TABLE transactional_first(id INT)");throw new AssertionError("DDL joined caller transaction.");}
+   catch(ApiFailure invalid){check(invalid.code().equals("GENERATOR_CREATE_CONNECTION_INVALID"),"Wrong transaction boundary refusal.");}
+   finally{db.setAutoCommit(true);}
+   absent("transactional_first");
+   Connection lostAck=(Connection)java.lang.reflect.Proxy.newProxyInstance(Connection.class.getClassLoader(),new Class[]{Connection.class},(proxy,method,arguments)->{
+    Object result=delegate(connection,method,arguments);
+    if(method.getName().equals("createStatement")) {
+     Statement original=(Statement)result;
+     return java.lang.reflect.Proxy.newProxyInstance(Statement.class.getClassLoader(),new Class[]{Statement.class},(statementProxy,statementMethod,statementArguments)->{
+      Object statementResult=delegate(original,statementMethod,statementArguments);
+      if(statementMethod.getName().equals("execute"))throw new SQLTransientConnectionException("private lost acknowledgement","08006");
+      return statementResult;
+     });
+    }
+    return result;
+   });
+   var uncertain=io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(lostAck,"CREATE TABLE lost_ack(id INT);CREATE TABLE lost_following(id INT)");
+   check(uncertain.tables().stream().map(t->t.state().name()).toList().equals(List.of("UNCONFIRMED","UNATTEMPTED")),"Lost acknowledgement claimed physical failure or ownership.");
+   try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT COUNT(*) FROM lost_ack")){check(rows.next()&&rows.getInt(1)==0,"Unconfirmed acknowledged-loss fixture was dropped.");}
+   absent("lost_following");
+   try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT COUNT(*) FROM gen_table")){check(rows.next()&&rows.getInt(1)==1,"Physical phase changed generator metadata.");}
+   try(var competitor=DriverManager.getConnection(url,"root",password)) {
+    Connection race=(Connection)java.lang.reflect.Proxy.newProxyInstance(Connection.class.getClassLoader(),new Class[]{Connection.class},(proxy,method,arguments)->{
+     Object result=delegate(connection,method,arguments);
+     if(method.getName().equals("createStatement")) {
+      try(var competing=competitor.createStatement()){competing.execute("CREATE TABLE race_target(id INT)");competing.execute("INSERT INTO race_target VALUES(91)");}
+     }
+     return result;
+    });
+    var raced=io.eforge.enterprise.generator.service.GeneratorCreationExecution.execute(race,"CREATE TABLE IF NOT EXISTS race_target(id INT);CREATE TABLE race_following(id INT)");
+    check(raced.tables().get(0).state().name().equals("FAILED")&&raced.tables().get(0).code().equals("GENERATOR_CREATE_TARGET_EXISTS"),"Concurrent IF NOT EXISTS claimed another request's ownership.");
+    check(raced.tables().get(1).state().name().equals("UNATTEMPTED"),"Continued DDL after ownership race.");
+    try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT id FROM race_target")){check(rows.next()&&rows.getInt(1)==91&&!rows.next(),"Competing owner's row was changed.");}
+    absent("race_following");
+   }
    String originalMode;
    try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT @@session.sql_mode")){rows.next();originalMode=rows.getString(1);}
    for(String mode:List.of("NO_BACKSLASH_ESCAPES","ANSI_QUOTES","PIPES_AS_CONCAT","HIGH_NOT_PRECEDENCE")) {
@@ -89,7 +142,7 @@ class GeneratorCreationPreflightMysqlProbe {
    }
    absent("fault_guard");
    try(var statement=db.createStatement();var rows=statement.executeQuery("SELECT id,name FROM owned_source")){check(rows.next()&&rows.getInt(1)==1&&rows.getString(2).equals("retained")&&!rows.next(),"Original data changed.");}
-   System.out.println("PASS: "+assertions+" actual JDBC read-only whole-batch preflight assertions; sources/views/FK/LIKE/metadata/SQL modes/permission faults and source retention.");
+   System.out.println("PASS: "+assertions+" actual JDBC preflight/physical-phase assertions; scopes/sources/metadata, partial DDL, lost acknowledgement, ownership race and retained rows.");
   }
  }
 }

@@ -1440,3 +1440,15 @@ real denied metadata access and retained source data. Prior bbd1556 cloud run
 Current creation endpoint/executor/import/outcomes, source races and compatibility,
 React output/pages and final parity remain incomplete. See
 `security-review-generator-create-preflight.md`. Form builder remains deferred.
+### 2026-10-06: physical creation execution foundation
+
+An unwired physical executor now validates the entire batch before DDL, requires
+an owned writable autocommit connection, and reports immutable requested-order
+CREATED/FAILED/UNATTEMPTED/UNCONFIRMED outcomes. It stops on failure/uncertainty,
+never writes metadata or automatically drops tables, and removes IF NOT EXISTS
+before dispatch to avoid ownership no-ops. Real JDBC profiles pass 88/86 combined
+assertions, including actual partial DDL, retained business rows, injected lost
+acknowledgement after real CREATE, and independent-connection target competition.
+Shared original/canonical admin routes, checked metadata import, full compatibility,
+React output/pages and final active parity are still required. See
+`security-review-generator-create-execution.md`; form builder remains deferred.
