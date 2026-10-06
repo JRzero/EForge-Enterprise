@@ -73,7 +73,7 @@ final OpenAPI files equal the committed D3161897... contract exactly. Original a
 canonical file bytes/replacements, path refusal/default protection/no-role/audit,
 complete metadata/business rows and all MySQL/Redis/Quartz/OSHI/ACL/captcha APIs
 pass. No local integration app is retained. Mocked browser3429 ended0 with64 tests.
-Cloud acceptance is still pending this implementation's exact commit/workflows.
+Exact cloud acceptance is recorded below for this implementation's own commit.
 
 Runtime probes use uniquely owned roots, restore environment and validate cleanup
 paths before recursive deletion. They compare original/canonical backend files
@@ -89,3 +89,17 @@ generated CRUD/tree/sub modules compiled and deployed through HTTP/browser remai
 required, followed by full shell/shared behavior and per-capability audit. Form
 builder is deferred. The specifically rejected Quartz mutation runtime proposal
 remains unimplemented. Prior bd83767 cloud does not validate this new implementation.
+
+Exact custom output cloud acceptance: implementation
+7d0563476688255543969169a147bf4e96d1c59c, server37470491224 all three jobs
+SUCCESS and web37470491110 SUCCESS. Observers13268/71517 ended0. Direct
+generator-custom-output-cloud-server-accepted.log proves603 backend (593boot+
+10scope, one OS-specific skip), actual MySQL modes0/1 each64 coherent snapshots
+and each474 output contexts, default/enabled each43 real browsers, complete
+canonical/original output and MySQL/Redis/Quartz/OSHI/ACL/captcha APIs, actual
+custom filesystem bytes/replacement/default protection and exact committed
+OpenAPI comparisons. Direct web-accepted log proves79 units,64 mocked browsers,
+generated reproduction/lint/typecheck/build. The corrected D3161897... contract
+is accepted. Earlier missing200 exports are superseded, not accepted evidence.
+This accepts custom output/API/client only; true React/EForge templates, full
+manager UI and actual generated business deployment remain required.

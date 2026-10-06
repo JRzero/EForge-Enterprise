@@ -526,3 +526,17 @@ protection/path refusal/no-role/audit, full metadata/business-row retention and
 complete MySQL/Redis/Quartz/OSHI/ACL/captcha regression pass. No local app retained.
 Cloud acceptance remains pending this exact implementation's workflows. This does
 not complete React/EForge templates, generator UI or generated business deployment.
+
+Exact custom output cloud acceptance: implementation
+7d0563476688255543969169a147bf4e96d1c59c, server37470491224 all three jobs
+SUCCESS and web37470491110 SUCCESS. Observers13268/71517 ended0. Direct
+generator-custom-output-cloud-server-accepted.log proves603 backend (593boot+
+10scope, one OS-specific skip), actual MySQL modes0/1 each64 coherent snapshots
+and each474 output contexts, default/enabled each43 real browsers, complete
+canonical/original output and MySQL/Redis/Quartz/OSHI/ACL/captcha APIs, actual
+custom filesystem bytes/replacement/default protection and exact committed
+OpenAPI comparisons. Direct web-accepted log proves79 units,64 mocked browsers,
+generated reproduction/lint/typecheck/build. The corrected D3161897... contract
+is accepted. Earlier missing200 exports are superseded, not accepted evidence.
+This accepts custom output/API/client only; true React/EForge templates, full
+manager UI and actual generated business deployment remain required.

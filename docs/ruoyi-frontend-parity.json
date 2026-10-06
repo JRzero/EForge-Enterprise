@@ -1382,7 +1382,7 @@
     "scope": "Generated service getter calls match saved PK/domain accessor spelling while public mapper/service suffixes remain compatible. Full language semantics, tree aliases, custom output, React/EForge/UI and actual generated business deployment remain required."
   },
   "generatorCustomOutputValidation": {
-    "state": "implemented-local-runtime-verified-cloud-pending",
+    "state": "cloud-verified",
     "review": "docs/security-review-generator-custom-output.md",
     "backendTests": 603,
     "targetTests": 34,
@@ -1393,7 +1393,10 @@
     "realBrowserProfiles": [43,43],
     "runtime": "both-complete-api-and-43-browser-profiles-success",
     "openApiSha256": "D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3",
-    "currentCloud": "pending-exact-implementation-workflows",
+    "currentCloud": "all-three-server-and-web-success",
+    "implementationCommit": "7d0563476688255543969169a147bf4e96d1c59c",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37470491224",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37470491110",
     "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
   }
 }
