@@ -2,9 +2,12 @@
 $bundleMarker="gbundle_$runId";$bundleUserId=$null
 function GeneratorBundle-Sql([string]$sql){return Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -N -B -uroot eforge_enterprise -e $sql}
 function GeneratorBundle-Snapshot([string]$id){return @(GeneratorBundle-Sql "SELECT * FROM gen_table WHERE table_id=$id; SELECT * FROM gen_table_column WHERE table_id=$id ORDER BY column_id;") -join "`n"}
-function GeneratorBundle-Zip([string]$path){
-    $bundleResponse=Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$path" -Headers $authorized -SkipHttpErrorCheck -TimeoutSec 30
-    Assert-Check ($bundleResponse.StatusCode -eq 200 -and $bundleResponse.Headers['Content-Disposition'] -like '*ruoyi.zip*') 'Original download must return the complete attachment.'
+function GeneratorBundle-Zip([string]$path,[string]$method='GET',[string]$body=''){
+    $bundleRequestArgs=@{Uri="http://127.0.0.1:$AppPort$path";Headers=$authorized;Method=$method;SkipHttpErrorCheck=$true;TimeoutSec=30}
+    if($body){$bundleRequestArgs.Body=$body;$bundleRequestArgs.ContentType='application/json'}
+    $bundleResponse=Invoke-WebRequest @bundleRequestArgs
+    $bundleExpectedFilename=if($path.StartsWith('/api/v1/')){'eforge-generated.zip'}else{'ruoyi.zip'}
+    Assert-Check ($bundleResponse.StatusCode -eq 200 -and $bundleResponse.Headers['Content-Disposition'] -like "*$bundleExpectedFilename*") 'Original download must return the complete attachment.'
     $bundleBytes=$bundleResponse.Content
     Assert-Check ($bundleBytes -is [byte[]]) 'Archive response must retain binary bytes.'
     $bundleFiles=[ordered]@{}
@@ -49,6 +52,21 @@ try{
     foreach($bundleLine in ($bundleTreePreview['vm/ts/index.ts.vm'] -split "`n")){if($bundleLine.StartsWith('export * from')){$bundleExport+="`n$bundleLine"}}
     Assert-Check ($bundleBatch['vue/types/api/index-bak.ts'] -ceq $bundleExport) 'Original shared export index semantics changed.'
     foreach($bundleTemplate in $bundleTreePreview.Keys){if($bundleTemplate -ne 'vm/ts/index.ts.vm'){Assert-Check (@($bundleBatch.Values|Where-Object {$_ -ceq $bundleTreePreview[$bundleTemplate]}).Count -ge 1) 'Batch omitted tree output content.'}}
+    $bundleCanonicalPreviewReply=Request "/api/v1/tool/generator/tables/$($bundleSelection.root)/preview" 'GET' '' $authorized
+    Assert-Check ($bundleCanonicalPreviewReply.StatusCode -eq 200 -and ($bundleCanonicalPreviewReply.Headers['Cache-Control'] -join ',') -eq 'no-store') 'Canonical preview must return no-store JSON.'
+    $bundleCanonicalPreview=$bundleCanonicalPreviewReply.Content|ConvertFrom-Json
+    Assert-Check ($bundleCanonicalPreview.tableId -ceq $bundleSelection.root -and $bundleCanonicalPreview.files.Count -eq $bundleRootPreview.Count -and !$bundleCanonicalPreview.PSObject.Properties['data']) 'Canonical typed preview ID/files boundary failed.'
+    foreach($bundleFile in $bundleCanonicalPreview.files){Assert-Check ($bundleFile.content -ceq $bundleRootPreview[$bundleFile.template] -and $bundleFile.content -ceq $bundleRootZip[$bundleFile.path]) 'Canonical preview differs from actual original preview/ZIP.'}
+    $bundleCanonicalSingle=GeneratorBundle-Zip '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root)}|ConvertTo-Json -Compress)
+    Assert-Check ($bundleCanonicalSingle.Count -eq $bundleRootZip.Count) 'Canonical single ZIP omitted files.'
+    foreach($bundlePath in $bundleRootZip.Keys){Assert-Check ($bundleCanonicalSingle[$bundlePath] -ceq $bundleRootZip[$bundlePath]) 'Canonical single ZIP content mismatch.'}
+    $bundleCanonicalBatch=GeneratorBundle-Zip '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root,$bundleSelection.tree)}|ConvertTo-Json -Compress)
+    Assert-Check ($bundleCanonicalBatch.Count -eq $bundleBatch.Count) 'Canonical batch omitted files.'
+    foreach($bundlePath in $bundleBatch.Keys){Assert-Check ($bundleCanonicalBatch[$bundlePath] -ceq $bundleBatch[$bundlePath]) 'Canonical batch content mismatch.'}
+    Assert-Problem (Request "/api/v1/tool/generator/tables/$($bundleSelection.root)/preview") 401 'AUTHENTICATION_REQUIRED'
+    Assert-Problem (Request '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root,$bundleSelection.root)}|ConvertTo-Json -Compress) $authorized) 400 'GENERATOR_SNAPSHOT_SELECTION_INVALID'
+    Assert-Problem (Request '/api/v1/tool/generator/tables/9223372036854775807/preview' 'GET' '' $authorized) 404 'GENERATOR_TABLE_NOT_FOUND'
+    Assert-Problem (Request '/api/v1/tool/generator/downloads' 'POST' '{"tableIds":["9223372036854775808"]}' $authorized) 400 'VALIDATION_ERROR'
     $bundleMissing=Request "/tool/gen/download/${bundleMarker}_missing" 'GET' '' $authorized
     Assert-Check (($bundleMissing.Content|ConvertFrom-Json).code -eq 404 -and !$bundleMissing.Headers['Content-Disposition']) 'Missing output must be JSON failure without partial attachment.'
     $bundleDuplicate=Request "/tool/gen/batchGenCode?tables=${bundleMarker}_root,${bundleMarker}_root" 'GET' '' $authorized
@@ -56,12 +74,14 @@ try{
     $bundleUnsafeBefore=GeneratorBundle-Snapshot $bundleSelection.root
     GeneratorBundle-Sql "UPDATE gen_table SET module_name='../private_secret' WHERE table_id=$($bundleSelection.root);"|Out-Null
     try{
+        Assert-Problem (Request "/api/v1/tool/generator/tables/$($bundleSelection.root)/preview" 'GET' '' $authorized) 400 'GENERATOR_OUTPUT_PATH_INVALID'
         $bundleUnsafe=Request "/tool/gen/download/${bundleMarker}_root" 'GET' '' $authorized
         Assert-Check (($bundleUnsafe.Content|ConvertFrom-Json).code -eq 400 -and !$bundleUnsafe.Content.Contains('private_secret') -and !$bundleUnsafe.Headers['Content-Disposition']) 'Unsafe persisted output path must refuse without echo or partial archive.'
     }finally{GeneratorBundle-Sql "UPDATE gen_table SET module_name='bundle' WHERE table_id=$($bundleSelection.root);"|Out-Null}
     Assert-Check ((GeneratorBundle-Snapshot $bundleSelection.root) -ceq $bundleUnsafeBefore) 'Output refusal changed metadata.'
     GeneratorBundle-Sql "RENAME TABLE gen_table_column TO bundle_fields_fault_$runId;"|Out-Null
     try{
+        Assert-Problem (Request '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root)}|ConvertTo-Json -Compress) $authorized) 503 'GENERATOR_SNAPSHOT_UNAVAILABLE'
         $bundleFault=Request "/tool/gen/download/${bundleMarker}_root" 'GET' '' $authorized
         Assert-Check (($bundleFault.Content|ConvertFrom-Json).code -eq 503 -and !$bundleFault.Content.Contains('bundle_fields_fault') -and !$bundleFault.Headers['Content-Disposition']) 'Actual SQL fault must return safe JSON without partial ZIP.'
     }finally{GeneratorBundle-Sql "RENAME TABLE bundle_fields_fault_$runId TO gen_table_column;"|Out-Null}
@@ -69,6 +89,8 @@ try{
     $bundleCreated=Request '/api/v1/system/users' 'POST' (@{user=@{username="gb$runId";displayName='生成输出无角色';departmentId='103';email='';phone='';sex='2';status='0';roleIds=@();postIds=@()};password='User12345'}|ConvertTo-Json -Depth 5 -Compress) $authorized
     Assert-Check ($bundleCreated.StatusCode -eq 201) 'No-role output fixture failed.';$bundleUserId=($bundleCreated.Content|ConvertFrom-Json).id
     $bundleLogin=(Request '/api/v1/auth/login' 'POST' (@{username="gb$runId";password='User12345'}|ConvertTo-Json -Compress)).Content|ConvertFrom-Json
+    Assert-Problem (Request "/api/v1/tool/generator/tables/$($bundleSelection.root)/preview" 'GET' '' @{Authorization="Bearer $($bundleLogin.accessToken)"}) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/tool/generator/downloads' 'POST' (@{tableIds=@($bundleSelection.root)}|ConvertTo-Json -Compress) @{Authorization="Bearer $($bundleLogin.accessToken)"}) 403 'ACCESS_DENIED'
     $bundleDenied=Request "/tool/gen/download/${bundleMarker}_root" 'GET' '' @{Authorization="Bearer $($bundleLogin.accessToken)"}
     Assert-Check (($bundleDenied.Content|ConvertFrom-Json).code -eq 403 -and !$bundleDenied.Headers['Content-Disposition']) 'No-role original download grant must remain authoritative.'
     $bundleAfter=@(foreach($bundleId in $bundleSelection.Values){GeneratorBundle-Snapshot $bundleId}) -join "`n"

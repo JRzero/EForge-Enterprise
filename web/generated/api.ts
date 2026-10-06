@@ -742,6 +742,9 @@ export type PageResponseDatabaseTable = {
     pageSize: number;
     total: number;
 };
+export type DownloadRequest = {
+    tableIds: string[];
+};
 export type ImportRequest = {
     names: string[];
 };
@@ -866,6 +869,16 @@ export type GeneratorConfigurationUpdate = {
     remark?: string;
     subTableForeignKey?: string;
     subTableName?: string;
+};
+export type OutputFile = {
+    content?: string;
+    path?: string;
+    template?: string;
+};
+export type PreviewResponse = {
+    files?: OutputFile[];
+    generationDate?: string;
+    tableId?: string;
 };
 /**
  * Get the current user and authorized application navigation
@@ -2297,6 +2310,16 @@ export function listGeneratorDatabaseTables({ page, pageSize, name, comment, $fr
         ...opts
     });
 }
+export function downloadGeneratorTables(downloadRequest: DownloadRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>("/api/v1/tool/generator/downloads", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: downloadRequest
+    }));
+}
 export function importGeneratorTables(importRequest: ImportRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 201;
@@ -2360,6 +2383,14 @@ export function listGeneratorColumns(id: string, opts?: Oazapfts.RequestOpts) {
         status: 200;
         data: ColumnResponse[];
     }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/columns`, {
+        ...opts
+    });
+}
+export function previewGeneratorTable(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PreviewResponse;
+    }>(`/api/v1/tool/generator/tables/${encodeURIComponent(id)}/preview`, {
         ...opts
     });
 }

@@ -32,6 +32,8 @@ import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openAp
 
 import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
 
+import {previewGeneratorTable, downloadGeneratorTables, type DownloadRequest} from '../generated/api';
+
 export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = fetch,
   onUnauthorized: (token: string) => void = () => {}) {
   function transport(authenticated: boolean, timeoutMs = 15000, credentials: RequestCredentials = 'omit'): typeof fetch {
@@ -51,6 +53,8 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async previewGeneratorTable(id: string, signal?: AbortSignal) {return (await previewGeneratorTable(id, {baseUrl: '', fetch: transport(true, 60000), signal})).data;},
+    async downloadGeneratorTables(tableIds: DownloadRequest['tableIds'], signal?: AbortSignal) {return (await downloadGeneratorTables({tableIds}, {baseUrl: '', fetch: transport(true, 60000), signal})).data;},
     async getDruidConsoleStatus(signal?: AbortSignal) {return (await getDruidConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
     async getApiDocsConsoleStatus(signal?: AbortSignal) {return (await getApiDocsConsoleStatus({baseUrl: '', fetch: transport(true), signal})).data;},
     // Only these fixed same-origin mutations accept HttpOnly console cookies.

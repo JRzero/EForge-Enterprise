@@ -1656,3 +1656,19 @@ SHA256 481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
 No local integration app is retained. Full frontend generated/lint/typecheck/
 73-unit/build pass. Output-limit target44 passes after the full565 build with
 only an additional test, no production jar/source changes. Exact cloud pending.
+Exact bundle cloud acceptance: a884f08a783cadc73f2087a304f83c5181a53e32,
+server37443783208 all three jobs SUCCESS. Observer84145 ended0. Direct
+generator-bundle-cloud-accepted.log proves566 backend (556boot+10scope), modes0/1
+each64 actual snapshots and474 actual output/Mapper/menu checks, default/enabled
+each43 real browsers, original single/batch output HTTP/audit/retention and full
+APIs/OpenAPI. This accepts only bundle implementation, not later canonical APIs.
+Canonical output API stage (2026-10-06, final runtime/cloud pending): actual typed
+preview and full binary download under/api/v1 now share immutable output; original
+preview/code permissions remain separate, exact string IDs and safe problems,
+no-store and audit preserved.586 backend/20MVC, actual default full API without
+browser, generated client reproduction and frontend75/lint/typecheck/build pass.
+Final both43/browser API profiles now under86768. First contract B817D25F... new
+schema is not accepted by the prior bundle cloud. No canonical custom filesystem,
+React/EForge templates or complete generator UI claim; all remain required.
+See security-review-generator-canonical-output-v1.md.
+Final local acceptance (2026-10-06): both generator-canonical-output-disabled/enabled-runtime.log end in PASS and each records 43 real browser tests passed. Session86768 is no longer retained; authoritative complete logs and both live OpenAPI exports prove terminal success. Both exports exactly equal contract SHA256 B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0. Canonical preview/download real permissions, full binary fidelity, safe SQL/path failures/recovery, audit and exact metadata/business-row retention pass. Cloud acceptance of this canonical implementation remains pending its own commit and workflows.

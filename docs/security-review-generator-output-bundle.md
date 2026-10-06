@@ -98,3 +98,9 @@ SHA256 481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201.
 No local integration app is retained. Full frontend generated/lint/typecheck/
 73-unit/build pass. Output-limit target44 passes after the full565 build with
 only an additional test, no production jar/source changes. Exact cloud pending.
+Exact bundle cloud acceptance: a884f08a783cadc73f2087a304f83c5181a53e32,
+server37443783208 all three jobs SUCCESS. Observer84145 ended0. Direct
+generator-bundle-cloud-accepted.log proves566 backend (556boot+10scope), modes0/1
+each64 actual snapshots and474 actual output/Mapper/menu checks, default/enabled
+each43 real browsers, original single/batch output HTTP/audit/retention and full
+APIs/OpenAPI. This accepts only bundle implementation, not later canonical APIs.

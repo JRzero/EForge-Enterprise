@@ -1328,7 +1328,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37440030951"
   },
   "generatorOutputBundleValidation": {
-    "state": "original-output-integrated-local-runtime-verified-cloud-pending",
+    "state": "original-output-integrated-cloud-verified",
     "review": "docs/security-review-generator-output-bundle.md",
     "backendTests": 565,
     "originalTemplateFamilies": 9,
@@ -1339,7 +1339,7 @@
       64
     ],
     "completeRuntime": "both-complete-api-profiles-success",
-    "currentCloud": "not-yet-committed",
+    "currentCloud": "all-three-server-jobs-success",
     "scope": "Actual immutable pure output and original preview/single/batch ZIP integration. Canonical output, custom filesystem, language semantics/React/EForge/UI/full generated HTTP/browser remain required.",
     "frontendChecks": "generated-reproducible-lint-typecheck-73-unit-build-success",
     "realBrowserProfiles": [
@@ -1347,6 +1347,21 @@
       43
     ],
     "additionalOutputLimitTargetCases": 44,
-    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201"
+    "openApiSha256": "481758EF3A0D6F22D781AAE0A982DA974B2321A9E7736A89765E3703257F7201",
+    "cloudBackendTests": 566,
+    "implementationCommit": "a884f08a783cadc73f2087a304f83c5181a53e32",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37443783208"
+  },
+  "generatorCanonicalOutputValidation": {
+    "state": "preview-download-local-final-runtime-verified",
+    "review": "docs/security-review-generator-canonical-output-v1.md",
+    "backendTests": 586,
+    "mvcTests": 20,
+    "frontendUnitTests": 75,
+    "firstCompleteApi": "success-no-browser",
+    "finalRuntime": "both-profiles-complete-api-and-43-real-browsers-success",
+    "openApiSha256": "B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0",
+    "currentCloud": "not-yet-committed",
+    "scope": "Typed canonical preview/download and generated authenticated transports; custom output, full semantics, React/EForge/UI/business HTTP-browser remain required."
   }
 }
