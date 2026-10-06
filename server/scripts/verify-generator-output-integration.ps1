@@ -39,13 +39,17 @@ try{
         $bundleParentProperty=if($bundleSuffix -eq 'line'){'ownerReference'}else{'parentId'}
         GeneratorBundle-Sql "INSERT INTO gen_table_column(table_id,column_name,column_comment,column_type,java_type,java_field,is_pk,is_increment,is_required,is_insert,is_edit,is_list,is_query,query_type,html_type,dict_type,sort) VALUES($($bundleSelection[$bundleSuffix]),'id','编号','bigint','Long','id','1','0','1','1','1','1','0','EQ','input','',0),($($bundleSelection[$bundleSuffix]),'parent_id','父项','bigint','Long','$bundleParentProperty','0','0','0','1','1','1','0','EQ','input','',1),($($bundleSelection[$bundleSuffix]),'name','中文名称','varchar(64)','String','name','0','0','0','1','1','1','1','LIKE','input','',2);"|Out-Null
     }
+    GeneratorBundle-Sql "UPDATE gen_table_column SET java_field='oRderKey' WHERE table_id=$($bundleSelection.root) AND column_name='id';"|Out-Null
     $bundleBefore=@(foreach($bundleId in $bundleSelection.Values){GeneratorBundle-Snapshot $bundleId}) -join "`n"
     $bundlePhysicalBefore=@(foreach($bundleSuffix in @('root','line','tree')){GeneratorBundle-Sql "SELECT JSON_OBJECT('id',id,'parent',parent_id,'name',name) FROM ${bundleMarker}_$bundleSuffix ORDER BY id;"}) -join "`n"
     $bundleRootPreview=GeneratorBundle-Preview $bundleSelection.root;$bundleTreePreview=GeneratorBundle-Preview $bundleSelection.tree
     $bundleRootZip=GeneratorBundle-Zip "/tool/gen/download/${bundleMarker}_root"
     Assert-Check ($bundleRootZip.Count -eq $bundleRootPreview.Count) 'Single archive must include every preview template.'
     foreach($bundleText in $bundleRootPreview.Values){Assert-Check (@($bundleRootZip.Values|Where-Object {$_ -ceq $bundleText}).Count -ge 1) 'Single archive differs from preview content.'}
-    Assert-Check ($bundleRootZip['main/java/io/eforge/enterprise/bundle/service/impl/BundleRootServiceImpl.java'].Contains('setOwnerReference(id)')) 'Actual downloaded service ignored the saved FK property.'
+    Assert-Check ($bundleRootZip['main/java/io/eforge/enterprise/bundle/service/impl/BundleRootServiceImpl.java'].Contains('setOwnerReference(oRderKey)')) 'Actual downloaded service ignored the saved FK property.'
+    $bundleService=$bundleRootZip['main/java/io/eforge/enterprise/bundle/service/impl/BundleRootServiceImpl.java']
+    Assert-Check ($bundleService.Contains('getoRderKey()') -and !$bundleService.Contains('getORderKey()')) 'Downloaded service must use the actual configured primary-key accessor.'
+    Assert-Check ($bundleRootZip['main/java/io/eforge/enterprise/bundle/domain/BundleRoot.java'].Contains('getoRderKey()')) 'Downloaded domain accessor differs from generated service.'
     $bundleBatch=GeneratorBundle-Zip "/tool/gen/batchGenCode?tables=${bundleMarker}_root,${bundleMarker}_tree"
     Assert-Check ($bundleBatch.Count -eq ($bundleRootPreview.Count+$bundleTreePreview.Count-1)) 'Batch archive lost files or duplicated the shared index.'
     $bundleExport=$bundleRootPreview['vm/ts/index.ts.vm']

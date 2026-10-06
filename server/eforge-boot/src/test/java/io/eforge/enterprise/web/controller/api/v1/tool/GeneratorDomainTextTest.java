@@ -65,7 +65,9 @@ class GeneratorDomainTextTest {
  }
  void inspectGeneratedForeignAssignment(URLClassLoader classes,GenTable table)throws Exception{
   var rootType=classes.loadClass("generated.domain.AliasedRoot");var childType=classes.loadClass("generated.domain.AliasedLine");
-  var root=rootType.getConstructor().newInstance();rootType.getMethod("setLabel",String.class).invoke(root,"真实父键/中文");
+  var root=rootType.getConstructor().newInstance();
+  String rootAccessor=Map.of("label","Label","orderKey","OrderKey","oRderKey","oRderKey","父键","父键").get(table.getPkColumn().getJavaField());
+  rootType.getMethod("set"+rootAccessor,String.class).invoke(root,"真实父键/中文");
   var line=childType.getConstructor().newInstance();childType.getMethod("setLabel",String.class).invoke(line,"子行");
   rootType.getMethod("setAliasedLineList",List.class).invoke(root,List.of(line));
   String field=table.getSubTable().getColumns().get(1).getJavaField();
@@ -99,6 +101,17 @@ class GeneratorDomainTextTest {
  void configuredForeignKeyJavaNameCompilesInActualRootAndChildSources(String javaField)throws Exception{
   var root=table("sub","AliasedRoot");var child=table("crud","AliasedLine");
   var foreign=new GenTableColumn();foreign.setColumnName("parent_id");foreign.setJavaField(javaField);foreign.setJavaType("String");foreign.setIsPk("0");foreign.setIsList("0");
+  child.setColumns(List.of(child.getColumns().get(0),foreign));root.setSubTable(child);root.setSubTableName(child.getTableName());root.setSubTableFkName("parent_id");
+  compileAndInspect(root,ATTACK,"");
+ }
+ @org.junit.jupiter.params.ParameterizedTest
+ @org.junit.jupiter.params.provider.ValueSource(strings={"orderKey","oRderKey","父键"})
+ void configuredParentPrimaryKeyAccessorCompilesAndAssignsActualChild(String javaField)throws Exception{
+  var root=table("sub","AliasedRoot");var child=table("crud","AliasedLine");
+  root.getColumns().get(0).setIsPk("0");
+  var primary=new GenTableColumn();primary.setColumnName("root_id");primary.setJavaField(javaField);primary.setJavaType("String");primary.setIsPk("1");primary.setIsList("0");
+  root.setColumns(List.of(root.getColumns().get(0),primary));root.setPkColumn(primary);
+  var foreign=new GenTableColumn();foreign.setColumnName("parent_id");foreign.setJavaField("ownerReference");foreign.setJavaType("String");foreign.setIsPk("0");foreign.setIsList("0");
   child.setColumns(List.of(child.getColumns().get(0),foreign));root.setSubTable(child);root.setSubTableName(child.getTableName());root.setSubTableFkName("parent_id");
   compileAndInspect(root,ATTACK,"");
  }

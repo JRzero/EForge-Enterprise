@@ -64,6 +64,11 @@ public class VelocityUtils
         velocityContext.put("colSpan", getColSpan(genTable.getFormColNum()));
         velocityContext.put("datetime", DateUtils.getDate());
         velocityContext.put("pkColumn", genTable.getPkColumn());
+        String primaryJavaField = io.eforge.enterprise.generator.rendering.GeneratorOutputText.javaIdentifier(genTable.getPkColumn().getJavaField());
+        // Getter calls must match domain.java.vm; method suffixes retain compatibility spelling.
+        String primaryAccessor = primaryJavaField.length() > 2 && primaryJavaField.substring(1, 2).matches("[A-Z]")
+            ? primaryJavaField : primaryJavaField.substring(0, 1).toUpperCase() + primaryJavaField.substring(1);
+        velocityContext.put("pkJavaAccessor", primaryAccessor);
         velocityContext.put("importList", getImportList(genTable));
         velocityContext.put("permissionPrefix", getPermissionPrefix(moduleName, businessName));
         velocityContext.put("columns", genTable.getColumns());

@@ -1366,5 +1366,17 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37458912730",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37458912762",
     "scope": "Typed canonical preview/download and generated authenticated transports; custom output, full semantics, React/EForge/UI/business HTTP-browser remain required."
+  },
+  "generatorPrimaryKeyAccessorValidation": {
+    "state": "local-final-runtime-verified-cloud-pending",
+    "review": "docs/security-review-generator-pk-accessor.md",
+    "backendTests": 589,
+    "actualJavaCompileExecutionCases": 10,
+    "beforeFailures": 1,
+    "afterFailures": 0,
+    "realBrowserProfiles": [43,43],
+    "runtime": "both-complete-api-profiles-success",
+    "openApiSha256": "B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0",
+    "scope": "Generated service getter calls match saved PK/domain accessor spelling while public mapper/service suffixes remain compatible. Full language semantics, tree aliases, custom output, React/EForge/UI and actual generated business deployment remain required."
   }
 }

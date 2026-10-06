@@ -99,7 +99,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
 #end
 #end
 #if($table.sub)
-        ${className}Mapper.delete${subClassName}By${subTableFkClassName}(${className}.get${pkColumn.capJavaField}());
+        ${className}Mapper.delete${subClassName}By${subTableFkClassName}(${className}.get${pkJavaAccessor}());
         insert${subClassName}(${className});
 #end
         return ${className}Mapper.update${ClassName}(${className});
@@ -150,7 +150,7 @@ public class ${ClassName}ServiceImpl implements I${ClassName}Service
     public void insert${subClassName}(${ClassName} ${className})
     {
         List<${subClassName}> ${subclassName}List = ${className}.get${subClassName}List();
-        ${pkColumn.javaType} ${pkColumn.javaField} = ${className}.get${pkColumn.capJavaField}();
+        ${pkColumn.javaType} ${pkColumn.javaField} = ${className}.get${pkJavaAccessor}();
         if (StringUtils.isNotNull(${subclassName}List))
         {
             List<${subClassName}> list = new ArrayList<${subClassName}>();
