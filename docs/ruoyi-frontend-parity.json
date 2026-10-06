@@ -1353,7 +1353,7 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37443783208"
   },
   "generatorCanonicalOutputValidation": {
-    "state": "preview-download-local-final-runtime-verified",
+    "state": "preview-download-cloud-verified",
     "review": "docs/security-review-generator-canonical-output-v1.md",
     "backendTests": 586,
     "mvcTests": 20,
@@ -1361,7 +1361,10 @@
     "firstCompleteApi": "success-no-browser",
     "finalRuntime": "both-profiles-complete-api-and-43-real-browsers-success",
     "openApiSha256": "B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0",
-    "currentCloud": "not-yet-committed",
+    "currentCloud": "server-all-three-and-web-success",
+    "implementationCommit": "67ea28c8531657f563068cfc6fc37133cbaf0ce1",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37458912730",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37458912762",
     "scope": "Typed canonical preview/download and generated authenticated transports; custom output, full semantics, React/EForge/UI/business HTTP-browser remain required."
   }
 }
