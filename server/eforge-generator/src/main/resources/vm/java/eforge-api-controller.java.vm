@@ -22,7 +22,7 @@ public class ${ClassName}ApiController {
     public ${ClassName}ApiController(I${ClassName}Service service){this.service=service;}
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:list"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
-    @GetMapping
+    @GetMapping(produces="application/json")
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_list"))
 #if($table.tree)
     public ResponseEntity<List<${ClassName}ApiModel>> list(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query) {
@@ -46,9 +46,12 @@ public class ${ClassName}ApiController {
 #end
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:query"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
-    @GetMapping("/{id}")
+    @GetMapping(value="/{id}",produces="application/json")
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_detail"))
-    public ResponseEntity<${ClassName}ApiModel> detail(@PathVariable("id") ${pkColumn.javaType} id) {
+    public ResponseEntity<${ClassName}ApiModel> detail(#if($pkColumn.javaType == 'Long' || $pkColumn.javaType == 'BigDecimal')
+@io.swagger.v3.oas.annotations.Parameter(schema=@io.swagger.v3.oas.annotations.media.Schema(type="string"))
+#end
+@PathVariable("id") ${pkColumn.javaType} id) {
         try {
             var row=service.select${ClassName}By${pkColumn.capJavaField}(id);
             if(row==null)throw new ApiFailure(404,"RESOURCE_NOT_FOUND","The requested record was not found.");
@@ -57,7 +60,8 @@ public class ${ClassName}ApiController {
     }
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:add"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
-    @PostMapping
+    @PostMapping(produces="application/json")
+    @ResponseStatus(HttpStatus.CREATED)
     @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
     @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.INSERT)
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_create"))
@@ -73,11 +77,14 @@ public class ${ClassName}ApiController {
     }
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:edit"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
-    @PutMapping("/{id}")
+    @PutMapping(value="/{id}",produces="application/json")
     @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
     @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.UPDATE)
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_update"))
-    public ResponseEntity<${ClassName}ApiModel> update(@PathVariable("id") ${pkColumn.javaType} id,@Valid @RequestBody ${ClassName}ApiModel.Write input) {
+    public ResponseEntity<${ClassName}ApiModel> update(#if($pkColumn.javaType == 'Long' || $pkColumn.javaType == 'BigDecimal')
+@io.swagger.v3.oas.annotations.Parameter(schema=@io.swagger.v3.oas.annotations.media.Schema(type="string"))
+#end
+@PathVariable("id") ${pkColumn.javaType} id,@Valid @RequestBody ${ClassName}ApiModel.Write input) {
         try {
             var row=input.domain(false);
             if(row.get${pkJavaAccessor}()!=null&&!java.util.Objects.equals(id,row.get${pkJavaAccessor}()))
@@ -90,10 +97,16 @@ public class ${ClassName}ApiController {
             return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(result));
         } catch(DataAccessException failure){throw unavailable();}
     }
-    public record DeleteRequest(@jakarta.validation.constraints.NotEmpty @jakarta.validation.constraints.Size(max=100) List<@jakarta.validation.constraints.NotNull ${pkColumn.javaType}> ids) {}
+    @io.swagger.v3.oas.annotations.media.Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}DeleteRequest"))
+    public record DeleteRequest(
+#if($pkColumn.javaType == 'Long' || $pkColumn.javaType == 'BigDecimal')
+        @io.swagger.v3.oas.annotations.media.ArraySchema(schema=@io.swagger.v3.oas.annotations.media.Schema(type="string",implementation=String.class))
+#end
+@jakarta.validation.constraints.NotEmpty @jakarta.validation.constraints.Size(max=100) List<@jakarta.validation.constraints.NotNull ${pkColumn.javaType}> ids) {}
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:remove"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
     @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @org.springframework.transaction.annotation.Transactional(rollbackFor=Exception.class)
     @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.DELETE)
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_delete"))
@@ -110,6 +123,7 @@ public class ${ClassName}ApiController {
     @PostMapping(value="/export",produces="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @io.eforge.enterprise.common.annotation.Log(title=$outputText.javaLiteral($functionName),businessType=io.eforge.enterprise.common.enums.BusinessType.EXPORT)
     @Operation(operationId=$outputText.javaLiteral("${moduleName}_${businessName}_export"))
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode="200",content=@io.swagger.v3.oas.annotations.media.Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@io.swagger.v3.oas.annotations.media.Schema(type="string",format="binary")))
     public void export(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query,jakarta.servlet.http.HttpServletResponse response) {
         try {
             // Export the whole filtered selection, never a stale PageHelper thread-local page.

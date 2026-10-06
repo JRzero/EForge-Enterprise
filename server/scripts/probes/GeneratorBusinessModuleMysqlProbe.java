@@ -28,6 +28,9 @@ class GeneratorBusinessModuleMysqlProbe {
     static class SecurityAndTransactions {}
     @org.springframework.context.annotation.Configuration
     @org.springframework.web.servlet.config.annotation.EnableWebMvc
+    @org.springframework.boot.context.properties.EnableConfigurationProperties(org.springdoc.core.properties.SpringDocConfigProperties.class)
+    @org.springframework.context.annotation.Import({org.springdoc.core.configuration.SpringDocConfiguration.class,
+            org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration.class})
     static class NetworkMvc {}
     static int checks;
     static void verifyNetwork(org.springframework.context.ApplicationContext parent, ClassLoader loader,
@@ -43,6 +46,10 @@ class GeneratorBusinessModuleMysqlProbe {
             var filter = servletContext.addFilter("probeAuthentication", new jakarta.servlet.Filter() {
                 public void doFilter(jakarta.servlet.ServletRequest request, jakarta.servlet.ServletResponse response,
                                      jakarta.servlet.FilterChain chain) throws java.io.IOException, jakarta.servlet.ServletException {
+                    if (((jakarta.servlet.http.HttpServletRequest)request).getRequestURI().equals("/v3/api-docs")
+                            && !grants.get().contains("test:entry:query")) {
+                        ((jakarta.servlet.http.HttpServletResponse)response).sendError(403); return;
+                    }
                     login(grants.get());
                     try { chain.doFilter(request, response); } finally { SecurityContextHolder.clearContext(); }
                 }
@@ -69,10 +76,41 @@ class GeneratorBusinessModuleMysqlProbe {
             check(created.statusCode() == 201, "Actual network create failed: " + created.body());
             check(json.readTree(created.body()).get("oRderKey").textValue().equals(id), "Network JSON lost exact identifier.");
             check(jdbc.queryForObject("SELECT label FROM module_" + category, String.class).equals("网络中文"), "Actual network create did not persist.");
+            var docsRequest = java.net.http.HttpRequest.newBuilder(java.net.URI.create("http://127.0.0.1:" + server.getPort() + "/v3/api-docs")).GET().build();
+            var docsResponse = client.send(docsRequest, java.net.http.HttpResponse.BodyHandlers.ofString());
+            check(docsResponse.statusCode() == 200, "Actual generated OpenAPI HTTP failed: " + docsResponse.body());
+            var spec = json.readTree(docsResponse.body());
+            ((com.fasterxml.jackson.databind.node.ObjectNode)spec).remove("servers");
+            Path contractOutput = Path.of(System.getProperty("eforge.probe.repo")).resolve("server/eforge-boot/target/generated-business-openapi");
+            Files.createDirectories(contractOutput);
+            Files.writeString(contractOutput.resolve(category + ".json"), json.writerWithDefaultPrettyPrinter().writeValueAsString(spec), StandardCharsets.UTF_8);
+            check(spec.path("paths").has("/api/v1/business/test/entry"), "Generated business API missing from actual OpenAPI.");
+            check(spec.path("paths").path("/api/v1/business/test/entry").path("post").path("operationId").asText().equals("test_entry_create"), "Generated OpenAPI create operation identity changed.");
+            check(spec.path("components").path("schemas").path("test_ApiRootApiModel").path("properties").path("oRderKey").path("type").asText().equals("string"), "Actual generated OpenAPI exact ID schema was not string.");
+            var paths = spec.path("paths").path("/api/v1/business/test/entry");
+            check(paths.path("post").path("responses").has("201"), "Create success is not documented as201.");
+            check(paths.path("delete").path("responses").has("204"), "Delete success is not documented as204.");
+            check(spec.path("paths").path("/api/v1/business/test/entry/{id}").path("get").path("parameters").get(0).path("schema").path("type").asText().equals("string"), "Path long ID schema would lose precision in generated client.");
+            check(spec.path("components").path("schemas").path("test_ApiRootDeleteRequest").path("properties").path("ids").path("items").path("type").asText().equals("string"), "Delete ID schema would lose precision in generated client.");
+            var params = paths.path("get").path("parameters");
+            boolean decimalQueryString = false;
+            for (var param : params) if (param.path("name").asText().equals("q_begin_amount")) decimalQueryString = param.path("schema").path("type").asText().equals("string");
+            check(decimalQueryString, "Generated decimal query schema would lose precision in client.");
+            grants.set(Set.of("test:entry:add", "test:entry:query", "test:entry:remove", "test:entry:edit", "test:entry:list", "test:entry:export"));
+            var clientLogPath = contractOutput.resolve(category + ".client.log");
+            var clientProcess = new ProcessBuilder("node", Path.of(System.getProperty("eforge.probe.repo")).resolve("web/scripts/verify-generator-business-client.mjs").toString(),
+                    contractOutput.resolve(category + ".json").toString(), "http://127.0.0.1:" + server.getPort(), category).redirectErrorStream(true).redirectOutput(clientLogPath.toFile()).start();
+            boolean finished = clientProcess.waitFor(90, java.util.concurrent.TimeUnit.SECONDS);
+            if (!finished) { clientProcess.destroyForcibly(); clientProcess.waitFor(10, java.util.concurrent.TimeUnit.SECONDS); }
+            String clientLog = Files.readString(clientLogPath, StandardCharsets.UTF_8);
+            check(finished && clientProcess.exitValue() == 0, "Generated actual HTTP client failed or timed out: " + clientLog);
+            System.out.print(clientLog);
+            check(jdbc.queryForObject("SELECT COUNT(*) FROM module_" + category, Integer.class) == 1, "Generated client left extra SQL data after delete.");
             var detail = java.net.http.HttpRequest.newBuilder(java.net.URI.create(route + "/" + id)).GET().build();
             check(client.send(detail, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 200, "Network detail failed.");
             grants.set(Set.of("test:entry:remove"));
             check(client.send(detail, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 403, "Network revoked permission remained usable.");
+            check(client.send(docsRequest, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 403, "Test deployed OpenAPI remained available after permission withdrawal.");
             var delete = java.net.http.HttpRequest.newBuilder(java.net.URI.create(route)).header("Content-Type", "application/json")
                     .method("DELETE", java.net.http.HttpRequest.BodyPublishers.ofString("{\"ids\":[\"" + id + "\"]}")).build();
             check(client.send(delete, java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode() == 204, "Network delete failed.");
@@ -89,6 +127,7 @@ class GeneratorBusinessModuleMysqlProbe {
         var action=fixture.getClass().getDeclaredMethod(method,types);action.setAccessible(true);return action.invoke(fixture,values);
     }
     public static void main(String[] args)throws Exception {
+        System.setProperty("eforge.probe.repo", Path.of(args[0]).toAbsolutePath().normalize().toString());
         var ds=new DriverManagerDataSource(System.getenv("EFORGE_POLICY_JDBC_URL"),"root",System.getenv("EFORGE_POLICY_JDBC_PASSWORD"));
         var jdbc=new JdbcTemplate(ds);var json=new ObjectMapper();
         Path owned=Files.createTempDirectory("eforge-generated-module-").toAbsolutePath().normalize();

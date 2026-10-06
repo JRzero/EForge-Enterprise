@@ -129,10 +129,10 @@ public record ${ClassName}ApiModel(
 #if($column.query)
 #set($field=$outputText.javaIdentifier($column.javaField))
 #if($column.queryType == 'BETWEEN')
-        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_begin_${field}
-        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_end_${field}
+        ,#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')@io.swagger.v3.oas.annotations.Parameter(schema=@Schema(type="string"))#end#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_begin_${field}
+        ,#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')@io.swagger.v3.oas.annotations.Parameter(schema=@Schema(type="string"))#end#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_end_${field}
 #else
-        ,#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_${field}
+        ,#if($column.javaType == 'Long' || $column.javaType == 'BigDecimal')@io.swagger.v3.oas.annotations.Parameter(schema=@Schema(type="string"))#end#if($column.javaType == 'Date')@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME,fallbackPatterns={"yyyy-MM-dd","yyyy-MM-dd HH:mm:ss"})#end $column.javaType q_${field}
 #end
 #end
 #end

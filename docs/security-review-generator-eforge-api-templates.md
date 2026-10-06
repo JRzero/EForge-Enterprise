@@ -177,3 +177,63 @@ owned process, stopped it so the owner script cleaned its database, then added t
 formal server.destroy in nested finally. Both final runs exit naturally, no System.exit
 or assertion bypass. This new HTTP probe has no cloud acceptance yet; the earlier
 nativeSQL e8a637f workflow37492073073 is still in progress and cannot cover new code.
+
+
+Native SQL cloud acceptance: e8a637fffba3487a1357c9f393435f2be7dbeebc,
+server37492073073 all three jobs SUCCESS. Direct generator-business-module-cloud-
+accepted.log proves modes0/1 each52 generated module SQL/transaction assertions,
+606 backend (596boot+10scope, one OS-specific skip), two66 snapshots/two474 text,
+default/enabled each43 real browsers and complete existing auth/API/OpenAPI checks.
+Observer43975 ended0. This does not accept later network or contract revisions.
+
+Actual generated OpenAPI/client checkpoint (2026-10-07, local verification):
+The deployed generated controller is now discovered by real springdoc and serves
+an actual HTTP contract; no hand-written TypeScript DTO substitutes for that output.
+This revealed path Long IDs, delete ID elements and BigDecimal interval query
+parameters documented as numbers, and dynamic create/delete status inferred200.
+Those contracts would lose precision or misdescribe successful responses. Templates
+now document string exact IDs/decimal filters,201 create,204 delete, explicit JSON
+responses and actual binary XLSX export; runtime Java Long/BigDecimal types, original
+validation, mapper/service and authorization behavior remain unchanged.
+The array element needs explicit String.class implementation in ArraySchema; a
+first type-only annotation still produced int64 in the real document. The native
+regression failed before that fix and proves the corrected actual schema/client.
+
+web/scripts/verify-generator-business-client.mjs uses pinned oazapfts/TypeScript,
+generates twice and compares identical output, compiles strict client/types including
+expected errors for numeric path/bulk IDs/decimal queries, then directly calls the
+same deployed generated CRUD/tree/sub HTTP modules. Exact IDs/money, create201,
+update/detail/list/filter, real XLSX Blob/ZIP header and delete204 pass with actual SQL.
+The node process has a90-second bound and owns a unique validated temporary directory;
+CI installs existing pinned dependencies before invoking both modes. Native final
+logs generator-business-client-final-0/1.log each116 Java assertions plus all three
+real generated client checks passed, no fixture/service witness for those requests.
+Local full Maven606 (one OS-specific skip), frontend reproducibility/lint/typecheck/
+79 unit tests/build passed. Initial script lint Blob global was corrected to explicit
+node:buffer import; no production frontend page was changed.
+
+This remains a checkpoint. The test authentication filter is controlled LoginUser,
+not product JWT/Redis. Actual persisted audit/concurrent writes and final product
+assembly remain pending. The existing production api-v1 group filters the controller
+package; registering externally generated packages/contracts in that actual canonical
+group needs integration and must not be silently treated as proven by this standalone
+springdoc context. Real React/EForge templates, generator manager and generated browser
+flows remain incomplete. Prior network commit7c5e041 cloud37493510404 is pending;
+its unique observer65926 is live and does not include these new contract/client fixes.
+
+
+Exact network checkpoint cloud acceptance:7c5e041203632f9330c412ea2bcccc36e34296b9,
+server37493510404 all three SUCCESS, direct generator-business-network-cloud-accepted.log
+proves both modes80 real generated HTTP/SQL assertions, two66 snapshot/two474 output
+contexts, default/enabled each43 actual browsers and complete existing auth/API/OpenAPI
+regression. Observer65926 ended0. This accepts the preceding network checkpoint only;
+it does not contain the latest OpenAPI/TypeScript client contract fixes above.
+
+
+Latest client-contract local final regression: sequential process20597 exited0;
+default/enabled custom-output complete existing real API checks both PASS in
+generator-business-client-disabled/enabled-runtime.log (no local browser run).
+Both live OpenAPI hashes equal committed D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+No live local app remains. This verifies existing product APIs, while generated
+module network/client evidence remains the independent two116 native checks;
+production auth/group integration and full React generator remain pending.

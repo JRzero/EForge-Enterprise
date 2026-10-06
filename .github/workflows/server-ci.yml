@@ -108,6 +108,15 @@ jobs:
         run: |
           ./server/scripts/verify-generator-rendering-snapshot.ps1 -LowerCaseTableNames 0
           ./server/scripts/verify-generator-rendering-snapshot.ps1 -LowerCaseTableNames 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install pinned generated client verification tools
+        working-directory: web
+        run: npm ci --no-audit --no-fund
+
       - name: Verify generated CRUD tree and sub modules on actual MySQL
         shell: pwsh
         run: |

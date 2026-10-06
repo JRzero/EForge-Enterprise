@@ -1400,7 +1400,7 @@
     "scope": "Canonical/original backend filesystem output, typed honest partial outcomes and generated authenticated client. React/EForge templates, full manager UI and generated business HTTP/browser remain required."
   },
   "generatorEforgeApiTemplatesValidation": {
-    "state": "module-templates-cloud-verified-network-locally-verified-react-incomplete",
+    "state": "generated-business-openapi-client-locally-verified-react-incomplete",
     "review": "docs/security-review-generator-eforge-api-templates.md",
     "backendTests": 606,
     "compiledModuleCategories": [
@@ -1411,20 +1411,25 @@
     "moduleCompile": "business-excludes-boot-api-in-boot-assembly",
     "methodSecurity": "actual-original-permission-service-and-proxies-passed",
     "mvc": "read-write-export-error-boundaries-passed-with-service-witness",
-    "runtime": "both-existing-api-profiles-success-no-browser-no-generated-deployment",
+    "runtime": "latest-existing-api-default-and-enabled-custom-profiles-success-no-local-browser",
     "generatedModuleSqlDeployment": "actual-mysql-generated-spring-transactions-and-loopback-http-passed",
     "actualSqlAssertions": [52,52],
     "actualSqlAndNetworkAssertions": [80,80],
+    "actualSqlNetworkOpenApiClientAssertions": [116,116],
+    "generatedClientReproducibility": "twice-identical-strict-type-check-and-real-http-crud-filter-xlsx-passed",
     "networkAuthentication": "controlled-test-login-user-product-jwt-redis-chain-not-yet-verified",
     "actualLateParentFaultChildRollback": "passed",
-    "generatedModuleOpenApiClient": "not-yet-verified",
+    "generatedModuleOpenApiClient": "actual-standalone-springdoc-http-and-pinned-generated-client-locally-verified",
+    "productCanonicalOpenApiRegistration": "existing-package-scan-filter-requires-generated-package-integration",
     "reactTemplate": "still-vue-fallback-incomplete",
-    "currentCloud": "template-source-all-three-server-success-native-script-workflow-pending",
+    "currentCloud": "template-native-sql-network-all-three-success-latest-client-fixes-pending",
+    "networkCommit": "7c5e041203632f9330c412ea2bcccc36e34296b9",
+    "networkServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37493510404",
     "nativeSnapshotAssertions": [66,66],
     "nativeSqlScriptCommit": "e8a637fffba3487a1357c9f393435f2be7dbeebc",
     "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37489735710",
-    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/product JWT-Redis authentication/OpenAPI-client, React/EForge templates, full generator manager and generated browser remain required."
+    "scope": "Concrete generated API templates are actual output, but concurrent SQL/audit/product JWT-Redis authentication/canonical OpenAPI group integration, React/EForge templates, full generator manager and generated browser remain required."
   }
 }

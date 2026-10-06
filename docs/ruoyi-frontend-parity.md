@@ -1797,3 +1797,24 @@ exit cleanly. Controlled test LoginUser does not prove deployed JWT/Redis auth;
 persisted audit/concurrent writes/OpenAPI/client/React/UI/browser remain pending.
 The new probe is locally verified only; e8a637f cloud37492073073 still runs and does
 not include this new HTTP code. Form builder remains deferred, not complete.
+
+
+2026-10-07 native SQL e8a637f cloud37492073073 all three SUCCESS, direct accepted
+log proves two52 SQL/two66 snapshot/two474 text/two43 real browser/full API checks.
+New generated API OpenAPI/client checkpoint is locally verified: actual HTTP springdoc
+contracts exposed and fixed numeric exact-ID/decimal-filter and inferred success-code
+bugs; pinned client reproduces twice, strict types and real CRUD/tree/sub HTTP/filter/
+XLSX checks pass with actual SQL (each116 assertions in both modes). Full Maven606,
+frontend79 units/repro/lint/types/build pass. Product JWT/Redis, persisted audit and
+concurrency, actual canonical group inclusion of generated packages, real React/EForge
+output/manager/browser remain pending. Network7c5e041 cloud37493510404 is separately
+pending and cannot accept these latest fixes. Form builder remains deferred.
+
+
+Latest client-contract local final regression: sequential process20597 exited0;
+default/enabled custom-output complete existing real API checks both PASS in
+generator-business-client-disabled/enabled-runtime.log (no local browser run).
+Both live OpenAPI hashes equal committed D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3.
+No live local app remains. This verifies existing product APIs, while generated
+module network/client evidence remains the independent two116 native checks;
+production auth/group integration and full React generator remain pending.

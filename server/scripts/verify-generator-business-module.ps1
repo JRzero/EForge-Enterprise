@@ -9,6 +9,7 @@ $probeClasspath=($probeReport.testsuite.properties.property | Where-Object {$_.n
 if(!$probeClasspath){throw 'The Maven report has no resolved runtime classpath.'}
 $probeClasspath=($probeClasspath.Split([IO.Path]::PathSeparator) | Where-Object {![string]::IsNullOrWhiteSpace($_)}) -join [IO.Path]::PathSeparator
 foreach($probeDependency in $probeClasspath.Split([IO.Path]::PathSeparator)) {if(!(Test-Path -LiteralPath $probeDependency)){throw 'Run Maven verify before the generated module probe.'}}
+if(!(Test-Path -LiteralPath (Join-Path $repoRoot 'web/node_modules/oazapfts/package.json'))){throw 'Run npm ci in web before the generated module client probe.'}
 $probeName='eforge-business-module-'+[guid]::NewGuid().ToString('N').Substring(0,12)
 $probePassword=[guid]::NewGuid().ToString('N')
 $probeOwned=$false
