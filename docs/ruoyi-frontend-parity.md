@@ -1,9 +1,13 @@
 # RuoYi frontend capability parity
 
-The active objective is **all original frontend capabilities**, with strict
+The active objective is **all original frontend capabilities except explicitly deferred scope**, with strict
 function-by-function verification. A working shell or a green subset of tests
 does not prove this objective complete. The architecture baselines in AGENTS.md
 remain unchanged.
+
+## Current scope adjustment (2026-10-06)
+
+The user explicitly deferred the online form builder. Do not develop or require it for current acceptance. Preserve its original behavior inventory for future work; deferred does not mean implemented or verified. All other capability requirements remain active.
 
 ## Immutable behavior reference
 
@@ -46,7 +50,7 @@ It is a work inventory, not executable proof of completion.
 | Cache monitoring | Redis info/command statistics, names/keys/value lookup, per-key/per-name/all clear with confirmations and permissions | Canonical API/client and both React pages passed complete local regression and exact-head CI, including rose/gauge charts, mobile/keyboard, scoped/global clearing, SQL retention and actual session invalidation; final capability audit pending |
 | Connection pool/API consoles | authenticated Druid and API documentation entry and errors; disabled console behavior; never anonymous production access | Canonical API/client and both embedded React pages pass local and exact-head CI enabled/default-disabled runtime and browser acceptance, including original login/SQL/JSON windows, Swagger authorization/Try it out, logout/revocation, no-store and failure recovery; final capability audit pending |
 | Code generator | DB tables search/import/create, metadata editing, field/query/form/list configuration, tree/main-subtable modes, sync, preview, delete, download and custom output, generated API/routes/pages and reproducible validation | Missing React output and UI |
-| Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Missing |
+| Online form builder | drag/reorder/configure fields and layouts, field-specific controls, preview, code-type choice, generated code/download/copy, tree/icon configuration | Deferred by user on 2026-10-06; excluded from current development and acceptance; original inventory retained, not implemented |
 | Shared controls | dictionary tags, paging, reset/date ranges, toolbar column/search toggle, image/file upload and preview, rich editor, icon picker, cron editor, keyboard/focus and empty/loading/error/retry states | Missing complete parity |
 
 ## Per-feature acceptance gates

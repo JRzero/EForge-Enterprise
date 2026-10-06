@@ -1,5 +1,9 @@
 # EForge Enterprise Roadmap
 
+## Current scope adjustment (2026-10-06)
+
+The user deferred the online form builder. It is excluded from current development and acceptance, while its original inventory is retained for future work. Historical entries below do not override this decision. Generator work, scheduled jobs, shell/shared capabilities and every other required capability remain in scope. Deferred work must not be reported as completed.
+
 ## Phase 0 — Architecture
 
 - [x] repository model

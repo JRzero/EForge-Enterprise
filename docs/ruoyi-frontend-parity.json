@@ -4,6 +4,18 @@
   "frontendBehaviorCommit": "0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
   "frontendRelease": "v3.9.2",
   "reason": "The pinned springboot3 backend commit has split frontend repositories. The immutable same-version historical frontend supplies behavior references and the explicitly attributed static SVG bundle under ADR-0014; no Vue application is imported and the backend baseline stays unchanged.",
+  "scopeAdjustments": [
+    {
+      "capability": "online-form-builder",
+      "status": "deferred-by-user",
+      "date": "2026-10-06",
+      "instruction": "表单构建器功能暂不需要开发",
+      "includedInCurrentDevelopment": false,
+      "includedInCurrentAcceptance": false,
+      "retainOriginalInventory": true,
+      "implemented": false
+    }
+  ],
   "sourceFiles": [
     "ruoyi-ui/src/App.vue",
     "ruoyi-ui/src/api/login.js",
