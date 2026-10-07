@@ -2024,4 +2024,20 @@
     "review":"docs/security-review-password-controls.md",
     "fullGoalComplete":false
   }
+  ,"rememberedLogin": {
+    "status":"local-accepted-exact-cloud-pending",
+    "reference":"ruoyi-ui/src/views/login.vue@0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
+    "frontendUnitTests":98,
+    "mockedBrowserTests":130,
+    "focusedRealBrowsers":1,
+    "realAuthority":"40388-terminal0-focused1-and-full-api",
+    "requiredCloudRealBrowsersPerProfile":60,
+    "expiryDays":30,
+    "plaintextCredentialPersistence":false,
+    "nonSecretSynchronousOptOutMarker":true,
+    "automaticLogin":false,
+    "freshMavenRun":false,
+    "review":"docs/security-review-remembered-login.md",
+    "fullGoalComplete":false
+  }
 }
