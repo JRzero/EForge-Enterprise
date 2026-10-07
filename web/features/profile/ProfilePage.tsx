@@ -69,6 +69,6 @@ export function ProfilePage() {
         <div className="post-row-actions"><Button label={busy ? '正在修改密码…' : '保存密码'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </form>}
     </div></div>}
-    {avatar && profile ? <AvatarDialog avatarUrl={profile.avatarUrl} onCancel={() => setAvatar(false)} onSaved={async () => { const result = await api.getMyProfile();setProfile(result);setAvatar(false);setFeedback('头像已保存。'); }} /> : null}
+    {avatar && profile ? <AvatarDialog avatarUrl={profile.avatarUrl} onCancel={() => setAvatar(false)} onSaved={async () => { const result = await api.getMyProfile();setProfile(result);setAvatar(false);setFeedback('头像已保存。'); try { await controls.refresh(); } catch { setError('头像已保存，账号信息刷新失败，请刷新页面重试。'); } }} /> : null}
   </section>;
 }

@@ -37,6 +37,8 @@ test('real self profile, password verification, avatar crop/rotation/replace and
     const expected=await dialog.locator('canvas').first().evaluate(async (canvas:HTMLCanvasElement)=>({data:canvas.toDataURL(),hash:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',canvas.getContext('2d')!.getImageData(0,0,200,200).data))).join(',')})); expect(expected.data).not.toBe(original);
     await dialog.getByRole('button',{name:'保存头像',exact:true}).click(); await expect(dialog).toHaveCount(0); await expect(page.getByRole('status').filter({hasText:'头像已保存'})).toBeVisible();
     avatarUrl=(await (await page.request.get('/api/v1/me',{headers:ownHeaders})).json()).avatarUrl;
+    await expect(page.getByRole('link',{name:'个人中心',exact:true}).locator('img')).toHaveAttribute('src',avatarUrl!);
+    await expect.poll(()=>page.getByRole('link',{name:'个人中心',exact:true}).locator('img').evaluate((image:HTMLImageElement)=>image.naturalWidth)).toBe(200);
     const actual=await page.evaluate(async (url:string)=> {const image=new Image(); image.src=url; await image.decode(); const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight; const context=canvas.getContext('2d')!;context.drawImage(image,0,0); return {width:canvas.width,height:canvas.height,hash:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',context.getImageData(0,0,200,200).data))).join(',')};},avatarUrl!);
     expect(actual).toEqual({width:200,height:200,hash:expected.hash});
     await page.reload(); await expect(page.getByRole('img',{name:'当前头像',exact:true})).toHaveAttribute('src',avatarUrl!);

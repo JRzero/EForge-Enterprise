@@ -31,6 +31,7 @@ export type NavigationNode = {
     "type": "GROUP" | "ROUTE" | "EXTERNAL";
 };
 export type UserSummary = {
+    avatarUrl?: string;
     displayName: string;
     id: string;
     username: string;

@@ -65,7 +65,9 @@ public class BootstrapService
         if(persistSession)tokens.setLoginUser(session);
         String displayName = user.getNickName() == null || user.getNickName().isBlank() ? user.getUserName() : user.getNickName();
         return new BootstrapResponse(new BootstrapResponse.UserSummary(user.getUserId().toString(),
-                user.getUserName(), displayName), Collections.unmodifiableSet(roles),
+                user.getUserName(), displayName, safeAvatar(user.getAvatar())), Collections.unmodifiableSet(roles),
                 Collections.unmodifiableSet(permissions), navigation);
     }
+    private static String safeAvatar(String url)
+    { return url != null && url.matches("/profile/[A-Za-z0-9/_-]+\\.[A-Za-z0-9]+") ? url : null; }
 }

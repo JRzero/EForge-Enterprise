@@ -3672,6 +3672,9 @@
       },
       "UserSummary": {
         "properties": {
+          "avatarUrl": {
+            "type": "string"
+          },
           "displayName": {
             "type": "string"
           },

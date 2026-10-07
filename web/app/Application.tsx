@@ -7,6 +7,7 @@ import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
 import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshContext} from './context';
+import {AccountAvatar} from './components/AccountAvatar';
 import {EnterpriseShell} from './components/EnterpriseShell';
 import {NavigationBreadcrumbs, NavigationSearch} from './components/NavigationTools';
 import {routes} from './routes';
@@ -56,7 +57,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
       header={menuButton => <div className="enterprise-header">{menuButton}<span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
         <Suspense fallback={null}><HeaderNotices version={noticeVersion} /></Suspense>
-        <a href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}>个人中心</a>
+        <a className="header-account-link" aria-label="个人中心" href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}><AccountAvatar key={snapshot.user.id+snapshot.user.avatarUrl} user={snapshot.user}/>个人中心</a>
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
       {match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : null}
       {logoutError ? <p role="alert">{logoutError}</p> : null}

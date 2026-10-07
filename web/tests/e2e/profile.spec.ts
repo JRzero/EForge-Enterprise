@@ -23,3 +23,18 @@ test('authenticated self-service route retries without grants, validates forms, 
   await page.getByRole('button',{name:'修改头像',exact:true}).click(); const dialogBox=await page.getByRole('dialog').boundingBox(); expect(dialogBox!.x).toBeGreaterThanOrEqual(0); expect(dialogBox!.x+dialogBox!.width).toBeLessThanOrEqual(390); await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'关闭个人中心'}).click(); await expect(page).toHaveURL(/\/dashboard$/);await expect(page.locator('[data-page-path="/user/profile"]')).toHaveCount(0);await expect(page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：个人中心',exact:true})).toHaveCount(0); await page.getByRole('link',{name:'个人中心',exact:true}).click(); await expect(page).toHaveURL(/\/user\/profile$/);await expect(page.getByRole('tab',{name:'基本资料'})).toHaveAttribute('aria-selected','true');await page.getByRole('tab',{name:'修改密码'}).click();await expect(page.getByLabel('旧密码',{exact:true})).toHaveValue('');
 });
+
+test('header avatar uses safe profile images, recovers broken images and retains the native profile entry', async ({page}) => {
+  let avatarUrl='/profile/avatar/current.png';
+  const requests:string[]=[];page.on('request',request=>requests.push(request.url()));
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'7',username:'ordinary',displayName:'😀普通用户',avatarUrl},roles:[],permissions:[],navigation:[]}}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'7',username:'ordinary',displayName:'😀普通用户',sex:'2',roleNames:'',postNames:''}}));
+  await page.route('**/profile/avatar/current.png',route=>route.fulfill({path:'tests/fixtures/avatar.png',contentType:'image/png'}));
+  await page.route('**/profile/avatar/missing.png',route=>route.fulfill({status:404}));
+  await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill('ordinary');await page.getByLabel('密码',{exact:true}).fill('Password123');await page.getByRole('button',{name:'登录',exact:true}).click();
+  const link=page.getByRole('link',{name:'个人中心',exact:true});await expect(link.locator('img')).toHaveAttribute('src',avatarUrl);await expect.poll(()=>link.locator('img').evaluate((image:HTMLImageElement)=>image.naturalWidth)).toBeGreaterThan(0);
+  avatarUrl='/profile/avatar/missing.png';await page.reload();await expect(link.locator('img')).toHaveCount(0);await expect(link.locator('.header-account-avatar-fallback')).toHaveText('😀');
+  avatarUrl='https://example.com/tracking.png';await page.reload();await expect(link.locator('.header-account-avatar-fallback')).toHaveText('😀');expect(requests.some(url=>url.includes('example.com/tracking'))).toBe(false);await expect(link).toHaveAttribute('href','/user/profile');
+});

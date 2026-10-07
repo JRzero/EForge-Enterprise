@@ -13,5 +13,5 @@ public record BootstrapResponse(
     public record UserSummary(
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String id,
             @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String username,
-            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String displayName) { }
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String displayName, String avatarUrl) { }
 }

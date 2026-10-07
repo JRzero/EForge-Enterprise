@@ -329,3 +329,7 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 .header-utilities a {margin-inline:0;font-size:12px;}
 .header-utilities select {max-width:100px;}
 .top-navigation-brand {max-width:180px;}
+
+.header-account-link {display:inline-flex;align-items:center;gap:6px;}
+.header-account-avatar {width:28px;height:28px;flex:0 0 28px;object-fit:cover;border-radius:50%;}
+.header-account-avatar-fallback {display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:white;}

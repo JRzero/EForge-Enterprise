@@ -101,4 +101,15 @@ class BootstrapServiceTest
         user.setStatus("1");assertThrows(CredentialsExpiredException.class,()->service.refreshConsoleAuthorization(session));
         verify(tokens).delLoginUser("session-id");verify(tokens,never()).setLoginUser(any());verifyNoInteractions(menus,permissions);
     }
+    @Test void avatarUsesFreshAccountAndRejectsUnsafeStoredPaths()
+    {
+        when(menus.selectActiveRoles(2L)).thenReturn(List.of());
+        when(menus.selectGrantedMenus(2L,false)).thenReturn(List.of());
+        user.setAvatar("/profile/avatar/2026/10/avatar_2.png");
+        assertEquals(user.getAvatar(),service.bootstrap(session).user().avatarUrl());
+        for(String unsafe:List.of("https://example.com/tracker.png","javascript:alert(1)","/profile/../secrets.png","//example.com/x.png","/profile/a.png?token=secret")) {
+            user.setAvatar(unsafe);assertNull(service.bootstrap(session).user().avatarUrl());
+        }
+        assertTrue(session.getPermissions().isEmpty());verifyNoInteractions(permissions);
+    }
 }
