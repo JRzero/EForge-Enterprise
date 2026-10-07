@@ -46,6 +46,12 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('请填写岗位编码');
   await page.getByRole('dialog').getByLabel('岗位编码', {exact: true}).fill(code);
   await page.getByRole('dialog').getByLabel('岗位名称', {exact: true}).fill(name);
+  const nativeEditor=page.getByRole('dialog',{name:'新增岗位',exact:true}),geometry=(await nativeEditor.boundingBox())!;
+  await nativeEditor.getByRole('button',{name:'移动弹窗',exact:true}).focus();await page.keyboard.press('ArrowRight');
+  await expect.poll(async()=>Math.round((await nativeEditor.boundingBox())!.x-geometry.x)).toBe(10);
+  await nativeEditor.getByRole('button',{name:'调整弹窗宽度',exact:true}).focus();await page.keyboard.press('ArrowRight');
+  await expect.poll(async()=>Math.round((await nativeEditor.boundingBox())!.width-geometry.width)).toBe(10);
+  await page.keyboard.press('Home');await expect(nativeEditor.getByLabel('岗位名称',{exact:true})).toHaveValue(name);
   await page.getByRole('dialog').getByLabel('显示顺序', {exact: true}).fill('9');
   await page.getByLabel('备注', {exact: true}).fill('浏览器真实操作');
   await page.getByRole('button', {name: '保存岗位', exact: true}).click();

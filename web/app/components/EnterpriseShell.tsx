@@ -95,7 +95,7 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
         <button type="button" onClick={() => {setPreferences({...layoutDefaults});try {reset();setSettingMessage('已恢复默认布局');} catch {setSettingMessage('当前布局已恢复，无法清除保存的配置');}}}>恢复默认</button>
         <button type="button" onClick={closeSettings}>关闭设置</button></div></section>
     </ResourceDialog> : null}
-    {opened ? <ResourceDialog titleId={titleId} busy={false} onCancel={close} closeOnBackdrop>
+    {opened ? <ResourceDialog titleId={titleId} busy={false} onCancel={close} closeOnBackdrop adjustable={false}>
       <div className="sidebar-drawer-body" id={navigationId} onKeyDown={trapDrawerTab}>
         <div className="sidebar-drawer-title"><h2 id={titleId}>菜单</h2><button type="button" aria-label="关闭菜单" onClick={close}>×</button></div>
         <div className="sidebar-drawer-brand">{brand}</div>
