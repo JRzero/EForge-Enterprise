@@ -88,9 +88,41 @@ test('actual route parents retain their links and expose children with a separat
   await role.click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await expect(children).toHaveAttribute('aria-expanded','true');
   await children.click();await expect(nav.getByRole('link',{name:'岗位子页面',exact:true})).toBeHidden();await expect(role).toBeVisible();await expect(page).toHaveURL(/\/role$/);
 });
+test('mobile sidebar uses the original breakpoint, native focus trap and route/resize dismissal',async({page})=>{
+  await page.setViewportSize({width:991,height:844});await setup(page);const opener=page.getByRole('button',{name:'打开菜单',exact:true});
+  await expect(page.locator('.ef-app-shell__sidebar')).toBeHidden();await expect(page.getByRole('dialog',{name:'菜单',exact:true})).toHaveCount(0);
+  await opener.click();const drawer=page.getByRole('dialog',{name:'菜单',exact:true});await expect(drawer).toBeVisible();await expect(page.locator('body')).toHaveCSS('overflow','hidden');
+  await drawer.getByRole('button',{name:'系统管理',exact:true}).click();await drawer.getByRole('link',{name:'角色管理',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await expect(drawer).toHaveCount(0);
+  await opener.click();await drawer.getByRole('button',{name:'关闭菜单',exact:true}).focus();await page.keyboard.press('Shift+Tab');
+  expect(await drawer.evaluate(element=>element.contains(document.activeElement))).toBe(true);await page.keyboard.press('Escape');await expect(drawer).toHaveCount(0);await expect(opener).toBeFocused();await expect(page.locator('body')).toHaveCSS('overflow','visible');
+  await opener.click();await page.mouse.click(980,700);await expect(drawer).toHaveCount(0);await expect(opener).toBeFocused();await expect(page.locator('body')).toHaveCSS('overflow','visible');
+  await opener.click();await page.setViewportSize({width:992,height:844});await expect(drawer).toHaveCount(0);await expect(page.locator('.ef-app-shell__sidebar')).toBeVisible();
+  await page.setViewportSize({width:390,height:844});await expect(drawer).toHaveCount(0);await opener.click();await expect(drawer).toBeVisible();await expect(page.locator('body')).toHaveCSS('overflow','hidden');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
 test('personal center does not borrow user-management ancestry from its URL prefix',async({page})=>{
   const state=await setup(page);state.userRoute=true;state.extraGroup=true;state.permissions.push('system:user:list');await page.reload();const nav=page.locator('.ef-app-shell__nav');
   const tools=nav.getByRole('button',{name:'工具菜单',exact:true}),system=nav.getByRole('button',{name:'系统管理',exact:true});
   await tools.click();await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
   await expect(tools).toHaveAttribute('aria-expanded','true');await expect(system).toHaveAttribute('aria-expanded','false');
+});
+test('desktop collapse retains popup navigation, keyboard dismissal, preference and page draft',async({page})=>{
+  await setup(page);const sidebar=page.locator('.ef-app-shell__sidebar');await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(240);
+  await page.getByRole('button',{name:'收起菜单',exact:true}).click();await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(64);
+  const group=sidebar.getByRole('button',{name:'系统管理',exact:true}),role=sidebar.getByRole('link',{name:'角色管理',exact:true});
+  await expect(group).toHaveAttribute('aria-expanded','false');await group.hover();await expect(role).toBeVisible();await group.focus();await group.press('Escape');await expect(role).toBeHidden();await expect(group).toBeFocused();
+  await group.press('Enter');await expect(role).toBeVisible();await role.click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await expect(role).toBeHidden();
+  await page.reload();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(64);
+  await page.getByLabel('角色名称筛选',{exact:true}).fill('折叠草稿');await page.getByRole('button',{name:'展开菜单',exact:true}).click();await expect(role).toBeVisible();await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('折叠草稿');
+  await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(240);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('collapsed popup stays within the viewport, closes outside and preserves preference across mobile mode',async({page})=>{
+  await setup(page);await page.getByRole('button',{name:'收起菜单',exact:true}).click();const sidebar=page.locator('.ef-app-shell__sidebar'),group=sidebar.getByRole('button',{name:'系统管理',exact:true});
+  await page.setViewportSize({width:1100,height:300});await group.hover();const popup=sidebar.locator('.navigation-popup:visible');await expect(popup).toBeVisible();
+  const bounds=(await popup.boundingBox())!;expect(bounds.y).toBeGreaterThanOrEqual(0);expect(bounds.y+bounds.height).toBeLessThanOrEqual(300);expect(bounds.x+bounds.width).toBeLessThanOrEqual(1100);
+  await page.getByRole('heading',{name:'你好，管理员'}).click();await expect(popup).toHaveCount(0);
+  await page.setViewportSize({width:991,height:844});await page.getByRole('button',{name:'打开菜单',exact:true}).click();const drawer=page.getByRole('dialog',{name:'菜单',exact:true});
+  await drawer.getByRole('button',{name:'系统管理',exact:true}).click();await drawer.getByRole('link',{name:'角色管理',exact:true}).click();await expect(drawer).toHaveCount(0);await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
+  await page.setViewportSize({width:992,height:844});await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(64);await expect(page.getByRole('button',{name:'展开菜单',exact:true})).toBeVisible();await expect(popup).toHaveCount(0);
 });

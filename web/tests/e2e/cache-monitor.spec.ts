@@ -34,7 +34,7 @@ test('cache statistics retain all fields, exact counters, rose/gauge graphics, s
   }
   await page.evaluate(() => (window as Window & {restoreCacheTimers?: () => void}).restoreCacheTimers?.());
   value = {...stats, keyCount: '0', commands: [], info: {...stats.info, usedMemory: '0B', usedMemoryBytes: '0'}}; await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.getByText('暂无命令统计', {exact: true})).toBeVisible(); await expect(page.locator('dd').filter({hasText: /^0$/})).toBeVisible();
-  await page.getByRole('link', {name: '工作台', exact: true}).click(); await page.getByRole('link', {name: '缓存监控', exact: true}).click(); await expect(page.locator('.cache-chart svg')).toHaveCount(2); expect(errors).toEqual([]);
+  await page.getByRole('button', {name: '打开菜单', exact: true}).click(); await page.getByRole('dialog', {name: '菜单', exact: true}).getByRole('link', {name: '工作台', exact: true}).click(); await page.getByRole('button', {name: '打开菜单', exact: true}).click(); const menu = page.getByRole('dialog', {name: '菜单', exact: true}); await menu.getByRole('button', {name: '系统监控', exact: true}).click(); await menu.getByRole('link', {name: '缓存监控', exact: true}).click(); await expect(page.locator('.cache-chart svg')).toHaveCount(2); expect(errors).toEqual([]);
 });
 test('stats loading ends on fault, keyboard retry succeeds, backend denial clears diagnostic fields', async ({page}) => {
   let release!: () => void; const initialResponse = new Promise<void>(resolve => {release = resolve;});

@@ -105,3 +105,29 @@ was not a product failure and no successful job was restarted. This accepts
 GROUP disclosure and declared ancestry only. Mobile source subsequently merged
 locally remains independently pending; desktop collapse is isolated and also
 not yet real/cloud accepted. Original active full parity remains unfinished.
+
+## Responsive sidebar phase (2026-10-07)
+
+The actual Application now consumes EnterpriseShell around the pinned EForge
+AppShell. Original 991/992px breakpoint opens a native modal drawer; route,
+account and viewport changes dismiss it. Tab boundaries, Escape/backdrop focus
+restoration and body scroll restoration are verified. Mobile navigation uses the
+same authorized static projection; GROUP nodes remain disclosure controls.
+Desktop collapse changes the shell width from 240px to 64px, retains literal
+accessible names and provides mouse/keyboard child popups. Escape, outside
+pointer, scrolling and resize close popups. Popup bounds are clamped to the
+viewport. Local storage keeps only collapsed/expanded preference; unavailable
+storage does not prevent navigation. Switching to mobile retains the desktop
+preference without presenting a collapsed drawer. PageWorkspace remains mounted,
+so toggling does not discard page drafts. Java, schema, authorization and denied
+Quartz runtime source are unchanged.
+
+Final frontend lint/typecheck, reproducible client, 98 units, production build
+and 109 mocked browser tests pass. Earlier mobile-only authority79194 completed
+both57 actual framework browser/API profiles with identical contract OpenAPI;
+that evidence is not relabeled as final desktop-collapse verification.
+Final combined-source real authority96723 and exact-source cloud are pending.
+The full frontend parity goal remains unfinished; mixed/top navigation, settings,
+other remaining editor/action audits and full capability acceptance remain.
+The user requested pausing after this responsive sidebar task; finish its
+verification and commit/push, then pause without starting another module.

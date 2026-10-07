@@ -1,5 +1,5 @@
 import {lazy, Suspense, useCallback, useMemo, useState, useSyncExternalStore} from 'react';
-import {AppShell, PermissionProvider} from '@eforge/patterns';
+import {PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
 import {getRouteAncestry, matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
 import {LoginPage} from '../features/auth/LoginPage';
@@ -7,7 +7,7 @@ import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
 import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshContext} from './context';
-import {Navigation} from './Navigation';
+import {EnterpriseShell} from './components/EnterpriseShell';
 import {NavigationBreadcrumbs, NavigationSearch} from './components/NavigationTools';
 import {routes} from './routes';
 import {PageWorkspace} from './components/PageWorkspace';
@@ -49,13 +49,12 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const allowed = match && canAccessRoute(match.route, permissions);
 
   return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><ApplicationControlsContext.Provider value={{navigate: path => router.navigate(path), refresh: runtime.refresh}}><NoticeRefreshContext.Provider value={invalidateNotices}><PermissionProvider permissions={permissions}>
-    <AppShell brand={<a className="enterprise-brand" href="/dashboard" onClick={event => {
+    <EnterpriseShell activePaths={match ? getRouteAncestry(routes,match.route.id).map(route => route.path) : []} items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} href={href} ownerId={snapshot.user.id} router={router} brand={<a aria-label="EForge Enterprise" className="enterprise-brand" href="/dashboard" onClick={event => {
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); router.navigate('/dashboard');
       }
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
-      navigation={<Navigation items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} router={router} activePaths={match ? getRouteAncestry(routes,match.route.id).map(route => route.path) : []} />}
-      header={<div className="enterprise-header"><span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
+      header={menuButton => <div className="enterprise-header">{menuButton}<span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
         <Suspense fallback={null}><HeaderNotices version={noticeVersion} /></Suspense>
         <a href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}>个人中心</a>
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
@@ -63,6 +62,6 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
       {logoutError ? <p role="alert">{logoutError}</p> : null}
       <PageWorkspace key={JSON.stringify([snapshot.user.id,snapshot.user.username,snapshot.roles,snapshot.permissions,snapshot.navigation])} ownerId={snapshot.user.id} href={href} items={navigation} permissions={permissions} router={router}
         fallback={<StatePage code={match?'403':'404'} router={router} />} />
-    </AppShell>
+    </EnterpriseShell>
   </PermissionProvider></NoticeRefreshContext.Provider></ApplicationControlsContext.Provider></BootstrapContext.Provider></ApiContext.Provider>;
 }

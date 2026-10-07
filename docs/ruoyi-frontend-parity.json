@@ -1376,7 +1376,10 @@
     "actualJavaCompileExecutionCases": 10,
     "beforeFailures": 1,
     "afterFailures": 0,
-    "realBrowserProfiles": [43,43],
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
     "runtime": "both-complete-api-profiles-success",
     "openApiSha256": "B817D25FAACE254B3514DB47AF09F0F8356122B4D6E605E91615DCF30E630CF0",
     "scope": "Generated service getter calls match saved PK/domain accessor spelling while public mapper/service suffixes remain compatible. Full language semantics, tree aliases, custom output, React/EForge/UI and actual generated business deployment remain required."
@@ -1390,7 +1393,10 @@
     "actualWindowsJunction": "passed",
     "frontendUnitTests": 79,
     "mockedBrowserTests": 64,
-    "realBrowserProfiles": [43,43],
+    "realBrowserProfiles": [
+      43,
+      43
+    ],
     "runtime": "both-complete-api-and-43-browser-profiles-success",
     "openApiSha256": "D3161897413EDBBE68548E6CA5FB73B00E1E5624D678FC3104F526E9694892E3",
     "currentCloud": "all-three-server-and-web-success",
@@ -1413,10 +1419,22 @@
     "mvc": "read-write-export-error-boundaries-passed-with-service-witness",
     "runtime": "actual-generated-boot-jwt-redis-and-complete-api-default-enabled-custom-success-no-local-browser",
     "generatedModuleSqlDeployment": "actual-mysql-generated-spring-transactions-and-loopback-http-passed",
-    "actualSqlAssertions": [52,52],
-    "actualSqlAndNetworkAssertions": [80,80],
-    "actualSqlNetworkOpenApiClientAssertions": [116,116],
-    "actualProductCanonicalGroupAssertions": [122,122],
+    "actualSqlAssertions": [
+      52,
+      52
+    ],
+    "actualSqlAndNetworkAssertions": [
+      80,
+      80
+    ],
+    "actualSqlNetworkOpenApiClientAssertions": [
+      116,
+      116
+    ],
+    "actualProductCanonicalGroupAssertions": [
+      122,
+      122
+    ],
     "canonicalGroupCommit": "08771cd604d9f17c321884cede68850bc2e7b472",
     "canonicalGroupServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37499013614",
     "actualBootReview": "docs/security-review-generated-business-boot.md",
@@ -1432,7 +1450,10 @@
     "clientContractWebCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37496589426",
     "networkCommit": "7c5e041203632f9330c412ea2bcccc36e34296b9",
     "networkServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37493510404",
-    "nativeSnapshotAssertions": [66,66],
+    "nativeSnapshotAssertions": [
+      66,
+      66
+    ],
     "nativeSqlScriptCommit": "e8a637fffba3487a1357c9f393435f2be7dbeebc",
     "nativeSqlServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37492073073",
     "implementationCommit": "87b3f3f391614f0bd4cef247d663f79c95669d5e",
@@ -1443,9 +1464,31 @@
     "status": "exact-commit-cloud-output-types-and-real-generated-pages-proven-full-generator-incomplete",
     "backendTests": 607,
     "frontendUnitTests": 81,
-    "realGeneratedPageProfiles": ["default", "enabled-console-custom-output"],
-    "realGeneratedPageKinds": ["crud", "tree", "sub"],
-    "realGeneratedAssertions": ["create", "edit", "detail-read-only", "real-http-search", "reset", "tree-child-parent", "expand-collapse", "subtable-update-fk", "selection-edit", "two-row-delete", "xlsx", "long-id-decimal", "hostile-text", "no-role"],
+    "realGeneratedPageProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
+    "realGeneratedPageKinds": [
+      "crud",
+      "tree",
+      "sub"
+    ],
+    "realGeneratedAssertions": [
+      "create",
+      "edit",
+      "detail-read-only",
+      "real-http-search",
+      "reset",
+      "tree-child-parent",
+      "expand-collapse",
+      "subtable-update-fk",
+      "selection-edit",
+      "two-row-delete",
+      "xlsx",
+      "long-id-decimal",
+      "hostile-text",
+      "no-role"
+    ],
     "focusedProcess": "42073-terminal-0",
     "fullDefaultBrowserTestsBeforeFinalRootTemplatePatch": 43,
     "fullEnabledBeforeFinalRootTemplatePatch": "red-null-versus-zero-root-regression",
@@ -1455,9 +1498,16 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37516887733",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37516887676",
     "mockedBrowserTests": 64,
-    "exactCloudFullFrameworkBrowserProfiles": [43,43],
+    "exactCloudFullFrameworkBrowserProfiles": [
+      43,
+      43
+    ],
     "review": "docs/security-review-generator-react-pages.md",
-    "remaining": ["all-dictionary-upload-richtext-control-variants", "full-generator-management-ui", "remaining-active-parity"],
+    "remaining": [
+      "all-dictionary-upload-richtext-control-variants",
+      "full-generator-management-ui",
+      "remaining-active-parity"
+    ],
     "formBuilder": "deferred-not-complete"
   },
   "generatorRouteInstallValidation": {
@@ -1465,59 +1515,90 @@
     "mockedBrowserTests": 64,
     "backendTests": 610,
     "frontendUnitTests": 83,
-    "realHostProfiles": ["default", "enabled-console-custom-output"],
-    "realPageKinds": ["crud", "tree", "sub"],
+    "realHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
+    "realPageKinds": [
+      "crud",
+      "tree",
+      "sub"
+    ],
     "review": "docs/security-review-generator-route-install.md",
-    "evidence": ["generator-route-host-correct-disabled-runtime.log", "generator-route-host-correct-enabled-runtime.log"],
+    "evidence": [
+      "generator-route-host-correct-disabled-runtime.log",
+      "generator-route-host-correct-enabled-runtime.log"
+    ],
     "menuSql": "actual-post-root-fault-row-rollback-and-duplicate-no-overwrite",
     "cloud": "all-three-server-and-web-terminal-success",
     "implementationCommit": "8157b87c7bed2cf4b3e1f52d6507bb11e73c85f7",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37522840964",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37522840972",
-    "exactCloudFullFrameworkBrowserProfiles": [43,43],
-    "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"],
+    "exactCloudFullFrameworkBrowserProfiles": [
+      43,
+      43
+    ],
+    "remaining": [
+      "full-generator-management-ui",
+      "all-control-variants",
+      "shared-shell-parity",
+      "final-active-capability-audit"
+    ],
     "formBuilder": "deferred-not-complete"
   },
   "generatorTemplateChoice": {
     "status": "exact-commit-cloud-accepted-full-generator-incomplete",
-    "choices": ["eforge-react", "element-ui", "element-plus", "element-plus-typescript"],
+    "choices": [
+      "eforge-react",
+      "element-ui",
+      "element-plus",
+      "element-plus-typescript"
+    ],
     "omittedValue": "previous-canonical-eforge-react-default",
     "backendTests": 615,
     "targetMvcTests": 19,
     "frontendUnitTests": 83,
-    "fullRealFrameworkBrowserProfiles": [43,43],
+    "fullRealFrameworkBrowserProfiles": [
+      43,
+      43
+    ],
     "mainOpenApiSha256": "7C431ED9D0876F95649E9432A6B06759BF741E93BE8B58BE9AD1FC33B4EE5E5D",
     "review": "docs/security-review-generator-template-choice.md",
     "cloud": "all-three-server-and-web-terminal-success",
     "implementationCommit": "4664f31556edf7428bf2eb9cd7b324c9b78781c8",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251402",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37526251594",
-    "remaining": ["full-generator-management-ui", "all-control-variants", "shared-shell-parity", "final-active-capability-audit"]
+    "remaining": [
+      "full-generator-management-ui",
+      "all-control-variants",
+      "shared-shell-parity",
+      "final-active-capability-audit"
+    ]
   },
   "generatorManagerUi": {
-  "status": "exact-commit-cloud-accepted-manager-stage-full-goal-incomplete",
-  "route": "/gen",
-  "routeId": "tool-generator",
-  "review": "docs/security-review-generator-manager-ui.md",
-  "backendTests": 618,
-  "targetMvcTests": 20,
-  "frontendUnitTests": 89,
-  "mockedBrowserTests": 71,
-  "defaultRealBrowsers": 47,
-  "fullRealProfiles": "terminal-success-default-enabled-47-each",
-  "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
-  "remaining": [
-    "all-generated-control-variants",
-    "shared-shell-parity",
-    "final-active-capability-audit"
-  ],
-  "formBuilder": "deferred-not-complete",
-  "implementationCommit": "d569f33d2ddba9ae4a07f34115a5bcf77511388e",
+    "status": "exact-commit-cloud-accepted-manager-stage-full-goal-incomplete",
+    "route": "/gen",
+    "routeId": "tool-generator",
+    "review": "docs/security-review-generator-manager-ui.md",
+    "backendTests": 618,
+    "targetMvcTests": 20,
+    "frontendUnitTests": 89,
+    "mockedBrowserTests": 71,
+    "defaultRealBrowsers": 47,
+    "fullRealProfiles": "terminal-success-default-enabled-47-each",
+    "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
+    "remaining": [
+      "all-generated-control-variants",
+      "shared-shell-parity",
+      "final-active-capability-audit"
+    ],
+    "formBuilder": "deferred-not-complete",
+    "implementationCommit": "d569f33d2ddba9ae4a07f34115a5bcf77511388e",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37533050064",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37533050094",
     "cloud": "all-three-server-and-web-terminal-success",
     "quartzMutationBoundary": "prior-specific-rejection-preserved"
-},
+  },
   "generatorControlParity": {
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "implementationCommit": "aafa28d001dd9295471666d602823edaf0adf349",
@@ -1526,16 +1607,50 @@
     "review": "docs/security-review-generator-control-parity.md",
     "backendTests": 618,
     "frontendUnitTests": 89,
-    "actualHostProfiles": ["default", "enabled-console-custom-output"],
-    "rootTemplateKinds": ["crud", "tree", "sub"],
+    "actualHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
+    "rootTemplateKinds": [
+      "crud",
+      "tree",
+      "sub"
+    ],
     "actualChildMatrix": "all-nine-controls-seven-types-exact-values-clear-and-parent-fk",
-    "localEvidence": ["generator-child-control-matrix-disabled-runtime.log", "generator-child-control-matrix-enabled-runtime.log"],
-    "crudControls": ["input", "textarea", "select", "radio", "checkbox", "datetime", "imageUpload", "fileUpload", "editor"],
-    "crudJavaTypes": ["String", "Long", "Integer", "Double", "BigDecimal", "Date", "Boolean"],
+    "localEvidence": [
+      "generator-child-control-matrix-disabled-runtime.log",
+      "generator-child-control-matrix-enabled-runtime.log"
+    ],
+    "crudControls": [
+      "input",
+      "textarea",
+      "select",
+      "radio",
+      "checkbox",
+      "datetime",
+      "imageUpload",
+      "fileUpload",
+      "editor"
+    ],
+    "crudJavaTypes": [
+      "String",
+      "Long",
+      "Integer",
+      "Double",
+      "BigDecimal",
+      "Date",
+      "Boolean"
+    ],
     "emptyStringRegression": "actual-installed-browser-failed-before-passed-after",
     "queryDictionaryParity": "original-select-radio-dictionary-dropdown-real-wire-filter-reset",
     "specialField": "legal-__proto__-exact-persist-and-clear",
-    "remaining": ["required-disabled-autokey-variants", "supported-type-control-dictionary-combinations", "date-timezone-xlsx-edges", "shared-shell-parity", "final-active-audit"]
+    "remaining": [
+      "required-disabled-autokey-variants",
+      "supported-type-control-dictionary-combinations",
+      "date-timezone-xlsx-edges",
+      "shared-shell-parity",
+      "final-active-audit"
+    ]
   },
   "generatorEmptyStringCorrection": {
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
@@ -1545,7 +1660,10 @@
     "backendTests": 618,
     "frontendUnitTests": 89,
     "mockedBrowsers": 71,
-    "fullFrameworkRealProfiles": [47,47],
+    "fullFrameworkRealProfiles": [
+      47,
+      47
+    ],
     "review": "docs/security-review-generator-control-parity.md",
     "scope": "optional-string-clear-and-original-select-radio-query-parity"
   },
@@ -1554,7 +1672,10 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
     "cloud": "all-three-server-and-web-terminal-success",
-    "acceptedFullFrameworkProfiles": [48,48],
+    "acceptedFullFrameworkProfiles": [
+      48,
+      48
+    ],
     "status": "exact-correction-cloud-accepted-full-goal-incomplete",
     "failedImplementationCommit": "3266157bdaf7ed91174cc1c01cb5372d80747cf5",
     "failedServerCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37539853310",
@@ -1562,29 +1683,57 @@
     "review": "docs/security-review-generator-boolean-dictionary.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
-    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "actualHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
     "scope": "numeric-0-1-select-radio-persist-refill-display-query-and-invalid-scalar-rejection",
-    "rootTemplateKinds": ["crud", "tree", "sub"],
+    "rootTemplateKinds": [
+      "crud",
+      "tree",
+      "sub"
+    ],
     "actualSubRows": true,
-    "evidence": ["generator-boolean-dictionary-before-runtime.log", "generator-boolean-dictionary-final-disabled-runtime.log", "generator-boolean-dictionary-final-enabled-runtime.log"],
+    "evidence": [
+      "generator-boolean-dictionary-before-runtime.log",
+      "generator-boolean-dictionary-final-disabled-runtime.log",
+      "generator-boolean-dictionary-final-enabled-runtime.log"
+    ],
     "fullGoalComplete": false
-  },
+  },
   "generatorRequiredControls": {
     "implementationCommit": "6b1e375ffd1c41012e93c0af0194399d8aebf650",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
     "cloud": "all-three-server-and-web-terminal-success",
-    "acceptedFullFrameworkProfiles": [48,48],
+    "acceptedFullFrameworkProfiles": [
+      48,
+      48
+    ],
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-generator-required-controls.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
     "mockedBrowserTests": 71,
-    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "actualHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
     "scope": "required-checkbox-active-write-phases-zero-false-and-own-property-reads",
-    "beforeEvidence": ["generator-required-checkbox-before-runtime.log", "generator-required-own-value-before-runtime.log"],
-    "afterEvidence": ["generator-required-own-value-final-disabled-runtime.log", "generator-required-own-value-final-enabled-runtime.log"],
-    "remaining": ["automatic-key-variants", "supported-control-type-variants", "shared-shell-parity", "final-active-audit"],
+    "beforeEvidence": [
+      "generator-required-checkbox-before-runtime.log",
+      "generator-required-own-value-before-runtime.log"
+    ],
+    "afterEvidence": [
+      "generator-required-own-value-final-disabled-runtime.log",
+      "generator-required-own-value-final-enabled-runtime.log"
+    ],
+    "remaining": [
+      "automatic-key-variants",
+      "supported-control-type-variants",
+      "shared-shell-parity",
+      "final-active-audit"
+    ],
     "fullGoalComplete": false
   },
   "sessionLogoutRace": {
@@ -1592,16 +1741,25 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032711",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37547032673",
     "cloud": "all-three-server-and-web-terminal-success",
-    "acceptedFullFrameworkProfiles": [48,48],
+    "acceptedFullFrameworkProfiles": [
+      48,
+      48
+    ],
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-session-logout-race.md",
     "scope": "captured-token-revocation-finishes-through-concurrent-401-or-new-login-with-generation-guards",
     "beforeEvidence": "session-logout-real-race-selected-before-runtime.log",
-    "afterEvidence": ["session-logout-real-race-final-disabled-runtime.log", "session-logout-real-race-final-enabled-runtime.log"],
+    "afterEvidence": [
+      "session-logout-real-race-final-disabled-runtime.log",
+      "session-logout-real-race-final-enabled-runtime.log"
+    ],
     "focusedRealLoginTestsPerProfile": 3,
     "finalCompleteApiProfiles": "terminal-success-default-enabled",
     "updatedFullFrameworkLiveSuiteTests": 48,
-    "priorFullFrameworkProfiles": [47,47],
+    "priorFullFrameworkProfiles": [
+      47,
+      47
+    ],
     "priorProfilesPrecedeFinalTemplateAndLiveTest": true,
     "fullGoalComplete": false
   },
@@ -1610,14 +1768,24 @@
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37550410563",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37550410644",
     "cloud": "all-three-server-and-web-terminal-success",
-    "acceptedFullFrameworkProfiles": [48,48],
+    "acceptedFullFrameworkProfiles": [
+      48,
+      48
+    ],
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-generator-auto-key.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
     "mockedBrowserTests": 71,
-    "actualHostProfiles": ["default", "enabled-console-custom-output"],
-    "rootKinds": ["crud", "tree", "sub"],
+    "actualHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
+    "rootKinds": [
+      "crud",
+      "tree",
+      "sub"
+    ],
     "keys": "manual-keys-retained-automatic-root-and-child-exact-long-ids",
     "oldAutomaticMetadataInsertAndRequiredFlags": true,
     "parentReferenceAndOldChildIdPreserved": true,
@@ -1626,32 +1794,50 @@
     "installedOpenApiSha256": "52CD6F01BE3A40B9099424A4D29A240E0DB4EABBE1A54EAAC1A225C36D32EABF",
     "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
     "beforeEvidence": "generator-auto-key-before-runtime.log",
-    "afterEvidence": ["generator-auto-matrix-child-final-disabled-runtime.log", "generator-auto-matrix-child-final-enabled-runtime.log"],
-    "remaining": ["supported-control-type-variants", "shared-shell-parity", "final-active-audit"],
+    "afterEvidence": [
+      "generator-auto-matrix-child-final-disabled-runtime.log",
+      "generator-auto-matrix-child-final-enabled-runtime.log"
+    ],
+    "remaining": [
+      "supported-control-type-variants",
+      "shared-shell-parity",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "generatorStringKeySelection": {
     "implementationCommit": "77c43dc9045c1780cb919ad111212f916c6a051c",
     "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37551876095",
     "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37551876119",
     "cloud": "all-three-server-and-web-terminal-success",
-    "acceptedFullFrameworkProfiles": [48,48],
+    "acceptedFullFrameworkProfiles": [
+      48,
+      48
+    ],
     "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-generator-string-key.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
     "mockedBrowserTests": 71,
-    "actualHostProfiles": ["default", "enabled-console-custom-output"],
-    "legalStringIds": ["__proto__", "constructor", "toString"],
+    "actualHostProfiles": [
+      "default",
+      "enabled-console-custom-output"
+    ],
+    "legalStringIds": [
+      "__proto__",
+      "constructor",
+      "toString"
+    ],
     "uiRowKeyPrefixDoesNotChangeApiId": true,
     "beforeEvidence": "generator-string-key-before-runtime.log",
-    "afterEvidence": ["generator-string-key-final-disabled-runtime.log", "generator-string-key-final-enabled-runtime.log"],
+    "afterEvidence": [
+      "generator-string-key-final-disabled-runtime.log",
+      "generator-string-key-final-enabled-runtime.log"
+    ],
     "installedOpenApiSha256": "D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386",
     "fullGoalComplete": false
-  }
-,
+  },
   "shellNavigationTools": {
     "status": "accepted-exact-cloud-072df8d",
     "review": "docs/security-review-shell-navigation-tools.md",
@@ -1671,9 +1857,20 @@
     "uiSelectionCannotBypassPermission": true,
     "groupsHaveNoFakeRoutes": true,
     "externalNoOpenerOrJwtUrl": true,
-    "finalEvidence": ["shell-navigation-unicode-final-frontend.log", "shell-navigation-literal-final-target.log", "shell-navigation-final-disabled-runtime.log", "shell-navigation-final-enabled-runtime.log"],
+    "finalEvidence": [
+      "shell-navigation-unicode-final-frontend.log",
+      "shell-navigation-literal-final-target.log",
+      "shell-navigation-final-disabled-runtime.log",
+      "shell-navigation-final-enabled-runtime.log"
+    ],
     "openApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
-    "remaining": ["tabs-cache-pin-context-menu", "sidebar-collapse-top-navigation", "query-cache-embedded-metadata", "theme-density-settings", "final-active-audit"],
+    "remaining": [
+      "tabs-cache-pin-context-menu",
+      "sidebar-collapse-top-navigation",
+      "query-cache-embedded-metadata",
+      "theme-density-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   },
@@ -1691,14 +1888,17 @@
     "focusedRealNavigationCasesPerProfile": 2,
     "finalRealProfiles": "terminal-success-default-enabled",
     "actualSqlFixture": "navigation-metadata-schema-runtime.log",
-    "queryConsumers": ["registered-menu-link", "header-search", "internal-parent-breadcrumb"],
+    "queryConsumers": [
+      "registered-menu-link",
+      "header-search",
+      "internal-parent-breadcrumb"
+    ],
     "prototypeKeysRemainUrlData": true,
     "cachedPreferenceDelivered": true,
     "actualPageRetentionImplemented": false,
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "fullGoalComplete": false
-  }
-,
+  },
   "pageTabsRetainedReads": {
     "status": "accepted-exact-cloud-5cfa35a",
     "review": "docs/security-review-page-tabs.md",
@@ -1706,21 +1906,47 @@
     "unchangedBackendTests": 619,
     "frontendUnitTests": 98,
     "mockedBrowserTests": 83,
-    "fullRealBrowserProfiles": [52, 52],
+    "fullRealBrowserProfiles": [
+      52,
+      52
+    ],
     "completedBuiltInReads": 12,
     "cloudServer": "37562002947",
     "cloudWeb": "37562002771",
     "persistence": "per-account-authorized-links-only-no-records-or-forms",
-    "controls": ["dashboard-affix", "close-current-others-left-right-all", "middle-click", "context-dropdown", "refresh-remount", "keyboard-scroll", "fullscreen-escape", "resource-close-removes-cache"],
+    "controls": [
+      "dashboard-affix",
+      "close-current-others-left-right-all",
+      "middle-click",
+      "context-dropdown",
+      "refresh-remount",
+      "keyboard-scroll",
+      "fullscreen-escape",
+      "resource-close-removes-cache"
+    ],
     "authorizationEviction": "real-withdrawal-403-and-authorized-profile-save-bootstrap-refresh-same-document",
-    "beforeEvidence": ["page-tabs-selection-before.log", "page-tabs-full-before-runtime.log", "page-tabs-second-before-runtime.log", "page-tabs-strict-mode-before-frontend.log"],
-    "finalEvidence": ["page-tabs-final-captured-read-mocked.log", "page-tabs-accepted-disabled-runtime.log", "page-tabs-accepted-enabled-runtime.log"],
+    "beforeEvidence": [
+      "page-tabs-selection-before.log",
+      "page-tabs-full-before-runtime.log",
+      "page-tabs-second-before-runtime.log",
+      "page-tabs-strict-mode-before-frontend.log"
+    ],
+    "finalEvidence": [
+      "page-tabs-final-captured-read-mocked.log",
+      "page-tabs-accepted-disabled-runtime.log",
+      "page-tabs-accepted-enabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
-    "remaining": ["action-interruption-lifecycle", "installed-generated-cache-selection", "remaining-resource-monitor-embedded-lifecycle", "sidebar-topnav-settings", "final-active-audit"],
+    "remaining": [
+      "action-interruption-lifecycle",
+      "installed-generated-cache-selection",
+      "remaining-resource-monitor-embedded-lifecycle",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "dictionaryCachedActions": {
     "status": "accepted-exact-cloud-4349cd3",
     "review": "docs/security-review-dictionary-cached-actions.md",
@@ -1728,17 +1954,27 @@
     "cloudWeb": "37564226259",
     "frontendUnitTests": 98,
     "mockedBrowserTests": 85,
-    "fullRealBrowserProfiles": [53, 53],
+    "fullRealBrowserProfiles": [
+      53,
+      53
+    ],
     "cancelledEditorRead": "exact-request-aborted-on-hide-explicit-retry-real200",
     "pendingCacheWrite": "completed-read-controller-retired-write-remains-locked-exactly-one-real204",
     "automaticMutationRetry": false,
-    "beforeEvidence": ["page-cache-editor-interruption-before.log", "page-cache-operation-owner-before.log"],
-    "finalEvidence": ["page-cache-operation-owner-after.log", "page-cache-owner-final-frontend.log", "page-cache-owner-disabled-runtime.log", "page-cache-owner-enabled-runtime.log"],
+    "beforeEvidence": [
+      "page-cache-editor-interruption-before.log",
+      "page-cache-operation-owner-before.log"
+    ],
+    "finalEvidence": [
+      "page-cache-operation-owner-after.log",
+      "page-cache-owner-final-frontend.log",
+      "page-cache-owner-disabled-runtime.log",
+      "page-cache-owner-enabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "fullGoalComplete": false,
     "formBuilder": "deferred-not-complete"
-  }
-,
+  },
   "jobCachedActions": {
     "status": "accepted-exact-cloud-66a910b",
     "review": "docs/security-review-job-cached-actions.md",
@@ -1746,17 +1982,27 @@
     "cloudWeb": "37566079777",
     "frontendUnitTests": 98,
     "mockedBrowserTests": 89,
-    "fullRealBrowserProfiles": [53, 53],
+    "fullRealBrowserProfiles": [
+      53,
+      53
+    ],
     "exportCancellation": "exact-task-log-get-abort-explicit-retry-genuine-xlsx",
     "pendingLogWrites": "history-navigation-preserves-locked-single-delete-clear-actual204-and-sql-result",
     "automaticMutationRetry": false,
-    "beforeEvidence": ["page-cache-jobs-export-before.log", "page-cache-jobs-actions-before.log"],
-    "finalEvidence": ["page-cache-jobs-actions-after.log", "page-cache-jobs-final-frontend.log", "page-cache-jobs-disabled-runtime.log", "page-cache-jobs-enabled-runtime.log"],
+    "beforeEvidence": [
+      "page-cache-jobs-export-before.log",
+      "page-cache-jobs-actions-before.log"
+    ],
+    "finalEvidence": [
+      "page-cache-jobs-actions-after.log",
+      "page-cache-jobs-final-frontend.log",
+      "page-cache-jobs-disabled-runtime.log",
+      "page-cache-jobs-enabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "fullGoalComplete": false,
     "formBuilder": "deferred-not-complete"
-  }
-,
+  },
   "generatedCachedReads": {
     "status": "exact-cloud-accepted-c3a7783",
     "review": "docs/security-review-generated-cached-reads.md",
@@ -1768,23 +2014,47 @@
     "mockedFrameworkBrowserTests": 89,
     "actualInstalledGeneratedCasesPerProfile": 7,
     "strictMode": true,
-    "categories": ["crud", "tree", "sub", "auto", "autotree", "autosub", "stringkey"],
+    "categories": [
+      "crud",
+      "tree",
+      "sub",
+      "auto",
+      "autotree",
+      "autosub",
+      "stringkey"
+    ],
     "cancelledReadsRetry": "captured-exact-request-abort-and-genuine200",
     "completedReadsRetain": "selected-checkbox-and-draft-zero-new-list-requests",
     "beforeEvidence": "generated-cache-before-runtime.log",
-    "finalEvidence": ["generated-cache-final-maven.log", "generated-cache-final-frontend.log", "generated-cache-strict-disabled-runtime.log", "generated-cache-strict-enabled-runtime.log", "generated-cache-full-disabled-runtime.log", "generated-cache-full-enabled-runtime.log"],
+    "finalEvidence": [
+      "generated-cache-final-maven.log",
+      "generated-cache-final-frontend.log",
+      "generated-cache-strict-disabled-runtime.log",
+      "generated-cache-strict-enabled-runtime.log",
+      "generated-cache-full-disabled-runtime.log",
+      "generated-cache-full-enabled-runtime.log"
+    ],
     "frameworkOpenApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "installedGeneratedOpenApiSha256": "1B92C88E2974AAF19BA152C4D97847802BA7DFCBAC716771EAF1CBA9022CB0C0",
-    "remaining": ["generated-upload-editor-action-lifecycle", "other-resource-monitor-embedded-cache", "sidebar-topnav-settings", "final-active-audit"],
+    "remaining": [
+      "generated-upload-editor-action-lifecycle",
+      "other-resource-monitor-embedded-cache",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "generatedCachedUploads": {
     "status": "exact-cloud-accepted-d492318",
     "review": "docs/security-review-generated-cached-uploads.md",
     "beforeEvidence": "generated-upload-before2-runtime.log",
-    "finalEvidence": ["generated-upload-final-maven.log", "generated-upload-frontend.log", "generated-upload-disabled-runtime.log", "generated-upload-enabled-runtime.log"],
+    "finalEvidence": [
+      "generated-upload-final-maven.log",
+      "generated-upload-frontend.log",
+      "generated-upload-disabled-runtime.log",
+      "generated-upload-enabled-runtime.log"
+    ],
     "actualGeneratedCasesPerProfile": 7,
     "gatedRawUploadsPerProfile": 8,
     "router": "actual-browser-history-and-StrictMode",
@@ -1792,11 +2062,16 @@
     "backendDeclaredTests": 619,
     "localApplicableTestsPassed": 618,
     "frontendUnitTests": 98,
-    "remaining": ["rich-text-upload", "generated-editor-other-actions", "remaining-shared-lifecycle", "sidebar-topnav-settings", "final-active-audit"],
+    "remaining": [
+      "rich-text-upload",
+      "generated-editor-other-actions",
+      "remaining-shared-lifecycle",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "richTextCachedUploads": {
     "status": "exact-cloud-accepted-2bf7c2d",
     "cloudServer": "37574541663",
@@ -1812,18 +2087,35 @@
     "actualNoticeUpload": "one-POST-genuine201-hidden-result-original-PNG-JPG-SVG-persistence",
     "ownership": "per-editor-pending-and-queue-counted-busy-retained-emitted-received-selection",
     "cursorBeforeAfter": "actual-failed-3-10-4-repaired-4-3-10",
-    "finalEvidence": ["rich-upload-final-maven.log", "rich-upload-owned-final-frontend.log", "rich-upload-cursor-owned-browser.log", "rich-upload-notice-owned-runtime.log", "rich-upload-generated-disabled-runtime.log", "rich-upload-generated-enabled-runtime.log", "rich-upload-full-disabled-runtime.log", "rich-upload-full-enabled-runtime.log"],
-    "remaining": ["editor-detail-read-other-actions", "nested-rich-upload-final-audit", "resource-monitor-embedded-cache", "sidebar-topnav-settings", "final-active-audit"],
+    "finalEvidence": [
+      "rich-upload-final-maven.log",
+      "rich-upload-owned-final-frontend.log",
+      "rich-upload-cursor-owned-browser.log",
+      "rich-upload-notice-owned-runtime.log",
+      "rich-upload-generated-disabled-runtime.log",
+      "rich-upload-generated-enabled-runtime.log",
+      "rich-upload-full-disabled-runtime.log",
+      "rich-upload-full-enabled-runtime.log"
+    ],
+    "remaining": [
+      "editor-detail-read-other-actions",
+      "nested-rich-upload-final-audit",
+      "resource-monitor-embedded-cache",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "monitorCachedReads": {
     "status": "exact-cloud-accepted-947f706",
     "cloudServer": "37577784305",
     "cloudWeb": "37577784304",
     "review": "docs/security-review-monitor-cached-reads.md",
-    "pages": ["cache-entries", "online-sessions"],
+    "pages": [
+      "cache-entries",
+      "online-sessions"
+    ],
     "readOwners": "three-independent-cache-tickets-and-one-online-ticket",
     "completedReturn": "actual-cached-tab-zero-GET-retained-data-and-draft",
     "interruptedReturn": "captured-aborts-exactly-one-successful-resumed-response",
@@ -1832,23 +2124,42 @@
     "mockedBrowserTests": 93,
     "focusedRealBrowsers": 9,
     "realFrameworkBrowserTestsPerProfile": 55,
-    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "fullApiProfiles": [
+      "default",
+      "consoles-and-custom-output-enabled"
+    ],
     "beforeEvidence": "monitor-cached-reads-before-browser.log",
-    "finalEvidence": ["monitor-cached-reads-targeted.log", "monitor-cached-reads-final-frontend.log", "monitor-cached-reads-final-static.log", "monitor-cached-reads-focused-accepted-runtime.log", "monitor-cached-reads-disabled-runtime.log", "monitor-cached-reads-enabled-runtime.log"],
+    "finalEvidence": [
+      "monitor-cached-reads-targeted.log",
+      "monitor-cached-reads-final-frontend.log",
+      "monitor-cached-reads-final-static.log",
+      "monitor-cached-reads-focused-accepted-runtime.log",
+      "monitor-cached-reads-disabled-runtime.log",
+      "monitor-cached-reads-enabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "newMutationLifecycleAcceptance": false,
     "freshLocalMavenRun": false,
-    "remaining": ["server-cache-statistics", "embedded-consoles", "other-editor-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "final-active-audit"],
+    "remaining": [
+      "server-cache-statistics",
+      "embedded-consoles",
+      "other-editor-actions",
+      "nested-rich-upload-final-audit",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
-  }
-,
+  },
   "statisticsCachedReads": {
     "status": "exact-cloud-accepted-f583a38",
     "cloudServer": "37580421117",
     "cloudWeb": "37580420897",
     "review": "docs/security-review-statistics-cached-reads.md",
-    "pages": ["server-monitor", "cache-statistics"],
+    "pages": [
+      "server-monitor",
+      "cache-statistics"
+    ],
     "completedReturn": "actual-cached-tab-retained-sample-counter-graphs-zero-GET",
     "interruptedReturn": "actual-request-abort-exactly-one-genuine200-resume",
     "refresh": "explicit-real-OSHI-new-sample-and-Redis-response",
@@ -1858,19 +2169,38 @@
     "scopedMockedBrowserTests": 17,
     "focusedRealBrowsers": 9,
     "realFrameworkBrowserTestsPerProfile": 57,
-    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "fullApiProfiles": [
+      "default",
+      "consoles-and-custom-output-enabled"
+    ],
     "beforeEvidence": "statistics-cached-reads-before-browser.log",
-    "finalEvidence": ["statistics-cached-reads-targeted.log", "statistics-cached-reads-final-frontend.log", "statistics-cached-reads-final-static.log", "statistics-cached-reads-focused-final-runtime.log", "statistics-cached-reads-disabled-runtime.log", "statistics-cached-reads-enabled-runtime.log"],
+    "finalEvidence": [
+      "statistics-cached-reads-targeted.log",
+      "statistics-cached-reads-final-frontend.log",
+      "statistics-cached-reads-final-static.log",
+      "statistics-cached-reads-focused-final-runtime.log",
+      "statistics-cached-reads-disabled-runtime.log",
+      "statistics-cached-reads-enabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "freshLocalMavenRun": false,
-    "remaining": ["embedded-consoles", "other-editor-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "final-active-audit"],
+    "remaining": [
+      "embedded-consoles",
+      "other-editor-actions",
+      "nested-rich-upload-final-audit",
+      "sidebar-topnav-settings",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   },
   "consoleCachedSessions": {
     "status": "exact-cloud-accepted-431b56f",
     "review": "docs/security-review-console-cached-session.md",
-    "targets": ["druid", "api-docs"],
+    "targets": [
+      "druid",
+      "api-docs"
+    ],
     "validReturn": "same-native-DOM-input-SQL-response-cookies-zero-ticket-POST-zero-native-reload",
     "authorization": "fresh-JWT-status-and-cookie-only-fixed-entry-probe-before-reveal",
     "expiry": "original-absolute-owner-StrictMode-safe-no-implicit-renewal",
@@ -1880,13 +2210,33 @@
     "mockedBrowserTests": 102,
     "scopedMockedBrowserTests": 12,
     "realFrameworkBrowserTestsPerProfile": 57,
-    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "fullApiProfiles": [
+      "default",
+      "consoles-and-custom-output-enabled"
+    ],
     "finalAuthority": "66413-terminal0",
-    "beforeEvidence": ["console-cached-session-before-browser.log", "console-cached-scoped-ticket-before-browser.log", "console-cached-native-gate-before-browser.log"],
-    "finalEvidence": ["console-cached-native-gate-after-browser.log", "console-cached-native-owned-static.log", "console-cached-native-owned-frontend.log", "console-cached-native-owned-mocked.log", "console-cached-native-owned-enabled-runtime.log", "console-cached-native-owned-disabled-runtime.log"],
+    "beforeEvidence": [
+      "console-cached-session-before-browser.log",
+      "console-cached-scoped-ticket-before-browser.log",
+      "console-cached-native-gate-before-browser.log"
+    ],
+    "finalEvidence": [
+      "console-cached-native-gate-after-browser.log",
+      "console-cached-native-owned-static.log",
+      "console-cached-native-owned-frontend.log",
+      "console-cached-native-owned-mocked.log",
+      "console-cached-native-owned-enabled-runtime.log",
+      "console-cached-native-owned-disabled-runtime.log"
+    ],
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "freshLocalMavenRun": false,
-    "remaining": ["other-editor-resource-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "dates-timezones-XLSX", "final-active-audit"],
+    "remaining": [
+      "other-editor-resource-actions",
+      "nested-rich-upload-final-audit",
+      "sidebar-topnav-settings",
+      "dates-timezones-XLSX",
+      "final-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   },
@@ -1904,9 +2254,34 @@
     "realAuthority": "80422-terminal0-on12ec001-and99065-terminal0-generated-fix",
     "beforeEvidence": "sidebar-disclosure-before.log",
     "mockedEvidence": "sidebar-disclosure-final105-mocked.log",
-    "realEvidence": ["sidebar-disclosure-final-enabled-runtime.log", "sidebar-disclosure-final-disabled-runtime.log"],
-    "remaining": ["desktop-collapse-popups", "mobile-drawer", "mixed-top-navigation", "layout-settings", "full-active-audit"],
+    "realEvidence": [
+      "sidebar-disclosure-final-enabled-runtime.log",
+      "sidebar-disclosure-final-disabled-runtime.log"
+    ],
+    "remaining": [
+      "desktop-collapse-popups",
+      "mobile-drawer",
+      "mixed-top-navigation",
+      "layout-settings",
+      "full-active-audit"
+    ],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
+  },
+  "sidebarResponsive": {
+    "status": "final-real-and-cloud-pending",
+    "review": "docs/security-review-sidebar-disclosure.md",
+    "breakpoint": 991,
+    "desktopWidths": [
+      240,
+      64
+    ],
+    "mobile": "native-modal-focus-scroll-route-account-resize",
+    "desktop": "keyboard-hover-popup-and-local-preference",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 109,
+    "realAuthority": "96723-pending",
+    "fullGoalComplete": false,
+    "pauseAfterPhase": true
   }
 }
