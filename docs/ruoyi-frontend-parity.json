@@ -2044,4 +2044,19 @@
     "review":"docs/security-review-remembered-login.md",
     "fullGoalComplete":false
   }
+  ,"dashboardCharts": {
+    "status":"local-accepted-exact-cloud-pending",
+    "reference":"ruoyi-ui/src/views/index_v1.vue@0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
+    "frontendUnitTests":98,
+    "mockedBrowserTests":132,
+    "focusedRealBrowsers":1,
+    "realAuthority":"16452-terminal0-focused1-and-full-api",
+    "requiredCloudRealBrowsersPerProfile":61,
+    "originalChartFamilies":["line","radar","rose","stacked-bar"],
+    "originalMetricCards":4,
+    "sampleDataExplicitlyLabelled":true,
+    "freshMavenRun":false,
+    "review":"docs/security-review-dashboard-parity.md",
+    "fullGoalComplete":false
+  }
 }
