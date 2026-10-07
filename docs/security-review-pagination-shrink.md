@@ -31,3 +31,6 @@ CRUD/tree/sub, upload, exact ID, permission, activity ownership and audit checks
 Logs: pagination-shrink-generated-default.log and
 pagination-shrink-generated-enabled.log. The real root OpenAPI SHA256 remains
 CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C. No cloud acceptance is claimed for this stage.
+
+
+Exact cloud acceptance: 2a20eb3726b75ec663588ac10e4a42281052ed3e has terminal SUCCESS in server37683623514 (all four jobs) and web37683623639. Direct pagination-shrink-cloud-{server,default,enabled,web}-accepted.log proves661 backend declarations (10 scope and one existing skip),106 frontend units,144 mocked browsers, both62 real browser/fullAPI/OpenAPI profiles and both configurations of all seven installed generated families. The independent-session post shrink case passed in both cloud profiles. No product failure occurred in this stage. Current inventory retains119 operations/114 accepted/five task mutations pending and175 source-path assignments; assignment alone remains weaker than semantic evidence. Whole goal remains incomplete; form builder deferred.

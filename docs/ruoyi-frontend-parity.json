@@ -2937,8 +2937,7 @@
       "runJob"
     ],
     "independentRemaining": [
-      "Successful total-shrink normalization with failure/retry distinction: precise acceptance pending",
-      "Final whole-objective acceptance after task mutations"
+      "Final whole-objective acceptance after task mutations; original-component semantic audit remains required"
     ],
     "deferred": [
       "online-form-builder"
@@ -4020,7 +4019,7 @@
       "proof": "source-reconciliation-final.log",
       "mappingIsNotIndependentFunctionalProof": true
     },
-    "latestAcceptedSha": "508104c3f659576fc1418a9c1a4e07f9c4729282"
+    "latestAcceptedSha": "2a20eb3726b75ec663588ac10e4a42281052ed3e"
   },
   "sharedDialogGeometry": {
     "status": "exact-cloud-accepted",
@@ -4155,7 +4154,7 @@
     "finalServerJobs": 4
   },
   "paginationTotalShrink": {
-    "status": "local-all-gates-and-real-configurations-passed-cloud-pending",
+    "status": "exact-cloud-accepted",
     "review": "docs/security-review-pagination-shrink.md",
     "fullGoalComplete": false,
     "realAuthority": "96741-terminal0-posts2-fullAPI-default-enabled-seven-generated",
@@ -4164,6 +4163,11 @@
     "frontendUnits": 106,
     "mockedBrowsers": 144,
     "frameworkConsumers": 13,
-    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
+    "implementationSha": "2a20eb3726b75ec663588ac10e4a42281052ed3e",
+    "cloudServerRun": "37683623514",
+    "cloudWebRun": "37683623639",
+    "serverJobs": 4,
+    "realBrowsersPerProfile": 62
   }
 }
