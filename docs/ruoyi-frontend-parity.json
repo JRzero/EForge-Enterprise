@@ -1756,4 +1756,27 @@
     "fullGoalComplete": false,
     "formBuilder": "deferred-not-complete"
   }
+,
+  "generatedCachedReads": {
+    "status": "local-strict-both-seven-and-complete-api-success-exact-cloud-pending",
+    "review": "docs/security-review-generated-cached-reads.md",
+    "backendDeclaredTests": 619,
+    "localApplicableTestsPassed": 618,
+    "localWindowsSymlinkPrivilegeSkip": 1,
+    "localRealWindowsJunctionPassed": true,
+    "frontendUnitTests": 98,
+    "mockedFrameworkBrowserTests": 89,
+    "actualInstalledGeneratedCasesPerProfile": 7,
+    "strictMode": true,
+    "categories": ["crud", "tree", "sub", "auto", "autotree", "autosub", "stringkey"],
+    "cancelledReadsRetry": "captured-exact-request-abort-and-genuine200",
+    "completedReadsRetain": "selected-checkbox-and-draft-zero-new-list-requests",
+    "beforeEvidence": "generated-cache-before-runtime.log",
+    "finalEvidence": ["generated-cache-final-maven.log", "generated-cache-final-frontend.log", "generated-cache-strict-disabled-runtime.log", "generated-cache-strict-enabled-runtime.log", "generated-cache-full-disabled-runtime.log", "generated-cache-full-enabled-runtime.log"],
+    "frameworkOpenApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "installedGeneratedOpenApiSha256": "1B92C88E2974AAF19BA152C4D97847802BA7DFCBAC716771EAF1CBA9022CB0C0",
+    "remaining": ["generated-upload-editor-action-lifecycle", "other-resource-monitor-embedded-cache", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

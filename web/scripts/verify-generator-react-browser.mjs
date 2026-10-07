@@ -34,6 +34,40 @@ async function verifyChildControls(page,row) {
   assert.equal(new Date(row.childEventTime).getTime(),await page.evaluate(()=>new Date('2026-10-07T01:02:03.456').getTime()));
   for(const key of ['childImagePaths','childFilePaths']) {assert(row[key].startsWith('/profile/upload/'));const response=await page.request.get(new URL(row[key],page.url()).href);assert.equal(response.status(),200);if(key==='childFilePaths')assert.equal(await response.text(),'子表实际文件');}
 }
+async function verifyRetainedList(page,category,label){
+  const path='/api/v1/business/fixture/'+category,pattern='**'+path+'*';
+  const row=page.getByRole('row').filter({hasText:label});
+  await expect(row).toBeVisible();
+  let release;const gate=new Promise(resolve=>{release=resolve;});
+  await page.route(pattern,async route=>{
+    if(new URL(route.request().url()).pathname!==path)return route.continue();
+    await gate;await route.continue().catch(()=>{});
+  });
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname===path&&request.method()==='GET');
+  await page.getByRole('button',{name:'刷新',exact:true}).click();const captured=await requested;
+  const aborted=page.waitForEvent('requestfailed',{predicate:request=>request===captured});
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    assert.match((await aborted).failure().errorText,/abort|cancel/i);
+  }finally{release();}
+  await page.unroute(pattern);
+  const restored=page.waitForResponse(response=>new URL(response.url()).pathname===path&&response.request().method()==='GET'&&response.status()===200);
+  await page.locator('.ef-app-shell__nav').getByRole('link',{name:'Installed '+category,exact:true}).click();
+  await restored;await expect(row).toBeVisible();
+  const checkbox=row.getByRole('checkbox'),filter=page.getByRole('textbox',{name:'label',exact:true});
+  const prior=await filter.inputValue();await filter.fill('缓存草稿-'+category);await checkbox.check();
+  let reads=0;const count=request=>{if(new URL(request.url()).pathname===path&&request.method()==='GET')reads++;};
+  page.on('request',count);
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await page.locator('.ef-app-shell__nav').getByRole('link',{name:'Installed '+category,exact:true}).click();
+    await expect(checkbox).toBeChecked();await expect(filter).toHaveValue('缓存草稿-'+category);assert.equal(reads,0,'Completed generated list must not reload on cached activation');
+  }finally{page.off('request',count);}
+  await checkbox.uncheck();await filter.fill(prior);
+  console.log('PASS: '+category+' installed Activity cancels exact pending read, retries real200, preserves completed selection/draft and performs zero resumed list requests.');
+}
 async function verifyAutomaticKey(page, noRoleUser, category) {
   const ids = [];
   for (const index of [0, 1]) {
@@ -70,6 +104,7 @@ async function verifyAutomaticKey(page, noRoleUser, category) {
       assert.equal(detail.data.fixtureAutoLineList[0].label,'自动子表-'+index);
     }
   }
+  await verifyRetainedList(page,category,'自动编号-0');
   const row = page.getByRole('row').filter({hasText:'自动编号-0'});
   await row.getByRole('button', {name:'修改', exact:true}).click();
   const editor = page.getByRole('dialog'); await expect(editor.getByLabel('oRderKey', {exact:true})).toHaveCount(0);
@@ -126,6 +161,7 @@ async function verifyStringKey(page, noRoleUser) {
     await expect(row.getByRole('checkbox')).not.toBeChecked();
     const detail=await readDetail(page,id);assert.equal(detail.status,200);assert.equal(detail.data.oRderKey,id);
   }
+  await verifyRetainedList(page,'stringkey','字符串编号-0');
   await page.getByRole('row').filter({hasText:'字符串编号-0'}).getByRole('checkbox').check();
   await page.getByRole('button',{name:'修改选中',exact:true}).click();
   const editor=page.getByRole('dialog');await expect(editor.getByLabel('oRderKey',{exact:true})).toHaveCount(0);
@@ -158,6 +194,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     writeFileSync(join(owned, category, 'index.html'), '<div id="root"></div><script type="module" src="./probe.tsx"></script>');
     writeFileSync(join(owned, category, 'probe.tsx'), [
       "import {createRoot} from 'react-dom/client';",
+      "import {StrictMode} from 'react';",
       "import {createMemoryRouterAdapter} from '@eforge/app';",
       "import {createMemoryStorage} from '@eforge/core';",
       "import {EForgeProvider} from '@eforge/ui';",
@@ -172,7 +209,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "Object.assign(window, {probeLogin:runtime.login, probeLogout:runtime.logout, probeDetail:async (id:string) => {try {const response = await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/' + id); return {status:response.status, data:await response.json()};} catch(error) {return {status:(error as {status:number}).status};}}});",
       "function Probe() {return <EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider>;}",
       "Object.assign(window,{probeNavigate:()=>router.navigate(generatedRoute.path),probeHref:router.getCurrentHref});",
-      "createRoot(document.getElementById('root')!).render(<Probe />);",
+      "createRoot(document.getElementById('root')!).render(<StrictMode><Probe /></StrictMode>);",
     ].join('\n'));
   }
   const server = await createServer({configFile:false, root, server:{host:'127.0.0.1', port:0,
@@ -235,6 +272,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         await expect(page.getByText(label, {exact:true})).toBeVisible();
+        await verifyRetainedList(page,category,label);
         const detail = await readDetail(page,id);
         assert.equal(detail.status, 200); assert.equal(detail.data.oRderKey, id);
         assert.equal(detail.data.amount, '9007199254740993.00001');

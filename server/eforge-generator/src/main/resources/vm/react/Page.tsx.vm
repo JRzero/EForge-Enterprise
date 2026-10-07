@@ -3,6 +3,7 @@ import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState}
 import {PageHeader, PermissionGate} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
 import {useApi} from '../../../app/context';
+import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
 import {useDictionary, DictionaryOptions, DictionaryNotice} from '../../../app/useDictionary';
 import {DictionaryTag} from '../../../app/components/DictionaryTag';
@@ -197,7 +198,9 @@ export function GeneratedPage() {
     }
     return output as Query;
   }, [filters, page, size]);
+  const read = useRetainedRead();
   useEffect(() => {
+    const complete = read([query, options, version]); if (!complete) return;
     const controller = new AbortController(); setLoading(true); setError(''); setSelection({});
     client.list(query, {...options, signal: controller.signal}).then(result => {
       if (controller.signal.aborted) return;
@@ -206,10 +209,10 @@ export function GeneratedPage() {
 #else
       setRows(result.data.items); setTotal(result.data.total);
 #end
-      setLoading(false);
-    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+      setLoading(false); complete();
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false); complete();}});
     return () => controller.abort();
-  }, [query, options, version]);
+  }, [query, options, version, read]);
   const selected = rows.filter(row => Object.hasOwn(selection, rowKey(row)) && selection[rowKey(row)] === true).map(idOf);
   function refresh(message = '') {setFeedback(message); setSelection({}); setVersion(value => value + 1);}
   const edit = useCallback(async (id: Id, viewing = false) => {

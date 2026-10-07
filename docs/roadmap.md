@@ -1017,3 +1017,22 @@ Windows real junction protection passes while symlink privileges are unavailable
 Linux executes symlink protection and skips the Windows-only junction case.
 This accepts the committed task/log action source. The subsequent actual
 generated-list retention template is independently under verification.
+### Actual generated-page list retention: final local phase
+The real React Page.tsx.vm now retains completed generated lists through the host
+read ticket; interrupted/changed-input/explicit-refresh reads still rerun.
+The original installed CRUD checkbox reset was reproduced before repair. Final
+current-template StrictMode/default/enabled profiles each pass all seven actual
+compiled CRUD/tree/sub/automatic/String-key pages:exact request abort, genuine200
+retry, retained selection/draft and zero completed-list reloads. Original
+CRUD/controls/uploads/XLSX/precision/tree/sub/SQL/grant/logout/audit checks pass.
+619 Maven cases are declared,618 applicable cases execute locally with only the
+Windows symlink privilege skip; actual Windows junction protection passes.
+Frontend reproducibility/lint/typecheck/98 units/build/all89 mocked pass.
+32374 ended0 with both complete API profiles; framework live contracts match
+65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+50996 ended0 with both final StrictMode generated deployments; their additional
+fixture API contracts independently match1B92C88E2974AAF19BA152C4D97847802BA7DFCBAC716771EAF1CBA9022CB0C0.
+See security-review-generated-cached-reads.md. Exact cloud is pending.
+Generated upload/editor/actions and other resource/monitor/embedded lifecycle,
+sidebar/topnav/settings and final active capability audit remain open. The
+specific Quartz runtime denial remains unchanged; form builder stays deferred.
