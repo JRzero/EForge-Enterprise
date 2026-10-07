@@ -1397,3 +1397,6 @@ while the Azure HTTP Ubuntu apt mirror stalled. New CI uses official HTTPS
 archive and bounded installation retries, preserving all tests/dependencies.
 Form builder remains deferred; the specifically denied Quartz runtime proposal
 is still absent and its five original mutation controls remain unfinished.
+
+
+Final source acceptance: 508104c3f659576fc1418a9c1a4e07f9c4729282 has terminal SUCCESS for server37678890841 (all four jobs: verify, default and enabled authentication/runtime integration, runtime) and web37678890914. Direct upload-controls-final-cloud-{verify,default,enabled,web}-accepted.log evidence proves661 backend declarations with one existing platform skip,106 frontend units,143 mocked browsers, both62 real framework browsers/full API/OpenAPI, and all seven installed generated families under both configurations. The CI dependency ownership correction is exercised by these successful jobs. Earlier timeout/lock failures remain historical infrastructure evidence. This acceptance does not include the later uncommitted pagination-total-shrink correction and does not complete the whole project.

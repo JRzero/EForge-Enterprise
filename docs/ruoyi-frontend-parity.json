@@ -4082,14 +4082,12 @@
     "mockedBrowsers": 142
   },
   "paginationFidelity": {
-    "status": "source-local-passed-web-cloud-success-server-auth-timeout-successor-matrix-pending",
+    "status": "exact-cloud-accepted",
     "frontEndUnits": 98,
     "mockedBrowsers": 143,
     "mainListConsumers": 10,
     "realAuthority": "81830-terminal0-all-generated;43263-terminal0-both62-fullAPI",
-    "remaining": [
-      "precise source cloud acceptance"
-    ],
+    "remaining": [],
     "fullGoalComplete": false,
     "dialogConsumers": 3,
     "generatedTemplates": "CRUD/sub use shared pagination; tree retains full hierarchy",
@@ -4101,10 +4099,15 @@
     "webRun": 37663449678,
     "matrixSource": "f09ea7be071a451f1ba69b68fd411f314b46c02e",
     "matrixServerRun": 37666836763,
-    "cloudAuthFailure": "GitHub explicitly reports maximum20m execution exceeded;62 browsers passed before interrupted API;not full cloud acceptance"
+    "cloudAuthFailure": "GitHub explicitly reports maximum20m execution exceeded;62 browsers passed before interrupted API;not full cloud acceptance",
+    "finalAcceptedSha": "508104c3f659576fc1418a9c1a4e07f9c4729282",
+    "finalCloudServerRun": "37678890841",
+    "finalCloudWebRun": "37678890914",
+    "realBrowsersPerProfile": 62,
+    "finalServerJobs": 4
   },
   "generatedImagePreviewAudit": {
-    "status": "published-web-both-auth-runtime-cloud-success-verify-apt-mirror-timeout-successor-pending",
+    "status": "exact-cloud-accepted",
     "implementationSha": "7fc7c8ca4430584bf8c89aaeed4b34b1436d6b80",
     "cloudServerRun": 37667176845,
     "cloudWebRun": 37667177067,
@@ -4121,17 +4124,39 @@
     "isolatedUnitTests": 3,
     "frontendUnits": 101,
     "mockedBrowsers": 143,
-    "originalViewer": "Element UI2.15.14"
+    "originalViewer": "Element UI2.15.14",
+    "finalAcceptedSha": "508104c3f659576fc1418a9c1a4e07f9c4729282",
+    "finalCloudServerRun": "37678890841",
+    "finalCloudWebRun": "37678890914",
+    "realBrowsersPerProfile": 62,
+    "finalServerJobs": 4
   },
   "generatedUploadControlsAudit": {
-    "status": "final-local-both-configurations-passed-publication-cloud-pending",
+    "status": "exact-cloud-accepted",
     "realAuthority": "83259-terminal0-default-enabled-all-seven-installed-generated-families",
     "backendDeclarations": 661,
     "existingPlatformSkipped": 1,
     "review": "docs/security-review-generated-upload-controls.md",
-    "required": ["editable image preview and file opening", "one-item duplicate deletion", "pointer and keyboard order saved in SQL", "original five-file and strict five-MiB boundaries", "mixed-batch and HTTP partial-success fidelity", "root and subtable browser proof"],
+    "required": [
+      "editable image preview and file opening",
+      "one-item duplicate deletion",
+      "pointer and keyboard order saved in SQL",
+      "original five-file and strict five-MiB boundaries",
+      "mixed-batch and HTTP partial-success fidelity",
+      "root and subtable browser proof"
+    ],
     "frontendUnits": 106,
     "mockedBrowsers": 143,
+    "fullGoalComplete": false,
+    "finalAcceptedSha": "508104c3f659576fc1418a9c1a4e07f9c4729282",
+    "finalCloudServerRun": "37678890841",
+    "finalCloudWebRun": "37678890914",
+    "realBrowsersPerProfile": 62,
+    "finalServerJobs": 4
+  },
+  "paginationTotalShrink": {
+    "status": "implementation-mocked-red-green-real-validation-pending",
+    "review": "docs/security-review-pagination-shrink.md",
     "fullGoalComplete": false
   }
 }
