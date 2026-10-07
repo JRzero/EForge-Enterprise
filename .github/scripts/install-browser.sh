@@ -3,9 +3,9 @@ set -euo pipefail
 
 # Hosted Ubuntu's Azure HTTP mirror stalled both precise-source verify attempts.
 # Keep the official Ubuntu archive and all browser dependencies; bound network stalls.
-for source in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+for source in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources /etc/apt/apt-mirrors.txt; do
   if [[ -f "$source" ]]; then
-    sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+    sudo sed -i -e 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' -e 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
   fi
 done
 printf '%s\n' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' 'Acquire::Retries "2";' |

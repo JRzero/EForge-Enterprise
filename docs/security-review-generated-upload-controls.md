@@ -70,3 +70,13 @@ file windows/exact bytes, zero upload for invalid selections, individual HTTP
 failure and retained successful uploads all passed. Original lifecycle/date/
 prototype/permission/audit/XLSX/automatic/String PK checks remained green.
 The pending source cloud acceptance must include all four server jobs and web.
+
+Published sourcea2045512ef41b448ea9506ff1d0697c8a9153411 has successful
+web37677153277: exact client/lint/types/106 units/build/143 simulated browsers.
+Server37677153350 remains pending. Direct web logs revealed hosted Ubuntu
+actually uses file:/etc/apt/apt-mirrors.txt; rewriting only sources.list and
+ubuntu.sources did not change that selected mirror. The bounded installer is
+being corrected to include the demonstrated mirror-list file, preserving
+other vendor sources and priorities. The syntax and exact Azure/archive-only
+substitution were checked without modifying local operating-system sources.
+This is not yet accepted cloud evidence for the corrected installer.
