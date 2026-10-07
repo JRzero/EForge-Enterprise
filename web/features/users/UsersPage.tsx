@@ -8,6 +8,7 @@ import {Button, Checkbox, Input} from '@eforge/ui';
 import type {DepartmentResponse, PageResponseUserResponse, UserResponse, UserWriteRequest, UserOptionsResponseRead, UserOption, UserImportResponse} from '../../generated/api';
 import {useApi, useBootstrap} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
+import {PasswordField} from '../../app/components/PasswordField';
 import {ApiError, errorMessage} from '../../integration/errors';
 import {departmentTree, searchedDepartmentTree} from '../departments/tree';
 
@@ -186,7 +187,7 @@ export function UsersPage() {
     {editor ? <ResourceDialog titleId="user-editor-title" busy={busy} onCancel={close}><h2 id="user-editor-title">{editor.id ? '修改用户' : '新增用户'}</h2><form noValidate onSubmit={event => { void save(event); }}>
       <Input label="登录账号" value={editor.form.username} isDisabled={busy || !!editor.id} aria-required="true" onChange={username => setEditor({...editor, form: {...editor.form, username}})} />
       <Input label="用户昵称" value={editor.form.displayName} isDisabled={busy} aria-required="true" onChange={displayName => setEditor({...editor, form: {...editor.form, displayName}})} />
-      {!editor.id ? <Input label="用户密码" type="password" value={editor.password} isDisabled={busy} aria-required="true" onChange={password => setEditor({...editor, password})} /> : null}
+      {!editor.id ? <PasswordField label="用户密码" autoComplete="new-password" value={editor.password} isDisabled={busy} aria-required="true" onChange={password => setEditor({...editor, password})} /> : null}
       <Input label="搜索归属部门" value={parentSearch} onChange={setParentSearch} />
       <label>归属部门<select aria-label="归属部门" value={editor.form.departmentId ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, departmentId: event.target.value || undefined}})}><option value="">未指定部门</option>{editor.form.departmentId && !parentOptions.some(row => row.department.id === editor.form.departmentId) ? <option value={editor.form.departmentId}>当前归属部门</option> : null}{parentOptions.map(row => <option key={row.department.id} value={row.department.id}>{row.path}{row.department.status === '1' ? '（停用）' : ''}</option>)}</select></label>
       <Input label="手机号码" value={editor.form.phone ?? ''} isDisabled={busy} onChange={phone => setEditor({...editor, form: {...editor.form, phone}})} /><Input label="邮箱" value={editor.form.email ?? ''} isDisabled={busy} onChange={email => setEditor({...editor, form: {...editor.form, email}})} />

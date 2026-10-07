@@ -61,7 +61,7 @@ timeout, recorded HTTP200=32 and zero policy/identity failures, and terminated0.
 The fixture now normalizes byte responses exactly as the existing Request
 helper does and records safe HTTP/exception categories without credentials.
 Authority69991 reruns the entire enabled58/full-API profile with the original
-assertions and timeout unchanged; it is pending. Exact implementation
+assertions and timeout unchanged; it terminated0 with58 browsers and the full API suite. Exact implementation
 b039ab43dae5e59e97c554f27d44a6cedfd75417 has now passed server37611280476 all
 three jobs and web37611280555. Direct accepted cloud logs prove both58-browser
 profiles, both32-concurrent bootstrap checks, complete actual API/OpenAPI suites,

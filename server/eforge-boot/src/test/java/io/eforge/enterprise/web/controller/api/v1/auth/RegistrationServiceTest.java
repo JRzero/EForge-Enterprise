@@ -17,6 +17,9 @@ class RegistrationServiceTest {
     private final RegistrationService service=new RegistrationService(configs,original);
     private final RegistrationRequest request=new RegistrationRequest("newaccount","Register123","Register123","42","captcha-id");
     @BeforeEach void enabled(){when(configs.selectConfigByKey("sys.account.registerUser")).thenReturn("true");}
+    @Test void requestDiagnosticsDoNotContainAnyCredentialsOrCaptcha(){
+        assertEquals("RegistrationRequest[credentials redacted]",request.toString());
+    }
     @Test void disabledAndMalformedSettingNeverConsumeCaptchaOrCreateAccount(){
         for(String value:new String[]{"false","TRUE","","broken"}){
             when(configs.selectConfigByKey("sys.account.registerUser")).thenReturn(value);

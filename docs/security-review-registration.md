@@ -63,6 +63,11 @@ original audit. Actual live OpenAPI equals staged contract exactly:
 All fixture users/configuration changes are owned by the disposable parent run;
 exact original settings are restored and only owned accounts are deleted.
 
-The final registration live browser and both full59-browser profiles are still
-pending, as is exact-source cloud acceptance. This document does not claim them
-complete or use password-reminder cloud evidence as registration acceptance.
+Exact implementation d4567f25edc5ec77c9fbdeea395479e129a6cb27 is accepted:
+server37614190802 all three jobs and web37614190817 terminated SUCCESS.
+Direct registration-cloud-server-accepted.log proves both59-browser profiles,
+both full API suites and exact live OpenAPI; the web log proves98 units and123
+mocked browsers. Local authority66393 also terminated0 with both59-browser
+profiles and full API suites. Later request-diagnostic redaction and independent
+password-display controls require their own acceptance and are not covered by
+this implementation SHA.

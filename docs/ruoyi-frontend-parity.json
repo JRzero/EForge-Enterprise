@@ -1975,14 +1975,14 @@
     "fullGoalComplete": false
   },
   "passwordReminders": {
-    "status": "exact-cloud-accepted-local-diagnostic-enabled-retry-running",
+    "status": "exact-cloud-accepted-local-diagnostic-enabled-retry-passed",
     "implementationSha": "b039ab43dae5e59e97c554f27d44a6cedfd75417",
     "backendDeclarations": 623,
     "existingPlatformSkips": 1,
     "frontendUnitTests": 98,
     "mockedBrowserTests": 120,
     "realAuthority": "13398-terminal1-default58-and-full-api-passed-enabled-concurrency-failed",
-    "enabledRetryAuthority": "69991-running",
+    "enabledRetryAuthority": "69991-terminal0-enabled58-and-full-api-passed",
     "focusedConcurrencyAuthority": "78224-terminal0-32-http200",
     "cloudServer": "37611280476-all-three-success",
     "cloudWeb": "37611280555-success",
@@ -1996,17 +1996,32 @@
     "fullGoalComplete": false
   },
   "registration": {
-    "status": "local-api-and-frozen-ui-passed-final-real-cloud-pending",
+    "implementationSha": "d4567f25edc5ec77c9fbdeea395479e129a6cb27",
+    "cloudServer": "37614190802-all-three-success",
+    "cloudWeb": "37614190817-success",
+    "status": "exact-cloud-accepted",
     "backendDeclarations": 633,
     "existingPlatformSkips": 1,
     "targetedSecurityTests": 25,
     "frontendUnitTests": 98,
     "mockedBrowserTests": 123,
     "actualApiAuthority": "46176-terminal0",
-    "realAuthority": "66393-running",
+    "realAuthority": "66393-terminal0-both59-and-full-api-passed",
     "requiredRealBrowsersPerProfile": 59,
     "openApiSha256": "51811E0BB00D0B30658965425019CA8FE7319C26146827C46F95A9B1665B8C8F",
     "review": "docs/security-review-registration.md",
     "fullGoalComplete": false
+  }
+  ,"passwordDisplayControls": {
+    "status":"local-accepted-exact-cloud-pending",
+    "backendDeclarations":634,
+    "existingPlatformSkips":1,
+    "frontendUnitTests":98,
+    "mockedBrowserTests":124,
+    "focusedRealBrowsers":7,
+    "realAuthority":"40851-terminal0-focused7-and-full-api",
+    "openApiSha256":"51811E0BB00D0B30658965425019CA8FE7319C26146827C46F95A9B1665B8C8F",
+    "review":"docs/security-review-password-controls.md",
+    "fullGoalComplete":false
   }
 }

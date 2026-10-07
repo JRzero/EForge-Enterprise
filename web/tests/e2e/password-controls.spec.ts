@@ -1,0 +1,21 @@
+import {test,expect} from './fixtures';
+test('personal password fields reveal independently, keep focus/selection, retain original validation and mask after commit',async({page})=>{
+  let writes=0,release:()=>void=()=>{};const responseGate=new Promise<void>(resolve=>release=resolve);
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'owned-fixture',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'7',username:'ordinary',displayName:'独立密码字段'},roles:[],permissions:[],navigation:[]}}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'7',username:'ordinary',displayName:'独立密码字段',sex:'2',phone:'13900000008',email:'ordinary@example.com',roleNames:'',postNames:''}}));
+  await page.route('**/api/v1/me/password',async route=>{writes++;expect(route.request().postDataJSON()).toEqual({oldPassword:'Old12345',newPassword:'New12345'});await responseGate;await route.fulfill({status:204});});
+  await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill('ordinary');await page.getByLabel('密码',{exact:true}).fill('Password123');await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('tab',{name:'修改密码'}).click();
+  const old=page.getByLabel('旧密码',{exact:true}),next=page.getByLabel('新密码',{exact:true}),confirmation=page.getByLabel('确认新密码',{exact:true});
+  await old.fill('Old12345');await next.fill('New12345');await confirmation.fill('New12345');await old.press('Home');await old.press('ArrowRight');expect(await old.evaluate((input:HTMLInputElement)=>input.selectionStart)).toBe(1);
+  await page.getByRole('button',{name:'显示旧密码',exact:true}).click();await expect(old).toHaveAttribute('type','text');await expect(old).toBeFocused();await expect.poll(()=>old.evaluate((input:HTMLInputElement)=>input.selectionStart)).toBe(1);await expect(next).toHaveAttribute('type','password');await expect(confirmation).toHaveAttribute('type','password');
+  await page.getByRole('button',{name:'显示新密码',exact:true}).focus();await page.keyboard.press('Space');await expect(page.getByRole('button',{name:'隐藏新密码',exact:true})).toBeFocused();await expect(next).toHaveAttribute('type','text');await expect(confirmation).toHaveAttribute('type','password');
+  const all=page.getByLabel('显示密码',{exact:true});await expect(all).toHaveAttribute('aria-checked','mixed');await all.check();await expect(confirmation).toHaveAttribute('type','text');await page.getByRole('button',{name:'隐藏旧密码',exact:true}).click();await expect(old).toHaveAttribute('type','password');await expect(next).toHaveAttribute('type','text');await expect(all).toHaveAttribute('aria-checked','mixed');await all.check();await all.uncheck();await expect(next).toHaveAttribute('type','password');await expect(confirmation).toHaveAttribute('type','password');
+  await next.fill('Short');await confirmation.fill('Short');await page.getByRole('button',{name:'保存密码',exact:true}).click();await expect(page.getByRole('alert')).toContainText('6–20');expect(writes).toBe(0);
+  await next.fill('Bad|1234');await confirmation.fill('Bad|1234');await page.getByRole('button',{name:'保存密码',exact:true}).click();await expect(page.getByRole('alert')).toContainText('非法字符');expect(writes).toBe(0);
+  await next.fill('New12345');await confirmation.fill('New12345');await page.getByRole('button',{name:'显示新密码',exact:true}).click();await page.getByRole('button',{name:'保存密码',exact:true}).click();await expect(page.getByRole('button',{name:'隐藏新密码',exact:true})).toBeDisabled();await expect(all).toBeDisabled();expect(writes).toBe(1);
+  release();await expect(page.getByRole('status').filter({hasText:'密码已修改'})).toBeVisible();for(const input of [old,next,confirmation]){await expect(input).toHaveValue('');await expect(input).toHaveAttribute('type','password');}
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain('Old12345');expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain('New12345');
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.body.scrollWidth<=innerWidth)).toBe(true);
+});

@@ -333,3 +333,8 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 .header-account-link {display:inline-flex;align-items:center;gap:6px;}
 .header-account-avatar {width:28px;height:28px;flex:0 0 28px;object-fit:cover;border-radius:50%;}
 .header-account-avatar-fallback {display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:white;}
+.password-field {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;min-width:0;}
+.password-field > :first-child {min-width:0;width:100%;}
+.password-field-toggle {min-height:32px;padding:5px 8px;border:1px solid #ceddd9;border-radius:6px;background:#fff;color:inherit;white-space:nowrap;cursor:pointer;}
+.password-field-toggle:hover:not(:disabled) {background:#eef6f2;}
+.password-field-toggle:disabled {opacity:.5;cursor:default;}

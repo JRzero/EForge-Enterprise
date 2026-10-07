@@ -7,6 +7,7 @@ import type {ProfileResponse, UpdateProfileRequest} from '../../generated/api';
 import {useApi, useApplicationControls} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
 import {AvatarDialog} from './AvatarDialog';
+import {PasswordField} from '../../app/components/PasswordField';
 
 export function ProfilePage() {
   const sexDictionary = useDictionary('sys_user_sex');
@@ -14,6 +15,13 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null); const [version, setVersion] = useState(0);
   const [form, setForm] = useState<UpdateProfileRequest>({displayName:'',email:'',phone:'',sex:'2'});
   const [passwords, setPasswords] = useState({oldPassword:'',newPassword:'',confirmPassword:''}); const [showPasswords, setShowPasswords] = useState(false);
+  const [revealedPasswords,setRevealedPasswords]=useState({oldPassword:false,newPassword:false,confirmPassword:false});
+  const allPasswordsShown=showPasswords || Object.values(revealedPasswords).every(Boolean);
+  const somePasswordsShown=showPasswords || Object.values(revealedPasswords).some(Boolean);
+  function togglePassword(field:keyof typeof revealedPasswords){
+    setRevealedPasswords(current=>showPasswords ? {oldPassword:true,newPassword:true,confirmPassword:true,[field]:false} : {...current,[field]:!current[field]});
+    setShowPasswords(false);
+  }
   const [tab, setTab] = useState<'profile' | 'password'>('profile');
   useEffect(()=>{if(new URLSearchParams(controls.href?.split('?')[1]?.split('#')[0] ?? '').get('password')==='1')setTab('password');},[controls.href]); const [busy, setBusy] = useState(false);
   const [error, setError] = useState(''); const [feedback, setFeedback] = useState(''); const [loadError, setLoadError] = useState(''); const [avatar, setAvatar] = useState(false);
@@ -43,7 +51,7 @@ export function ProfilePage() {
     }
     if (passwords.newPassword !== passwords.confirmPassword) { setError('两次输入的新密码不一致。'); return; }
     setBusy(true);
-    try { await api.changeMyPassword({oldPassword:passwords.oldPassword,newPassword:passwords.newPassword}); setPasswords({oldPassword:'',newPassword:'',confirmPassword:''}); setShowPasswords(false); setFeedback('密码已修改，请使用新密码登录。'); }
+    try { await api.changeMyPassword({oldPassword:passwords.oldPassword,newPassword:passwords.newPassword}); setPasswords({oldPassword:'',newPassword:'',confirmPassword:''}); setShowPasswords(false); setRevealedPasswords({oldPassword:false,newPassword:false,confirmPassword:false}); setFeedback('密码已修改，请使用新密码登录。'); }
     catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
   return <section className="profile-page"><PageHeader title="个人中心" description="维护个人资料、登录密码和头像。" /><DictionaryNotice dictionary={sexDictionary} />
@@ -65,8 +73,8 @@ export function ProfilePage() {
         <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><input type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
         <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </form> : <form role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
-        {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <Input key={key} label={['旧密码','新密码','确认新密码'][index]!} type={showPasswords ? 'text' : 'password'} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}
-        <label className="profile-show-password"><input type="checkbox" checked={showPasswords} disabled={busy} onChange={event => setShowPasswords(event.target.checked)} />显示密码</label>
+        {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <PasswordField key={key} label={['旧密码','新密码','确认新密码'][index]!} autoComplete={key==='oldPassword'?'current-password':'new-password'} visible={showPasswords || revealedPasswords[key]} onToggle={()=>togglePassword(key)} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}
+        <label className="profile-show-password"><input type="checkbox" checked={allPasswordsShown} aria-checked={somePasswordsShown && !allPasswordsShown ? 'mixed' : allPasswordsShown} disabled={busy} onChange={event => {setShowPasswords(event.target.checked);setRevealedPasswords({oldPassword:false,newPassword:false,confirmPassword:false});}} />显示密码</label>
         <div className="post-row-actions"><Button label={busy ? '正在修改密码…' : '保存密码'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </form>}
     </div></div>}

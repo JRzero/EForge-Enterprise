@@ -9,4 +9,6 @@ public record RegistrationRequest(
         @Schema(accessMode=Schema.AccessMode.WRITE_ONLY) String password,
         @NotBlank @Size(min=5,max=20) @Schema(accessMode=Schema.AccessMode.WRITE_ONLY) String confirmPassword,
         @Size(max=128) @Schema(accessMode=Schema.AccessMode.WRITE_ONLY) String code,
-        @Size(max=128) @Schema(accessMode=Schema.AccessMode.WRITE_ONLY) String uuid) {}
+        @Size(max=128) @Schema(accessMode=Schema.AccessMode.WRITE_ONLY) String uuid) {
+    @Override public String toString(){return "RegistrationRequest[credentials redacted]";}
+}
