@@ -2937,7 +2937,9 @@
       "runJob"
     ],
     "independentRemaining": [
-      "Shared dialog precise-cloud acceptance and final reconciliation"
+      "Denied-page history exact cloud acceptance",
+      "Shared column selector all/partial selection parity",
+      "Final source capability reconciliation"
     ],
     "deferred": [
       "online-form-builder"
@@ -3999,10 +4001,10 @@
     ]
   },
   "sharedDialogGeometry": {
-    "status": "final-scoped-caption-local-verified-exact-cloud-pending",
-    "implementationSha": "41f3b6aa62b157b0ce0d010e39fc2e94d3504dc1",
-    "cloudServerRun": "37643644308",
-    "cloudWebRun": "37643644236",
+    "status": "exact-cloud-accepted",
+    "implementationSha": "98daf4ebe25d9cba1f65f661ddd497383b5ca1ad",
+    "cloudServerRun": "37649130907",
+    "cloudWebRun": "37649131155",
     "frontEndUnits": 98,
     "mockedBrowsers": 141,
     "realBrowsersPerProfile": 62,
@@ -4023,8 +4025,17 @@
     "duplicateRetainedHeadingRegression": true,
     "finalRealAuthority": "59827-terminal0-real-posts2-full-api",
     "finalRealBrowsers": 2,
-    "latestFullProfiles": "required-at-final-exact-cloud",
+    "latestFullProfiles": "final-exact-cloud-both62-and-full-api-success",
     "failedIntermediateWeb": "08bb4e4-web37646585561-140of141-immediate-viewport-layout-read",
     "viewportCheck": "same-exact-positive-height-and-bounds-after-native-layout;8-repeat-and141-full-pass"
+  },
+  "errorHistory": {
+    "status": "local142-mock-98-unit-real1-fullapi-pass-exact-cloud-pending",
+    "review": "docs/security-review-error-history.md",
+    "noGoBackOriginalQuerySemantics": true,
+    "protectedApiAuthorityUnchanged": true,
+    "fullGoalComplete": false,
+    "realAuthority": "48423-terminal0-registration1-full-api",
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
   }
 }

@@ -56,3 +56,13 @@ Final scoped caption correction: a second controlled retained heading with a dif
 Final local98 units/lint/type/repro/build and141 mocks pass in dialog-caption-final-*; corrected final test set also passes lint/type and141 in dialog-caption-viewport-final-*. Local59827 completed0 with2 actual posts browsers and complete enabled API; unchanged OpenAPI is CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C. Earlier88070 used a test-name regex where the runner requires a file pattern and ran zero tests, then cleaned its owned runtime; it is not product acceptance or a product defect. The corrected invocation uses posts.spec.ts and preserves both original tests.
 
 Intermediate08bb4e4 web37646585561 failed140/141 at the viewport resize check; no claim of all-green acceptance for that source. The old check read boundingBox immediately after viewport emulation, before owned native resize/ResizeObserver layout delivery. The corrected assertion waits for the same non-null positive-height and exact bottom-within-viewport condition with normal expect.poll, without increased timeout, retries, force clicks or relaxed bounds. All8 repeated ordinary resize cases and the final full141 pass. ConsolePage production source is unchanged. Its previously demonstrated forced-min-height defect remains fixed and the original native authorization interactions stay tested. A precise final source cloud remains required; baseline41f3b6a success does not replace it.
+
+Final exact98daf4ebe25d9cba1f65f661ddd497383b5ca1ad is accepted:
+server37649130907 all three jobs and web37649131155 terminal SUCCESS.
+dialog-caption-cloud-server/web-accepted.log directly prove both62 real browser
+and fullAPI profiles, unchanged live contract,661 backend declarations including
+10 scope and one existing platform skip,98 units/141 mocked browsers, native
+dialog regressions and both actual compiled installed generated hosts. Authority
+51938 completed0; no old failed source is substituted. This completes the shared
+dialog stage, not the complete project. Subsequent denied-page history parity is
+an independent source change with independent acceptance still required.

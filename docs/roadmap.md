@@ -1329,3 +1329,15 @@ Exact verifier22f88957653b758042eea68140c35188197b0f96 is accepted in server3763
 Shared dialog41f3b6a is published after exact-SHA Git API recovery from repeated receive HTTP500. Local97313 both62/fullAPI/OpenAPI and98 units/141 mocks pass. Precise server37643644308/web37643644236 remain pending; observer97642 is the unique observer. The only remaining task API operations are add/update/delete/status/run, gated by the specific unapproved runtime proposal; full active goal is not complete.
 Dialog base41f3b6a exact server37643644308 all3/web37643644236 accepted. Independently reproduced duplicate retained heading picking another dialog; selector is now scoped to the current native modal. Before test fails; final98 units/141 mocks and frozen frontend gates pass. Focused real2/fullAPI88070 and exact scoped-source cloud remain pending.
 2026-10-08 final caption source: hidden retained different-name heading exposed an accessible-name collision; per-instance literal caption/help identities and scoped heading observer fix it. Final98 units/141 mocks/frozen frontend gates and actual posts2/fullAPI59827 pass. Intermediate08 web fails140/141 immediate resize layout read, preserved; unchanged exact bounds now await native layout,8 repeats/full141 pass without weaker assertions. Exact final cloud pending. Complete goal still incomplete; five task mutations require the specific runtime approval.
+
+2026-10-08 exact dialog98daf4e is accepted: server37649130907 all3 and
+web37649131155 SUCCESS; direct logs prove both62/fullAPI/unchanged OpenAPI,
+661 declarations with10 scope/one existing skip,98 units/141 mocks and generated
+hosts. Original error401 source audit uncovered missing history/noGoBack behavior;
+the canonical403 implementation and98 units/142 mocks pass, actual no-role and
+complete API validation is running. The new source must receive separate exact
+cloud acceptance. Task mutations remain specifically approval-gated; builder
+deferred; complete objective incomplete.
+
+Denied-page local authority48423 completed0 with the real no-role account and complete API;142 mocked browsers/98 units/all frontend checks pass. Original RightToolbar audit also found missing all/partial column selection controls; that independent remaining capability is recorded without claiming complete parity.
+

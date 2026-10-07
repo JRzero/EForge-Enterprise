@@ -47,7 +47,8 @@ pending: `addJob`, `updateJob`, `delJob`, `changeJobStatus`, `runJob`. Task-log
 operations are independently accepted and are not incorrectly held incomplete
 because task CRUD is pending. Historical source/operation lists are unchanged.
 
-Remaining active work is the independent shared-dialog stage, final reconciliation
+Remaining active work is the permission-denied history/noGoBack capability found
+by original-source audit, the independent shared-dialog stage, final reconciliation
 of its acceptance with the source inventory, and canonical task mutation APIs,
 invocation whitelist, database/Quartz fault/concurrency consistency, generated
 client and create/edit/status/run/delete controls integrating the Cron editor.
@@ -64,3 +65,10 @@ Cloud observer2948 and resumed20097 both ended on GitHub API unexpected EOF;
 authoritative terminal jobs and direct logs establish actual success, not their
 observer exit codes. Earlier actual password-focus and viewport failures remain
 recorded in their reviews and were superseded by corrected-source acceptance.
+
+Subsequent native dialog source98daf4ebe25d9cba1f65f661ddd497383b5ca1ad
+has terminal success in server37649130907 (all three jobs) and web37649131155.
+Direct dialog-caption-cloud-server/web-accepted.log retain actual aggregate
+evidence. A subsequently discovered denied-page history capability is being
+implemented and requires its own exact acceptance; this dialog source cannot
+be used as acceptance for the later change. See security-review-error-history.md.

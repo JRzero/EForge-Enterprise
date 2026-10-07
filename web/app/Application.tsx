@@ -20,10 +20,16 @@ import {toEForgePermissions} from '../integration/permissions';
 const HeaderNotices = lazy(() => import('../features/notices/HeaderNotices').then(module => ({default: module.HeaderNotices})));
 
 function StatePage({code, router}: {code: '403' | '404'; router: AppRouterAdapter}) {
+  function back() {
+    const flags = new URL(router.getCurrentHref(), 'http://eforge.local').searchParams.getAll('noGoBack');
+    if (flags.length > 1 || !!flags[0]) router.navigate('/dashboard');
+    else window.history.back();
+  }
   return <section className="state-page"><span className="eyebrow">{code}</span>
     <h1>{code === '403' ? '暂无访问权限' : '页面不存在'}</h1>
     <p>{code === '403' ? '如需访问，请联系企业管理员。' : '请检查地址，或返回工作台继续。'}</p>
-    <Button label="返回工作台" onClick={() => router.navigate('/dashboard')} /></section>;
+    <div className="state-actions">{code === '403' ? <Button label="返回上一页" onClick={back} /> : null}
+      <Button label="返回工作台" variant="ghost" onClick={() => router.navigate('/dashboard')} /></div></section>;
 }
 export function Application({runtime, router}: {runtime: SessionRuntime; router: AppRouterAdapter}) {
   const session = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);

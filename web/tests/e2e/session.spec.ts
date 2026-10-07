@@ -52,6 +52,33 @@ test('revoked permissions show 403, while expiry removes the session', async ({p
   await expect(page.getByRole('heading', {name: '登录工作空间'})).toBeVisible();
   expect(await page.evaluate(() => sessionStorage.getItem('eforge.enterprise.session.v1'))).toBeNull();
 });
+
+test('denied routes return through history unless the original noGoBack query requests home', async ({page}) => {
+  await setup(page); await signIn(page);
+  await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
+  let protectedRequests = 0;
+  page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/v1/system/roles')) protectedRequests++; });
+  for (const query of ['', '?noGoBack=']) {
+    await page.goto('/missing-history');
+    await expect(page.getByRole('heading', {name: '页面不存在'})).toBeVisible();
+    await expect(page.getByRole('button', {name: '返回上一页'})).toHaveCount(0);
+    await page.goto('/role' + query);
+    await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
+    await page.getByRole('button', {name: '返回上一页', exact: true}).click();
+    await expect(page).toHaveURL(/\/missing-history$/);
+    await expect(page.getByRole('heading', {name: '页面不存在'})).toBeVisible();
+  }
+  for (const query of ['?noGoBack=1', '?noGoBack=false', '?noGoBack=&noGoBack=']) {
+    await page.goto('/missing-history');
+    await expect(page.getByRole('heading', {name: '页面不存在'})).toBeVisible();
+    await page.goto('/role' + query);
+    await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
+    await page.getByRole('button', {name: '返回上一页', exact: true}).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
+  }
+  expect(protectedRequests).toBe(0);
+});
 test('rejected login refreshes captcha and supports recovery', async ({page}) => {
   const state = await setup(page); state.captcha = true; state.reject = true;
   await page.goto('/'); await page.getByLabel('账号', {exact: true}).fill('admin');

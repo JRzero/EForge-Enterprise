@@ -20,6 +20,11 @@ test('actual registration switch, no-session success, fresh no-role login, dupli
     await expect(page).toHaveURL(/\/dashboard$/);await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
     const token=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken);
     const boot=await(await page.request.get('/api/v1/app/bootstrap',{headers:{Authorization:'Bearer '+token}})).json();expect(boot.roles).toEqual([]);expect(boot.permissions).toEqual([]);expect(boot.passwordStatus.initialChangeRecommended).toBe(false);expect(boot.user.password).toBeUndefined();
+    await page.goto('/role');await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();
+    await page.getByRole('button',{name:'返回上一页',exact:true}).click();await expect(page).toHaveURL(/\/user\/profile$/);await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    expect((await page.request.get('/api/v1/system/roles',{headers:{Authorization:'Bearer '+token}})).status()).toBe(403);
+    await page.goto('/role?noGoBack=false');await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();await page.getByRole('button',{name:'返回上一页',exact:true}).click();await expect(page).toHaveURL(/\/dashboard$/);await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();
+    const unchanged=await(await page.request.get('/api/v1/app/bootstrap',{headers:{Authorization:'Bearer '+token}})).json();expect(unchanged.roles).toEqual([]);expect(unchanged.permissions).toEqual([]);
     await page.getByRole('button',{name:'退出登录',exact:true}).click();await page.goto('/register');await page.getByLabel('账号',{exact:true}).fill(username);await page.getByLabel('密码',{exact:true}).fill('Register123');await page.getByLabel('确认密码',{exact:true}).fill('Register123');await page.getByRole('button',{name:'注册',exact:true}).click();await expect(page.getByRole('alert')).toContainText('账号已存在');await expect(page.getByLabel('密码',{exact:true})).toHaveValue('');
     await configure('false');await page.reload();await expect(page.getByRole('status')).toContainText('注册暂未开放');await expect(page.getByRole('button',{name:'注册',exact:true})).toHaveCount(0);
   }finally{
