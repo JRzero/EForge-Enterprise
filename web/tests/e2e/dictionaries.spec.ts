@@ -89,3 +89,40 @@ test('metadata failure disables editing until retry and inconsistent preview sup
   await page.getByRole('button', {name: '预览字典 测试字典'}).click(); const dialog = page.getByRole('dialog'); await expect(dialog.getByRole('alert')).toContainText('字典数据已变化'); drift = false; await dialog.getByRole('button', {name: '重试预览'}).click(); await expect(dialog.locator('p[role=status]')).toHaveText('共计 101 条，正常 101 条，停用 0 条'); await expect(dialog.getByText('预览100', {exact: true})).toBeAttached(); await page.keyboard.press('Escape');
   await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期');
 });
+
+test('a cached dictionary page recovers an editor read cancelled by tab navigation',async({page})=>{
+  await page.route('**/api/v1/system/dictionaries?*',route=>route.fulfill({json:{items:[type],total:1,page:1,pageSize:10}}));
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'2',username:'reader',displayName:'测试账号',sex:'2',roleNames:'',postNames:''}}));
+  await page.route('**/api/v1/system/dictionaries/'+id,async route=>{await gate;await route.fulfill({json:type}).catch(()=>{});});
+  await authenticate(page,['system:dict:list','system:dict:query','system:dict:edit']);
+  const modify=page.getByRole('button',{name:'修改字典 测试字典',exact:true});await expect(modify).toBeEnabled();
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname==='/api/v1/system/dictionaries/'+id);
+  await modify.click();const pending=await requested;
+  const aborted=page.waitForEvent('requestfailed',{predicate:request=>request===pending});
+  try{await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();expect((await aborted).failure()?.errorText).toMatch(/abort|cancel/i);}
+  finally{release();}
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：字典管理',exact:true}).click();
+  await expect(modify).toBeEnabled();await modify.click();const dialog=page.getByRole('dialog');
+  await expect(dialog.getByLabel('字典名称',{exact:true})).toHaveValue('测试字典');await page.keyboard.press('Escape');
+});
+test('resuming a completed editor read does not unlock a pending cache mutation',async({page})=>{
+  await page.route('**/api/v1/system/dictionaries?*',route=>route.fulfill({json:{items:[type],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/system/dictionaries/'+id,route=>route.fulfill({json:type}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'2',username:'reader',displayName:'测试账号',sex:'2',roleNames:'',postNames:''}}));
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let writes=0;
+  await page.route('**/api/v1/system/dictionaries/cache/refresh',async route=>{writes++;await gate;await route.fulfill({status:204});});
+  await authenticate(page,['system:dict:list','system:dict:query','system:dict:edit','system:dict:remove']);
+  await page.getByRole('button',{name:'修改字典 测试字典',exact:true}).click();
+  await expect(page.getByRole('dialog').getByLabel('字典名称',{exact:true})).toHaveValue('测试字典');await page.keyboard.press('Escape');
+  const refresh=page.getByRole('button',{name:'刷新字典缓存',exact:true});
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname==='/api/v1/system/dictionaries/cache/refresh');
+  await refresh.click();await requested;
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：字典管理',exact:true}).click();
+    await expect(refresh).toBeDisabled();expect(writes).toBe(1);
+  }finally{release();}
+  await expect(page.getByText('字典缓存已刷新。',{exact:true})).toBeVisible();await expect(refresh).toBeEnabled();expect(writes).toBe(1);
+});

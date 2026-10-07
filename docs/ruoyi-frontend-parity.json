@@ -1720,4 +1720,20 @@
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }
+,
+  "dictionaryCachedActions": {
+    "status": "local-both53-full-api-success-exact-cloud-pending",
+    "review": "docs/security-review-dictionary-cached-actions.md",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 85,
+    "fullRealBrowserProfiles": [53, 53],
+    "cancelledEditorRead": "exact-request-aborted-on-hide-explicit-retry-real200",
+    "pendingCacheWrite": "completed-read-controller-retired-write-remains-locked-exactly-one-real204",
+    "automaticMutationRetry": false,
+    "beforeEvidence": ["page-cache-editor-interruption-before.log", "page-cache-operation-owner-before.log"],
+    "finalEvidence": ["page-cache-operation-owner-after.log", "page-cache-owner-final-frontend.log", "page-cache-owner-disabled-runtime.log", "page-cache-owner-enabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "fullGoalComplete": false,
+    "formBuilder": "deferred-not-complete"
+  }
 }

@@ -26,7 +26,12 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
   const [editor, setEditor] = useState<DictionaryEditorState | null>(null), [deleting, setDeleting] = useState<string[] | null>(null), [preview, setPreview] = useState<DictionaryTypeOption | null>(null);
-  const action = useRef<AbortController | null>(null); useEffect(() => () => action.current?.abort(), []);
+  const action = useRef<AbortController | null>(null);
+  useEffect(() => {
+    // A hidden Activity aborts editor reads but retains the page's busy state.
+    if (action.current?.signal.aborted) {action.current = null; setBusy(false);}
+    return () => action.current?.abort();
+  }, []);
   const selectedType = types.find(type => type.id === dictionaryId);
   useEffect(() => {
     const controller = new AbortController(); setMetadataError(''); setMetadataLoading(true);
@@ -51,7 +56,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
     try {
       if (entryMode) {const row = await api.getDictionaryEntry(id, controller.signal); if (!controller.signal.aborted) setEditor({kind: 'entry', id, form: {dictionaryId: row.dictionaryId, label: row.label, value: row.value, sort: row.sort, style: row.style, cssClass: row.cssClass ?? '', defaultEntry: row.defaultEntry, status: row.status, remark: row.remark ?? ''}});}
       else {const row = await api.getDictionary(id, controller.signal); if (!controller.signal.aborted) setEditor({kind: 'type', id, form: {name: row.name, code: row.code, status: row.status, remark: row.remark ?? ''}});}
-    } catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted) setBusy(false);}
+    } catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted) {if (action.current === controller) action.current = null; setBusy(false);}}
   }, [api, entryMode]);
   const columns = useMemo<ColumnDef<Row>[]>(() => [
     {id: 'id', header: entryMode ? '字典编码' : '字典编号', cell: ({row}) => row.original.id},

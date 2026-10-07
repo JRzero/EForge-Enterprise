@@ -973,3 +973,15 @@ browsers. This accepts the committed tab/read stage; the following dictionary
 action interruption patch is independently under verification. Remaining
 generated/action/monitor/embedded cache, sidebar/topnav/settings and final active
 audit are not complete. Form builder remains deferred.
+### Dictionary retained-action recovery: local acceptance
+An actual cancelled editor GET no longer leaves the cached dictionary page busy.
+Completed reads retire their controller, so returning to a tab cannot falsely
+unlock an unrelated pending cache-refresh POST. Both defects have browser
+before-failure/after-success evidence; the new real case proves exact GET abort,
+explicit genuine200 recovery, pending-write lock and exactly one genuine204.
+Frontend reproducibility/lint/typecheck/98 units/build/all85 mocked pass.
+43066 ended0 with default/enabled complete real API regressions and53 browser
+cases each; both OpenAPI exports exactly match65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-dictionary-cached-actions.md. Exact cloud remains pending.
+Other action/generated/monitor/embedded lifecycle and shell settings remain open;
+no automatic mutation retry or rejected Quartz runtime change was introduced.

@@ -142,3 +142,40 @@ test('real dictionary pagination, date filters, whole preview, type switching, c
     return (await fetch('/api/v1/system/dictionaries', {method: 'DELETE', headers, body: JSON.stringify({ids: seeded.types.slice(0, 10).map(row => row.id)})})).status;
   }, seeded); expect(cleanup).toBe(204);
 });
+
+test('actual cached dictionary read cancellation recovers without unlocking a pending cache write',async({page})=>{
+  await page.goto('/dict');await page.getByLabel('账号',{exact:true}).fill('admin');await page.getByLabel('密码',{exact:true}).fill('admin123');
+  await page.getByRole('button',{name:'登录',exact:true}).click();await expect(page.getByRole('heading',{name:'字典管理',exact:true})).toBeVisible();
+  const token=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string),headers={Authorization:'Bearer '+token};
+  const options=await (await page.request.get('/api/v1/system/dictionaries/options',{headers})).json() as DictionaryTypeOption[];
+  const selected=options.find(item=>item.code==='sys_normal_disable')!;expect(selected).toBeDefined();
+  const detailPath='/api/v1/system/dictionaries/'+selected.id;
+  let releaseRead!:()=>void;const readGate=new Promise<void>(resolve=>{releaseRead=resolve;});
+  await page.route('**'+detailPath,async route=>{await readGate;await route.continue().catch(()=>{});});
+  const modify=page.getByRole('button',{name:'修改字典 '+selected.name,exact:true});await expect(modify).toBeEnabled();
+  const pendingRead=page.waitForRequest(request=>new URL(request.url()).pathname===detailPath);
+  await modify.click();const captured=await pendingRead;
+  const cancelled=page.waitForEvent('requestfailed',{predicate:request=>request===captured});
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    expect((await cancelled).failure()?.errorText).toMatch(/abort|cancel/i);
+  }finally{releaseRead();}
+  await page.unroute('**'+detailPath);
+  const tabs=page.getByRole('navigation',{name:'页面标签'});
+  await tabs.getByRole('link',{name:'页面标签：字典管理',exact:true}).click();await expect(modify).toBeEnabled();
+  const recovered=page.waitForResponse(response=>new URL(response.url()).pathname===detailPath&&response.status()===200);
+  await modify.click();await recovered;await expect(page.getByRole('dialog').getByLabel('字典名称',{exact:true})).toHaveValue(selected.name);await page.keyboard.press('Escape');
+  let releaseWrite!:()=>void;const writeGate=new Promise<void>(resolve=>{releaseWrite=resolve;});let writes=0;
+  const cachePath='/api/v1/system/dictionaries/cache/refresh';
+  await page.route('**'+cachePath,async route=>{writes++;await writeGate;await route.continue();});
+  const refresh=page.getByRole('button',{name:'刷新字典缓存',exact:true});
+  const sent=page.waitForRequest(request=>new URL(request.url()).pathname===cachePath&&request.method()==='POST');
+  const committed=page.waitForResponse(response=>new URL(response.url()).pathname===cachePath&&response.status()===204);
+  await refresh.click();await sent;
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await tabs.getByRole('link',{name:'页面标签：字典管理',exact:true}).click();
+    await expect(refresh).toBeDisabled();expect(writes).toBe(1);
+  }finally{releaseWrite();}
+  await committed;await expect(page.getByText('字典缓存已刷新。',{exact:true})).toBeVisible();await expect(refresh).toBeEnabled();expect(writes).toBe(1);
+});
