@@ -52,10 +52,23 @@ but failed the new reminder test because its legacy `/getInfo` comparison used
 the frontend origin. The final test uses the actual backend origin. These
 earlier runs are not claimed as final full API or two-profile acceptance.
 
-Final authority 13398 runs default and enabled console/custom-output profiles
-sequentially. Each requires all 58 real browsers, the complete actual API suite,
-32 concurrent bootstraps and exact live OpenAPI equality. It is pending at this
-document revision. No exact-source cloud acceptance is claimed yet.
+Authority 13398 passed the default profile's 58 real browsers and complete API
+suite, then failed the enabled profile's initial aggregate concurrency check.
+That first check did not collect exception categories, so its precise cause is
+unclassified rather than assumed to be infrastructure or product failure.
+Focused enabled authority78224 retained the same 32 requests and 15-second
+timeout, recorded HTTP200=32 and zero policy/identity failures, and terminated0.
+The fixture now normalizes byte responses exactly as the existing Request
+helper does and records safe HTTP/exception categories without credentials.
+Authority69991 reruns the entire enabled58/full-API profile with the original
+assertions and timeout unchanged; it is pending. Exact implementation
+b039ab43dae5e59e97c554f27d44a6cedfd75417 has now passed server37611280476 all
+three jobs and web37611280555. Direct accepted cloud logs prove both58-browser
+profiles, both32-concurrent bootstrap checks, complete actual API/OpenAPI suites,
+613 boot declarations plus10 scope cases,98 frontend units and120 mocked browsers.
+Both live schemas match contract49E58409A91C3EC4C84B293C2FF8E7179552216C4D6991DB3BC2F06BFF820C12.
+That exact implementation is accepted. Subsequent diagnostic fixture changes
+and the independent registration stage are not represented as this SHA's source.
 
 The reminder test changes configuration only through authorized canonical APIs,
 compares the original and canonical flags, exercises a real no-role account,

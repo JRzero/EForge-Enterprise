@@ -1300,3 +1300,5 @@ exact cloud acceptance is claimed complete yet. See
 security-review-password-reminders.md. Registration/password complexity and
 remaining shared audits continue; form builder remains deferred. The specifically
 rejected Quartz runtime scheme still requires explicit approval.
+
+Password reminders b039ab4 are now exact-cloud accepted: server37611280476 all3/web37611280555 SUCCESS; both58/fullAPI/OpenAPI and32-concurrent bootstrap checks directly proved. Local failed enabled aggregate remains documented and diagnostic retry69991 is pending. Registration has independently passed targeted25/full633 Maven declarations and initial98 units/123 mocks, with actual registration SQL/captcha/race/privacy/audit proof and exact staged-vs-live OpenAPI51811E0B...; final registration login landing source, live59 profiles and its cloud are not yet accepted. Continue full current scope except deferred form builder and specifically unapproved Quartz runtime scheme.
