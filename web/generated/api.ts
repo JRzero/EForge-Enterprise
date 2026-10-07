@@ -30,6 +30,11 @@ export type NavigationNode = {
     routeId?: string;
     "type": "GROUP" | "ROUTE" | "EXTERNAL";
 };
+export type PasswordStatus = {
+    characterType: string;
+    expired: boolean;
+    initialChangeRecommended: boolean;
+};
 export type UserSummary = {
     avatarUrl?: string;
     displayName: string;
@@ -38,6 +43,7 @@ export type UserSummary = {
 };
 export type BootstrapResponse = {
     navigation: NavigationNode[];
+    passwordStatus?: PasswordStatus;
     permissions: string[];
     roles: string[];
     user: UserSummary;

@@ -14,7 +14,8 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null); const [version, setVersion] = useState(0);
   const [form, setForm] = useState<UpdateProfileRequest>({displayName:'',email:'',phone:'',sex:'2'});
   const [passwords, setPasswords] = useState({oldPassword:'',newPassword:'',confirmPassword:''}); const [showPasswords, setShowPasswords] = useState(false);
-  const [tab, setTab] = useState<'profile' | 'password'>('profile'); const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<'profile' | 'password'>('profile');
+  useEffect(()=>{if(new URLSearchParams(controls.href?.split('?')[1]?.split('#')[0] ?? '').get('password')==='1')setTab('password');},[controls.href]); const [busy, setBusy] = useState(false);
   const [error, setError] = useState(''); const [feedback, setFeedback] = useState(''); const [loadError, setLoadError] = useState(''); const [avatar, setAvatar] = useState(false);
   const read=useRetainedRead();
   useEffect(() => {

@@ -7,6 +7,7 @@ import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
 import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshContext} from './context';
+import {PasswordReminder} from './components/PasswordReminder';
 import {AccountAvatar} from './components/AccountAvatar';
 import {EnterpriseShell} from './components/EnterpriseShell';
 import {NavigationBreadcrumbs, NavigationSearch} from './components/NavigationTools';
@@ -50,7 +51,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const allowed = match && canAccessRoute(match.route, permissions);
 
   return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><ApplicationControlsContext.Provider value={{navigate: path => router.navigate(path), refresh: runtime.refresh}}><NoticeRefreshContext.Provider value={invalidateNotices}><PermissionProvider permissions={permissions}>
-    <EnterpriseShell activePaths={match ? getRouteAncestry(routes,match.route.id).map(route => route.path) : []} items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} href={href} ownerId={snapshot.user.id} router={router} brand={<a aria-label="EForge Enterprise" className="enterprise-brand" href="/dashboard" onClick={event => {
+    <PasswordReminder key={snapshot.user.id+snapshot.user.username+JSON.stringify(snapshot.passwordStatus)} status={snapshot.passwordStatus}/><EnterpriseShell activePaths={match ? getRouteAncestry(routes,match.route.id).map(route => route.path) : []} items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} href={href} ownerId={snapshot.user.id} router={router} brand={<a aria-label="EForge Enterprise" className="enterprise-brand" href="/dashboard" onClick={event => {
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); router.navigate('/dashboard');
       }

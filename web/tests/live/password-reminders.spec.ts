@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+import type {ConfigurationResponse,PageResponseConfigurationResponse} from '../../generated/api';
+test('actual configured password reminders preserve priority, cancellation, expired change and original getInfo parity',async({page})=>{
+  const login=await page.request.post('/api/v1/auth/login',{data:{username:'admin',password:'admin123'}});expect(login.status()).toBe(200);const admin={Authorization:`Bearer ${(await login.json()).accessToken}`};
+  const backups:ConfigurationResponse[]=[];let accountId:string|undefined;
+  async function setting(key:string,value:string){const result=await page.request.get(`/api/v1/system/configurations?key=${encodeURIComponent(key)}`,{headers:admin});expect(result.status()).toBe(200);const record=((await result.json()) as PageResponseConfigurationResponse).items.find(item=>item.key===key)!;expect(record).toBeTruthy();if(!backups.some(item=>item.id===record.id))backups.push(record);expect((await page.request.put(`/api/v1/system/configurations/${record.id}`,{headers:admin,data:{name:record.name,key:record.key,value,builtin:record.builtin,remark:record.remark??''}})).status()).toBe(204);}
+  const username=`pw${Date.now()}`;
+  try{
+    await setting('sys.account.initPasswordModify','1');await setting('sys.account.passwordValidateDays','30');
+    const created=await page.request.post('/api/v1/system/users',{headers:admin,data:{user:{username,displayName:'密码提醒验证用户',departmentId:'105',email:'',phone:'',sex:'2',status:'0',roleIds:[],postIds:[]},password:'Reminder123'}});expect(created.status()).toBe(201);accountId=(await created.json()).id;
+    await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill(username);await page.getByLabel('密码',{exact:true}).fill('Reminder123');await page.getByRole('button',{name:'登录',exact:true}).click();
+    const reminder=page.getByRole('alertdialog',{name:'安全提示'});await expect(reminder).toContainText('您的密码还是初始密码，请修改密码！');await expect(reminder).not.toContainText('已过期');await reminder.getByRole('button',{name:'取消',exact:true}).click();await expect(page.getByRole('tab',{name:'基本资料'})).toHaveAttribute('aria-selected','true');await page.getByLabel('用户昵称',{exact:true}).fill('取消真实草稿');
+    const headers={Authorization:`Bearer ${await page.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken)}`};
+    const snapshot=await (await page.request.get('/api/v1/app/bootstrap',{headers})).json(),legacy=await(await page.request.get(`${process.env.EFORGE_E2E_BACKEND_URL}/getInfo`,{headers})).json();expect(snapshot.roles).toEqual([]);expect(snapshot.permissions).toEqual([]);expect(snapshot.passwordStatus.initialChangeRecommended).toBe(legacy.isDefaultModifyPwd);expect(snapshot.passwordStatus.expired).toBe(legacy.isPasswordExpired);expect(snapshot.passwordStatus.expired).toBe(true);expect(snapshot.user.password).toBeUndefined();
+    await setting('sys.account.initPasswordModify','0');await page.reload();await expect(reminder).toContainText('您的密码已过期，请尽快修改密码！');await reminder.getByRole('button',{name:'确定',exact:true}).click();await expect(page).toHaveURL(/\/user\/profile\?password=1$/);await expect(page.getByRole('tab',{name:'修改密码'})).toHaveAttribute('aria-selected','true');
+    await page.getByLabel('旧密码',{exact:true}).fill('Reminder123');await page.getByLabel('新密码',{exact:true}).fill('Reminder456');await page.getByLabel('确认新密码',{exact:true}).fill('Reminder456');await page.getByRole('button',{name:'保存密码',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'密码已修改'})).toBeVisible();
+    const changed=await(await page.request.get('/api/v1/app/bootstrap',{headers})).json(),afterLegacy=await(await page.request.get(`${process.env.EFORGE_E2E_BACKEND_URL}/getInfo`,{headers})).json();expect(changed.passwordStatus.initialChangeRecommended).toBe(false);expect(changed.passwordStatus.expired).toBe(false);expect(afterLegacy.isPasswordExpired).toBe(false);await page.reload();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();await expect(reminder).toHaveCount(0);
+    await page.getByRole('button',{name:'退出登录',exact:true}).click();expect((await page.request.get('/api/v1/app/bootstrap',{headers})).status()).toBe(401);
+  }finally{
+    for(const record of backups)expect((await page.request.put(`/api/v1/system/configurations/${record.id}`,{headers:admin,data:{name:record.name,key:record.key,value:record.value,builtin:record.builtin,remark:record.remark??''}})).status()).toBe(204);
+    if(accountId)expect((await page.request.delete('/api/v1/system/users',{headers:admin,data:{ids:[accountId]}})).status()).toBe(204);await page.request.post('/logout',{headers:admin});
+  }
+});

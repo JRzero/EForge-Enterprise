@@ -70,7 +70,7 @@ class AuthControllerTest
         when(tokenService.getLoginUser(any())).thenReturn(session);
         when(bootstrapService.bootstrap(session)).thenReturn(new BootstrapResponse(
                 new BootstrapResponse.UserSummary("2", "ry", "Display name", null), Set.of("common"),
-                Set.of("system:user:list"), List.of()));
+                Set.of("system:user:list"), List.of(), null));
         mvc.perform(get("/api/v1/app/bootstrap").header("Authorization", "Bearer session-token"))
                 .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
                 .andExpect(jsonPath("$.user.id").value("2")).andExpect(jsonPath("$.roles[0]").value("common"))

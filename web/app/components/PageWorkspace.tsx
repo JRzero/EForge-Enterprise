@@ -136,7 +136,7 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
       const match=matchAppRoute(routes,item.path);if(!match || !canAccessRoute(match.route,permissions))return null;
       const Page=match.route.component;
       return <Activity key={item.path+':'+item.revision} mode={item.path===active?.path?'visible':'hidden'}>
-        <ApplicationControlsContext.Provider value={{...controls,closePage:destination=>{setState({href,views:views.filter(prior=>prior.affix || prior.path!==item.path)});setSelected(null);router.navigate(destination);}}}><div data-page-path={item.path}><Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params}/></Suspense></div></ApplicationControlsContext.Provider>
+        <ApplicationControlsContext.Provider value={{...controls,href:item.path===active?.path?href:item.href,closePage:destination=>{setState({href,views:views.filter(prior=>prior.affix || prior.path!==item.path)});setSelected(null);router.navigate(destination);}}}><div data-page-path={item.path}><Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params}/></Suspense></div></ApplicationControlsContext.Provider>
       </Activity>;
     })}
   </div>;

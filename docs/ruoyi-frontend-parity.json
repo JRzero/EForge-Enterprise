@@ -1973,5 +1973,19 @@
     "openApiSha256": "80D252BDCF626075609B65CA2EF4FD795ADB50D7A0E242325680984A39E1CA46",
     "review": "docs/security-review-header-avatar.md",
     "fullGoalComplete": false
+  },
+  "passwordReminders": {
+    "status": "final-real-validation-running-cloud-not-yet-accepted",
+    "backendDeclarations": 623,
+    "existingPlatformSkips": 1,
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 120,
+    "realAuthority": "13398-running",
+    "requiredRealBrowsersPerProfile": 58,
+    "concurrentBootstrapRequests": 32,
+    "review": "docs/security-review-password-reminders.md",
+    "registrationComplete": false,
+    "passwordComplexityComplete": false,
+    "fullGoalComplete": false
   }
 }

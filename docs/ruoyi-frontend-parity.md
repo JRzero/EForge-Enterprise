@@ -2396,3 +2396,18 @@ Both local profiles completed authority60953 with57 real browsers each and compl
 ## Exact cloud acceptance
 
 Implementation3aed9a8787798456686cc143d40df3d3fd98ee64: server37606190761 all three jobs and web37606190846 terminal SUCCESS. Direct header-avatar-cloud-server-accepted.log proves610 boot declarations (one existing platform skip),10 scope tests, both57 real browser profiles and complete API/OpenAPI acceptance including actual header image immediately after crop upload. Direct web log proves118 mocked browsers;98 units/reproduction/lint/type/build also passed. Local focused profile evidence remains explicitly one browser. Full project is still incomplete; password reminder work in its separate worktree is not included in this accepted source.
+
+## Password reminders: final real validation in progress
+
+Original initial-password and expiration priority/cancel behavior is implemented
+with generated canonical bootstrap metadata and a native personal-profile
+password-tab destination. The authoritative read-only repeatable-read SQL
+snapshot releases its connection before the existing guarded configuration
+reader runs. Final local Maven declares623 tests including10 scope cases and
+one existing platform skip; unchanged UI source passed98 units/120 mocked
+browsers. Authority13398 is running both58-browser profiles and complete actual
+API suites, with32 actual concurrent bootstraps. Earlier transaction and legacy
+comparison-fixture failures are retained and are not final acceptance. Cloud
+acceptance is pending. Registration/complexity/shared final audit and approved
+task management still remain; form builder remains user-deferred. See
+security-review-password-reminders.md.

@@ -48,7 +48,7 @@ class ConsoleAccessControllerTest
         }
     }
     @BeforeEach void setup(){session=new LoginUser();var user=new io.eforge.enterprise.common.core.domain.entity.SysUser(2L);user.setUserName("reader");session.setUser(user);session.setToken("1234567890abcdef1234567890abcdef");when(tokens.getLoginUser(any())).thenReturn(session);grants("*:*:*");}
-    void grants(String... values){when(bootstrap.refreshConsoleAuthorization(session)).thenReturn(new BootstrapResponse(null,Set.of(),Set.of(values),List.of()));}
+    void grants(String... values){when(bootstrap.refreshConsoleAuthorization(session)).thenReturn(new BootstrapResponse(null,Set.of(),Set.of(values),List.of(),null));}
     @Test void statusesAreCanonicalAndDisabledWithoutLeakingConsoleResources() throws Exception
     {
         for(String path:List.of("druid","api-docs"))mvc.perform(get("/api/v1/monitor/consoles/"+path)).andExpect(status().isOk())

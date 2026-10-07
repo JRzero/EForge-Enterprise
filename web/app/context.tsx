@@ -13,7 +13,7 @@ export function useBootstrap() {
   if (!value) throw new Error('Bootstrap context is unavailable.');
   return value;
 }
-export const ApplicationControlsContext = createContext<{navigate: (path: string) => void; refresh: () => Promise<void>; closePage?: (fallback: string) => void} | null>(null);
+export const ApplicationControlsContext = createContext<{navigate: (path: string) => void; refresh: () => Promise<void>; closePage?: (fallback: string) => void; href?: string} | null>(null);
 export function useApplicationControls() {
   const value = useContext(ApplicationControlsContext);
   if (!value) throw new Error('Application controls are unavailable.');

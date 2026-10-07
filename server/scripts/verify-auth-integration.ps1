@@ -71,6 +71,12 @@ try {
             & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
         if ($LASTEXITCODE -ne 0) { throw "Migration failed: $($migration.Name)" }
     }
+    if ($VerifyWeb -or $VerifyGeneratedReact) {
+        # Isolate unrelated browser modules from the original default-on reminder.
+        # The reminder's real browser case enables the actual canonical settings and restores them.
+        Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e `
+            "UPDATE sys_config SET config_value='0' WHERE config_key='sys.account.initPasswordModify';" | Out-Null
+    }
     $unidentified = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e `
         "SELECT COUNT(*) FROM sys_menu WHERE menu_key IS NULL;"
     Assert-Check ([int]$unidentified -eq 0) 'Every upstream seed must have a stable identity.'
@@ -189,6 +195,18 @@ try {
     }
     $bootstrapResponse = Request '/api/v1/app/bootstrap' 'GET' '' $authorized
     Assert-Check ($bootstrapResponse.StatusCode -eq 200 -and ($bootstrapResponse.Headers['Cache-Control'] -join ';') -eq 'no-store') 'Bootstrap must succeed without caching.'
+    $parallelBootstrapUri="http://127.0.0.1:$AppPort/api/v1/app/bootstrap"
+    $parallelBootstrapHeaders=$authorized
+    $parallelBootstrapReads=@(1..32 | ForEach-Object -Parallel {
+        try {
+            $response=Invoke-WebRequest -Uri $using:parallelBootstrapUri -Headers $using:parallelBootstrapHeaders -SkipHttpErrorCheck -TimeoutSec 15
+            if($response.StatusCode -ne 200){return [pscustomobject]@{Status=[int]$response.StatusCode;UserId='';Safe=$false}}
+            $body=$response.Content | ConvertFrom-Json
+            [pscustomobject]@{Status=200;UserId=$body.user.id;Safe=($body.roles -contains 'admin' -and $null -ne $body.passwordStatus -and !$body.user.PSObject.Properties['password'])}
+        }catch{[pscustomobject]@{Status=0;UserId='';Safe=$false}}
+    } -ThrottleLimit 32)
+    Assert-Check ($parallelBootstrapReads.Count -eq 32 -and @($parallelBootstrapReads | Where-Object {$_.Status -ne 200 -or $_.UserId -ne '1' -or !$_.Safe}).Count -eq 0) 'Concurrent bootstrap reads must preserve authority and release SQL snapshots before guarded configuration reads.'
+    Write-Host 'Bootstrap concurrency:32 actual HTTP reads retained admin identity, safe typed policy and completed without held-snapshot connection starvation.'
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
     Assert-Check ($bootstrap.user.id -eq '1' -and $bootstrap.user.username -eq 'admin' -and $bootstrap.roles -contains 'admin' -and $bootstrap.permissions -contains '*:*:*') 'Unexpected admin bootstrap snapshot.'
     Assert-Check (!$bootstrap.user.PSObject.Properties['password'] -and !$bootstrap.PSObject.Properties['code']) 'Bootstrap leaked internal or legacy fields.'

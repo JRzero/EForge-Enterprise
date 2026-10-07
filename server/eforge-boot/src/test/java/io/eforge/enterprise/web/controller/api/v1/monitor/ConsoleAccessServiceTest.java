@@ -15,7 +15,7 @@ class ConsoleAccessServiceTest
 {
     ConsoleTicketService tickets; BootstrapService bootstrap; LoginUser session; ConsoleAccessService access;
     @BeforeEach void prepare(){tickets=mock(ConsoleTicketService.class);bootstrap=mock(BootstrapService.class);session=new LoginUser();access=new ConsoleAccessService(tickets,bootstrap,true,true,true,true);grants("*:*:*");}
-    void grants(String... values){when(bootstrap.refreshConsoleAuthorization(session)).thenReturn(new BootstrapResponse(null,Set.of(),Set.of(values),List.of()));}
+    void grants(String... values){when(bootstrap.refreshConsoleAuthorization(session)).thenReturn(new BootstrapResponse(null,Set.of(),Set.of(values),List.of(),null));}
     MockHttpServletRequest request(String path){var request=new MockHttpServletRequest();request.setRequestURI(path);return request;}
     @Test void bothTargetsRequireTheirOriginalFreshDatabaseGrants()
     {

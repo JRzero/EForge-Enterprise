@@ -25,13 +25,16 @@ class BootstrapServiceTest
     @Mock private NavigationMapper menus;
     @Mock private SysPermissionService permissions;
     @Mock private TokenService tokens;
+    @Mock private PasswordStatusService passwords;
+    @Mock private org.springframework.transaction.PlatformTransactionManager transactions;
     private BootstrapService service;
     private SysUser user;
     private LoginUser session;
 
     @BeforeEach void setup()
     {
-        service = new BootstrapService(users, menus, permissions, tokens, new NavigationProjection());
+        when(transactions.getTransaction(any())).thenAnswer(invocation -> new org.springframework.transaction.support.SimpleTransactionStatus());
+        service = new BootstrapService(users, menus, permissions, tokens, new NavigationProjection(), passwords, transactions);
         user = new SysUser();
         user.setUserId(2L); user.setDeptId(105L); user.setUserName("ry"); user.setNickName("Display name");
         user.setStatus("0"); user.setDelFlag("0");
@@ -111,5 +114,31 @@ class BootstrapServiceTest
             user.setAvatar(unsafe);assertNull(service.bootstrap(session).user().avatarUrl());
         }
         assertTrue(session.getPermissions().isEmpty());verifyNoInteractions(permissions);
+    }
+    @Test void passwordStatusPreservesOriginalConfigurationAndDateBoundaries()
+    {
+        java.util.Date now = new java.util.Date(1_800_000_000_000L);
+        assertTrue(BootstrapResponse.PasswordStatus.from("3",1,30,null,now).initialChangeRecommended());
+        assertTrue(BootstrapResponse.PasswordStatus.from("3",1,30,null,now).expired());
+        assertFalse(BootstrapResponse.PasswordStatus.from("0",null,null,null,now).expired());
+        assertFalse(BootstrapResponse.PasswordStatus.from("0",0,-1,null,now).initialChangeRecommended());
+        for(long offset:List.of(30L*86_400_000,31L*86_400_000-1))
+            assertFalse(BootstrapResponse.PasswordStatus.from("0",1,30,new java.util.Date(now.getTime()-offset),now).expired());
+        assertTrue(BootstrapResponse.PasswordStatus.from("0",1,30,new java.util.Date(now.getTime()-31L*86_400_000),now).expired());
+        assertTrue(BootstrapResponse.PasswordStatus.from("0",1,30,new java.util.Date(now.getTime()+31L*86_400_000),now).expired());
+        when(menus.selectActiveRoles(2L)).thenReturn(List.of());when(menus.selectGrantedMenus(2L,false)).thenReturn(List.of());
+        when(passwords.read(null)).thenReturn(new BootstrapResponse.PasswordStatus("3",true,true));
+        var response=service.bootstrap(session);assertEquals("3",response.passwordStatus().characterType());
+        assertTrue(response.passwordStatus().initialChangeRecommended());assertTrue(response.passwordStatus().expired());
+        clearInvocations(passwords);assertNull(service.refreshConsoleAuthorization(session).passwordStatus());verifyNoInteractions(passwords);
+    }
+    @Test void releasesReadonlySnapshotBeforeGuardedPolicyReadsAndRestoresConsoleBehavior()
+    {
+        when(menus.selectActiveRoles(2L)).thenReturn(List.of());when(menus.selectGrantedMenus(2L,false)).thenReturn(List.of());
+        service.bootstrap(session);
+        var sequence=inOrder(transactions,passwords);
+        sequence.verify(transactions).getTransaction(argThat(definition->definition.isReadOnly() && definition.getIsolationLevel()==org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ));
+        sequence.verify(transactions).commit(any());sequence.verify(passwords).read(null);
+        clearInvocations(passwords);service.refreshConsoleAuthorization(session);verifyNoInteractions(passwords);
     }
 }
