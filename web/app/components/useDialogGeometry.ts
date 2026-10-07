@@ -9,7 +9,7 @@ export function useDialogGeometry(element:RefObject<HTMLDialogElement|null>,titl
   useEffect(()=>{
     const dialog=element.current;if(!dialog || !enabled)return;
     if(originalStyle.current===undefined)originalStyle.current=dialog.getAttribute('style');
-    const title=document.getElementById(titleId);
+    const title=dialog.querySelector<HTMLElement>('#'+CSS.escape(titleId));
     let drag:{kind:Kind;pointer:number;x:number;y:number;box:Box}|null=null;
     function read():Box {const {x,y,width,height}=dialog!.getBoundingClientRect();return{x,y,width,height};}
     function apply(box:Box){

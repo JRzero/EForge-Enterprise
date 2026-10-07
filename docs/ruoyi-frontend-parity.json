@@ -2937,7 +2937,7 @@
       "runJob"
     ],
     "independentRemaining": [
-      "Original registered dialog geometry final validation and exact-source cloud"
+      "Shared dialog precise-cloud acceptance and final reconciliation"
     ],
     "deferred": [
       "online-form-builder"
@@ -3261,19 +3261,19 @@
       {
         "source": "ruoyi-ui/src/directive/dialog/drag.js",
         "capability": "shared-dialog-geometry",
-        "status": "new-independent-validation-pending",
+        "status": "local-verified-exact-cloud-pending",
         "review": "docs/current-scope-acceptance.md"
       },
       {
         "source": "ruoyi-ui/src/directive/dialog/dragHeight.js",
         "capability": "shared-dialog-geometry",
-        "status": "new-independent-validation-pending",
+        "status": "local-verified-exact-cloud-pending",
         "review": "docs/current-scope-acceptance.md"
       },
       {
         "source": "ruoyi-ui/src/directive/dialog/dragWidth.js",
         "capability": "shared-dialog-geometry",
-        "status": "new-independent-validation-pending",
+        "status": "local-verified-exact-cloud-pending",
         "review": "docs/current-scope-acceptance.md"
       },
       {
@@ -3997,5 +3997,24 @@
         "review": "docs/current-scope-acceptance.md"
       }
     ]
+  },
+  "sharedDialogGeometry": {
+    "status": "local-verified-exact-cloud-pending",
+    "implementationSha": "41f3b6aa62b157b0ce0d010e39fc2e94d3504dc1",
+    "cloudServerRun": "37643644308",
+    "cloudWebRun": "37643644236",
+    "frontEndUnits": 98,
+    "mockedBrowsers": 141,
+    "realBrowsersPerProfile": 62,
+    "realAuthority": "97313-terminal0-both-full-api-profiles",
+    "nativePointerCapture": true,
+    "keyboardMoveResizeReset": true,
+    "viewportBounds": true,
+    "busyOwnership": true,
+    "cancelFocus": true,
+    "mobileDrawerOptOut": true,
+    "review": "docs/security-review-dialog-geometry.md",
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
+    "fullGoalComplete": false
   }
 }

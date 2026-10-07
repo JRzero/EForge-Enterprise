@@ -1,16 +1,18 @@
 import {test,expect} from './fixtures';
 import type {Page} from '@playwright/test';
 
-async function editor(page:Page){
+async function editor(page:Page,retainedHeading=false){
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'dialog-fixture',tokenType:'Bearer'}}));
   await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'1',username:'editor',displayName:'编辑'},roles:[],permissions:['system:post:list','system:post:add'],navigation:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}}));
   await page.route('**/api/v1/system/posts?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
-  await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('button',{name:'新增岗位',exact:true}).click();
+  await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
+  if(retainedHeading)await page.evaluate(()=>{const heading=document.createElement('h2');heading.id='post-editor-title';heading.textContent='新增岗位';heading.hidden=true;document.body.prepend(heading);});
+  await page.getByRole('button',{name:'新增岗位',exact:true}).click();
   return page.getByRole('dialog',{name:'新增岗位',exact:true});
 }
 test('actual editor title drag and width/corner resize retain field drafts and reachable viewport bounds',async({page})=>{
-  const dialog=await editor(page);await dialog.getByLabel('岗位名称',{exact:true}).fill('保留草稿');
+  const dialog=await editor(page,true);await dialog.getByLabel('岗位名称',{exact:true}).fill('保留草稿');
   const before=(await dialog.boundingBox())!;const title=(await dialog.getByRole('heading',{name:'新增岗位'}).boundingBox())!;
   await page.mouse.move(title.x+30,title.y+10);await page.mouse.down();await page.mouse.move(title.x+90,title.y+45);await page.mouse.up();
   await expect.poll(async()=>Math.round((await dialog.boundingBox())!.x-before.x)).toBe(60);
