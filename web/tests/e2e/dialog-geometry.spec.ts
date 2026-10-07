@@ -7,7 +7,7 @@ async function editor(page:Page,retainedHeading=false){
   await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'1',username:'editor',displayName:'编辑'},roles:[],permissions:['system:post:list','system:post:add'],navigation:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}}));
   await page.route('**/api/v1/system/posts?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
   await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
-  if(retainedHeading)await page.evaluate(()=>{const heading=document.createElement('h2');heading.id='post-editor-title';heading.textContent='新增岗位';heading.hidden=true;document.body.prepend(heading);});
+  if(retainedHeading)await page.evaluate(()=>{const heading=document.createElement('h2');heading.id='post-editor-title';heading.textContent='另一个保留页的编辑器';heading.hidden=true;document.body.prepend(heading);});
   await page.getByRole('button',{name:'新增岗位',exact:true}).click();
   return page.getByRole('dialog',{name:'新增岗位',exact:true});
 }

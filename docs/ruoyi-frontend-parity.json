@@ -3999,7 +3999,7 @@
     ]
   },
   "sharedDialogGeometry": {
-    "status": "local-verified-exact-cloud-pending",
+    "status": "final-scoped-caption-local-verified-exact-cloud-pending",
     "implementationSha": "41f3b6aa62b157b0ce0d010e39fc2e94d3504dc1",
     "cloudServerRun": "37643644308",
     "cloudWebRun": "37643644236",
@@ -4015,6 +4015,16 @@
     "mobileDrawerOptOut": true,
     "review": "docs/security-review-dialog-geometry.md",
     "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
-    "fullGoalComplete": false
+    "fullGoalComplete": false,
+    "baseImplementationSha": "41f3b6aa62b157b0ce0d010e39fc2e94d3504dc1",
+    "baseCloudServer": "37643644308-all-three-success",
+    "baseCloudWeb": "37643644236-success",
+    "ownedAccessibleCaption": true,
+    "duplicateRetainedHeadingRegression": true,
+    "finalRealAuthority": "59827-terminal0-real-posts2-full-api",
+    "finalRealBrowsers": 2,
+    "latestFullProfiles": "required-at-final-exact-cloud",
+    "failedIntermediateWeb": "08bb4e4-web37646585561-140of141-immediate-viewport-layout-read",
+    "viewportCheck": "same-exact-positive-height-and-bounds-after-native-layout;8-repeat-and141-full-pass"
   }
 }
