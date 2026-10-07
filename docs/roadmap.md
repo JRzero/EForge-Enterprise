@@ -1217,3 +1217,32 @@ The full frontend parity goal remains unfinished; mixed/top navigation, settings
 other remaining editor/action audits and full capability acceptance remain.
 The user requested pausing after this responsive sidebar task; finish its
 verification and commit/push, then pause without starting another module.
+
+## Responsive sidebar accepted; project paused (2026-10-07)
+
+Implementation 2b51493b54f678c429e887e4e80ac367944719d1 is accepted.
+Exact server37597012949 all three jobs SUCCESS and web37597012983 SUCCESS.
+Direct sidebar-responsive-cloud-server-accepted.log and
+sidebar-responsive-cloud-web-accepted.log retain full backend/generated/runtime
+and frontend evidence. Local authority96723 terminated0: both enabled/default
+profiles57 real framework browsers and complete API/MySQL/Redis/Quartz/OSHI/ACL/
+captcha regressions passed. Both live OpenAPI hashes exactly match the contract:
+65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+Final98 units,109 mocked browsers, lint/typecheck/client reproducibility/build
+passed. Real SQL navigation additionally proves desktop64/240px, hover/keyboard
+popup/Escape, page draft retention, reload preference and actual route actions;
+mobile native focus/backdrop/body scrolling/route/resize behavior also passes.
+Both generated React/Boot verification passes and all seven original generated
+categories retain strict permission, data, upload/read/action and audit checks.
+No fresh local Maven run is claimed; exact cloud backend validation is authoritative.
+
+The user explicitly requested pausing after this task. The responsive sidebar
+phase is complete and committed; the complete framework parity goal is paused,
+not complete. Do not start another module or automatic development until the
+user resumes. Remaining scope includes mixed/top navigation, layout/theme/density
+settings, other editor/action ownership, nested child-rich upload final audit,
+date/timezone/XLSX audit and final capability acceptance. Form builder remains
+user-deferred and not complete. The specifically denied Quartz runtime scheme
+remains unapproved. The isolated sidebar worktree was archived after integration
+and preservation of needed ignored validation evidence. Local owned ports are
+released and the main working tree is clean at pause.
