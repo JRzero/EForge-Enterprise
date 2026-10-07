@@ -38,3 +38,22 @@ test('real self force logout invalidates the browser session and returns to logi
   await expect(page.getByRole('heading', {name: '登录工作空间'})).toBeVisible(); expect(await page.evaluate(() => sessionStorage.getItem('eforge.enterprise.session.v1'))).toBeNull();
   expect((await page.request.get('/api/v1/app/bootstrap', {headers: {Authorization: `Bearer ${token}`}})).status()).toBe(401);
 });
+
+test('real retained online list cancels interrupted reads, keeps filter drafts and explicitly refreshes Redis',async({page})=>{
+  const {token,headers}=await login(page),own=idOf(token);const observed:import('@playwright/test').Request[]=[];let calls=0,blocked=false,release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  const menus=await(await page.request.get('/api/v1/system/menus',{headers})).json();expect(menus.find((menu:{routeId:string})=>menu.routeId==='monitor-online-sessions').cached).toBe(true);
+  await expect(page.getByRole('cell',{name:own,exact:true})).toBeVisible();
+  await page.route('**/api/v1/monitor/online-sessions?*',async route=>{calls++;observed.push(route.request());if(blocked)await gate;await route.continue().catch(()=>{});});
+  await page.getByLabel('用户名称',{exact:true}).fill('未应用的草稿');
+  await page.getByRole('link',{name:'工作台',exact:true}).click();await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：在线用户',exact:true}).click();
+  await expect(page.getByRole('cell',{name:own,exact:true})).toBeVisible();await expect(page.getByLabel('用户名称',{exact:true})).toHaveValue('未应用的草稿');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));expect(calls).toBe(0);
+  blocked=true;const requested=page.waitForRequest(request=>new URL(request.url()).pathname==='/api/v1/monitor/online-sessions');
+  await page.getByRole('button',{name:'刷新',exact:true}).click();const interrupted=await requested;
+  try{await page.getByRole('link',{name:'工作台',exact:true}).click();await expect.poll(()=>interrupted.failure()?.errorText).toMatch(/aborted/i);}finally{blocked=false;release();}
+  const resumed=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/online-sessions'&&response.status()===200);
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：在线用户',exact:true}).click();await resumed;await expect(page.getByRole('cell',{name:own,exact:true})).toBeVisible();const outcomes=await Promise.all(observed.map(async request=>({failure:request.failure(),status:(await request.response())?.status()})));expect(outcomes.filter(result=>result.status===200)).toHaveLength(1);expect(outcomes.filter(result=>result.status!==200).every(result=>/aborted/i.test(result.failure?.errorText??''))).toBe(true);const resumedCalls=calls;
+  await page.getByLabel('用户名称',{exact:true}).fill('admin');await page.getByLabel('登录地址',{exact:true}).fill('127.0.0.1');
+  const applied=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/online-sessions'&&response.status()===200);
+  await page.getByRole('button',{name:'搜索',exact:true}).click();await applied;await expect(page.getByRole('cell',{name:own,exact:true})).toBeVisible();expect(calls).toBe(resumedCalls+1);
+});

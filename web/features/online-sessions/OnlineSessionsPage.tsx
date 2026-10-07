@@ -6,6 +6,7 @@ import type {OnlineSessionResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {errorMessage} from '../../integration/errors';
+import {useRetainedRead} from '../../app/useRetainedRead';
 
 export function OnlineSessionsPage() {
   const api = useApi();
@@ -15,16 +16,18 @@ export function OnlineSessionsPage() {
   const [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [selected, setSelected] = useState<OnlineSessionResponse | null>(null), [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
+  const read = useRetainedRead();
   useEffect(() => {
+    const complete = read([api, filters, page, pageSize, version]); if (!complete) return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null);
     api.listOnlineSessions({...filters, page, pageSize}, controller.signal).then(result => {
       if (controller.signal.aborted) return;
       const last = Math.max(1, Math.ceil(result.total / pageSize));
       if (page > last) {setPage(last); return;}
-      setData(result); setLoading(false);
-    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+      setData(result); setLoading(false); complete();
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, filters, page, pageSize, version]);
+  }, [api, filters, page, pageSize, version, read]);
   const columns = useMemo<ColumnDef<OnlineSessionResponse>[]>(() => [
     {id: 'index', header: '序号', cell: ({row}) => (page - 1) * pageSize + row.index + 1},
     {accessorKey: 'id', header: '会话编号', cell: ({row}) => <span title={row.original.id}>{row.original.id}</span>},

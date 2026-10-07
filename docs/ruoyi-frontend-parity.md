@@ -2186,3 +2186,18 @@ See security-review-rich-text-cached-uploads.md. Exact2bf7c2d server37574541663 
 Remaining editor/actions and resource/monitor/embedded cache behavior, nested-rich
 final audit, sidebar/topnav/settings and final active audit stay open. Form builder
 is deferred; the specific Quartz runtime denial remains unchanged.
+### Cache entries and online sessions: retained reads locally accepted
+Completed cache names/keys/value and online list/filter draft now survive actual
+cached tab return without new GETs. Interrupted reads cancel and retry; explicit
+refresh/search still reaches real Redis. Two actual mocked cases failed before
+and passed after. Final reproducibility/lint/types/98 units/build/all93 mocked,
+focused9 genuine browsers plus complete API, default/enabled profiles each55
+browsers plus complete API passed; authority90787 ended0. All live OpenAPI hashes
+match the contract. StrictMode's interrupted replay is checked as genuine aborts
+with exactly one successful resumed response, not a fixed attempt count. The
+filtered Windows verification launcher now passes regex to native Node CLI.
+See security-review-monitor-cached-reads.md. Exact new-source cloud remains
+pending. No new clear/revoke write lifecycle acceptance, backend/runtime changes,
+form-builder completion or full-goal completion is claimed. Server/cache stats,
+embedded console lifecycle, other editor/actions, nested rich-image audit,
+sidebar/topnav/settings and remaining active final audits stay open.

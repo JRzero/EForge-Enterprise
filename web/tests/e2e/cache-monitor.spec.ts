@@ -107,3 +107,21 @@ test('both cache routes reject absent original grant before any data requests', 
   let calls = 0; await page.route('**/api/v1/monitor/cache**', route => {calls++; return route.fulfill({json: []});}); await login(page, '/cache', false); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
   await page.goto('/cacheList'); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible(); expect(calls).toBe(0);
 });
+
+test('completed cache names keys and value survive actual tabs with no implicit refetch',async({page})=>{
+  const calls={names:0,keys:0,value:0};let block=false;
+  await page.route('**/api/v1/monitor/cache/**',async route=>{
+    const kind=new URL(route.request().url()).pathname.split('/').at(-1) as keyof typeof calls;
+    calls[kind]++;if(block)return;
+    return route.fulfill({json:kind==='names'?names:kind==='keys'?['sys_config:retained']:{name:'sys_config:',key:'sys_config:retained',value:'完成后保留的值'}});
+  });
+  await login(page,'/cacheList');await page.getByRole('button',{name:'查看缓存 sys_config:',exact:true}).click();
+  await page.getByRole('button',{name:'查看键 sys_config:retained',exact:true}).click();
+  await expect(page.getByLabel('缓存值',{exact:true})).toHaveText('完成后保留的值');
+  const before={...calls};block=true;
+  await page.getByRole('link',{name:'工作台',exact:true}).click();
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：缓存列表',exact:true}).click();
+  await expect(page.getByLabel('缓存值',{exact:true})).toHaveText('完成后保留的值');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  expect(calls).toEqual(before);
+});

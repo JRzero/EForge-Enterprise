@@ -1817,4 +1817,27 @@
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }
+,
+  "monitorCachedReads": {
+    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "review": "docs/security-review-monitor-cached-reads.md",
+    "pages": ["cache-entries", "online-sessions"],
+    "readOwners": "three-independent-cache-tickets-and-one-online-ticket",
+    "completedReturn": "actual-cached-tab-zero-GET-retained-data-and-draft",
+    "interruptedReturn": "captured-aborts-exactly-one-successful-resumed-response",
+    "explicitInvalidation": "refresh-search-reset-paging-and-original-post-mutation-versions",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 93,
+    "focusedRealBrowsers": 9,
+    "realFrameworkBrowserTestsPerProfile": 55,
+    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "beforeEvidence": "monitor-cached-reads-before-browser.log",
+    "finalEvidence": ["monitor-cached-reads-targeted.log", "monitor-cached-reads-final-frontend.log", "monitor-cached-reads-final-static.log", "monitor-cached-reads-focused-accepted-runtime.log", "monitor-cached-reads-disabled-runtime.log", "monitor-cached-reads-enabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "newMutationLifecycleAcceptance": false,
+    "freshLocalMavenRun": false,
+    "remaining": ["server-cache-statistics", "embedded-consoles", "other-editor-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

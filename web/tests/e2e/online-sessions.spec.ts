@@ -50,3 +50,15 @@ test('revoking the caller and receiving actual 401 returns to login', async ({pa
   await login(page, ['monitor:online:list', 'monitor:online:forceLogout']); await page.getByRole('button', {name: `强退会话 ${row.id}`, exact: true}).click(); await page.getByRole('button', {name: '确认强退', exact: true}).click();
   await expect(page.getByRole('heading', {name: '登录工作空间'})).toBeVisible(); expect(await page.evaluate(() => sessionStorage.getItem('eforge.enterprise.session.v1'))).toBeNull();
 });
+
+test('completed online list and filter draft survive actual tabs without an implicit refresh',async({page})=>{
+  let calls=0,block=false;
+  await page.route('**/api/v1/monitor/online-sessions?*',route=>{calls++;if(block)return;return route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}});});
+  await login(page,['monitor:online:list']);await expect(page.getByRole('cell',{name:row.id,exact:true})).toBeVisible();
+  await page.getByLabel('用户名称',{exact:true}).fill('保留的筛选草稿');const before=calls;block=true;
+  await page.getByRole('link',{name:'工作台',exact:true}).click();
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：在线用户',exact:true}).click();
+  await expect(page.getByRole('cell',{name:row.id,exact:true})).toBeVisible();
+  await expect(page.getByLabel('用户名称',{exact:true})).toHaveValue('保留的筛选草稿');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));expect(calls).toBe(before);
+});

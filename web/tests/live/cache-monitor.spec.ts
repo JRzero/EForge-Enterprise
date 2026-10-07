@@ -66,3 +66,26 @@ for (const scope of ['key', 'name', 'all'] as const) test(`real ${scope} session
     expect((await page.request.get(`/api/v1/system/configurations/${record.id}`, {headers: fresh})).status()).toBe(200);
   } finally {expect((await page.request.delete('/api/v1/system/configurations', {headers: await freshHeaders(page), data: {ids: [record.id]}})).status()).toBe(204);}
 });
+
+test('real retained cache reads cancel interrupted refresh, preserve completed values and revalidate explicit refresh',async({page})=>{
+  const {headers}=await login(page,'/cacheList'),key='retained-cache-'+Date.now(),value='真实 Redis 保留值';
+  const menus=await(await page.request.get('/api/v1/system/menus',{headers})).json();expect(menus.find((menu:{routeId:string})=>menu.routeId==='monitor-cache-entries').cached).toBe(true);
+  const created=await page.request.post('/api/v1/system/configurations',{headers,data:{name:key,key,value,builtin:false}});expect(created.status()).toBe(201);const id=(await created.json()).id;
+  const counts={names:0,keys:0,value:0};let blocked=false,release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/api/v1/monitor/cache/**',async route=>{const kind=new URL(route.request().url()).pathname.split('/').at(-1) as keyof typeof counts;counts[kind]++;if(blocked&&kind==='value')await gate;await route.continue().catch(()=>{});});
+  try{
+    expect((await page.request.get('/api/v1/system/configurations/lookup?key='+encodeURIComponent(key),{headers})).status()).toBe(200);
+    await page.getByRole('button',{name:'查看缓存 sys_config:',exact:true}).click();await page.getByRole('button',{name:'查看键 sys_config:'+key,exact:true}).click();
+    await expect(page.getByLabel('缓存值',{exact:true})).toHaveText(value);const before={...counts};
+    await page.getByRole('link',{name:'工作台',exact:true}).click();await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：缓存列表',exact:true}).click();
+    await expect(page.getByLabel('缓存值',{exact:true})).toHaveText(value);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));expect(counts).toEqual(before);
+    blocked=true;const requested=page.waitForRequest(request=>new URL(request.url()).pathname==='/api/v1/monitor/cache/value');
+    await page.getByRole('button',{name:'刷新内容',exact:true}).click();const interrupted=await requested;
+    await page.getByRole('link',{name:'工作台',exact:true}).click();await expect.poll(()=>interrupted.failure()?.errorText).toMatch(/aborted/i);
+    blocked=false;release();const resumed=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/cache/value'&&response.status()===200);
+    await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：缓存列表',exact:true}).click();await resumed;await expect(page.getByLabel('缓存值',{exact:true})).toHaveText(value);
+    for(const [label,kind] of [['刷新名称','names'],['刷新键名','keys'],['刷新内容','value']] as const){const count=counts[kind],response=page.waitForResponse(result=>new URL(result.url()).pathname==='/api/v1/monitor/cache/'+kind&&result.status()===200);
+      await page.getByRole('button',{name:label,exact:true}).click();await response;await expect(page.getByLabel('缓存值',{exact:true})).toHaveText(value);expect(counts[kind]).toBe(count+1);}
+    expect((await(await page.request.get('/api/v1/system/configurations/'+id,{headers})).json()).value).toBe(value);
+  }finally{release();expect((await page.request.delete('/api/v1/system/configurations',{headers:await freshHeaders(page),data:{ids:[id]}})).status()).toBe(204);}
+});

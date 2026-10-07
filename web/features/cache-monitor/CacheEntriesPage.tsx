@@ -6,6 +6,7 @@ import type {CacheName, CacheValue} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {errorMessage} from '../../integration/errors';
+import {useRetainedRead} from '../../app/useRetainedRead';
 type ClearAction = {type: 'key'; name: string; key: string} | {type: 'name'; name: string} | {type: 'all'};
 export function CacheEntriesPage() {
   const api = useApi(); const [names, setNames] = useState<CacheName[]>([]), [keys, setKeys] = useState<string[]>([]), [value, setValue] = useState<CacheValue | null>(null);
@@ -14,24 +15,30 @@ export function CacheEntriesPage() {
   const [namesLoading, setNamesLoading] = useState(true), [keysLoading, setKeysLoading] = useState(false), [valueLoading, setValueLoading] = useState(false);
   const [namesError, setNamesError] = useState(''), [keysError, setKeysError] = useState(''), [valueError, setValueError] = useState('');
   const [action, setAction] = useState<ClearAction | null>(null), [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
+  const namesRead = useRetainedRead(), keysRead = useRetainedRead(), valueRead = useRetainedRead();
   useEffect(() => {
+    const complete = namesRead([api, namesVersion]); if (!complete) return;
     const controller = new AbortController(); setNamesLoading(true); setNamesError(''); setNames([]);
-    api.listCacheNames(controller.signal).then(result => {if (!controller.signal.aborted) {setNames(result); setNamesLoading(false); setName(current => result.some(item => item.name === current) ? current : '');}})
-      .catch(cause => {if (!controller.signal.aborted) {setNamesError(errorMessage(cause)); setNamesLoading(false);}});
+    api.listCacheNames(controller.signal).then(result => {if (!controller.signal.aborted) {setNames(result); setNamesLoading(false); setName(current => result.some(item => item.name === current) ? current : ''); complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setNamesError(errorMessage(cause)); setNamesLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, namesVersion]);
+  }, [api, namesVersion, namesRead]);
   useEffect(() => {
+    const complete = keysRead([api, name, keysVersion]); if (!complete) return;
     const controller = new AbortController(); setKeys([]); setKeysError(''); setKeysLoading(!!name);
-    if (name) api.listCacheKeys(name, controller.signal).then(result => {if (!controller.signal.aborted) {setKeys(result); setKeysLoading(false); setKey(current => result.includes(current) ? current : '');}})
-      .catch(cause => {if (!controller.signal.aborted) {setKeysError(errorMessage(cause)); setKeysLoading(false);}});
+    if (!name) complete();
+    if (name) api.listCacheKeys(name, controller.signal).then(result => {if (!controller.signal.aborted) {setKeys(result); setKeysLoading(false); setKey(current => result.includes(current) ? current : ''); complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setKeysError(errorMessage(cause)); setKeysLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, name, keysVersion]);
+  }, [api, name, keysVersion, keysRead]);
   useEffect(() => {
+    const complete = valueRead([api, name, key, valueVersion, keysVersion]); if (!complete) return;
     const controller = new AbortController(); setValue(null); setValueError(''); const selected = !!name && !!key && key.startsWith(name); setValueLoading(selected);
-    if (selected) api.getCacheValue(name, key, controller.signal).then(result => {if (!controller.signal.aborted) {setValue(result); setValueLoading(false);}})
-      .catch(cause => {if (!controller.signal.aborted) {setValueError(errorMessage(cause)); setValueLoading(false);}});
+    if (!selected) complete();
+    if (selected) api.getCacheValue(name, key, controller.signal).then(result => {if (!controller.signal.aborted) {setValue(result); setValueLoading(false); complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setValueError(errorMessage(cause)); setValueLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, name, key, valueVersion, keysVersion]);
+  }, [api, name, key, valueVersion, keysVersion, valueRead]);
   const selectName = useCallback((next: string) => {setName(next); setKey(''); setValue(null); setFeedback(''); setKeysVersion(version => version + 1);}, []);
   const confirm = useCallback((next: ClearAction) => {setAction(next); setActionError(''); setFeedback('');}, []);
   const nameColumns = useMemo<ColumnDef<CacheName>[]>(() => [

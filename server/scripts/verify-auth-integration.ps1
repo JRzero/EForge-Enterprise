@@ -218,7 +218,10 @@ try {
         Push-Location (Join-Path $repoRoot 'web')
         try {
             $npmCommand = if ($IsWindows) { 'npm.cmd' } else { 'npm' }
-            if ($WebTestPattern) { & $npmCommand run test:e2e:live -- $WebTestPattern }
+            if ($WebTestPattern) {
+                $browserNodeCommand = if ($IsWindows) { 'node.exe' } else { 'node' }
+                & $browserNodeCommand (Join-Path $repoRoot 'web/node_modules/@playwright/test/cli.js') test --config playwright.live.config.ts $WebTestPattern
+            }
             else { & $npmCommand run test:e2e:live }
             Assert-Check ($LASTEXITCODE -eq 0) 'Browser integration with real MySQL/Redis failed.'
             $generatorBrowserRowsAfter=Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -N -B -uroot eforge_enterprise -e "SELECT JSON_OBJECT('entry_id',entry_id,'name',name,'status',status) FROM $generatorBrowserTable ORDER BY entry_id;"
