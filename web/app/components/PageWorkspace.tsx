@@ -4,6 +4,7 @@ import type {NavigationItem} from '../../integration/navigation';
 import {routes} from '../routes';
 import {useApplicationControls, ApplicationControlsContext} from '../context';
 import {MenuIcon} from '../../features/menus/IconPicker';
+import {useLayout,useLayoutChanges} from './layout-preferences';
 
 interface View {path:string;href:string;title:string;routeId:string;cached:boolean;affix:boolean;icon?:string;revision:number}
 type CloseMode='current'|'others'|'left'|'right'|'all';
@@ -34,6 +35,7 @@ function retain(views:View[],target:View,mode:CloseMode):View[] {
 export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: {
   href:string;items:NavigationItem[];permissions:readonly string[];router:AppRouterAdapter;fallback:ReactNode;ownerId:string;
 }) {
+  const layout=useLayout(),changeLayout=useLayoutChanges();
   const controls=useApplicationControls();
   const active=view(href,items,permissions);
   const storageKey='eforge.enterprise.page-tabs.v1.'+ownerId;
@@ -46,6 +48,7 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
     }catch{return {enabled:false,hrefs:[]};}
   });
   const [persist,setPersist]=useState(saved.enabled);
+  useEffect(()=>{if(layout.tagsViewPersist===undefined)changeLayout?.(current=>({...current,tagsViewPersist:saved.enabled}));else setPersist(layout.tagsViewPersist);},[layout.tagsViewPersist,saved.enabled,changeLayout]);
   const [state,setState]=useState(()=>({href,views:visit(saved.hrefs.reduce((prior,item)=>visit(prior,view(item,items,permissions)),visit([],view('/dashboard',items,permissions))),active)}));
   // Adjust during rendering so the newly visited page is present before paint.
   if(state.href!==href)setState({href,views:visit(state.views,active)});
@@ -100,20 +103,20 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
     if(next!==undefined){event.preventDefault();links?.[next]?.focus();}
   }
   return <div ref={workspace} className="enterprise-workspace">
-    <nav aria-label="页面标签" className="page-tags">
+    <nav hidden={!layout.tagsView} aria-label="页面标签" className="page-tags">
       <button type="button" aria-label="滚动到首个标签" disabled={!scroll.left} onClick={()=>strip.current?.scrollTo({left:0,behavior:'smooth'})}>‹</button>
       <div ref={strip} className="page-tags-strip">{views.map((item,index)=><span key={item.path} className="page-tag">
         <a href={item.href} aria-label={"页面标签："+item.title} aria-current={active?.path===item.path?'page':undefined} onKeyDown={event=>keyboard(event,index)}
           onClick={event=>{if(!event.button&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();router.navigate(item.href);setSelected(null);}}}
           onAuxClick={event=>{if(event.button===1){event.preventDefault();if(!item.affix)close(item,'current');}}}
           onContextMenu={event=>{event.preventDefault();setMenuPoint({x:Math.max(8,Math.min(event.clientX,window.innerWidth-170)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-300))});setSelected(item.path);}}>
-          <MenuIcon name={item.icon}/>{item.title}{item.affix?<span aria-label="固定标签">●</span>:null}
+          {layout.tagsIcon ? <MenuIcon name={item.icon}/> : null}{item.title}{item.affix?<span aria-label="固定标签">●</span>:null}
         </a>{!item.affix?<button type="button" aria-label={'关闭标签 '+item.title} onClick={()=>close(item,'current')}>×</button>:null}
       </span>)}</div>
       <button type="button" aria-label="滚动到末个标签" disabled={!scroll.right} onClick={()=>strip.current?.scrollTo({left:strip.current.scrollWidth,behavior:'smooth'})}>›</button>
       <button type="button" aria-label="标签操作" aria-expanded={!!selected} onClick={event=>{event.stopPropagation();setMenuPoint(undefined);setSelected(selected?null:active?.path ?? views[0]?.path ?? null);}}>⌄</button>
       <button type="button" aria-label="刷新当前页面" disabled={!active} onClick={()=>{const current=views.find(item=>item.path===active?.path);if(current)refresh(current);}}>刷新</button>
-      <label className="page-tags-persist"><input type="checkbox" checked={persist} onChange={event=>setPersist(event.target.checked)}/>记住标签</label>
+      <label className="page-tags-persist"><input type="checkbox" checked={persist} onChange={event=>{setPersist(event.target.checked);changeLayout?.(current=>({...current,tagsViewPersist:event.target.checked}));}}/>记住标签</label>
     </nav>
     {selected && target?<div ref={menuElement} role="menu" aria-label="标签操作菜单" className="page-tag-menu" style={menuPoint?{position:"fixed",left:menuPoint.x,top:menuPoint.y,right:"auto"}:undefined} onKeyDown={event=>{if(event.key==='Escape'){setSelected(null);strip.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]')?.focus();}if(event.key==='ArrowDown'||event.key==='ArrowUp'){
         event.preventDefault();const buttons=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));

@@ -4,14 +4,15 @@ import type {AppRouterAdapter} from '@eforge/app';
 import type {NavigationItem} from '../../integration/navigation';
 import {Navigation} from '../Navigation';
 import {ResourceDialog} from './ResourceDialog';
+import {HeaderUtilities} from './HeaderUtilities';
 import {TopNavigation, navigationContains} from './TopNavigation';
+import {LayoutContext,LayoutChangesContext,layoutDefaults,useLayoutPreferences} from './layout-preferences';
+import {matchAppRoute} from '@eforge/app';
+import {routes} from '../routes';
 const mobileQuery = '(max-width: 991px)';
 const sidebarPreference = 'eforge.enterprise.sidebar.v1';
-const navigationPreference = 'eforge.enterprise.navigation.v1';
+
 type NavigationMode = 'left' | 'mixed' | 'top';
-function readNavigationMode(): NavigationMode {
-  try {const value = window.localStorage.getItem(navigationPreference);return value === 'mixed' || value === 'top' ? value : 'left';} catch {return 'left';}
-}
 function readCollapsed() {try {return window.localStorage.getItem(sidebarPreference) === 'collapsed';} catch {return false;}}
 function subscribeViewport(listener: () => void) {
   const query = window.matchMedia(mobileQuery);
@@ -34,7 +35,11 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
 }) {
   const mobile = useSyncExternalStore(subscribeViewport, isMobile, () => false);
   const [collapsed, setCollapsed] = useState(readCollapsed);
-  const [mode, setMode] = useState<NavigationMode>(readNavigationMode);
+  const {preferences,setPreferences,save,reset}=useLayoutPreferences(ownerId);
+  const mode=preferences.navMode;
+  const setMode=(value:NavigationMode)=>setPreferences(current=>({...current,navMode:value}));
+  const pageTitle=matchAppRoute(routes,pathname)?.route.title ?? 'EForge Enterprise';
+  useEffect(()=>{const previous=document.title;document.title=preferences.dynamicTitle ? pageTitle+' - EForge Enterprise' : 'EForge Enterprise';return()=>{document.title=previous;};},[pageTitle,preferences.dynamicTitle]);
   const [settings, setSettings] = useState(false), [settingMessage, setSettingMessage] = useState('');
   const settingsButton = useRef<HTMLButtonElement>(null), settingsTitle = useId();
   const settingsWasOpen = useRef(false);
@@ -69,18 +74,25 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
     aria-haspopup="dialog" aria-controls={opened ? navigationId : undefined} onClick={() => setOpenedFor({href, owner: ownerId})}>
     <span aria-hidden="true">☰</span></button> : <button ref={opener} type="button" className="sidebar-toggle" aria-label={collapsed ? '展开菜单' : '收起菜单'}
       aria-expanded={!collapsed} aria-controls={desktopNavigationId} onClick={() => setCollapsed(value => !value)}><span aria-hidden="true">☰</span></button>;
-  return <div className="enterprise-layout" data-sidebar-collapsed={!mobile && collapsed} data-sidebar-hidden={hideSidebar} data-navigation-mode={mobile ? 'left' : mode}>
+  return <LayoutChangesContext.Provider value={setPreferences}><LayoutContext.Provider value={preferences}><div className="enterprise-layout" style={{"--ef-color-accent":preferences.theme} as React.CSSProperties} data-side-theme={preferences.sideTheme} data-density={preferences.density} data-fixed-header={preferences.fixedHeader} data-show-logo={preferences.sidebarLogo} data-sidebar-collapsed={!mobile && collapsed} data-sidebar-hidden={hideSidebar} data-navigation-mode={mobile ? 'left' : mode}>
     <AppShell sidebarWidth={!mobile && collapsed ? 64 : 240} brand={brand} navigation={<div id={desktopNavigationId}><Navigation items={sideItems} pathname={pathname} router={router} activePaths={activePaths} collapsed={!mobile && collapsed} /></div>}
-      header={<>{header(<>{!hideSidebar ? menuButton : null}<button ref={settingsButton} type="button" aria-label="布局设置" onClick={() => {setSettingMessage('');setSettings(true);}}>⚙</button></>)}
+      header={<>{header(<>{hideSidebar && preferences.sidebarLogo ? <div className="top-navigation-brand">{brand}</div> : null}{!hideSidebar ? menuButton : null}<button ref={settingsButton} type="button" aria-label="布局设置" onClick={() => {setSettingMessage('');setSettings(true);}}>⚙</button><HeaderUtilities/></>)}
         {!mobile && mode !== 'left' ? <TopNavigation items={items} pathname={pathname} href={href} activePaths={activePaths} router={router}
-          mixed={mode === 'mixed'} selected={selectedKey} onSelect={key => setSelectedRoot({href,owner:ownerId,key})}/> : null}</>}>{children}</AppShell>
+          mixed={mode === 'mixed'} selected={selectedKey} onSelect={key => setSelectedRoot({href,owner:ownerId,key})}/> : null}</>}>{children}{preferences.footerVisible ? <footer className="enterprise-footer">{preferences.footerContent}</footer> : null}</AppShell>
     {settings ? <ResourceDialog titleId={settingsTitle} busy={false} onCancel={closeSettings} closeOnBackdrop>
       <section className="navigation-settings"><h2 id={settingsTitle}>布局设置</h2><fieldset><legend>菜单导航模式</legend>
         {([['left','左侧菜单'],['mixed','混合菜单'],['top','顶部菜单']] as const).map(([value,label]) => <label key={value}>
           <input type="radio" name={settingsTitle} value={value} checked={mode===value} onChange={() => setMode(value)}/>{label}</label>)}
+      </fieldset><fieldset><legend>主题风格</legend><label>侧栏风格<select aria-label="侧栏风格" value={preferences.sideTheme} onChange={event=>setPreferences(current=>({...current,sideTheme:event.target.value as 'dark'|'light'}))}><option value="dark">深色</option><option value="light">浅色</option></select></label>
+        <label>主题颜色<input type="color" aria-label="主题颜色" value={preferences.theme} onChange={event=>setPreferences(current=>({...current,theme:event.target.value}))}/></label>
+        <label>界面尺寸<select aria-label="界面尺寸" value={preferences.density} onChange={event=>setPreferences(current=>({...current,density:event.target.value as typeof current.density}))}><option value="default">默认</option><option value="medium">中等</option><option value="small">小型</option><option value="mini">迷你</option></select></label>
+      </fieldset><fieldset><legend>系统布局配置</legend>
+        {([['tagsView','显示页面标签'],['tagsIcon','显示页签图标'],['fixedHeader','固定头部'],['sidebarLogo','显示 Logo'],['dynamicTitle','动态标题'],['footerVisible','显示页脚']] as const).map(([property,label])=><label key={property}><input type="checkbox" checked={preferences[property]} disabled={property==='tagsIcon' && !preferences.tagsView} onChange={event=>setPreferences(current=>({...current,[property]:event.target.checked}))}/>{label}</label>)}
+        <label><input type="checkbox" checked={preferences.tagsViewPersist ?? false} disabled={!preferences.tagsView} onChange={event=>setPreferences(current=>({...current,tagsViewPersist:event.target.checked}))}/>持久化标签页</label>
+        <label>页脚内容<input aria-label="页脚内容" maxLength={1024} value={preferences.footerContent} onChange={event=>setPreferences(current=>({...current,footerContent:event.target.value}))}/></label>
       </fieldset>{settingMessage ? <p role="status">{settingMessage}</p> : null}<div className="state-actions">
-        <button type="button" onClick={() => {try {localStorage.setItem(navigationPreference,mode);setSettingMessage('布局已保存');} catch {setSettingMessage('无法保存布局，请检查浏览器存储设置');}}}>保存配置</button>
-        <button type="button" onClick={() => {setMode('left');try {localStorage.removeItem(navigationPreference);setSettingMessage('已恢复默认布局');} catch {setSettingMessage('当前布局已恢复，无法清除保存的配置');}}}>恢复默认</button>
+        <button type="button" onClick={() => {try {save();setSettingMessage('布局已保存');} catch {setSettingMessage('无法保存布局，请检查浏览器存储设置');}}}>保存配置</button>
+        <button type="button" onClick={() => {setPreferences({...layoutDefaults});try {reset();setSettingMessage('已恢复默认布局');} catch {setSettingMessage('当前布局已恢复，无法清除保存的配置');}}}>恢复默认</button>
         <button type="button" onClick={closeSettings}>关闭设置</button></div></section>
     </ResourceDialog> : null}
     {opened ? <ResourceDialog titleId={titleId} busy={false} onCancel={close} closeOnBackdrop>
@@ -90,5 +102,5 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
         <nav aria-label="手机菜单"><Navigation items={items} pathname={pathname} router={router} activePaths={activePaths} /></nav>
       </div>
     </ResourceDialog> : null}
-  </div>;
+  </div></LayoutContext.Provider></LayoutChangesContext.Provider>;
 }

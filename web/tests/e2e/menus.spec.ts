@@ -61,3 +61,21 @@ test('create validation and committed refresh-only retry never repeat mutations;
   await sort.fill('7'); await page.getByRole('button', {name: '保存菜单排序', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('服务暂时不可用'); await expect(sort).toHaveValue('7'); sortFails = false;
   await page.getByRole('button', {name: '保存菜单排序', exact: true}).click(); await expect(page.getByText('菜单排序已保存。', {exact: true})).toBeVisible();
 });
+
+test('menu folding waits for loaded rows and restores children after expansion', async ({page}) => {
+  let release!: () => void;
+  const ready = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/v1/system/menus?*', async route => {
+    await ready;
+    await route.fulfill({json: [owner, {...menu, parentId: owner.id}]});
+  });
+  await session(page, ['system:menu:list']);
+  const fold = page.getByRole('button', {name: '折叠全部菜单', exact: true});
+  await expect(fold).toBeDisabled();
+  release();
+  await expect(page.getByRole('cell', {name: '范围内菜单', exact: true})).toBeVisible();
+  await fold.click();
+  await expect(page.getByRole('cell', {name: '范围内菜单', exact: true})).toHaveCount(0);
+  await page.getByRole('button', {name: '展开全部菜单', exact: true}).click();
+  await expect(page.getByRole('cell', {name: '范围内菜单', exact: true})).toBeVisible();
+});

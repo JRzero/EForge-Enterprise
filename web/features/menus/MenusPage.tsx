@@ -81,7 +81,7 @@ export function MenusPage() {
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></form>
     <div className="post-toolbar"><PermissionGate permission="system:menu:add"><Button label="新增菜单" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:menu:edit"><Button label="保存菜单排序" variant="secondary" isDisabled={busy || !rows.some(row => sorts[row.id] !== undefined && sorts[row.id] !== row.sort)} onClick={() => { void saveSort(); }} /></PermissionGate>
-      <Button label={collapsed.size ? '展开全部菜单' : '折叠全部菜单'} variant="secondary" onClick={() => setCollapsed(collapsed.size ? new Set() : new Set(rows.map(row => row.id)))} />
+      <Button label={collapsed.size ? '展开全部菜单' : '折叠全部菜单'} variant="secondary" isDisabled={busy || loading || !rows.length} onClick={() => setCollapsed(collapsed.size ? new Set() : new Set(rows.map(row => row.id)))} />
       <Button label="刷新列表" variant="ghost" isDisabled={busy || loading} onClick={() => reload()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} /></div>
     {feedback ? <p role="status">{feedback}</p> : null}{snapshot.error ? <div role="alert"><p>菜单操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => reload()} /></div> : null}{actionError && !deleting ? <p role="alert">{actionError}</p> : null}

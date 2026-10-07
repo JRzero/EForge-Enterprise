@@ -1278,3 +1278,5 @@ Real authority72605 runs both complete profiles, including actual SQL navigation
 mode/draft/reload/route assertions; it is pending, not claimed accepted.
 Full theme/density/layout switches, remaining action audits and final active
 parity acceptance remain required. This is a navigation mode phase only.
+
+2026-10-07 resumed layout phase: navigation18b9f78 exact cloud server37601222320/web37601222367 accepted; actual theme/layout persistence, density and header fullscreen implemented. Frozen98 units/117 mocked browsers passed. Real authority60953 and exact new cloud pending; menu loading race and mobile notice overlap fixed with behavior regressions. See security-review-layout-settings.md. Form builder deferred; full goal incomplete.
