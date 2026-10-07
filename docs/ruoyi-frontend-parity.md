@@ -2116,3 +2116,13 @@ See security-review-job-cached-actions.md. Exact cloud for this patch is pending
 No Java scheduler/SQL authorization changes or automatic mutation retries were
 introduced. Generated/upload/other lifecycle, sidebar/topnav/settings and the
 final active capability audit remain open; form builder stays deferred.
+### Task/log action recovery exact cloud acceptance
+Exact66a910b5758fa54a5a655ce67982de92075bacdd server37566079776 all three
+jobs and web37566079777 are terminal SUCCESS. Direct accepted logs prove both53
+framework browsers, complete native/generated/API/SQL/session/grant regressions,
+both exact OpenAPI gates,98 units and89 mocked browsers. Maven declares619
+cases; each host executes618 with the platform-specific filesystem skip: local
+Windows real junction protection passes while symlink privileges are unavailable;
+Linux executes symlink protection and skips the Windows-only junction case.
+This accepts the committed task/log action source. The subsequent actual
+generated-list retention template is independently under verification.
