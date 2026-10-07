@@ -85,7 +85,7 @@ cache/editor cases and the complete91-case suite passed; the final source's full
 91-case run is also green.
 
 ## Scope still open
-Exact new-source cloud acceptance is pending. This does not accept all editor/
+Exact2bf7c2d2b856e7d597977ef2b7c0380d312dd117 cloud acceptance is complete: server37574541663 all three jobs and web37574541644 are terminal SUCCESS. Direct rich-upload-cloud-accepted-server/web.log prove both53 framework browsers and full API/OpenAPI gates, both seven StrictMode installed generated categories,91 mocked browsers,98 units and the complementary platform filesystem checks. This does not accept all editor/
 resource/monitor/embedded lifecycle, nested rich-image upload-specific final
 audit, sidebar/topnav/settings or the complete goal. Form builder remains
 deferred-not-complete. The explicitly rejected Quartz runtime scheme is unchanged.

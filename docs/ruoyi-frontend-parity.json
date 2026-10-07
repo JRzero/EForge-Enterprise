@@ -1798,7 +1798,9 @@
   }
 ,
   "richTextCachedUploads": {
-    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "status": "exact-cloud-accepted-2bf7c2d",
+    "cloudServer": "37574541663",
+    "cloudWeb": "37574541644",
     "review": "docs/security-review-rich-text-cached-uploads.md",
     "backendDeclaredTests": 619,
     "localApplicableTestsPassed": 618,
