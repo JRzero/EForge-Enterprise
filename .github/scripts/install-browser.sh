@@ -11,8 +11,13 @@ done
 printf '%s\n' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' 'Acquire::Retries "2";' |
   sudo tee /etc/apt/apt.conf.d/99-eforge-browser-network >/dev/null
 
+node_binary="$(command -v node)"
 for attempt in 1 2; do
-  if timeout --kill-after=15s 4m npx playwright install --with-deps chromium; then
+  # Run the dependency timeout as root, so it owns and can terminate its own
+  # apt children. Timing out an unprivileged CLI left sudo's apt process alive.
+  # Download the browser as the ordinary runner user, preserving its cache owner.
+  if sudo timeout --kill-after=15s 2m "$node_binary" node_modules/playwright/cli.js install-deps chromium &&
+      timeout --kill-after=15s 2m "$node_binary" node_modules/playwright/cli.js install chromium; then
     exit 0
   fi
   if [[ "$attempt" == 1 ]]; then

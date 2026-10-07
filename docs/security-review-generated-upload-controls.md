@@ -80,3 +80,13 @@ being corrected to include the demonstrated mirror-list file, preserving
 other vendor sources and priorities. The syntax and exact Azure/archive-only
 substitution were checked without modifying local operating-system sources.
 This is not yet accepted cloud evidence for the corrected installer.
+
+The failed a204551 verify log additionally proves the unprivileged timeout
+left sudo's apt child holding lists/lock, so its retry could not start. The
+installer now runs the dependency-only timeout as root, owning that apt process
+group, and downloads browsers separately as the ordinary runner user. It uses
+the already-installed pinned Playwright CLI, two-minute bounds per part and two
+attempts, without terminating unrelated processes or dropping dependencies.
+Syntax and the installed CLI's install-deps command were checked. The current
+mirror-only62e57ec cloud run is still independent evidence, not final acceptance
+of this last process-ownership correction.
