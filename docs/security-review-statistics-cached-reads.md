@@ -57,3 +57,12 @@ revocation, other resource/editor/action lifecycles, nested rich-image-specific
 final audit, sidebar/topnav/settings and final date/timezone/XLSX/permission/data
 consistency audit. Form builder is deferred-not-complete. The specific rejected
 Quartz runtime proposal remains unapproved and unchanged. Full goal not complete.
+### Exact source cloud acceptance — f583a38
+Server 37580421117 all three jobs and web 37580420897 are terminal SUCCESS
+for f583a38e7cd9d764c9480a83badcb75539ada884. Direct
+statistics-cached-reads-cloud-accepted-server/web.log confirms both profiles of
+57 actual framework browsers and complete runtime API regressions, exact live
+OpenAPI checks, 98 unit and 95 mocked browsers, and backend 619 declarations
+including all 10 data-scope cases with one platform-specific skip. The unique
+observer49937 is terminal0. This accepts the statistics-read phase only;
+embedded consoles and the remaining active capability audit are unfinished.
