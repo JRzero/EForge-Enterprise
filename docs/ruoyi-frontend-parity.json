@@ -1700,7 +1700,7 @@
   }
 ,
   "pageTabsRetainedReads": {
-    "status": "local-final-both52-complete-api-passed-exact-cloud-pending",
+    "status": "accepted-exact-cloud-5cfa35a",
     "review": "docs/security-review-page-tabs.md",
     "backendSourceBaseCommit": "71a53e1ed4d90939b6c1bc43f4c66b25892cbda6",
     "unchangedBackendTests": 619,
@@ -1708,6 +1708,8 @@
     "mockedBrowserTests": 83,
     "fullRealBrowserProfiles": [52, 52],
     "completedBuiltInReads": 12,
+    "cloudServer": "37562002947",
+    "cloudWeb": "37562002771",
     "persistence": "per-account-authorized-links-only-no-records-or-forms",
     "controls": ["dashboard-affix", "close-current-others-left-right-all", "middle-click", "context-dropdown", "refresh-remount", "keyboard-scroll", "fullscreen-escape", "resource-close-removes-cache"],
     "authorizationEviction": "real-withdrawal-403-and-authorized-profile-save-bootstrap-refresh-same-document",

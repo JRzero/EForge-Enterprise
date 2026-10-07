@@ -54,7 +54,7 @@ record. Storage failures do not prevent normal navigation.
 - 59451 never ran a browser: Windows npm interpreted a pipe in a filter argument.
   Subsequent whole suites avoid that invocation issue.
 
-## Final local evidence; exact cloud pending
+## Final local evidence and exact cloud acceptance
 47449 ended0:final lint/typecheck/reproduction/all83 mocked browsers, then
 both52 full framework browser profiles and both complete disposable MySQL/Redis/
 Quartz/OSHI/ACL/permission/session/captcha/API regressions are terminal PASS.
@@ -72,7 +72,7 @@ authorized affixed home, scroll controls, context/refresh and opt-in persistence
 render without header overlap. Mobile/fullscreen/keyboard behavior is exercised
 by browser assertions.
 
-Exact-head cloud remains pending. This stage changes no Quartz runtime, SQL
+Exact5cfa35ab5b5322d749ef5234d84371572e5e2d55 cloud server37562002947 all three jobs and web37562002771 are terminal SUCCESS. Direct page-tabs-cloud-accepted-server/web.log proves both52 framework browsers, native/generated Boot regressions, both exact committed OpenAPI gates,98 units and83 mocked browsers. This evidence covers committed5cfa35a only, not the later dictionary action patch. This stage changes no Quartz runtime, SQL
 mutations, templates or API contracts. Generated installed-page selection and
 additional resource/action/embedded/monitor lifecycle fidelity remain separate
 verification. Sidebar collapse/topnav/settings and final capability audit remain
