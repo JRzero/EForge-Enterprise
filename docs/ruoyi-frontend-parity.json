@@ -1891,7 +1891,7 @@
     "fullGoalComplete": false
   },
   "sidebarDisclosure": {
-    "status": "explicit-ancestry-generated-local-pass-exact-cloud-pending",
+    "status": "exact-cloud-accepted-04ac0f2",
     "review": "docs/security-review-sidebar-disclosure.md",
     "groupRoutes": false,
     "keyboard": "native-disclosure-enter-space",

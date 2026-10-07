@@ -1178,3 +1178,16 @@ of this fix. New exact-source server/full57-both-profiles and web cloud acceptan
 are pending.12ec001 server verify failed and remains failed historical evidence.
 Normal backend Java, schema, permission semantics and denied Quartz runtime were
 not changed. This remains a partial sidebar phase, not the full parity goal.
+Exact declared-ancestry acceptance (2026-10-07):04ac0f236ff6608587eacbc6116f4ef92b4ec7be
+server37593686563 all three jobs SUCCESS and web37593686565 SUCCESS. Direct
+sidebar-ancestry-cloud-accepted-server/web.log proves both57 full framework
+browsers/API profiles/OpenAPI,619 backend declarations with all10 data-scope
+cases and one platform-specific skip,98 units and106 mocked browsers. Both
+actual generated React/Boot verification passes including the complete seven
+categories and retained upload/read/action/audit assertions also succeeded.
+The earlier12ec001 cloud remains failed evidence; it is not relabeled success.
+Observer91971 exited1 despite authoritative successful jobs; its observation exit
+was not a product failure and no successful job was restarted. This accepts
+GROUP disclosure and declared ancestry only. Mobile source subsequently merged
+locally remains independently pending; desktop collapse is isolated and also
+not yet real/cloud accepted. Original active full parity remains unfinished.
