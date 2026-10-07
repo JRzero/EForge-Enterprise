@@ -44,9 +44,9 @@ credentials without a session, a second explicit login, and physical opt-out.
 
 Final frontend reproduction/lint/typecheck/build,98 units and130 mocked browsers
 passed. Final real authority40388 terminated0 with the focused native case and full
-API suite; precise source cloud acceptance is pending. Java source
+API suite. Exact b82e8731c80912804d39b26d9e9b44b6f1e5d38c cloud server37619212493 all three jobs and web37619212554 terminated SUCCESS. Direct accepted logs prove both60 browsers/full API/OpenAPI,634 backend declarations (one existing skip,10 scope),98 units and130 mocks. Java source
 is unchanged from the634-declaration local verification; no new Maven run is
 claimed for this frontend-only stage. Live/committed OpenAPI remain unchanged.
-Both60-browser cloud profiles are required for final acceptance. Dashboard,
+Both60-browser cloud profiles are accepted. Dashboard,
 remaining active audits and specifically unapproved task mutations remain
 separate; form builder is deferred and the full goal is incomplete.
