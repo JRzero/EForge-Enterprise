@@ -69,3 +69,13 @@ This accepts no full goal or complete generated action lifecycle. Upload/editor/
 other actions under hidden pages, remaining monitor/embedded cache behavior,
 sidebar/topnav/settings and the final active capability audit remain open.
 Form builder remains deferred. The rejected Quartz runtime proposal is unchanged.
+## Exact cloud acceptance
+Commit c3a77832eaf322c0ba9044c769f62b88e8bf6d7d is accepted:
+server37568415792 all three jobs and web37568415642 are terminal SUCCESS.
+Direct generated-cache-cloud-accepted-server/web.log prove both53 framework
+browsers, both seven installed StrictMode generated categories, complete API/
+SQL/session/grant regressions and both exact OpenAPI gates;98 units and89 mocked
+browsers pass. Linux executes the symlink protection case and skips only the
+Windows-only junction case.619 declared cases,618 applicable executions per
+host, are reported honestly. The later raw-upload change needs its own exact
+cloud acceptance; this source does not validate subsequent template changes.

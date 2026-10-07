@@ -2145,3 +2145,19 @@ See security-review-generated-cached-reads.md. Exact cloud is pending.
 Generated upload/editor/actions and other resource/monitor/embedded lifecycle,
 sidebar/topnav/settings and final active capability audit remain open. The
 specific Quartz runtime denial remains unchanged; form builder stays deferred.
+### Generated reads accepted; raw uploads locally verified
+Exact c3a77832eaf322c0ba9044c769f62b88e8bf6d7d server37568415792 all three
+and web37568415642 are SUCCESS. Direct logs prove both53 framework browsers,
+both seven StrictMode generated pages, complete API and exact contract gates,
+98 units/89 mocked and complementary Windows-junction/Linux-symlink protection.
+Raw image/file upload hide cancellation was separately reproduced with the
+actual browser adapter; Save unlocked while the upload field remained busy.
+The template now retains sent uploads and releases their own count/controller
+on actual settlement. Both seven-page profiles pass eight gated real upload
+checks each, including child files:history return preserves the form lock,
+exactly one POST completes, and saved paths/served contents are verified.
+Maven619 declared/618 locally applicable,10 scope, frontend reproducibility/
+lint/typecheck/98 units/build pass. See security-review-generated-cached-uploads.md.
+This new upload source still requires exact cloud acceptance. Rich-text/editor/
+other actions, remaining shared lifecycle, sidebar/topnav/settings and final
+active audit remain open; form builder is deferred and Quartz denial unchanged.

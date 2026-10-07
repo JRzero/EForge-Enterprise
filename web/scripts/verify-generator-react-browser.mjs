@@ -8,7 +8,26 @@ import {chromium, expect} from '@playwright/test';
 async function readDetail(page,id) {
   return JSON.parse(await page.evaluate(async value => JSON.stringify(await window.probeDetail(value)),id));
 }
-async function fillChildControls(scope,root) {
+async function verifyPendingUpload(page,category,field,file){
+  const uploadPath='/common/upload';
+  const control=page.getByRole('dialog').locator('label').filter({hasText:new RegExp('^'+field)}).first();
+  let release;const gate=new Promise(resolve=>{release=resolve;});let writes=0;
+  await page.route('**'+uploadPath,async route=>{writes++;await gate;await route.continue().catch(()=>{});});
+  const sent=page.waitForRequest(request=>new URL(request.url()).pathname===uploadPath&&request.method()==='POST');
+  const committed=page.waitForResponse(response=>new URL(response.url()).pathname===uploadPath&&response.status()===200).catch(cause=>({error:cause}));
+  await control.locator('input[type=file]').setInputFiles(file);const captured=await sent;
+  try{
+    await page.goBack();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await page.locator('.ef-app-shell__nav').getByRole('link',{name:'Installed '+category,exact:true}).click();
+    await expect(page.getByRole('dialog').getByRole('button',{name:'保存',exact:true})).toBeDisabled();
+    assert.equal(captured.failure(),null,'Sent upload must settle once instead of aborting on Activity hide');assert.equal(writes,1);
+  }finally{release();}
+  const acknowledgement=await committed;if(acknowledgement.error)throw acknowledgement.error;await expect(control.getByRole('button',{name:'移除文件',exact:true})).toBeVisible();
+  await expect(control.locator('input[type=file]')).toBeEnabled();assert.equal(writes,1);
+  await page.unroute('**'+uploadPath);
+  console.log('PASS: '+category+' '+field+' real browser history retains one pending upload and form lock until genuine200 acknowledgement.');
+}
+async function fillChildControls(scope,root,page,category) {
   await scope.getByLabel('childNotes',{exact:true}).fill('子表多行\n中文');
   await scope.locator('label').filter({hasText:/^childSelectedStatus/}).locator('select').selectOption('1');
   await scope.locator('label').filter({hasText:/^childRadioStatus/}).getByRole('radio').first().check();
@@ -17,8 +36,8 @@ async function fillChildControls(scope,root) {
   await scope.locator('label').filter({hasText:/^childBoolSelected/}).locator('select').selectOption('1');await scope.locator('label').filter({hasText:/^childBoolRadio/}).getByRole('radio').last().check();  await scope.getByLabel('childQuantity',{exact:true}).fill('17');await scope.getByLabel('childRatio',{exact:true}).fill('0.125');await scope.getByLabel('childEnabled',{exact:true}).fill('true');
   await scope.getByLabel('childPrototype',{exact:true}).fill('子行合法字段');await scope.getByLabel('childLong',{exact:true}).fill('9007199254741001');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.00001');
   await scope.getByRole('textbox',{name:'公告内容',exact:true}).fill('子表富文本');
-  await scope.locator('label').filter({hasText:/^childImagePaths/}).locator('input[type=file]').setInputFiles(join(root,'tests/fixtures/avatar.png'));await expect(scope.locator('label').filter({hasText:/^childImagePaths/})).toContainText('移除文件');
-  await scope.locator('label').filter({hasText:/^childFilePaths/}).locator('input[type=file]').setInputFiles({name:'子表文本.txt',mimeType:'text/plain',buffer:Buffer.from('子表实际文件')});await expect(scope.locator('label').filter({hasText:/^childFilePaths/})).toContainText('移除文件');
+  await verifyPendingUpload(page,category,'childImagePaths',join(root,'tests/fixtures/avatar.png'));
+  await verifyPendingUpload(page,category,'childFilePaths',{name:'子表文本.txt',mimeType:'text/plain',buffer:Buffer.from('子表实际文件')});
 }
 async function clearChildControls(scope) {
   await scope.locator('label').filter({hasText:/^childNotes/}).locator('textarea').fill('');await scope.getByLabel('childPrototype',{exact:true}).fill('');
@@ -195,7 +214,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     writeFileSync(join(owned, category, 'probe.tsx'), [
       "import {createRoot} from 'react-dom/client';",
       "import {StrictMode} from 'react';",
-      "import {createMemoryRouterAdapter} from '@eforge/app';",
+      "import {createBrowserRouterAdapter} from '@eforge/app';",
       "import {createMemoryStorage} from '@eforge/core';",
       "import {EForgeProvider} from '@eforge/ui';",
       "import {PermissionProvider} from '@eforge/patterns';",
@@ -205,7 +224,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "import {toEForgePermissions} from '../../../integration/permissions';",
       "import {Application} from '../../../app/Application';",
       "import {generatedRoute} from './route';",
-      "const runtime = createSessionRuntime(createMemoryStorage()); const router=createMemoryRouterAdapter('/dashboard');",
+      "const runtime = createSessionRuntime(createMemoryStorage()); const router=createBrowserRouterAdapter();",
       "Object.assign(window, {probeLogin:runtime.login, probeLogout:runtime.logout, probeDetail:async (id:string) => {try {const response = await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/' + id); return {status:response.status, data:await response.json()};} catch(error) {return {status:(error as {status:number}).status};}}});",
       "function Probe() {return <EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider>;}",
       "Object.assign(window,{probeNavigate:()=>router.navigate(generatedRoute.path),probeHref:router.getCurrentHref});",
@@ -234,6 +253,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await expect(page.getByRole('button', {name:'新增', exact:true})).toBeVisible();
         if (category.startsWith('auto')) {await verifyAutomaticKey(page, noRoleUser, category);assert.deepEqual(errors, []);continue;}
         if (category === 'stringkey') {await verifyStringKey(page,noRoleUser);assert.deepEqual(errors, []);continue;}
+        await page.getByRole('link',{name:'个人中心',exact:true}).click(); await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible(); await installedLink.click();
         const id = String(9007199254741001n + BigInt(ordinal));
         const label = '浏览器-' + category + '-<img src=x onerror=window.injected=true>';
         await page.getByRole('button', {name:'新增', exact:true}).click();
@@ -247,7 +267,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         if (category === 'sub') {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
           await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表');
-          await fillChildControls(dialog.locator('section[aria-label="子表明细"]'),root);
+          await fillChildControls(dialog.locator('section[aria-label="子表明细"]'),root,page,category);
         }
         {
           await dialog.getByLabel('notes', {exact:true}).fill('多行中文\n<script>保持文本</script>');
@@ -259,9 +279,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await dialog.locator('label').filter({hasText:/^boolSelected/}).locator('select').selectOption('1');await dialog.locator('label').filter({hasText:/^boolRadio/}).getByRole('radio').last().check();          await dialog.getByLabel('enabled', {exact:true}).fill('true'); await dialog.getByLabel('quantity', {exact:true}).fill('17');await dialog.getByLabel('ratio', {exact:true}).fill('0.125');
           await dialog.getByLabel('__proto__', {exact:true}).fill('合法字段保持精确');
           await dialog.getByRole('textbox', {name:'公告内容', exact:true}).first().fill('生成富文本中文');
-          await dialog.locator('label').filter({hasText:/^imagePaths/}).locator('input[type=file]').setInputFiles(join(root,'tests/fixtures/avatar.png'));
+          await verifyPendingUpload(page,category,'imagePaths',join(root,'tests/fixtures/avatar.png'));
           await expect(dialog.locator('label').filter({hasText:/^imagePaths/})).toContainText('移除文件');
-          await dialog.locator('label').filter({hasText:/^filePaths/}).locator('input[type=file]').setInputFiles({name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
+          await verifyPendingUpload(page,category,'filePaths',{name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
           await expect(dialog.locator('label').filter({hasText:/^filePaths/})).toContainText('移除文件');
           await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
         }
@@ -413,7 +433,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         assert.equal((await readDetail(page,id)).status, 403);
         await page.evaluate(() => window.probeLogout());
       } catch(cause) {
-        console.error('Generated browser failure state:', category, await page.locator('body').innerText().catch(()=>'Page unavailable.'));
+        console.error('Generated browser failure cause:',cause);console.error('Generated browser failure state:', category, await page.locator('body').innerText().catch(()=>'Page unavailable.'));
         throw cause;
       } finally {await context.close();}
     }

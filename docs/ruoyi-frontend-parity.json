@@ -1758,7 +1758,7 @@
   }
 ,
   "generatedCachedReads": {
-    "status": "local-strict-both-seven-and-complete-api-success-exact-cloud-pending",
+    "status": "exact-cloud-accepted-c3a7783",
     "review": "docs/security-review-generated-cached-reads.md",
     "backendDeclaredTests": 619,
     "localApplicableTestsPassed": 618,
@@ -1776,6 +1776,23 @@
     "frameworkOpenApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "installedGeneratedOpenApiSha256": "1B92C88E2974AAF19BA152C4D97847802BA7DFCBAC716771EAF1CBA9022CB0C0",
     "remaining": ["generated-upload-editor-action-lifecycle", "other-resource-monitor-embedded-cache", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
+,
+  "generatedCachedUploads": {
+    "status": "local-both-seven-real-browser-success-exact-cloud-pending",
+    "review": "docs/security-review-generated-cached-uploads.md",
+    "beforeEvidence": "generated-upload-before2-runtime.log",
+    "finalEvidence": ["generated-upload-final-maven.log", "generated-upload-frontend.log", "generated-upload-disabled-runtime.log", "generated-upload-enabled-runtime.log"],
+    "actualGeneratedCasesPerProfile": 7,
+    "gatedRawUploadsPerProfile": 8,
+    "router": "actual-browser-history-and-StrictMode",
+    "settlement": "one-real-POST-genuine200-form-lock-path-and-served-content",
+    "backendDeclaredTests": 619,
+    "localApplicableTestsPassed": 618,
+    "frontendUnitTests": 98,
+    "remaining": ["rich-text-upload", "generated-editor-other-actions", "remaining-shared-lifecycle", "sidebar-topnav-settings", "final-active-audit"],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }

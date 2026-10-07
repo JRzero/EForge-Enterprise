@@ -125,7 +125,7 @@ function QueryDictionaryControl({field, value, disabled, onChange}: {field: Fiel
 function FieldControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
   const changeUploads = useContext(UploadContext);
   const api = useApi(), [uploading, setUploading] = useState(false), [error, setError] = useState('');
-  const pending = useRef<AbortController | null>(null); useEffect(() => () => pending.current?.abort(), []);
+  const pending = useRef<AbortController | null>(null);
   if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange}} />;
   if (field.html === 'editor') return <RichTextEditor value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
   if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
@@ -134,7 +134,7 @@ function FieldControl({field, value, disabled, onChange}: {field: Field; value: 
       if (files.length + text(value).split(',').filter(Boolean).length > 5 || files.some(file => file.size > 5 * 1024 * 1024)) {setError('最多上传五个文件，每个不超过 5 MB。'); return;}
       pending.current?.abort(); const controller = new AbortController(); pending.current = controller; setUploading(true); changeUploads(1);
       try {const paths = text(value).split(',').filter(Boolean); for (const file of files) {paths.push(await api.uploadGeneratedFile(file, controller.signal)); if (!controller.signal.aborted) onChange(paths.join(','));}}
-      catch (cause) {if (!controller.signal.aborted) setError(errorMessage(cause));} finally {changeUploads(-1); if (!controller.signal.aborted) setUploading(false);}
+      catch (cause) {if (!controller.signal.aborted) setError(errorMessage(cause));} finally {changeUploads(-1); if (pending.current === controller) {pending.current = null; setUploading(false);}}
     }} />
     {uploading ? <p role="status">正在上传…</p> : null}{error ? <p role="alert">{error}</p> : null}
     {text(value).split(',').filter(Boolean).map(path => <div key={path}><span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(item => item !== path).join(','))} /></div>)}
