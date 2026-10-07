@@ -1280,3 +1280,7 @@ Full theme/density/layout switches, remaining action audits and final active
 parity acceptance remain required. This is a navigation mode phase only.
 
 2026-10-07 resumed layout phase: navigation18b9f78 exact cloud server37601222320/web37601222367 accepted; actual theme/layout persistence, density and header fullscreen implemented. Frozen98 units/117 mocked browsers passed. Real authority60953 and exact new cloud pending; menu loading race and mobile notice overlap fixed with behavior regressions. See security-review-layout-settings.md. Form builder deferred; full goal incomplete.
+
+## Exact acceptance of layout implementation 5b4dfa6
+
+Both local profiles completed authority60953 with57 real browsers each and complete MySQL/Redis/Quartz/OSHI/ACL/fault/data-consistency/captcha API PASS. Both live OpenAPI hashes equal the unchanged contract65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC. Exact cloud server37604035780 all three jobs and web37604036011 terminal SUCCESS. Direct accepted logs prove both57 browsers/full API,609 boot declarations (one existing platform skip),10 data-scope tests,98 units and117 mocked browsers. No fresh local Maven is claimed for this frontend-only stage. Main old72605 failure is superseded by the actual loading guard and this final source acceptance, not erased. Full project incomplete; isolated header-avatar stage is not covered by this commit's evidence.

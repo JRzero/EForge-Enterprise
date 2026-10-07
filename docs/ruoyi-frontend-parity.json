@@ -1940,5 +1940,23 @@
   ],
   "formBuilder": "deferred-not-complete",
   "freshLocalMavenRun": false
-}
+},
+  "activeLayoutPhase": {
+    "projectStatus": "resumed-by-user",
+    "implementationSha": "5b4dfa6",
+    "navigationAcceptedSha": "18b9f78d362f2d863a8b7bd9f15493d45a1431fa",
+    "navigationCloudServer": "37601222320",
+    "navigationCloudWeb": "37601222367",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 117,
+    "realAuthority": "60953-terminal0",
+    "status": "exact-cloud-accepted",
+    "cloudServer": "37604035780",
+    "cloudWeb": "37604036011",
+    "realBrowserTestsPerProfile": 57,
+    "review": "docs/security-review-layout-settings.md",
+    "formBuilder": "deferred-not-complete",
+    "quartzRuntimeProposal": "awaiting-explicit-approval",
+    "fullGoalComplete": false
+  }
 }
