@@ -346,7 +346,7 @@
         "changeJobStatus",
         "runJob"
       ],
-      "state": "partial-task-mutations-approval-pending",
+      "state": "partial-task-mutations-approved-implementation-in-progress",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java",
         "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java",
@@ -363,7 +363,7 @@
         "docs/security-review-cron-editor.md"
       ],
       "remaining": [
-        "Canonical task mutations, invocation whitelist, SQL/Quartz concurrency/fault consistency, generated client and create/edit/status/run/delete controls with Cron integration; specific runtime approval pending"
+        "Canonical task mutations, invocation whitelist, full SQL/Quartz/runtime/cloud acceptance, generated client and create/edit/status/run/delete controls with Cron integration; narrower runtime boundary explicitly approved on 2026-10-08 and under implementation"
       ],
       "pendingOperations": [
         "addJob",

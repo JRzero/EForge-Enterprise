@@ -67,10 +67,12 @@ followed by whole-objective acceptance. Source/operation inventory reconciliatio
 retains175 paths/119 operations;114 operations are accepted and five pending.
 All evidence files and named test classes resolve. This static reconciliation
 does not prove every implementation utility independently equivalent.
-The specific execution-gated runtime proposal was rejected by automatic approval
-review because it can delay/block dispatch under slow or unavailable SQL. It has
-not been implemented or retried equivalently; explicit approval remains pending
-in [proposed-task-mutation-boundary.md](proposed-task-mutation-boundary.md).
+The user explicitly approved the specific execution-gated runtime proposal on
+2026-10-08, including delay/rejection under slow or unavailable SQL. The narrower
+boundary is now being implemented; 17 targeted Quartz/transaction tests and
+both MySQL table-name modes with 32 checks each pass. Full runtime and exact
+cloud acceptance are pending. Canonical write APIs and task controls remain
+incomplete. See [security-review-task-mutation-boundary.md](security-review-task-mutation-boundary.md).
 
 Local generated1545 and framework default40541/sequential-enabled38045 completed
 successfully. The failed same-root parallel enabled run is retained; generated

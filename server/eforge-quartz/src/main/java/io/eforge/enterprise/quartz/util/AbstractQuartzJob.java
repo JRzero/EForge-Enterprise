@@ -14,6 +14,7 @@ import io.eforge.enterprise.common.utils.spring.SpringUtils;
 import io.eforge.enterprise.quartz.domain.SysJob;
 import io.eforge.enterprise.quartz.domain.SysJobLog;
 import io.eforge.enterprise.quartz.service.ISysJobLogService;
+import io.eforge.enterprise.quartz.service.TaskMutationBoundary;
 
 /**
  * 抽象quartz调用
@@ -37,6 +38,8 @@ public abstract class AbstractQuartzJob implements Job
         try
         {
             before(context, sysJob);
+            sysJob = SpringUtils.getBean(TaskMutationBoundary.class).admit(sysJob,
+                    Boolean.TRUE.equals(context.getMergedJobDataMap().get(TaskMutationBoundary.MANUAL_RUN)));
             if (sysJob != null)
             {
                 doExecute(context, sysJob);

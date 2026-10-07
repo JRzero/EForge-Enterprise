@@ -15,11 +15,14 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import io.eforge.enterprise.common.constant.ScheduleConstants;
 import io.eforge.enterprise.common.exception.job.TaskException;
 import io.eforge.enterprise.quartz.domain.SysJob;
 import io.eforge.enterprise.quartz.mapper.SysJobMapper;
 import io.eforge.enterprise.quartz.service.ISysJobService;
+import io.eforge.enterprise.quartz.service.TaskMutationBoundary;
 import io.eforge.enterprise.quartz.util.CronUtils;
 import io.eforge.enterprise.quartz.util.ScheduleUtils;
 
@@ -85,9 +88,12 @@ public class SysJobServiceImpl implements ISysJobService
     public int pauseJob(SysJob job) throws SchedulerException
     {
         Long jobId = job.getJobId();
-        String jobGroup = job.getJobGroup();
+        SysJob current = jobMapper.selectJobById(jobId);
+        if (current == null) return 0;
+        String jobGroup = current.getJobGroup();
         job.setStatus(ScheduleConstants.Status.PAUSE.getValue());
-        int rows = jobMapper.updateJob(job);
+        SysJob status = new SysJob(); status.setJobId(jobId); status.setStatus(job.getStatus()); status.setUpdateBy(job.getUpdateBy()); status.setMisfirePolicy(null);
+        int rows = jobMapper.updateJob(status);
         if (rows > 0)
         {
             scheduler.pauseJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -105,9 +111,12 @@ public class SysJobServiceImpl implements ISysJobService
     public int resumeJob(SysJob job) throws SchedulerException
     {
         Long jobId = job.getJobId();
-        String jobGroup = job.getJobGroup();
+        SysJob current = jobMapper.selectJobById(jobId);
+        if (current == null) return 0;
+        String jobGroup = current.getJobGroup();
         job.setStatus(ScheduleConstants.Status.NORMAL.getValue());
-        int rows = jobMapper.updateJob(job);
+        SysJob status = new SysJob(); status.setJobId(jobId); status.setStatus(job.getStatus()); status.setUpdateBy(job.getUpdateBy()); status.setMisfirePolicy(null);
+        int rows = jobMapper.updateJob(status);
         if (rows > 0)
         {
             scheduler.resumeJob(ScheduleUtils.getJobKey(jobId, jobGroup));
@@ -125,7 +134,9 @@ public class SysJobServiceImpl implements ISysJobService
     public int deleteJob(SysJob job) throws SchedulerException
     {
         Long jobId = job.getJobId();
-        String jobGroup = job.getJobGroup();
+        SysJob current = jobMapper.selectJobById(jobId);
+        if (current == null) return 0;
+        String jobGroup = current.getJobGroup();
         int rows = jobMapper.deleteJobById(jobId);
         if (rows > 0)
         {
@@ -147,7 +158,7 @@ public class SysJobServiceImpl implements ISysJobService
         for (Long jobId : jobIds)
         {
             SysJob job = jobMapper.selectJobById(jobId);
-            deleteJob(job);
+            if (job != null) deleteJob(job);
         }
     }
 
@@ -184,16 +195,31 @@ public class SysJobServiceImpl implements ISysJobService
     {
         boolean result = false;
         Long jobId = job.getJobId();
-        String jobGroup = job.getJobGroup();
         SysJob properties = selectJobById(job.getJobId());
+        if (properties == null) return false;
+        String jobGroup = properties.getJobGroup();
         // 参数
         JobDataMap dataMap = new JobDataMap();
         dataMap.put(ScheduleConstants.TASK_PROPERTIES, properties);
+        dataMap.put(TaskMutationBoundary.MANUAL_RUN, Boolean.TRUE);
         JobKey jobKey = ScheduleUtils.getJobKey(jobId, jobGroup);
         if (scheduler.checkExists(jobKey))
         {
             result = true;
-            scheduler.triggerJob(jobKey, dataMap);
+            // Do not enqueue a manual firing from a transaction that can still
+            // roll back. The outer task boundary retains its admission lock
+            // throughout this callback and actual commit completion.
+            if (!TransactionSynchronizationManager.isActualTransactionActive())
+                throw new SchedulerException("Manual task execution requires the task transaction boundary.");
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization()
+            {
+                @Override public void afterCommit()
+                {
+                    try { scheduler.triggerJob(jobKey, dataMap); }
+                    catch (SchedulerException failure)
+                    { throw new IllegalStateException("Manual task dispatch is temporarily unavailable."); }
+                }
+            });
         }
         return result;
     }

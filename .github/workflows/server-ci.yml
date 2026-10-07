@@ -110,6 +110,12 @@ jobs:
           ./server/scripts/verify-generator-creation-import.ps1 -LowerCaseTableNames 0
           ./server/scripts/verify-generator-creation-import.ps1 -LowerCaseTableNames 1
 
+      - name: Verify approved task transaction and Quartz admission boundary on actual MySQL
+        shell: pwsh
+        run: |
+          ./server/scripts/verify-task-mutation-boundary.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-task-mutation-boundary.ps1 -LowerCaseTableNames 1
+
       - name: Verify immutable generation snapshots on actual Spring and MyBatis
         shell: pwsh
         run: |

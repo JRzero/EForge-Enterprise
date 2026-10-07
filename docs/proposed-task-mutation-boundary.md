@@ -1,9 +1,19 @@
-# Proposed task mutation boundary — approval required
+# Approved task mutation boundary — implementation pending
 
-Status: proposed only. No runtime implementation of this boundary has been
-written or enabled. Automatic approval review rejected both the scheduler-wide
-replacement proposal and the narrower execution-gated proposal. The first
-proposal is abandoned because it could interrupt unrelated tasks.
+Human approval: on 2026-10-08 the user explicitly replied “批准” to the
+concrete request covering per-execution SQL verification and the shared
+mutation/execution lock, including possible dispatch delays under slow/faulty
+SQL. This supersedes the missing-approval boundary below; it does not approve
+the abandoned scheduler-wide replacement proposal. Normal implementation,
+targeted fault/concurrency verification and already-authorized commit/push may
+proceed. Approval is not implementation or acceptance evidence.
+
+Current status: the approved narrower boundary is being implemented, with
+targeted Quartz/transaction-advisor tests passing. Actual MySQL verification,
+complete HTTP/browser regression and exact-commit cloud acceptance remain
+pending. The rejection history below records the pre-approval state. The
+scheduler-wide replacement proposal remains abandoned because it could
+interrupt unrelated tasks.
 
 The narrower proposal would modify only schedules whose task IDs appear in the
 current create/update/delete/status request, including legacy callers. A local
@@ -43,5 +53,5 @@ backend/data-scope/frontend/real MySQL/Redis/Quartz/browser regression must pass
 Automatic review's second rejection states that a global mutation lock and
 per-execution database validation may stall or delay tasks and that existing
 objective-level authorization is insufficient for this persistent high-impact
-implementation. Explicit approval of this concrete narrower proposal is needed
-before its implementation; canonical read/export work can proceed independently.
+implementation. The explicit approval recorded above now permits implementation
+of the concrete narrower proposal. It does not establish functional acceptance.
