@@ -204,8 +204,8 @@
         "logout",
         "getCodeImg"
       ],
-      "state": "implemented-final-unlock-validation-pending",
-      "evidence": ["docs/security-review-registration.md", "docs/security-review-screen-lock.md"], "pendingOperations": ["unlockScreen"], "migration": "canonical login/register/bootstrap and compatible captcha/logout; unlock correction needs exact cloud acceptance"
+      "state": "implemented-exact-cloud-accepted",
+      "evidence": ["docs/security-review-registration.md", "docs/security-review-screen-lock.md"], "pendingOperations": [], "migration": "canonical login/register/bootstrap and compatible captcha/logout; unlock correction accepted in exact f20682e all-three-server/web cloud"
     },
     {
       "source": "ruoyi-ui/src/api/menu.js",
@@ -2068,9 +2068,9 @@
     "fullGoalComplete":false
   }
   ,"screenLock": {
-    "status":"locally-corrected-console-and-password-focus-final-cloud-pending",
+    "status":"exact-cloud-accepted-full-goal-incomplete","implementationSha":"f20682e1b490acc5f24877ed9ea1c6284419d036","cloudServer":"37633965317-all-three-success","cloudWeb":"37633965113-success","cloudRealBrowsersPerProfile":62,
     "targetedSecurityTests":14,"failedCloudSource":"31a6e86082d967638eddd76189eaf4c426b17ac6","failedCloudServer":"37625350654-auth-runtime-password-focus-race","focusRegression":"controlled-before-failed-after-passed","recoveredLocalAuthoritiesRequired":true,
-    "backendDeclarations":648,
+    "backendDeclarations":661,
     "existingPlatformSkips":1,
     "frontendUnitTests":98,
     "mockedBrowserTests":139,
@@ -2087,6 +2087,7 @@
     "review":"docs/security-review-screen-lock.md",
     "fullGoalComplete":false
   }
-  ,"canonicalExcelPrecision":{"status":"local-verified-exact-cloud-pending","backendDeclarations":661,"scopeTests":10,"existingPlatformSkips":1,"workbookCases":13,"frontendUnitTests":98,"mockedBrowserTests":139,"mainAuthority":"60959-terminal0-three-console-browsers-and-full-api","isolatedAuthority":"20950-terminal0-installed-generated-react-and-enabled-full-api","defaultRealApi":"17775-terminal0","systemSqlCalendarDayAndFilteredExport":true,"review":"docs/security-review-canonical-excel-precision.md","fullGoalComplete":false}
-  ,"consoleViewport":{"status":"local-verified-exact-cloud-pending","failedCloudSha":"bdebbd3d173044d2534008f1788c278134f18d73","failedCloudServer":"37628915843-auth-runtime-swagger-button-outside-viewport","beforeAfterRegression":true,"focusedRealBrowsers":3,"mainAuthority":"60959-terminal0-full-api","review":"docs/security-review-console-viewport.md","fullGoalComplete":false}
+  ,"canonicalExcelPrecision":{"status":"exact-cloud-accepted-full-goal-incomplete","implementationSha":"f20682e1b490acc5f24877ed9ea1c6284419d036","cloudServer":"37633965317-all-three-success","cloudWeb":"37633965113-success","cloudRealBrowsersPerProfile":62,"backendDeclarations":661,"scopeTests":10,"existingPlatformSkips":1,"workbookCases":13,"frontendUnitTests":98,"mockedBrowserTests":139,"mainAuthority":"60959-terminal0-three-console-browsers-and-full-api","isolatedAuthority":"20950-terminal0-installed-generated-react-and-enabled-full-api","defaultRealApi":"17775-terminal0","systemSqlCalendarDayAndFilteredExport":true,"review":"docs/security-review-canonical-excel-precision.md","fullGoalComplete":false}
+  ,"consoleViewport":{"status":"exact-cloud-accepted-full-goal-incomplete","implementationSha":"f20682e1b490acc5f24877ed9ea1c6284419d036","cloudServer":"37633965317-all-three-success","cloudWeb":"37633965113-success","cloudRealBrowsersPerProfile":62,"failedCloudSha":"bdebbd3d173044d2534008f1788c278134f18d73","failedCloudServer":"37628915843-auth-runtime-swagger-button-outside-viewport","beforeAfterRegression":true,"focusedRealBrowsers":3,"mainAuthority":"60959-terminal0-full-api","review":"docs/security-review-console-viewport.md","fullGoalComplete":false}
+  ,"finalCalendarXlsxAudit":{"status":"local-verified-new-exact-cloud-pending","authority":"1545-terminal0-actual-generated-host","browserZones":["UTC","Asia/Shanghai","America/New_York"],"independentIsoOracles":true,"newYorkFallAndSpringDates":true,"exactMillisecondsAndRefill":true,"exactGeneratedLongAndDecimalWorkbook":true,"originalJvmCalendarDateExport":true,"review":"docs/security-review-final-calendar-xlsx.md","fullGoalComplete":false}
 }

@@ -239,7 +239,12 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     const address = server.httpServer.address(); assert(address && typeof address === 'object');
     browser = await chromium.launch({headless:true});
     for (const [ordinal, category] of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub', 'stringkey'].entries()) {
-      const context = await browser.newContext({acceptDownloads:true});
+      const timezoneId = ['UTC','Asia/Shanghai','America/New_York'][ordinal % 3];
+      const initialDate = timezoneId === 'America/New_York' ? '2026-11-01T01:30:03.456' : '2026-10-07T01:02:03.456';
+      const editedDate = timezoneId === 'America/New_York' ? '2026-03-08T03:30:03.456' : initialDate;
+      const expectedInitial = {UTC:'2026-10-07T01:02:03.456Z','Asia/Shanghai':'2026-10-06T17:02:03.456Z','America/New_York':'2026-11-01T05:30:03.456Z'}[timezoneId];
+      const expectedEdit = timezoneId === 'America/New_York' ? '2026-03-08T07:30:03.456Z' : expectedInitial;
+      const context = await browser.newContext({acceptDownloads:true,timezoneId});
       const page = await context.newPage(), errors = [];
       page.on('pageerror', error => errors.push(error.message));
       try {
@@ -276,7 +281,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await dialog.locator('label').filter({hasText:/^radioStatus/}).getByRole('radio').first().check();
           const checks=dialog.locator('label').filter({hasText:/^checkedStatuses/}).getByRole('checkbox');
           await checks.first().check();await checks.last().check();
-          await dialog.getByLabel('eventTime', {exact:true}).fill('2026-10-07T01:02:03.456');
+          await dialog.getByLabel('eventTime', {exact:true}).fill(initialDate);
           await dialog.locator('label').filter({hasText:/^boolSelected/}).locator('select').selectOption('1');await dialog.locator('label').filter({hasText:/^boolRadio/}).getByRole('radio').last().check();          await dialog.getByLabel('enabled', {exact:true}).fill('true'); await dialog.getByLabel('quantity', {exact:true}).fill('17');await dialog.getByLabel('ratio', {exact:true}).fill('0.125');
           await dialog.getByLabel('__proto__', {exact:true}).fill('合法字段保持精确');
           await dialog.getByRole('textbox', {name:'公告内容', exact:true}).first().fill('生成富文本中文');
@@ -303,7 +308,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           assert.equal(detail.data.notes,'多行中文\n<script>保持文本</script>');assert.equal(detail.data.selectedStatus,'1');assert.equal(detail.data.radioStatus,'0');
           assert.equal(detail.data.boolSelected,true);assert.equal(detail.data.boolRadio,true);assert.equal(detail.data.enabled,true);assert.equal(detail.data.checkedStatuses,'0,1');assert.equal(detail.data.quantity,17);assert.equal(detail.data.ratio,0.125);
           assert.equal(detail.data.__proto__,'合法字段保持精确');assert(detail.data.richContent.includes('生成富文本中文'));assert(detail.data.richContent.includes('<img'),'The uploaded editor image must persist in SQL and actual detail JSON');
-          assert.equal(new Date(detail.data.eventTime).getTime(),await page.evaluate(() => new Date('2026-10-07T01:02:03.456').getTime()));
+          assert.equal(new Date(detail.data.eventTime).toISOString(),expectedInitial);assert.equal(new Date(detail.data.eventTime).getTime(),await page.evaluate(value => new Date(value).getTime(),initialDate));
           for(const key of ['imagePaths','filePaths']) {assert(detail.data[key].startsWith('/profile/upload/'));const served=await page.request.get(new URL(detail.data[key],page.url()).href);assert.equal(served.status(),200);if(key==='filePaths')assert.equal(await served.text(),'实际文件内容');}
         }
         if (category === 'tree') assert.equal(detail.data.parentId, '0');
@@ -316,6 +321,8 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const headerNames=await page.getByRole('columnheader').allTextContents();
         for(const key of ['boolSelected','boolRadio']) {const index=headerNames.findIndex(name=>name.trim()===key);assert(index>=0);await expect(row.getByRole('cell').nth(index)).toHaveText('失败');}
         await row.getByRole('button', {name:'修改', exact:true}).click();
+        await expect(dialog.getByLabel('eventTime',{exact:true})).toHaveValue(initialDate);
+        await dialog.getByLabel('eventTime',{exact:true}).fill(editedDate);
         await dialog.getByLabel('label', {exact:true}).first().fill(label + '-修改');
         await expect(dialog.getByLabel('insertOnly',{exact:true})).toHaveCount(0);await dialog.getByLabel('editOnly',{exact:true}).fill('修改专用值');
         if(category==='sub') {await dialog.getByLabel('label',{exact:true}).last().fill('浏览器子表-修改');await clearChildControls(dialog.locator('section[aria-label="子表明细"]'));}
@@ -335,7 +342,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const updated = page.getByRole('row').filter({has:page.getByText(label + '-修改', {exact:true})});
         await expect(updated).toBeVisible();
         {
-          const changed=await readDetail(page,id);assert.equal(changed.status,200);assert.equal(changed.data.insertOnly,'新增专用保持');assert.equal(changed.data.editOnly,'修改专用值');
+          const changed=await readDetail(page,id);assert.equal(changed.status,200);assert.equal(new Date(changed.data.eventTime).toISOString(),expectedEdit);assert.equal(new Date(changed.data.eventTime).getTime(),await page.evaluate(value=>new Date(value).getTime(),editedDate));console.log('PASS: '+category+' actual '+timezoneId+' datetime insert/refill/edit retains exact milliseconds and physical SQL/HTTP instants.');assert.equal(changed.data.insertOnly,'新增专用保持');assert.equal(changed.data.editOnly,'修改专用值');
           for(const key of ['notes','__proto__','selectedStatus','checkedStatuses','imagePaths','filePaths','richContent'])assert.equal(changed.data[key],'','Cleared field '+key+' must persist');
           assert.equal(changed.data.boolSelected,false);assert.equal(changed.data.boolRadio,false);assert.equal(changed.data.enabled,false);assert.equal(changed.data.radioStatus,'1');assert.equal(changed.data.quantity,0);assert.equal(changed.data.ratio,0);
           for(const key of ['selectedStatus','radioStatus','boolSelected','boolRadio']) {

@@ -19,12 +19,16 @@ try {
     $generatedDeployContractPath=Join-Path $generatedBusinessDirectory 'actual-boot-openapi.json'
     [IO.File]::WriteAllText($generatedDeployContractPath,$generatedDeployContract,[Text.UTF8Encoding]::new($false))
     $generatedDeploySpec=$generatedDeployContract|ConvertFrom-Json -AsHashtable
+    $generatedDeployZoneResponse=Request '/api/v1/monitor/jobs/cron-preview?expression=0%200%200%20*%20*%20%3F' 'GET' '' $generatedDeployActorHeaders
+    Assert-Check ($generatedDeployZoneResponse.StatusCode -eq 200) 'Original JVM calendar zone oracle unavailable.'
+    $generatedDeployZone=[TimeZoneInfo]::FindSystemTimeZoneById(($generatedDeployZoneResponse.Content|ConvertFrom-Json).zone)
+    $generatedDeployExpectedDate=[TimeZoneInfo]::ConvertTime([DateTimeOffset]::Parse('2026-10-06T17:02:03.456Z'),$generatedDeployZone).ToString('yyyy-MM-dd')
     foreach($generatedDeployCategory in @('crud','tree','sub')) {
         $generatedDeployRoute="/api/v1/business/fixture/$generatedDeployCategory"
         Assert-Problem (Request "$generatedDeployRoute/9007199254740995") 401 'AUTHENTICATION_REQUIRED'
         Assert-Problem (Request "$generatedDeployRoute/9007199254740995" 'GET' '' $generatedDeployNoRoleHeaders) 403 'ACCESS_DENIED'
         Assert-Check ($generatedDeploySpec.paths.ContainsKey($generatedDeployRoute)) 'Installed generated module is missing from actual Boot canonical OpenAPI.'
-        $generatedDeployInput=@{oRderKey='9007199254740995';label='部署中文';parentId='0';amount='9007199254740993.00001'}
+        $generatedDeployInput=@{oRderKey='9007199254740995';label='部署中文';parentId='0';amount='9007199254740993.00001';eventTime='2026-10-06T17:02:03.456Z'}
         if($generatedDeployCategory -eq 'sub'){$generatedDeployInput.fixtureLineList=@(@{label='部署子表';ownerReference='1'})}
         $generatedDeployCreated=Request $generatedDeployRoute 'POST' ($generatedDeployInput|ConvertTo-Json -Depth 8 -Compress) $generatedDeployActorHeaders
         Assert-Check ($generatedDeployCreated.StatusCode -eq 201) 'Actual Boot generated create failed.'
@@ -42,6 +46,13 @@ try {
                 if($generatedDeployCell.t -eq 'inlineStr' -and $generatedDeployCell.InnerText -ceq '9007199254740995'){$generatedDeployExactIdentity=$true}
             }
             Assert-Check $generatedDeployExactIdentity 'Installed generated workbook lost its exact text Long identity.'
+            foreach($generatedDeployExpectedColumn in @(@{name='amount';value='9007199254740993.00001'},@{name='eventTime';value=$generatedDeployExpectedDate})){
+                $generatedDeployHeader=$generatedDeployWorkbookXml.SelectNodes('//s:sheetData/s:row[@r="1"]/s:c',$generatedDeployWorkbookNs)|Where-Object {$_.InnerText -ceq $generatedDeployExpectedColumn.name}
+                Assert-Check ($null -ne $generatedDeployHeader) 'Generated workbook lost an original decimal/date column.'
+                $generatedDeployReference=($generatedDeployHeader.r -replace '[0-9]+$','')+'2'
+                $generatedDeployValueCell=$generatedDeployWorkbookXml.SelectSingleNode("//s:c[@r='$generatedDeployReference']",$generatedDeployWorkbookNs)
+                Assert-Check ($generatedDeployValueCell.t -eq 'inlineStr' -and $generatedDeployValueCell.InnerText -ceq $generatedDeployExpectedColumn.value) 'Installed generated workbook lost original exact decimal or JVM-calendar date formatting.'
+            }
         }finally{$generatedDeployWorkbookZip.Dispose();$generatedDeployWorkbookStream.Dispose()}
         [Environment]::SetEnvironmentVariable('EFORGE_GENERATED_CLIENT_TOKEN',$generatedDeployActorToken,'Process')
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-business-client.mjs') $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployCategory ('fixture'+(Get-Culture).TextInfo.ToTitleCase($generatedDeployCategory))

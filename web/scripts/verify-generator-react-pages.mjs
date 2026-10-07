@@ -1,3 +1,4 @@
+// Installs/removes routes matched by the host glob. Run sequentially with framework live browsers in this checkout; use a separate worktree for parallel verification.
 import {readFileSync, copyFileSync, mkdirSync, mkdtempSync, rmSync} from 'node:fs';
 import {resolve, dirname, join, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
