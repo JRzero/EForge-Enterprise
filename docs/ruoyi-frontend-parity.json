@@ -1722,8 +1722,10 @@
   }
 ,
   "dictionaryCachedActions": {
-    "status": "local-both53-full-api-success-exact-cloud-pending",
+    "status": "accepted-exact-cloud-4349cd3",
     "review": "docs/security-review-dictionary-cached-actions.md",
+    "cloudServer": "37564226305",
+    "cloudWeb": "37564226259",
     "frontendUnitTests": 98,
     "mockedBrowserTests": 85,
     "fullRealBrowserProfiles": [53, 53],

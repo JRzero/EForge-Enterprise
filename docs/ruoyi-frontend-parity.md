@@ -2094,3 +2094,10 @@ cases each; both OpenAPI exports exactly match65642E8458E11E179197EB8060A2F197E0
 See security-review-dictionary-cached-actions.md. Exact cloud remains pending.
 Other action/generated/monitor/embedded lifecycle and shell settings remain open;
 no automatic mutation retry or rejected Quartz runtime change was introduced.
+### Dictionary action recovery exact cloud acceptance
+Exact4349cd39c3d35ba564bf44977552e6f3838722b8 server37564226305 all three
+jobs and web37564226259 are terminal SUCCESS. Direct accepted server/web logs
+prove both53 real framework browsers, complete native/generated/API/SQL/grant/
+session regressions, both exact OpenAPI gates,98 units and85 mocked browsers.
+This accepts the dictionary read/write ownership patch only. The subsequent
+task/log request-lifecycle source remains an independent pending stage.
