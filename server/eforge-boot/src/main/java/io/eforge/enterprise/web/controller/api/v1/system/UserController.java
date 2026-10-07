@@ -27,7 +27,7 @@ import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.common.exception.ServiceException;
 import io.eforge.enterprise.common.utils.SecurityUtils;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.system.service.*;
 import io.eforge.enterprise.system.mapper.DepartmentMutationMapper;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
@@ -210,7 +210,7 @@ public class UserController
             @RequestParam(required = false) @Pattern(regexp = "[1-9][0-9]{0,18}") String departmentId,
             @RequestParam(defaultValue = "") @Size(max = 10) String beginDate,
             @RequestParam(defaultValue = "") @Size(max = 10) String endDate)
-    { new ExcelUtil<>(SysUser.class).exportExcel(response, users.selectUserList(filter(username, phone, status, departmentId, beginDate, endDate)), "用户数据"); }
+    { new CanonicalExcelUtil<>(SysUser.class).exportExcel(response, users.selectUserList(filter(username, phone, status, departmentId, beginDate, endDate)), "用户数据"); }
 
     private List<UserOption> roleOptions()
     { return roles.selectRoleAll().stream().filter(role -> !role.isAdmin()).map(role -> new UserOption(role.getRoleId().toString(), role.getRoleName(), role.getStatus())).toList(); }

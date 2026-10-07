@@ -182,8 +182,8 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .log-payload h3 { font-size: 15px; margin: 8px 0; }
 .log-payload pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; padding: 14px; border: 1px solid var(--color-border, #d0d5dd); border-radius: 8px; font-size: 13px; line-height: 1.6; }
 @media (max-width: 600px) { .log-metadata { grid-template-columns: 88px minmax(0, 1fr); gap: 10px; } }
-.console-page iframe {width:100%; min-height:36rem; height:calc(100vh - 14rem); border:1px solid var(--color-border, #d0d5dd); border-radius:.5rem; background:white;}
-@media (max-width:600px) {.console-page iframe {min-height:30rem; height:calc(100dvh - 12rem);}}
+.console-page iframe {width:100%; min-height:0; height:calc(100vh - 14rem); border:1px solid var(--color-border, #d0d5dd); border-radius:.5rem; background:white;}
+@media (max-width:600px) {.console-page iframe {min-height:0; height:calc(100dvh - 12rem);}}
 .cron-editor {min-width:0; display:grid; gap:14px;}
 .cron-editor label {display:grid; gap:6px; min-width:0;}
 .cron-editor textarea, .cron-editor input, .cron-editor select {max-width:100%; min-width:0; font:inherit;}

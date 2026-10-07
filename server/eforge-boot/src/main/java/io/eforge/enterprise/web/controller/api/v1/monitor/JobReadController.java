@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.quartz.domain.SysJob;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import static io.eforge.enterprise.web.controller.api.v1.monitor.JobContracts.*;
@@ -28,5 +28,5 @@ public class JobReadController {
     @Log(title="定时任务",businessType=BusinessType.EXPORT,isSaveResponseData=false)
     @ApiResponse(responseCode="200",description="Filtered XLSX",content=@Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@Schema(type="string",format="binary")))
     public void export(HttpServletResponse response,@Valid @ModelAttribute @ParameterObject JobQuery query)
-    {new ExcelUtil<>(SysJob.class).exportExcel(response,jobs.export(query),"定时任务");}
+    {new CanonicalExcelUtil<>(SysJob.class).exportExcel(response,jobs.export(query),"定时任务");}
 }

@@ -128,3 +128,13 @@ test('late native navigation cannot reveal retained HTML before its scoped probe
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await expect(page.locator('iframe')).toBeHidden();expect(opens).toBe(before);
   release();await expect(page.getByRole('alert')).toContainText('控制台凭据已到期');await expect(page.locator('iframe')).toHaveCount(0);expect(opens).toBe(before);
 });
+test('embedded authorization stays inside the remaining viewport after header layout and resize',async({page})=>{
+  await page.setViewportSize({width:1280,height:720});
+  await page.route('**/api/v1/monitor/consoles/druid',route=>route.fulfill({json:{enabled:true}}));
+  await page.route('**/api/v1/monitor/consoles/druid/session',route=>route.fulfill({json:{entryPath:'/druid/login.html',expiresInSeconds:300}}));
+  await page.route('**/druid/login.html',route=>route.fulfill({contentType:'text/html',body:`<html><body><h1>Viewport console</h1><button onclick="document.getElementById('authorization').hidden=false">Open authorization</button><div id="authorization" hidden style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:240px;max-height:90vh;overflow:auto;background:white;border:1px solid;padding:12px"><label>Credential<input aria-label="Credential"></label><div style="height:150px"></div><button onclick="document.body.dataset.applied='yes';document.getElementById('authorization').hidden=true">Apply credentials</button></div></body></html>`}));
+  await login(page);await expect(page.frameLocator('iframe').getByRole('heading',{name:'Viewport console'})).toBeVisible();
+  const fits=async()=>{const box=await page.locator('iframe').boundingBox();expect(box).not.toBeNull();expect(box!.height).toBeGreaterThan(0);expect(box!.y+box!.height).toBeLessThanOrEqual(page.viewportSize()!.height);};
+  await fits();const frame=page.frameLocator('iframe');await frame.getByRole('button',{name:'Open authorization',exact:true}).click();await frame.getByLabel('Credential',{exact:true}).fill('fixture');await frame.getByRole('button',{name:'Apply credentials',exact:true}).click();await expect(frame.locator('body')).toHaveAttribute('data-applied','yes');
+  await page.setViewportSize({width:390,height:600});await fits();await page.setViewportSize({width:1280,height:560});await fits();
+});

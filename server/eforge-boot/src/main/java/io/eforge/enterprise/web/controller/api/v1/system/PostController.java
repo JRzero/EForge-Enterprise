@@ -19,7 +19,7 @@ import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.common.utils.SecurityUtils;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.system.domain.SysPost;
 import io.eforge.enterprise.system.service.ISysPostService;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
@@ -134,7 +134,7 @@ public class PostController
             @RequestParam(defaultValue = "") @Size(max = 50) String name,
             @RequestParam(defaultValue = "") @Pattern(regexp = "[01]?") String status)
     {
-        new ExcelUtil<>(SysPost.class).exportExcel(response, posts.selectPostList(filter(code, name, status)), "岗位数据");
+        new CanonicalExcelUtil<>(SysPost.class).exportExcel(response, posts.selectPostList(filter(code, name, status)), "岗位数据");
     }
 
     private static ApiFailure failure(int status, String code, String detail) { return new ApiFailure(status, code, detail); }

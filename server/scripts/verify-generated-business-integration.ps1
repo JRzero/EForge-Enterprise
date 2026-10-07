@@ -29,6 +29,20 @@ try {
         $generatedDeployCreated=Request $generatedDeployRoute 'POST' ($generatedDeployInput|ConvertTo-Json -Depth 8 -Compress) $generatedDeployActorHeaders
         Assert-Check ($generatedDeployCreated.StatusCode -eq 201) 'Actual Boot generated create failed.'
         Assert-Check (($generatedDeployCreated.Content|ConvertFrom-Json).oRderKey -ceq '9007199254740995') 'Actual Boot generated ID lost precision.'
+        $generatedDeployWorkbook=Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$generatedDeployRoute/export" -Method POST -Headers $generatedDeployActorHeaders -SkipHttpErrorCheck
+        Assert-Check ($generatedDeployWorkbook.StatusCode -eq 200 -and $generatedDeployWorkbook.Content -is [byte[]]) 'Installed generated export must return an actual workbook.'
+        $generatedDeployWorkbookStream=[IO.MemoryStream]::new([byte[]]$generatedDeployWorkbook.Content)
+        $generatedDeployWorkbookZip=[IO.Compression.ZipArchive]::new($generatedDeployWorkbookStream,[IO.Compression.ZipArchiveMode]::Read)
+        try {
+            $generatedDeployWorkbookReader=[IO.StreamReader]::new($generatedDeployWorkbookZip.GetEntry('xl/worksheets/sheet1.xml').Open())
+            try{$generatedDeployWorkbookXml=[xml]$generatedDeployWorkbookReader.ReadToEnd()}finally{$generatedDeployWorkbookReader.Dispose()}
+            $generatedDeployWorkbookNs=[Xml.XmlNamespaceManager]::new($generatedDeployWorkbookXml.NameTable);$generatedDeployWorkbookNs.AddNamespace('s','http://schemas.openxmlformats.org/spreadsheetml/2006/main')
+            $generatedDeployExactIdentity=$false
+            foreach($generatedDeployCell in $generatedDeployWorkbookXml.SelectNodes('//s:sheetData/s:row[@r="2"]/s:c',$generatedDeployWorkbookNs)) {
+                if($generatedDeployCell.t -eq 'inlineStr' -and $generatedDeployCell.InnerText -ceq '9007199254740995'){$generatedDeployExactIdentity=$true}
+            }
+            Assert-Check $generatedDeployExactIdentity 'Installed generated workbook lost its exact text Long identity.'
+        }finally{$generatedDeployWorkbookZip.Dispose();$generatedDeployWorkbookStream.Dispose()}
         [Environment]::SetEnvironmentVariable('EFORGE_GENERATED_CLIENT_TOKEN',$generatedDeployActorToken,'Process')
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-business-client.mjs') $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployCategory ('fixture'+(Get-Culture).TextInfo.ToTitleCase($generatedDeployCategory))
         Assert-Check ($LASTEXITCODE -eq 0) 'Actual Boot generated client HTTP verification failed.'

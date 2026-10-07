@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.system.domain.SysOperLog;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import static io.eforge.enterprise.web.controller.api.v1.monitor.LogContracts.*;
@@ -40,5 +40,5 @@ public class OperationLogController
     @Log(title="操作日志",businessType=BusinessType.EXPORT,isSaveResponseData=false)
     @ApiResponse(responseCode="200",description="Filtered XLSX",content=@Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@Schema(type="string",format="binary")))
     public void export(HttpServletResponse response,@Valid @ModelAttribute @ParameterObject OperationQuery query)
-    {new ExcelUtil<>(SysOperLog.class).exportExcel(response,logs.exportOperations(query),"操作日志");}
+    {new CanonicalExcelUtil<>(SysOperLog.class).exportExcel(response,logs.exportOperations(query),"操作日志");}
 }

@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.quartz.domain.SysJobLog;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import static io.eforge.enterprise.web.controller.api.v1.monitor.JobLogContracts.*;
@@ -39,5 +39,5 @@ public class JobLogController
     @Log(title="任务调度日志",businessType=BusinessType.EXPORT,isSaveResponseData=false)
     @ApiResponse(responseCode="200",description="Filtered XLSX",content=@Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@Schema(type="string",format="binary")))
     public void export(HttpServletResponse response,@Valid @ModelAttribute @ParameterObject JobLogQuery query)
-    {new ExcelUtil<>(SysJobLog.class).exportExcel(response,logs.export(query),"任务调度日志");}
+    {new CanonicalExcelUtil<>(SysJobLog.class).exportExcel(response,logs.export(query),"任务调度日志");}
 }

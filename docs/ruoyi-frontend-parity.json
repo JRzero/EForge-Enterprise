@@ -2068,12 +2068,12 @@
     "fullGoalComplete":false
   }
   ,"screenLock": {
-    "status":"cloud-failure-corrected-source-under-validation",
+    "status":"locally-corrected-console-and-password-focus-final-cloud-pending",
     "targetedSecurityTests":14,"failedCloudSource":"31a6e86082d967638eddd76189eaf4c426b17ac6","failedCloudServer":"37625350654-auth-runtime-password-focus-race","focusRegression":"controlled-before-failed-after-passed","recoveredLocalAuthoritiesRequired":true,
     "backendDeclarations":648,
     "existingPlatformSkips":1,
     "frontendUnitTests":98,
-    "mockedBrowserTests":138,
+    "mockedBrowserTests":139,
     "focusedMockedBrowsers":5,
     "focusedRealBrowsers":1,
     "realAuthority":"34823-terminal0-focused1-full-api-and-dedicated-sql-script",
@@ -2087,4 +2087,6 @@
     "review":"docs/security-review-screen-lock.md",
     "fullGoalComplete":false
   }
+  ,"canonicalExcelPrecision":{"status":"local-verified-exact-cloud-pending","backendDeclarations":661,"scopeTests":10,"existingPlatformSkips":1,"workbookCases":13,"frontendUnitTests":98,"mockedBrowserTests":139,"mainAuthority":"60959-terminal0-three-console-browsers-and-full-api","isolatedAuthority":"20950-terminal0-installed-generated-react-and-enabled-full-api","defaultRealApi":"17775-terminal0","systemSqlCalendarDayAndFilteredExport":true,"review":"docs/security-review-canonical-excel-precision.md","fullGoalComplete":false}
+  ,"consoleViewport":{"status":"local-verified-exact-cloud-pending","failedCloudSha":"bdebbd3d173044d2534008f1788c278134f18d73","failedCloudServer":"37628915843-auth-runtime-swagger-button-outside-viewport","beforeAfterRegression":true,"focusedRealBrowsers":3,"mainAuthority":"60959-terminal0-full-api","review":"docs/security-review-console-viewport.md","fullGoalComplete":false}
 }

@@ -20,6 +20,7 @@ for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/l
       expect((await context.cookies()).some(value => value.name === cookie)).toBe(false);
     } else {
       await expect(page.locator('iframe')).toHaveAttribute('src', entry); const frame = page.frameLocator('iframe');
+      await expect.poll(async()=>{const bounds=await page.locator('iframe').boundingBox();return bounds ? bounds.y+bounds.height : Infinity;}).toBeLessThanOrEqual(page.viewportSize()!.height);
       if (path === '/druid') {
         await expect(frame.getByRole('heading', {name: 'Login', exact: true})).toBeVisible();
         await expect.poll(() => frame.locator('html').evaluate(element => element.ownerDocument.readyState)).toBe('complete');

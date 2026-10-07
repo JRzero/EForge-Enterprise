@@ -19,6 +19,26 @@ function ConsolePage({target}: {target: Target}) {
   const [loading, setLoading] = useState(true), [disabled, setDisabled] = useState(false), [error, setError] = useState('');
   const expiredOwner = useRef<{api: ReturnType<typeof useApi>; target: Target; version: number} | null>(null);
   const owner = useRef<FrameOwner | null>(null), sequence = useRef(0), active = useRef<Operation | null>(null);
+  const frameElement = useRef<HTMLIFrameElement>(null);
+  useLayoutEffect(() => {
+    const element = frameElement.current;
+    if (!element) return;
+    let disposed = false;
+    const fit = () => {
+      if (disposed || !element.isConnected) return;
+      const height = Math.max(160, window.innerHeight - Math.max(0, element.getBoundingClientRect().top) - 16);
+      const value = `${height}px`;
+      if (element.style.height !== value) element.style.height = value;
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    if (element.parentElement) observer.observe(element.parentElement);
+    const header = document.querySelector('.ef-app-shell__header');
+    if (header) observer.observe(header);
+    window.addEventListener('resize', fit);
+    window.addEventListener('scroll', fit, true);
+    return () => {disposed = true; observer.disconnect(); window.removeEventListener('resize', fit); window.removeEventListener('scroll', fit, true);};
+  }, [frame]);
   useLayoutEffect(() => {
     const controller = new AbortController(), operation = {controller, ready: false};
     const timers: ReturnType<typeof setTimeout>[] = []; active.current = operation;
@@ -99,7 +119,7 @@ function ConsolePage({target}: {target: Target}) {
     {loading && <p role="status">正在加载控制台，请稍候！</p>}
     {disabled && <p role="status">该控制台尚未启用，请联系管理员。</p>}
     {error && <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></>}
-    {frame && <iframe key={`${target}-${frame.id}`} src={frame.entry} title={definition.title} style={{visibility: loading ? 'hidden' : undefined}} onLoad={event => onLoad(event, frame)} onError={() => rejectFrame(frame)}
+    {frame && <iframe ref={frameElement} key={`${target}-${frame.id}`} src={frame.entry} title={definition.title} style={{visibility: loading ? 'hidden' : undefined}} onLoad={event => onLoad(event, frame)} onError={() => rejectFrame(frame)}
       referrerPolicy="same-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox" />}
   </section>;
 }

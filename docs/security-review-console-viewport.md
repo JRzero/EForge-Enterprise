@@ -1,0 +1,11 @@
+# Embedded console viewport correction
+
+Both the recovered enabled local62-browser authority and exact bdebbd3 server37628915843 auth-runtime job failed the unchanged Swagger Apply credentials click. Default62/fullAPI passed; enabled61 passed and one failed. The exact cloud verify/runtime jobs and web37628915861 succeeded, but that is not complete source acceptance.
+
+The focused actual native diagnostic reproduced the failure again. Safe geometry records show the iframe starts at y356.703125 with height576, while its authorization button starts at local y368.6484375. Its button is consequently outside the720px parent viewport. No token, password, curl or native credential content is recorded; native iframe error context remains sanitized.
+
+The parent wrapper now measures remaining viewport height, removes the forced36rem/30rem minimum and observes layout/header resize and window resize/scroll with owned cleanup. Frame document, scoped ticket, native session, permissions, grant revalidation, expiry, retry and logout behavior are unchanged. Activity cleanup disconnects observers; resumed frames are measured again without reloading native state. Internal native scrolling retains access to the full console content.
+
+The controlled fixture fails before correction (iframe bottom932.703125 exceeds720) and passes after. It verifies ordinary mouse authorization,1280x720,390x600 and1280x560 without force clicks, relaxed bounds or timeout increases. Actual enabled Druid, Swagger authorization/executed request, retained native state, expiry/retry and no-role/grant/logout isolation all pass as three focused real browser cases. Their parent full API remains in progress; final frozen frontend and exact corrected-source cloud acceptance remain pending. Earlier failed evidence is retained. This is a viewport correction, not full project acceptance.
+
+Final frozen frontend98 units/139 mocked cases, reproducibility/lint/type/build pass. Main authority60959 terminated0 with three actual enabled native console cases and complete MySQL/Redis API, including new export/calendar fixtures; Maven661 declarations (651 boot/one existing skip,10 scope) pass. Live OpenAPI is unchanged CF4. Exact corrected-source cloud and complete final profile acceptance remain required.

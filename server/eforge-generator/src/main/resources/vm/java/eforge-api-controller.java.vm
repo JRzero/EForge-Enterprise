@@ -130,7 +130,7 @@ public class ${ClassName}ApiController {
             PageHelper.clearPage();
             var rows=service.select${ClassName}List(query.domain());
             response.setHeader("Cache-Control","no-store");
-            new io.eforge.enterprise.common.utils.poi.ExcelUtil<>(${packageName}.domain.${ClassName}.class)
+            new io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil<>(${packageName}.domain.${ClassName}.class)
                 .exportExcel(response,rows,$outputText.javaLiteral("${ClassName}"));
         } catch(DataAccessException failure){throw unavailable();}
         finally {PageHelper.clearPage();}

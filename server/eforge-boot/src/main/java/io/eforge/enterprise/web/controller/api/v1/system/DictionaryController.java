@@ -17,7 +17,7 @@ import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.core.domain.entity.SysDictType;
 import io.eforge.enterprise.common.core.domain.entity.SysDictData;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import static io.eforge.enterprise.web.controller.api.v1.system.DictionaryContracts.*;
 
@@ -58,7 +58,7 @@ public class DictionaryController
     @ApiResponse(responseCode="200",description="Filtered XLSX",content=@Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@Schema(type="string",format="binary")))
     public void export(HttpServletResponse response,@RequestParam(defaultValue="") @Size(max=100) String name,@RequestParam(defaultValue="") @Size(max=100) String code,@RequestParam(defaultValue="") @Pattern(regexp="[01]?") String status,
             @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to)
-    {new ExcelUtil<>(SysDictType.class).exportExcel(response,dictionaries.exportTypes(name,code,status,from,to),"字典类型");}
+    {new CanonicalExcelUtil<>(SysDictType.class).exportExcel(response,dictionaries.exportTypes(name,code,status,from,to),"字典类型");}
     @GetMapping("/dictionary-entries") @PreAuthorize("@ss.hasPermi('system:dict:list')") @Operation(operationId="listDictionaryEntries")
     public PageResponse<DictionaryEntryResponse> entries(@RequestParam(defaultValue="1") @Min(1) @Max(1000000) int page,@RequestParam(defaultValue="10") @Min(1) @Max(100) int pageSize,
             @RequestParam @Pattern(regexp="[1-9][0-9]{0,18}") String dictionaryId,@RequestParam(defaultValue="") @Size(max=100) String label,@RequestParam(defaultValue="") @Pattern(regexp="[01]?") String status)
@@ -77,5 +77,5 @@ public class DictionaryController
     @PostMapping(value="/dictionary-entries/export",produces="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") @PreAuthorize("@ss.hasPermi('system:dict:export')") @Log(title="字典数据",businessType=BusinessType.EXPORT) @Operation(operationId="exportDictionaryEntries")
     @ApiResponse(responseCode="200",description="Filtered XLSX",content=@Content(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",schema=@Schema(type="string",format="binary")))
     public void exportEntries(HttpServletResponse response,@RequestParam @Pattern(regexp="[1-9][0-9]{0,18}") String dictionaryId,@RequestParam(defaultValue="") @Size(max=100) String label,@RequestParam(defaultValue="") @Pattern(regexp="[01]?") String status)
-    {new ExcelUtil<>(SysDictData.class).exportExcel(response,dictionaries.exportEntries(dictionaryId,label,status),"字典数据");}
+    {new CanonicalExcelUtil<>(SysDictData.class).exportExcel(response,dictionaries.exportEntries(dictionaryId,label,status),"字典数据");}
 }

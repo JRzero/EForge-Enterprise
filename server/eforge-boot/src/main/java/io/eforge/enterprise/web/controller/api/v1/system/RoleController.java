@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.*;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.core.domain.entity.SysRole;
-import io.eforge.enterprise.common.utils.poi.ExcelUtil;
+import io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import static io.eforge.enterprise.web.controller.api.v1.system.RoleContracts.*;
 
@@ -80,5 +80,5 @@ public class RoleController
     public void export(HttpServletResponse response,@RequestParam(defaultValue="") @Size(max=30) String name,
             @RequestParam(defaultValue="") @Size(max=100) String key,@RequestParam(defaultValue="") @Pattern(regexp="[01]?") String status,
             @RequestParam(defaultValue="") @Size(max=10) String beginDate,@RequestParam(defaultValue="") @Size(max=10) String endDate)
-    { new ExcelUtil<>(SysRole.class).exportExcel(response,roles.export(name,key,status,beginDate,endDate),"角色数据"); }
+    { new CanonicalExcelUtil<>(SysRole.class).exportExcel(response,roles.export(name,key,status,beginDate,endDate),"角色数据"); }
 }
