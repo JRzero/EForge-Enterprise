@@ -9,6 +9,15 @@ remain unchanged.
 
 The user explicitly deferred the online form builder. Do not develop or require it for current acceptance. Preserve its original behavior inventory for future work; deferred does not mean implemented or verified. All other capability requirements remain active.
 
+Latest aggregate acceptance (2026-10-08): exact29bb545 has server37653562598
+all three jobs and web37653562840 success, both62/fullAPI/OpenAPI profiles,
+98 units/142 mocked browsers and actual generated hosts. Subsequent original
+dialog move/resize, denied-page history/noGoBack and column all/partial-selection
+gaps are now independently accepted. Current records are in
+current-scope-acceptance.md.119 original API operations retain114 accepted and
+five task mutations pending. This is not a complete-project percentage or a
+claim that task management/full objective is complete.
+
 ## Immutable behavior reference
 
 The pinned Spring Boot 3 backend commit has already separated its frontend

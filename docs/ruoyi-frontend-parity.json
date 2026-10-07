@@ -2927,7 +2927,7 @@
   },
   "currentScopeAcceptance": {
     "review": "docs/current-scope-acceptance.md",
-    "sha": "22f88957653b758042eea68140c35188197b0f96",
+    "sha": "29bb545dab65f48a62af0aa6f83cf50b71bf1a1a",
     "apiModuleCount": 19,
     "taskPendingOperations": [
       "addJob",
@@ -2937,9 +2937,7 @@
       "runJob"
     ],
     "independentRemaining": [
-      "Denied-page history exact cloud acceptance",
-      "Shared column selector exact cloud acceptance",
-      "Final source capability reconciliation"
+      "Final whole-objective acceptance after task mutations"
     ],
     "deferred": [
       "online-form-builder"
@@ -3209,8 +3207,8 @@
       {
         "source": "ruoyi-ui/src/components/RightToolbar/index.vue",
         "capability": "shared-controls",
-        "status": "assigned-to-review-not-independent-proof",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "original-all-partial-and-individual-controls-exact-cloud-accepted",
+        "review": "docs/security-review-column-selection.md"
       },
       {
         "source": "ruoyi-ui/src/components/RuoYi/Doc/index.vue",
@@ -3263,20 +3261,20 @@
       {
         "source": "ruoyi-ui/src/directive/dialog/drag.js",
         "capability": "shared-dialog-geometry",
-        "status": "local-verified-exact-cloud-pending",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "functional-actions-exact-cloud-accepted",
+        "review": "docs/security-review-dialog-geometry.md"
       },
       {
         "source": "ruoyi-ui/src/directive/dialog/dragHeight.js",
         "capability": "shared-dialog-geometry",
-        "status": "local-verified-exact-cloud-pending",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "functional-actions-exact-cloud-accepted",
+        "review": "docs/security-review-dialog-geometry.md"
       },
       {
         "source": "ruoyi-ui/src/directive/dialog/dragWidth.js",
         "capability": "shared-dialog-geometry",
-        "status": "local-verified-exact-cloud-pending",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "functional-actions-exact-cloud-accepted",
+        "review": "docs/security-review-dialog-geometry.md"
       },
       {
         "source": "ruoyi-ui/src/directive/index.js",
@@ -3707,14 +3705,14 @@
       {
         "source": "ruoyi-ui/src/views/error/401.vue",
         "capability": "application-shell-and-shared-runtime",
-        "status": "assigned-to-review-not-independent-proof",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "functional-actions-exact-cloud-accepted",
+        "review": "docs/security-review-error-history.md"
       },
       {
         "source": "ruoyi-ui/src/views/error/404.vue",
         "capability": "application-shell-and-shared-runtime",
-        "status": "assigned-to-review-not-independent-proof",
-        "review": "docs/current-scope-acceptance.md"
+        "status": "functional-actions-exact-cloud-accepted",
+        "review": "docs/security-review-error-history.md"
       },
       {
         "source": "ruoyi-ui/src/views/index.vue",
@@ -3998,7 +3996,29 @@
         "status": "assigned-to-review-not-independent-proof",
         "review": "docs/current-scope-acceptance.md"
       }
-    ]
+    ],
+    "latestAggregate": {
+      "serverRun": "37653562598",
+      "serverAllThree": "success",
+      "webRun": "37653562840",
+      "web": "success",
+      "backendTestDeclarations": 661,
+      "existingPlatformSkips": 1,
+      "dataScopeTests": 10,
+      "frontEndUnits": 98,
+      "mockedBrowsers": 142,
+      "realBrowsersPerProfile": 62,
+      "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+    },
+    "inventoryReconciliation": {
+      "originalSourceInventoryUnchanged": true,
+      "originalApiOperationInventoryUnchanged": true,
+      "acceptedApiOperations": 114,
+      "pendingApiOperations": 5,
+      "evidenceFilesAndNamedClassesResolved": true,
+      "proof": "source-reconciliation-final.log",
+      "mappingIsNotIndependentFunctionalProof": true
+    }
   },
   "sharedDialogGeometry": {
     "status": "exact-cloud-accepted",
@@ -4030,16 +4050,20 @@
     "viewportCheck": "same-exact-positive-height-and-bounds-after-native-layout;8-repeat-and141-full-pass"
   },
   "errorHistory": {
-    "status": "local142-mock-98-unit-real1-fullapi-pass-exact-cloud-pending",
+    "status": "exact-cloud-accepted",
     "review": "docs/security-review-error-history.md",
     "noGoBackOriginalQuerySemantics": true,
     "protectedApiAuthorityUnchanged": true,
     "fullGoalComplete": false,
     "realAuthority": "48423-terminal0-registration1-full-api",
-    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
+    "implementationSha": "430892c3d2c7fb15384c4b49e9363908adf02a53",
+    "cloudServerRun": "37652335274",
+    "cloudWebRun": "37652335172",
+    "realBrowsersPerProfile": 62
   },
   "sharedColumnSelection": {
-    "status": "local98-unit142-mock-real6-full-api-pass-exact-cloud-pending",
+    "status": "exact-cloud-accepted",
     "review": "docs/security-review-column-selection.md",
     "consumerPages": 9,
     "masterAllNone": true,
@@ -4047,6 +4071,12 @@
     "preserveUnrelatedKeys": true,
     "fullGoalComplete": false,
     "realAuthority": "39021-terminal0-users6-full-api",
-    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
+    "implementationSha": "29bb545dab65f48a62af0aa6f83cf50b71bf1a1a",
+    "cloudServerRun": "37653562598",
+    "cloudWebRun": "37653562840",
+    "realBrowsersPerProfile": 62,
+    "frontEndUnits": 98,
+    "mockedBrowsers": 142
   }
 }

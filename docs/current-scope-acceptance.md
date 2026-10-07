@@ -1,4 +1,4 @@
-# Current scope acceptance index — 2026-10-07
+# Current scope acceptance index — 2026-10-08
 
 This index reconciles the original inventory with actual later acceptance. The
 chronological checkpoints remain historical evidence; an earlier “pending” does
@@ -16,7 +16,13 @@ Direct `calendar-xlsx-cloud-server-accepted.log` and
 platform skip,98 frontend units,139 mocked browsers, generated clients and
 compiled/installed generated hosts. Both live contracts equal
 `CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C`.
-The native dialog geometry stage is subsequent and is not covered by this SHA.
+The subsequent dialog, denied-page and column stages have their own acceptance
+below. Latest aggregate source29bb545dab65f48a62af0aa6f83cf50b71bf1a1a is
+accepted in server37653562598 (all three jobs) and web37653562840:98 units,
+142 mocked browsers, both62 real/fullAPI profiles, unchanged contract and actual
+compiled installed generated hosts. Backend remains661 declarations with10 scope
+and one existing platform skip. These counts are verification evidence, not a
+whole-product completion percentage.
 
 | Current capability | Actual browser/API evidence | Current boundary |
 | --- | --- | --- |
@@ -38,7 +44,7 @@ The native dialog geometry stage is subsequent and is not covered by this SHA.
 | Native consoles | live/e2e consoles; verify-consoles integration; diagnostic/cached-session/viewport reviews | Accepted both default-disabled and enabled Druid/Swagger, original authenticated HTML/resources/actions, viewport, expiry/revocation/logout and production defaults |
 | Generator management/output | live/e2e generator; generator integration scripts; manager/creation/sync/canonical/custom-output reviews | Accepted read/import/create/config/delete/sync, immutable preview/ZIP, guarded custom files, permissions, physical partial DDL reporting and retained original rows |
 | Generated business pages | verify-generated-business-integration and verify-generator-react-browser/pages; controls/required/automatic/String-key/calendar reviews | Accepted compiled installed CRUD/tree/sub, root/child controls/uploads, readonly/write phases, auto/String keys, exact IDs/decimal/XLSX and UTC/Shanghai/NewYork insert/refill/edit/DST |
-| Shared controls | named real editors plus e2e control regressions; dictionary/upload/editor/icon/Cron ownership reviews | Dialog move/width/corner and retained-instance captions accepted at exact98daf4e. Original all/partial column selection is a subsequent actual page change with its own acceptance pending |
+| Shared controls | named real editors plus e2e control regressions; dictionary/upload/editor/icon/Cron ownership reviews | Dialog move/width/corner and retained-instance captions accepted at exact98daf4e. All/partial column selection on nine actual consumers accepted at exact29bb545; denied history/noGoBack accepted at exact430892c |
 | Online form builder | original inventory preserved | User-deferred; excluded from current development/acceptance and never marked implemented |
 
 All19 original API modules now have an operation-level current acceptance entry
@@ -47,11 +53,13 @@ pending: `addJob`, `updateJob`, `delJob`, `changeJobStatus`, `runJob`. Task-log
 operations are independently accepted and are not incorrectly held incomplete
 because task CRUD is pending. Historical source/operation lists are unchanged.
 
-Remaining active work is the permission-denied history/noGoBack and shared all/partial
-column-selection capabilities found by original-source audit, final reconciliation
-of its acceptance with the source inventory, and canonical task mutation APIs,
+Remaining active work is canonical task mutation APIs,
 invocation whitelist, database/Quartz fault/concurrency consistency, generated
-client and create/edit/status/run/delete controls integrating the Cron editor.
+client and create/edit/status/run/delete controls integrating the Cron editor,
+followed by whole-objective acceptance. Source/operation inventory reconciliation
+retains175 paths/119 operations;114 operations are accepted and five pending.
+All evidence files and named test classes resolve. This static reconciliation
+does not prove every implementation utility independently equivalent.
 The specific execution-gated runtime proposal was rejected by automatic approval
 review because it can delay/block dispatch under slow or unavailable SQL. It has
 not been implemented or retried equivalently; explicit approval remains pending
@@ -69,8 +77,15 @@ recorded in their reviews and were superseded by corrected-source acceptance.
 Subsequent native dialog source98daf4ebe25d9cba1f65f661ddd497383b5ca1ad
 has terminal success in server37649130907 (all three jobs) and web37649131155.
 Direct dialog-caption-cloud-server/web-accepted.log retain actual aggregate
-evidence. A subsequently discovered denied-page history capability is being
-implemented and requires its own exact acceptance; this dialog source cannot
-be used as acceptance for the later change. See security-review-error-history.md.
+evidence. Subsequent denied-page source430892c3d2c7fb15384c4b49e9363908adf02a53
+is independently accepted in server37652335274 all3/web37652335172, with
+both62/fullAPI/OpenAPI/98 units/142 mocks and generated-host proof. See
+security-review-error-history.md.
 
-Original RightToolbar/index.vue also includes all/none and partial-column state; this was missing from the prior individual-only menus. Nine actual page consumers now use an owned native master checkbox while preserving original per-column keys.98 units/142 mocks and all frontend checks pass; actual user CRUD/columns/workbook validation is running. Exact new acceptance is required (security-review-column-selection.md).
+Original RightToolbar/index.vue also includes all/none and partial-column state;
+this was missing from the prior individual-only menus. Nine actual page consumers
+now use an owned native master checkbox while preserving original per-column
+keys. Local39021 users6/fullAPI and exact29bb545 server37653562598 all3/
+web37653562840 succeed, including both62 profiles. See
+security-review-column-selection.md. Whole goal remains incomplete; no deferred
+builder or task mutation is falsely marked complete.

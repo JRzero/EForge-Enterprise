@@ -29,3 +29,5 @@ rejected runtime consistency proposal remain pending. Full project completion
 is not claimed.
 
 Local authority48423 completed0: actual no-role registration/history/home/continued403 proof and complete MySQL/Redis/Quartz/OSHI/ACL/permissions/rollback/captcha API PASS. Live OpenAPI equals committed CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C. All parent-owned fixtures/processes cleaned. No fresh local Maven for unchanged Java source; exact CI remains required.
+
+Exact430892c3d2c7fb15384c4b49e9363908adf02a53 is now accepted: server37652335274 all three jobs and web37652335172 terminal SUCCESS. Direct error-back-cloud-server/web-accepted.log prove both62/fullAPI/OpenAPI profiles,661 backend declarations including10 data-scope and one existing platform skip,98 units/142 mocks and actual compiled installed generated hosts. Observer80838 ended on GitHub annotation EOF; authoritative jobs and direct logs, not that observer exit, prove success. Subsequent shared-column source29bb545 remains independently pending.

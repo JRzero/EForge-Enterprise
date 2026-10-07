@@ -29,3 +29,5 @@ Specific task mutations remain approval-gated; form builder remains deferred.
 Full project completion is not claimed.
 
 Local39021 terminated0:6 real users browsers with all/partial/hide/restore, original CRUD/assignments/status/password/import/export and full API regression passed.98 units/142 mocks/repro/lint/type/build also pass. Contract remains exact CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C. Parent-owned fixtures/processes cleaned; no new local Maven claimed for unchanged Java. Exact source cloud remains required.
+
+Exact29bb545dab65f48a62af0aa6f83cf50b71bf1a1a is accepted: server37653562598 all three jobs and web37653562840 terminal SUCCESS. Direct column-all-cloud-server/web-accepted.log prove both62 real-browser/fullAPI/OpenAPI profiles,661 backend declarations including10 scope and one existing platform skip,98 units/142 mocks and both compiled installed generated hosts. Authority71160 completed0. All nine actual consumers pass the frozen aggregate. Full goal remains incomplete: five task mutations and subsequent whole-objective acceptance.
