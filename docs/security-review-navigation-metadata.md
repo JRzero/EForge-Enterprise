@@ -67,3 +67,12 @@ lint/typecheck/build and both real focused profiles are locally accepted.
 Exact cloud and the two complete50-case framework browser profiles remain
 pending. This accepts query propagation and cache preference delivery only,
 not actual retained pages, tabs or the full shell/active parity objective.
+## Exact cloud acceptance
+71a53e1ed4d90939b6c1bc43f4c66b25892cbda6: server37556646644 all three
+jobs and web37556646684 are terminal SUCCESS; the unique55163 observer ended0.
+Direct navigation-metadata-cloud-accepted-server/web.log proves619 Maven
+(609boot with one existing OS skip plus10scope),98 units/all75 mocked,
+both50 complete framework browser profiles, complete actual SQL/API/ACL/session/
+generator/console/captcha regressions and both live OpenAPI equality gates.
+The separately dirty page-tabs implementation is not part of this acceptance.
+No source change or retry was required. The full active goal remains incomplete.

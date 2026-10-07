@@ -1678,13 +1678,16 @@
     "fullGoalComplete": false
   },
   "navigationRouteMetadata": {
-    "status": "local-final-two-real-profiles-passed-exact-cloud-pending",
+    "status": "accepted-exact-cloud-71a53e1",
     "review": "docs/security-review-navigation-metadata.md",
     "backendTests": 619,
     "dataScopeCases": 10,
     "frontendUnitTests": 98,
     "mockedBrowserTests": 75,
     "expectedFullFrameworkLiveSuiteTests": 50,
+    "cloudFullFrameworkCasesPerProfile": 50,
+    "cloudServer": "37556646644",
+    "cloudWeb": "37556646684",
     "focusedRealNavigationCasesPerProfile": 2,
     "finalRealProfiles": "terminal-success-default-enabled",
     "actualSqlFixture": "navigation-metadata-schema-runtime.log",

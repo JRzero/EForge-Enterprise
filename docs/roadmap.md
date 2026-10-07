@@ -942,3 +942,10 @@ See security-review-navigation-metadata.md. Exact cloud/full50 framework cases
 remain pending. Actual page retention/tabs/cache/pin/context, sidebar icons/
 collapse/topnav/embedded, settings and final active audit remain incomplete.
 Form builder stays deferred; the specific Quartz runtime denial still applies.
+### Route metadata exact cloud acceptance
+71a53e1 server37556646644 all three jobs and web37556646684 are terminal
+SUCCESS. Direct navigation-metadata-cloud-accepted-server/web.log proves both50
+framework browsers,619 Maven including10scope,98 units/all75 mocked, complete
+real API/SQL/permission/session/console/captcha regressions and both exact
+OpenAPI gates. Query propagation/cache preference delivery is accepted;
+separate dirty tabs/actual page retention remains under verification.
