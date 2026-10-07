@@ -899,3 +899,10 @@ terminal SUCCESS, observer81717 ended0. Direct accepted logs prove618 backend,
 installed manual/automatic CRUD/tree/sub hosts with exact root/child keys and
 SQL zero-orphan counts, and exact framework OpenAPI gates. Later String key
 correction77c43dc remains separately cloud pending. Full active goal incomplete.
+String primary-key selection77c43dc9045c1780cb919ad111212f916c6a051c is
+exact-cloud accepted: server37551876095 all three jobs and web37551876119
+SUCCESS; observer20828 ended0. Direct accepted logs prove both seven-module
+installed generated hosts with legal prototype-name IDs, both48 full framework
+browsers/API profiles,618 backend,91 units/71 mocked and exact OpenAPI gates.
+Shared breadcrumb/search code remains separately local under verification;
+full shell and active parity goal remain incomplete. Form builder is deferred.

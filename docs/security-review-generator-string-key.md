@@ -29,7 +29,7 @@ case plus all six prior manual/automatic CRUD/tree/sub modules, exact generated
 clients, real SQL/JWT/Redis/permissions/audit and zero-orphan checks. Both installed
 OpenAPI snapshots match SHA256D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386.
 Evidence: generator-string-key-final-disabled/enabled-runtime.log and matching
-OpenAPI snapshots. Exact cloud acceptance remains pending.
+OpenAPI snapshots. Exact implementation77c43dc9045c1780cb919ad111212f916c6a051c is cloud accepted: server37551876095 all three jobs and web37551876119 terminal SUCCESS; observer20828 ended0. Direct generator-string-key-cloud-accepted-server/web.log prove both seven-module installed hosts, both48 full framework browsers/API profiles,618 backend,91 units/71 mocked and exact OpenAPI gates. Later shell navigation code is separate local work and is not included in this acceptance.
 No local pending result is represented as successful. Full active parity is not
 complete. Form builder remains deferred, and the specific Quartz runtime denial
 remains in force.

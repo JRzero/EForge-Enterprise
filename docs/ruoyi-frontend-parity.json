@@ -1633,7 +1633,12 @@
   }
 ,
   "generatorStringKeySelection": {
-    "status": "local-both-seven-module-profiles-passed-exact-cloud-pending",
+    "implementationCommit": "77c43dc9045c1780cb919ad111212f916c6a051c",
+    "serverCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37551876095",
+    "webCi": "https://github.com/JRzero/EForge-Enterprise/actions/runs/37551876119",
+    "cloud": "all-three-server-and-web-terminal-success",
+    "acceptedFullFrameworkProfiles": [48,48],
+    "status": "exact-commit-cloud-accepted-full-goal-incomplete",
     "review": "docs/security-review-generator-string-key.md",
     "backendTests": 618,
     "frontendUnitTests": 91,
