@@ -892,3 +892,10 @@ request/no-role flow and all prior manual/automatic CRUD/tree/sub regressions
 pass with matching installed OpenAPI D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386.
 Exact cloud is pending; shared shell and final active capability audit remain.
 Form builder stays deferred, and the specific Quartz runtime rejection remains.
+Automatic generated key implementation00d73a4314278eda7c61e88d36698b4d5ecc3514
+is exact-cloud accepted: server37550410563 all three jobs and web37550410644
+terminal SUCCESS, observer81717 ended0. Direct accepted logs prove618 backend,
+91 units/71 mocked, both48 real framework browsers/full API profiles, both six
+installed manual/automatic CRUD/tree/sub hosts with exact root/child keys and
+SQL zero-orphan counts, and exact framework OpenAPI gates. Later String key
+correction77c43dc remains separately cloud pending. Full active goal incomplete.

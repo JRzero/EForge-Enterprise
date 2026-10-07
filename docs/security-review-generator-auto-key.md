@@ -43,7 +43,7 @@ generator-auto-matrix-child-final-disabled/enabled-runtime.log; default all six
 modules, SQL orphan proof and original full generated client/permission/audit
 checks pass in both profiles; observer28066 ended0. Production source has not changed since
 the final Maven; later changes are verification fixtures. Both live generated
-OpenAPI snapshots match exactly: SHA25652CD6F01BE3A40B9099424A4D29A240E0DB4EABBE1A54EAAC1A225C36D32EABF. The framework contract remains36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F. No new exact cloud is accepted.
+OpenAPI snapshots match exactly: SHA25652CD6F01BE3A40B9099424A4D29A240E0DB4EABBE1A54EAAC1A225C36D32EABF. The framework contract remains36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F. Exact implementation00d73a4314278eda7c61e88d36698b4d5ecc3514 is now cloud accepted: server37550410563 all three jobs and web37550410644 ended SUCCESS. Observer81717 ended0. Direct generator-auto-key-cloud-accepted-server/web.log prove both six-module installed hosts, automatic root/child exact IDs and zero-orphan SQL, both48 real framework browser/API profiles,618 backend,91 units/71 mocked and both exact framework OpenAPI gates. This acceptance does not cover the later String key correction77c43dc.
 
 Other supported type/control variants, shared shell and final active capability
 audit remain open. Form builder is deferred; the specific Quartz runtime rejection
