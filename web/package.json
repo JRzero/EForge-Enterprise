@@ -26,6 +26,7 @@
     "@oazapfts/runtime": "1.2.0",
     "dompurify": "3.4.16",
     "echarts": "6.1.0",
+    "fuse.js": "6.4.3",
     "quill": "2.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"

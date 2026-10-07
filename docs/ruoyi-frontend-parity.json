@@ -1651,4 +1651,26 @@
     "installedOpenApiSha256": "D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386",
     "fullGoalComplete": false
   }
+,
+  "shellNavigationTools": {
+    "status": "local-final-two-real-profiles-passed-exact-cloud-pending",
+    "review": "docs/security-review-shell-navigation-tools.md",
+    "frontendUnitTests": 94,
+    "mockedBrowserTests": 74,
+    "focusedRealNavigationCasesPerProfile": 1,
+    "finalCompleteApiProfiles": "terminal-success-default-enabled",
+    "updatedFullFrameworkLiveSuiteTests": 49,
+    "fuseVersion": "6.4.3",
+    "behaviorReference": "0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
+    "literalLabelsAndQueries": true,
+    "unicodeHighlightBefore": "shell-highlight-unicode-before.log",
+    "uiSelectionCannotBypassPermission": true,
+    "groupsHaveNoFakeRoutes": true,
+    "externalNoOpenerOrJwtUrl": true,
+    "finalEvidence": ["shell-navigation-unicode-final-frontend.log", "shell-navigation-literal-final-target.log", "shell-navigation-final-disabled-runtime.log", "shell-navigation-final-enabled-runtime.log"],
+    "openApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
+    "remaining": ["tabs-cache-pin-context-menu", "sidebar-collapse-top-navigation", "query-cache-embedded-metadata", "theme-density-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

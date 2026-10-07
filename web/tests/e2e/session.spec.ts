@@ -28,7 +28,7 @@ test('login, grouped navigation, refresh, 404 and confirmed logout', async ({pag
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   const state = await setup(page); await signIn(page);
   await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
-  await expect(page.getByText('我的空间', {exact: true})).toBeVisible();
+  await expect(page.locator('.ef-app-shell__nav').getByText('我的空间', {exact: true})).toBeVisible();
   await expect(page.getByRole('link', {name: '未知页面'})).toHaveCount(0);
   await expect(page.getByRole('link', {name: '我的空间'})).toHaveCount(0);
   await page.reload(); await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();

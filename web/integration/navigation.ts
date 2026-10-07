@@ -1,7 +1,7 @@
 import {canAccessRoute, type AppRouteRecord} from '@eforge/app';
 import type {NavigationNode} from '../generated/api';
 import {toEForgePermissions} from './permissions';
-export interface NavigationItem {key: string; label: string; href?: string; external?: boolean; children: NavigationItem[]}
+export interface NavigationItem {key: string; label: string; href?: string; external?: boolean; icon?: string; children: NavigationItem[]}
 export function projectNavigation(nodes: NavigationNode[], routes: readonly AppRouteRecord[], permissions: readonly string[],
   diagnostic: (message: string) => void = message => console.warn(message)): NavigationItem[] {
   const registry = new Map(routes.map(route => [route.id, route]));
@@ -14,19 +14,19 @@ export function projectNavigation(nodes: NavigationNode[], routes: readonly AppR
       visited.add(node.key);
       if (node.type === 'GROUP') {
         const children = visit(node.children, depth + 1);
-        return children.length ? [{key: node.key, label: node.label, children}] : [];
+        return children.length ? [{key: node.key, label: node.label, icon: node.icon, children}] : [];
       }
       if (node.type === 'EXTERNAL') {
         try {
           const url = new URL(node.externalUrl ?? '');
           if (!['http:', 'https:'].includes(url.protocol) || !url.hostname || url.username || url.password) return [];
-          return [{key: node.key, label: node.label, href: url.href, external: true, children: []}];
+          return [{key: node.key, label: node.label, href: url.href, external: true, icon: node.icon, children: []}];
         } catch { return []; }
       }
       const route = registry.get(node.routeId ?? '');
       if (!route) { diagnostic(`Unknown navigation route: ${node.routeId ?? '(missing)'}`); return []; }
       if (!canAccessRoute(route, access)) return [];
-      return [{key: node.key, label: node.label, href: route.path, children: visit(node.children, depth + 1)}];
+      return [{key: node.key, label: node.label, href: route.path, icon: node.icon, children: visit(node.children, depth + 1)}];
     });
   }
   return visit(nodes, 0);

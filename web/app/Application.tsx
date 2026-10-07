@@ -8,6 +8,7 @@ import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
 import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshContext} from './context';
 import {Navigation} from './Navigation';
+import {NavigationBreadcrumbs, NavigationSearch} from './components/NavigationTools';
 import {routes} from './routes';
 import {toEForgePermissions} from '../integration/permissions';
 const HeaderNotices = lazy(() => import('../features/notices/HeaderNotices').then(module => ({default: module.HeaderNotices})));
@@ -53,10 +54,11 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
       }
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
       navigation={<Navigation items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} router={router} />}
-      header={<div className="enterprise-header"><span>企业工作空间</span><div><span className="account-name">{snapshot.user.displayName}</span>
+      header={<div className="enterprise-header"><span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
         <Suspense fallback={null}><HeaderNotices version={noticeVersion} /></Suspense>
         <a href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}>个人中心</a>
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
+      {match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : null}
       {logoutError ? <p role="alert">{logoutError}</p> : null}
       {!match ? <StatePage code="404" router={router} /> : !allowed ? <StatePage code="403" router={router} />
         : Page ? <Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params} /></Suspense> : null}

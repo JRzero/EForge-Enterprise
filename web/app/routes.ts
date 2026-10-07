@@ -122,13 +122,13 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {
-  id: roleUsers.id, path: roleUsers.path, title: '用户授权',
+  id: roleUsers.id, path: roleUsers.path, parentId: rolesContract.id, title: '用户授权',
   access: {permission: roleUsers.permission}, component: RoleUsersPage
 }, {
-  id: dictionaryData.id, path: dictionaryData.path, title: '字典数据',
+  id: dictionaryData.id, path: dictionaryData.path, parentId: dictionaries.id, title: '字典数据',
   access: {permission: dictionaryData.permission}, component: DictionaryEntriesPage
 }, {
-  id: jobLogs.id, path: jobLogs.path, title: '调度日志', access: {permission: jobLogs.permission}, component: JobLogsPage
+  id: jobLogs.id, path: jobLogs.path, parentId: jobs.id, title: '调度日志', access: {permission: jobLogs.permission}, component: JobLogsPage
 }]);
 
 export const routes: readonly AppRoute[] = defineAppRoutes(appendGeneratedRoutes(baseRoutes, generatedBusinessRoutes));

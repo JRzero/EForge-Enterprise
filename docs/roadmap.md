@@ -906,3 +906,17 @@ installed generated hosts with legal prototype-name IDs, both48 full framework
 browsers/API profiles,618 backend,91 units/71 mocked and exact OpenAPI gates.
 Shared breadcrumb/search code remains separately local under verification;
 full shell and active parity goal remain incomplete. Form builder is deferred.
+### Authorized breadcrumbs and navigation search verified locally
+
+Original fixed v3.9.2 Fuse6.4.3 title/path fuzzy search, layered labels/icons,
+literal safe highlight, keyboard wrap/Enter/Escape, clear/empty/mobile, backdrop
+closing/focus recovery and no-opener external opening are implemented. Authorized
+menu hierarchy and static internal parameter route ancestry form breadcrumbs;
+groups remain non-links and React components never come from database strings.
+Actual focus and Unicode highlight failures were fixed, with before/after proof.
+94 units/all74 mocked, final3 expanded mocked cases and83456 both real focused
+navigation plus complete API profiles pass; exact live OpenAPI remains36EE572B...
+No server source change; existing618 Maven/DataScope10 proof remains applicable.
+Exact cloud/full49-case framework suites are pending. Continue original menu
+query/cache/embedded metadata, tabs/cache/pin/context menu, collapse/topnav and
+settings. Full active parity remains incomplete; form builder stays deferred.
