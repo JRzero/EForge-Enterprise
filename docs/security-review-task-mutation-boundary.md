@@ -73,6 +73,37 @@ acceptance; this foundation does not claim those controls are complete.
 - CI runs both native modes. Original authenticated HTTP/Redis/Quartz/browser
   profiles and exact-source cloud verification remain pending for this stage.
 
+## Compatibility corrections discovered in full regression
+
+The initial implementation was pushed as `59e5ddaa6cce78db0b905df560151806b6ca7632`.
+Its local default profile passed all 62 real browsers but failed the existing
+task replacement HTTP check: the service ignored a supplied stale task group,
+so an attempted-group manual request dispatched the valid current-group task.
+Native affected-key restoration had passed; the failure did not prove that
+the attempted key survived. The fix rejects mismatched explicit groups while
+retaining SQL-authoritative current configuration and ID-only internal calls.
+The failed full run was terminal and cleaned up its owned application/databases;
+the enabled run was not started. Initial cloud run `37704369397` remains pending
+and cannot accept the later fix.
+
+A review also identified the inherited legacy handler's raw error-message
+envelope and operation audit. Five task write controller paths now convert
+SQL/Quartz/transaction failures into a fixed safe `ServiceException` before
+the audit advice observes them. Status requests no longer perform a stale
+lock-outside SQL read and use the authenticated update actor. Three new MVC
+cases prove all five safe envelopes, status actor handling and original
+no-role denial. The first permission assertion expected canonical HTTP 403;
+it was corrected to the original legacy HTTP 200/business 403 envelope,
+without changing product permission semantics.
+
+The revised full Maven run passes 675 declarations (665 Boot plus ten scope
+cases, one existing platform skip). Final native modes now include an explicit
+stale-group manual-dispatch rejection check. A new real HTTP strict-SQL fault
+verifies complete configuration rollback, safe response and failed audit,
+then successful status retry. Final native modes each pass 35 checks. Both
+complete runtime profiles are running and are not accepted yet. Canonical write APIs, invocation policy,
+generated client and full task controls remain unfinished.
+
 The native scheduler intentionally remains in standby to inspect scheduling
 and committed admission deterministically. Actual target execution and
 authenticated HTTP/browser behavior are covered by the subsequent full

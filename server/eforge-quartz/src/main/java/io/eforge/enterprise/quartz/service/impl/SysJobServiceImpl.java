@@ -197,6 +197,7 @@ public class SysJobServiceImpl implements ISysJobService
         Long jobId = job.getJobId();
         SysJob properties = selectJobById(job.getJobId());
         if (properties == null) return false;
+        if (job.getJobGroup() != null && !job.getJobGroup().equals(properties.getJobGroup())) return false;
         String jobGroup = properties.getJobGroup();
         // 参数
         JobDataMap dataMap = new JobDataMap();

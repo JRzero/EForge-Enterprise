@@ -20,6 +20,7 @@ import io.eforge.enterprise.common.core.domain.AjaxResult;
 import io.eforge.enterprise.common.core.page.TableDataInfo;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.exception.job.TaskException;
+import io.eforge.enterprise.common.exception.ServiceException;
 import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.common.utils.poi.ExcelUtil;
 import io.eforge.enterprise.quartz.domain.SysJob;
@@ -107,7 +108,7 @@ public class SysJobController extends BaseController
             return error("新增任务'" + job.getJobName() + "'失败，目标字符串不在白名单内");
         }
         job.setCreateBy(getUsername());
-        return toAjax(jobService.insertJob(job));
+        return toAjax(taskWrite(() -> jobService.insertJob(job)));
     }
 
     /**
@@ -143,7 +144,7 @@ public class SysJobController extends BaseController
             return error("修改任务'" + job.getJobName() + "'失败，目标字符串不在白名单内");
         }
         job.setUpdateBy(getUsername());
-        return toAjax(jobService.updateJob(job));
+        return toAjax(taskWrite(() -> jobService.updateJob(job)));
     }
 
     /**
@@ -154,9 +155,8 @@ public class SysJobController extends BaseController
     @PutMapping("/changeStatus")
     public AjaxResult changeStatus(@RequestBody SysJob job) throws SchedulerException
     {
-        SysJob newJob = jobService.selectJobById(job.getJobId());
-        newJob.setStatus(job.getStatus());
-        return toAjax(jobService.changeStatus(newJob));
+        job.setUpdateBy(getUsername());
+        return toAjax(taskWrite(() -> jobService.changeStatus(job)));
     }
 
     /**
@@ -167,7 +167,7 @@ public class SysJobController extends BaseController
     @PutMapping("/run")
     public AjaxResult run(@RequestBody SysJob job) throws SchedulerException
     {
-        boolean result = jobService.run(job);
+        boolean result = taskWrite(() -> jobService.run(job));
         return result ? success() : error("任务不存在或已过期！");
     }
 
@@ -179,7 +179,22 @@ public class SysJobController extends BaseController
     @DeleteMapping("/{jobIds}")
     public AjaxResult remove(@PathVariable Long[] jobIds) throws SchedulerException
     {
-        jobService.deleteJobByIds(jobIds);
+        taskWrite(() -> { jobService.deleteJobByIds(jobIds); return null; });
         return success();
+    }
+
+    @FunctionalInterface private interface TaskWrite<T>
+    {
+        T execute() throws SchedulerException, TaskException;
+    }
+
+    /** Compatibility envelope and failure audit must not expose SQL/Quartz details. */
+    private static <T> T taskWrite(TaskWrite<T> operation)
+    {
+        try { return operation.execute(); }
+        catch (SchedulerException | TaskException | RuntimeException failure)
+        {
+            throw new ServiceException("定时任务操作暂时不可用，请稍后重试。");
+        }
     }
 }

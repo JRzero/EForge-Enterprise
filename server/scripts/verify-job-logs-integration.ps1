@@ -69,6 +69,30 @@ try {
     Assert-Check ($newExecution.Count -eq 1 -and $newExecution[0].status -eq '0' -and $newExecution[0].invokeTarget -eq $originalTask.invokeTarget) 'Recovered task must actually execute the original target and produce a successful log.'
     Assert-Check ((Request $jobLogBase 'DELETE' (@{ids=@($newExecution[0].id)}|ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Owned recovery execution cleanup failed.'
     Write-Output 'Task replacement: real MySQL checked-exception rollback, original Quartz key/manual execution and failed-key cleanup passed.'
+    # A real SQL failure must preserve complete configuration and produce a
+    # safe compatibility response AND safe failed operation-audit text.
+    $taskPrivacyId=$ownedJobs[0]
+    $taskPrivacySnapshotSql="SELECT JSON_OBJECT('id',job_id,'name',job_name,'group',job_group,'target',invoke_target,'cron',cron_expression,'misfire',misfire_policy,'concurrent',concurrent,'status',status,'remark',remark,'actor',update_by,'updated',update_time) FROM sys_job WHERE job_id=$taskPrivacyId;"
+    $taskPrivacyBefore=Log-Sql $taskPrivacySnapshotSql
+    Log-Sql "CREATE TRIGGER owned_task_status_fault BEFORE UPDATE ON sys_job FOR EACH ROW SET NEW.job_name=IF(NEW.job_id=$taskPrivacyId,REPEAT('x',1000),NEW.job_name);" | Out-Null
+    try {
+        $taskPrivacyRequest=@{jobId=$taskPrivacyId;jobName="$jobMarker-privacy";jobGroup='SYSTEM';status='0'}|ConvertTo-Json -Compress
+        $taskPrivacyFailure=Request '/monitor/job/changeStatus' 'PUT' $taskPrivacyRequest $authorized
+        $taskPrivacyPayload=$taskPrivacyFailure.Content|ConvertFrom-Json
+        Assert-Check ($taskPrivacyFailure.StatusCode -eq 200 -and $taskPrivacyPayload.code -eq 500 -and $taskPrivacyPayload.msg -eq '定时任务操作暂时不可用，请稍后重试。') 'Legacy task write must retain a safe compatibility error without SQL/driver details.'
+        Assert-Check ((Log-Sql $taskPrivacySnapshotSql) -ceq $taskPrivacyBefore) 'Actual SQL status failure must preserve every task configuration and audit column.'
+    } finally {Log-Sql 'DROP TRIGGER IF EXISTS owned_task_status_fault;' | Out-Null}
+    $taskPrivacyAudit=''
+    for($taskPrivacyAttempt=0;$taskPrivacyAttempt -lt 30;$taskPrivacyAttempt++) {
+        $taskPrivacyAudit=Log-Sql "SELECT error_msg FROM sys_oper_log WHERE oper_url='/monitor/job/changeStatus' AND status=1 AND oper_param LIKE '%$jobMarker%' ORDER BY oper_id DESC LIMIT 1;"
+        if($taskPrivacyAudit){break};Start-Sleep -Milliseconds 100
+    }
+    Assert-Check ($taskPrivacyAudit -ceq '定时任务操作暂时不可用，请稍后重试。') 'Failed task operation audit must not expose SQL/Quartz/driver details.'
+    foreach($taskPrivacyStatus in @('0','1')) {
+        $taskPrivacyRetry=Request '/monitor/job/changeStatus' 'PUT' (@{jobId=$taskPrivacyId;jobGroup='SYSTEM';status=$taskPrivacyStatus}|ConvertTo-Json -Compress) $authorized
+        Assert-Check (($taskPrivacyRetry.Content|ConvertFrom-Json).code -eq 200) 'Task status must recover after actual SQL fault removal.'
+    }
+    Write-Output 'Task write privacy: actual SQL fault retained complete configuration, compatibility error and failure audit were safe, and status retry succeeded.'
     $file=Join-Path $logDirectory 'owned-job-logs.xlsx'
     Invoke-WebRequest -Uri "http://127.0.0.1:$AppPort$jobLogBase/export?name=$jobMarker&pageSize=1" -Method POST -Headers $authorized -OutFile $file|Out-Null
     $archive=[IO.Compression.ZipFile]::OpenRead($file)

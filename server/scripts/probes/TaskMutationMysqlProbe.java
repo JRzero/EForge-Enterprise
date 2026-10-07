@@ -86,6 +86,7 @@ class TaskMutationMysqlProbe {
    try{boundary.admit(original,true);throw new AssertionError("Old payload admitted");}catch(SchedulerException expected){assertions++;}
    check(!scheduler.checkExists(key)&&scheduler.checkExists(ScheduleUtils.getJobKey(id,"SYSTEM")),"Group move retained wrong key");
    var stale=row("stale","DEFAULT","ryTask.ryNoParams()");stale.setJobId(id);stale.setStatus("1");service.changeStatus(stale);
+   check(!service.run(stale),"Legacy manual request with stale explicit group dispatched current schedule");
    var current=mapper.selectJobById(id);check("SYSTEM".equals(current.getJobGroup())&&"ryTask.ryParams('committed')".equals(current.getInvokeTarget())&&"3".equals(current.getMisfirePolicy()),"Stale status input overwrote current configuration");
    check(scheduler.getTriggerState(ScheduleUtils.getTriggerKey(id,"SYSTEM"))==Trigger.TriggerState.PAUSED,"Current group not paused");
    try{boundary.admit(current,false);throw new AssertionError("Paused automatic payload admitted");}catch(SchedulerException expected){assertions++;}check("1".equals(boundary.admit(current,true).getStatus()),"Paused manual admission lost");

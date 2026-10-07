@@ -141,4 +141,10 @@ class TaskMutationBoundaryTest {
         unavailable.set(false);assertEquals(row.getInvokeTarget(),guarded.admit(row,false).getInvokeTarget());
         assertTrue(scheduler.checkExists(ScheduleUtils.getJobKey(811L,"DEFAULT")));
     }
+    @Test void legacyManualRequestForStaleExplicitGroupDoesNotDispatchCurrentSchedule() throws Exception {
+        var current=row(811L,"SYSTEM","ryTask.ryNoParams()","1");when(mapper.selectJobById(811L)).thenReturn(current);
+        var service=new SysJobServiceImpl();ReflectionTestUtils.setField(service,"scheduler",scheduler);ReflectionTestUtils.setField(service,"jobMapper",mapper);
+        var stale=row(811L,"DEFAULT","ryTask.ryNoParams()","1");assertFalse(service.run(stale));
+        assertFalse(service.run(row(899L,"SYSTEM","ryTask.ryNoParams()","1")));
+    }
 }
