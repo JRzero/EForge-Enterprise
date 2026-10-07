@@ -1866,5 +1866,28 @@
     "remaining": ["embedded-consoles", "other-editor-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "final-active-audit"],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
+  },
+  "consoleCachedSessions": {
+    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "review": "docs/security-review-console-cached-session.md",
+    "targets": ["druid", "api-docs"],
+    "validReturn": "same-native-DOM-input-SQL-response-cookies-zero-ticket-POST-zero-native-reload",
+    "authorization": "fresh-JWT-status-and-cookie-only-fixed-entry-probe-before-reveal",
+    "expiry": "original-absolute-owner-StrictMode-safe-no-implicit-renewal",
+    "lostScopedTicket": "actual-native401-main-JWT-preserved-explicit-retry",
+    "lateNativeLoad": "actual-native-document-load-cannot-unlock-pending-current-probe",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 102,
+    "scopedMockedBrowserTests": 12,
+    "realFrameworkBrowserTestsPerProfile": 57,
+    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "finalAuthority": "66413-terminal0",
+    "beforeEvidence": ["console-cached-session-before-browser.log", "console-cached-scoped-ticket-before-browser.log", "console-cached-native-gate-before-browser.log"],
+    "finalEvidence": ["console-cached-native-gate-after-browser.log", "console-cached-native-owned-static.log", "console-cached-native-owned-frontend.log", "console-cached-native-owned-mocked.log", "console-cached-native-owned-enabled-runtime.log", "console-cached-native-owned-disabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "freshLocalMavenRun": false,
+    "remaining": ["other-editor-resource-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "dates-timezones-XLSX", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
   }
 }

@@ -1125,3 +1125,19 @@ OpenAPI checks, 98 unit and 95 mocked browsers, and backend 619 declarations
 including all 10 data-scope cases with one platform-specific skip. The unique
 observer49937 is terminal0. This accepts the statistics-read phase only;
 embedded consoles and the remaining active capability audit are unfinished.
+### Embedded console cached ownership: final local acceptance
+Valid Druid and Swagger native documents retain their state and exact scoped/native
+cookies on cached return, without ticket POST or native reload. Current JWT grants
+and a cookie-only fixed-entry probe complete before retained HTML is revealed.
+Hidden absolute expiry, lost scoped ticket with valid main JWT, actual role
+withdrawal and late native load require the appropriate discard/explicit retry.
+Five before-failure scenarios and12 scoped/102 full fixture browsers,98 units,
+client reproducibility/lint/types/build and final two profiles of57 genuine
+framework browsers/fullAPI pass. Authority66413 is terminal0 and both live
+contracts exactly match65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-console-cached-session.md and console-cached-native-owned-*
+logs. New exact source cloud is pending; unchanged Java/old f583 cloud cannot
+substitute for it. Full active goal is incomplete: other shared lifecycles,
+nested rich-image audit, sidebar/topnav/settings and dates/timezones/XLSX/final
+capability audits remain; form builder is deferred and the specific Quartz
+runtime proposal remains unapproved.

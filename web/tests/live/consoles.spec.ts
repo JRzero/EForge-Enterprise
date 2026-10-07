@@ -1,4 +1,4 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect, type Page, type Route} from '@playwright/test';
 const enabled = process.env.EFORGE_DRUID_CONSOLE_ENABLED === 'true';
 async function login(page: Page, path: string) {
   await page.goto(path); await page.getByLabel('账号', {exact: true}).fill('admin'); await page.getByLabel('密码', {exact: true}).fill('admin123');
@@ -7,10 +7,11 @@ async function login(page: Page, path: string) {
 async function token(page: Page) {return page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string);}
 for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/login.html', 'eforge_console_druid'], ['/swagger', '接口文档', '/swagger-ui/index.html', 'eforge_console_docs']] as const) {
   test(`${title}: actual disabled/enabled iframe, original interactions, refresh and logout`, async ({page, context}) => {
-    test.setTimeout(60000); const errors: string[] = []; page.on('pageerror', cause => errors.push(cause.message));
+    test.setTimeout(60000); let opens=0,nativeDocuments=0;page.on('request',request=>{const url=new URL(request.url());if(url.pathname.startsWith('/api/v1/monitor/consoles/')&&url.pathname.endsWith('/session')&&request.method()==='POST')opens++;if(request.resourceType()==='document'&&(url.pathname.startsWith('/druid/')||url.pathname.startsWith('/swagger-ui/')))nativeDocuments++;});const errors: string[] = []; page.on('pageerror', cause => errors.push(cause.message));
     const diagnosticResources: {path: string; status: number}[] = [];
     page.on('response', response => {const path = new URL(response.url()).pathname; if (path.startsWith('/druid/') && diagnosticResources.length < 100) diagnosticResources.push({path, status: response.status()});});
     try {
+    if(enabled)await page.clock.install();
     await login(page, path); await expect(page.getByRole('heading', {name: title, exact: true})).toBeVisible();
     const accessToken = await token(page);
     if (!enabled) {
@@ -52,6 +53,39 @@ for (const [path, title, entry, cookie] of [['/druid', '数据监控', '/druid/l
         const executed = page.waitForResponse(response => response.url().endsWith('/api/v1/monitor/consoles/druid') && response.request().headers().authorization === `Bearer ${accessToken}` && response.status() === 200);
         await operation.getByRole('button', {name: 'Execute', exact: true}).click(); await executed; await expect(operation.locator('.live-responses-table')).toContainText('200');
       }
+      const retainedNonce=await frame.locator('html').evaluate(element=>{element.dataset.ownerNonce=crypto.randomUUID();return element.dataset.ownerNonce;});
+      const beforeReturn={opens,nativeDocuments},beforeCookies=(await context.cookies()).filter(value=>value.name===cookie||value.name==='JSESSIONID').map(value=>({name:value.name,value:value.value}));
+      await page.getByRole('link',{name:'工作台',exact:true}).click();
+      const checked=page.waitForResponse(response=>response.url().endsWith('/api/v1/monitor/consoles/'+(path==='/druid'?'druid':'api-docs'))&&response.request().method()==='GET'&&response.status()===200);
+      await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：'+(path==='/swagger'?'系统接口':title),exact:true}).click();await checked;
+      await expect(page.locator('iframe')).toBeVisible();await expect(frame.locator('html')).toHaveAttribute('data-owner-nonce',retainedNonce);
+      if(path==='/druid')await expect(frame.locator('#dataTable')).toBeVisible();else await expect(frame.locator('.live-responses-table')).toContainText('200');
+      expect({opens,nativeDocuments}).toEqual(beforeReturn);expect(JSON.stringify((await context.cookies()).filter(value=>value.name===cookie||value.name==='JSESSIONID').map(value=>({name:value.name,value:value.value})))===JSON.stringify(beforeCookies)).toBe(true);
+      if(path==='/druid'){
+        let pendingProbe=0,releaseProbe!:()=>void;const probeGate=new Promise<void>(resolve=>{releaseProbe=resolve;});
+        const heldProbe=async(route:Route)=>{if(route.request().resourceType()!=='document'){pendingProbe++;await probeGate;}await route.continue().catch(()=>{});};
+        await page.getByRole('link',{name:'工作台',exact:true}).click();await page.route('**/druid/login.html',heldProbe);
+        try{
+          await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：数据监控',exact:true}).click();await expect.poll(()=>pendingProbe).toBeGreaterThan(0);await expect(page.locator('iframe')).toBeHidden();
+          const nativeNavigation=page.waitForResponse(response=>response.url().endsWith('/druid/sql.html')&&response.request().resourceType()==='document'&&response.status()===200);
+          await frame.locator('html').evaluate(element=>{element.ownerDocument.defaultView!.location.href='/druid/sql.html';});await nativeNavigation;await expect.poll(()=>frame.locator('html').evaluate(element=>element.ownerDocument.readyState)).toBe('complete');
+          await expect(frame.locator('#dataTable')).toHaveCount(1);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await expect(page.locator('iframe')).toBeHidden();expect(opens).toBe(beforeReturn.opens);
+          releaseProbe();await expect(page.locator('iframe')).toBeVisible();await expect(frame.locator('#dataTable')).toBeVisible();expect(opens).toBe(beforeReturn.opens);
+        }finally{releaseProbe();await page.unroute('**/druid/login.html',heldProbe);}
+      }
+      // Lose only this owned browser's scoped ticket; the actual JWT stays valid.
+      await page.getByRole('link',{name:'工作台',exact:true}).click();await context.clearCookies({name:cookie});
+      const rejectedTicket=page.waitForResponse(response=>response.url().endsWith(entry)&&response.request().resourceType()!=='document'&&response.status()===401);
+      await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：'+(path==='/swagger'?'系统接口':title),exact:true}).click();await rejectedTicket;
+      await expect(page.getByRole('alert')).toContainText('控制台凭据已到期');await expect(page.locator('iframe')).toHaveCount(0);expect(opens).toBe(beforeReturn.opens);expect(await token(page)===accessToken).toBe(true);
+      await page.getByRole('button',{name:'重试',exact:true}).click();await expect(page.locator('iframe')).toBeVisible();await expect(page.getByText('正在加载控制台，请稍候！')).toHaveCount(0);expect(opens).toBe(beforeReturn.opens+1);
+      const beforeExpiry=opens;
+      // Advance only the frontend monotonic clock; the real server clock is unchanged.
+      // Its ticket expiry is independently covered by the real API integration suite.
+      await page.getByRole('link',{name:'工作台',exact:true}).click();await page.clock.runFor(301000);
+      await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：'+(path==='/swagger'?'系统接口':title),exact:true}).click();
+      await expect(page.getByRole('alert')).toContainText('控制台凭据已到期');await expect(page.locator('iframe')).toHaveCount(0);expect(opens).toBe(beforeExpiry);
+      await page.getByRole('button',{name:'重试',exact:true}).click();await expect(page.locator('iframe')).toBeVisible();await expect(page.getByText('正在加载控制台，请稍候！')).toHaveCount(0);expect(opens).toBe(beforeExpiry+1);
       const scoped = (await context.cookies()).find(value => value.name === cookie)!; expect(scoped.httpOnly).toBe(true); expect(scoped.sameSite).toBe('Strict'); expect(scoped.value === accessToken).toBe(false);
       expect(page.url().includes(accessToken)).toBe(false); expect((await page.locator('iframe').getAttribute('src'))?.includes(accessToken)).toBe(false);
       await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.locator('iframe')).toHaveAttribute('src', entry); await expect(page.getByText('正在加载控制台，请稍候！')).toHaveCount(0);
@@ -84,11 +118,12 @@ test('no-role UI denial, actual grant allocation, live revocation and scoped-coo
     if (enabled) {
       await expect(page.locator('iframe')).toBeVisible(); await expect(page.getByText('正在加载控制台，请稍候！')).toHaveCount(0);
       expect(await page.evaluate(async () => (await fetch('/api/v1/app/bootstrap')).status)).toBe(401);
+      await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
       expect((await page.request.put(`/api/v1/system/users/${account!.id}/roles`, {headers: admin, data: {roleIds: []}})).status()).toBe(204);
       expect(await page.evaluate(async () => (await fetch('/druid/login.html')).status)).toBe(403);
-      await page.evaluate(() => window.dispatchEvent(new Event('focus'))); await expect(page.getByRole('alert')).toBeVisible(); await expect(page.locator('iframe')).toHaveCount(0);
+      await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：数据监控',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByTitle('数据监控',{exact:true})).toHaveCount(0);
       expect((await page.request.put(`/api/v1/system/users/${account!.id}/roles`, {headers: admin, data: {roleIds: [role.id]}})).status()).toBe(204);
-      await page.getByRole('button', {name: '重试', exact: true}).click(); await expect(page.frameLocator('iframe').getByRole('heading', {name: 'Login', exact: true})).toBeVisible();
+      await page.getByRole('button', {name: '重试', exact: true}).click(); await expect(page.frameLocator('iframe[title="数据监控"]').getByRole('heading', {name: 'Login', exact: true})).toBeVisible();
     } else await expect(page.getByText('该控制台尚未启用，请联系管理员。')).toBeVisible();
   } finally {
     if (account) expect((await page.request.delete('/api/v1/system/users', {headers: admin, data: {ids: [account.id]}})).status()).toBe(204);
