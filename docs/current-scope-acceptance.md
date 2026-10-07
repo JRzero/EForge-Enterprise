@@ -38,7 +38,7 @@ The native dialog geometry stage is subsequent and is not covered by this SHA.
 | Native consoles | live/e2e consoles; verify-consoles integration; diagnostic/cached-session/viewport reviews | Accepted both default-disabled and enabled Druid/Swagger, original authenticated HTML/resources/actions, viewport, expiry/revocation/logout and production defaults |
 | Generator management/output | live/e2e generator; generator integration scripts; manager/creation/sync/canonical/custom-output reviews | Accepted read/import/create/config/delete/sync, immutable preview/ZIP, guarded custom files, permissions, physical partial DDL reporting and retained original rows |
 | Generated business pages | verify-generated-business-integration and verify-generator-react-browser/pages; controls/required/automatic/String-key/calendar reviews | Accepted compiled installed CRUD/tree/sub, root/child controls/uploads, readonly/write phases, auto/String keys, exact IDs/decimal/XLSX and UTC/Shanghai/NewYork insert/refill/edit/DST |
-| Shared controls | named real editors plus e2e control regressions; dictionary/upload/editor/icon/Cron ownership reviews | Existing controls accepted by actual uses. Original registered dialog move/width/corner facilities were separately discovered; new implementation currently awaits its own aggregate and precise-cloud acceptance |
+| Shared controls | named real editors plus e2e control regressions; dictionary/upload/editor/icon/Cron ownership reviews | Dialog move/width/corner and retained-instance captions accepted at exact98daf4e. Original all/partial column selection is a subsequent actual page change with its own acceptance pending |
 | Online form builder | original inventory preserved | User-deferred; excluded from current development/acceptance and never marked implemented |
 
 All19 original API modules now have an operation-level current acceptance entry
@@ -47,8 +47,8 @@ pending: `addJob`, `updateJob`, `delJob`, `changeJobStatus`, `runJob`. Task-log
 operations are independently accepted and are not incorrectly held incomplete
 because task CRUD is pending. Historical source/operation lists are unchanged.
 
-Remaining active work is the permission-denied history/noGoBack capability found
-by original-source audit, the independent shared-dialog stage, final reconciliation
+Remaining active work is the permission-denied history/noGoBack and shared all/partial
+column-selection capabilities found by original-source audit, final reconciliation
 of its acceptance with the source inventory, and canonical task mutation APIs,
 invocation whitelist, database/Quartz fault/concurrency consistency, generated
 client and create/edit/status/run/delete controls integrating the Cron editor.
@@ -72,3 +72,5 @@ Direct dialog-caption-cloud-server/web-accepted.log retain actual aggregate
 evidence. A subsequently discovered denied-page history capability is being
 implemented and requires its own exact acceptance; this dialog source cannot
 be used as acceptance for the later change. See security-review-error-history.md.
+
+Original RightToolbar/index.vue also includes all/none and partial-column state; this was missing from the prior individual-only menus. Nine actual page consumers now use an owned native master checkbox while preserving original per-column keys.98 units/142 mocks and all frontend checks pass; actual user CRUD/columns/workbook validation is running. Exact new acceptance is required (security-review-column-selection.md).

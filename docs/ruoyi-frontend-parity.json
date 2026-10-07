@@ -2938,7 +2938,7 @@
     ],
     "independentRemaining": [
       "Denied-page history exact cloud acceptance",
-      "Shared column selector all/partial selection parity",
+      "Shared column selector exact cloud acceptance",
       "Final source capability reconciliation"
     ],
     "deferred": [
@@ -4036,6 +4036,17 @@
     "protectedApiAuthorityUnchanged": true,
     "fullGoalComplete": false,
     "realAuthority": "48423-terminal0-registration1-full-api",
+    "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+  },
+  "sharedColumnSelection": {
+    "status": "local98-unit142-mock-real6-full-api-pass-exact-cloud-pending",
+    "review": "docs/security-review-column-selection.md",
+    "consumerPages": 9,
+    "masterAllNone": true,
+    "nativeIndeterminate": true,
+    "preserveUnrelatedKeys": true,
+    "fullGoalComplete": false,
+    "realAuthority": "39021-terminal0-users6-full-api",
     "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
   }
 }

@@ -8,5 +8,16 @@ test('read-only user permissions, scoped department roots, failure retry and mob
   await page.goto('/user'); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('服务暂时不可用');
   rejects = false; await page.getByRole('button', {name: '重试列表', exact: true}).click(); await expect(page.getByRole('cell', {name: '9007199254740993', exact: true})).toBeVisible(); await expect(page.getByRole('button', {name: '筛选部门 范围内部门', exact: true})).toBeVisible();
   for (const action of ['新增用户', '修改所选用户', '删除所选用户', '导出用户', '导入用户', '修改用户 visible', '停用用户 visible', '重置密码 visible', '分配角色 visible']) await expect(page.getByRole('button', {name: action, exact: true})).toHaveCount(0);
+  await page.getByText('显示列', {exact: true}).click();
+  const allColumns = page.getByRole('checkbox', {name: '列展示', exact: true});
+  await expect(allColumns).toBeChecked();
+  await page.getByRole('checkbox', {name: '用户昵称', exact: true}).uncheck();
+  await expect(page.getByRole('columnheader', {name: '用户昵称', exact: true})).toHaveCount(0);
+  await expect(allColumns).toBeChecked({indeterminate: true});
+  await allColumns.check(); await expect(page.getByRole('columnheader', {name: '用户昵称', exact: true})).toBeVisible();
+  await allColumns.uncheck();
+  for (const name of ['用户编号', '登录账号', '用户昵称', '部门', '手机号码', '状态', '创建时间']) await expect(page.getByRole('columnheader', {name, exact: true})).toHaveCount(0);
+  await expect(allColumns).not.toBeChecked({indeterminate: true});
+  await allColumns.check(); await expect(page.getByRole('cell', {name: '9007199254740993', exact: true})).toBeVisible();
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

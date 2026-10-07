@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
@@ -115,7 +116,7 @@ export function PostsPage() {
       <PermissionGate permission="system:post:export"><Button label="导出岗位" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} />
       <Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
-      <details><summary>显示列</summary><div className="post-columns">{Object.entries(columnLabels).map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false} onChange={event => setVisibility({...visibility, [key]: event.target.checked})} />{label}</label>)}</div></details>
+      <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
     </div>
     {feedback ? <p role="status">{feedback}</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}

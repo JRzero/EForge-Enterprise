@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
@@ -100,7 +101,7 @@ export function ConfigurationsPage() {
       <PermissionGate permission="system:config:remove"><Button label="删除所选参数" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => {setActionError(''); setDeleting(selectedIds);}} /><Button label="刷新参数缓存" variant="secondary" isDisabled={busy} onClick={() => {void refreshCache();}} /></PermissionGate>
       <PermissionGate permission="system:config:export"><Button label="导出参数" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
-      <details><summary>显示列</summary><div className="post-columns">{Object.entries(columnLabels).map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false} onChange={event => setVisibility({...visibility, [key]: event.target.checked})} />{label}</label>)}</div></details>
+      <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
     </div>
     {feedback ? <p role="status">{feedback}</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}

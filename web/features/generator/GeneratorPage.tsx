@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
@@ -92,7 +93,7 @@ export function GeneratorPage() {
       <Button label="刷新列表" isDisabled={loading} onClick={()=>refresh()}/><Button label={showFilters?'隐藏筛选':'显示筛选'} onClick={()=>setShowFilters(value=>!value)}/>
       <label>排序字段<select aria-label="排序字段" value={sort} onChange={event=>{setSort(event.target.value as typeof sort);setPage(1);}}>{(['name','comment','createdAt','updatedAt'] as const).map(value=><option key={value} value={value}>{labels[value]}</option>)}</select></label>
       <Button label={direction==='asc'?'升序':'降序'} onClick={()=>{setDirection(value=>value==='asc'?'desc':'asc');setPage(1);}}/>
-      <details><summary>显示列</summary>{Object.entries(labels).map(([key,label])=><label key={key}><input type="checkbox" checked={visibility[key]!==false} onChange={event=>setVisibility({...visibility,[key]:event.target.checked})}/>{label}</label>)}</details>
+      <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
     </div>
     {feedback?<p role="status">{feedback}</p>:null}
     {error?<div role="alert">{error}<Button label="重试列表" onClick={()=>refresh()}/></div>:null}

@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
@@ -100,7 +101,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     <div className="post-toolbar">{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} />}
       <PermissionGate permission="monitor:job:export"><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
       <Button label={showSearch ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowSearch(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy || loading} onClick={() => setVersion(value => value + 1)} />
-      <details className="post-column-menu"><summary>列显示</summary>{columns.filter(column => column.id !== 'actions').map(column => {const id = 'accessorKey' in column ? String(column.accessorKey) : column.id ?? ''; return <label key={id}><input type="checkbox" checked={visibility[id] !== false} onChange={event => setVisibility({...visibility, [id]: event.target.checked})} />{String(column.header)}</label>;})}</details>
+      <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
     </div>
     {!logs && <PermissionGate permission="monitor:job:query"><Button label="Cron表达式编辑" variant="ghost" onClick={event => {cronReturnFocus.current = event.currentTarget; setCron(confirmedCron);}} />{confirmedCron && <p>已确认Cron表达式：<output aria-label="已确认Cron表达式">{confirmedCron}</output></p>}</PermissionGate>}
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}

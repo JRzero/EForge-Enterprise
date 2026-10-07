@@ -1341,3 +1341,4 @@ deferred; complete objective incomplete.
 
 Denied-page local authority48423 completed0 with the real no-role account and complete API;142 mocked browsers/98 units/all frontend checks pass. Original RightToolbar audit also found missing all/partial column selection controls; that independent remaining capability is recorded without claiming complete parity.
 
+Shared column controls now work on nine actual page consumers. Local39021 terminal0 proves6 actual user browsers/fullAPI;98 units/142 mocks and all frontend gates pass. Exact new cloud remains pending; original task mutation approval and deferred builder boundaries are unchanged.

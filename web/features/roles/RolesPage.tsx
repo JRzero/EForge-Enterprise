@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
@@ -93,7 +94,7 @@ export function RolesPage() {
       <PermissionGate permission="system:role:remove"><Button label="删除所选角色" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => { setActionError(''); setAction({kind: 'delete', ids: selectedIds}); }} /></PermissionGate>
       <PermissionGate permission="system:role:export"><Button label="导出角色" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(previous => !previous)} />
-      <details><summary>显示列</summary><div className="post-columns">{Object.entries(labels).map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false} onChange={event => setVisibility({...visibility, [key]: event.target.checked})} />{label}</label>)}</div></details>
+      <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
     </div>{feedback ? <p role="status">{feedback}</p> : null}{busy && !action ? <p role="status">正在处理角色信息…</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !action ? <p role="alert">{actionError}</p> : null}
     {snapshot.error ? <div role="alert"><p>角色操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}

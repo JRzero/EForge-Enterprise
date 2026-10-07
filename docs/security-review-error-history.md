@@ -29,4 +29,3 @@ rejected runtime consistency proposal remain pending. Full project completion
 is not claimed.
 
 Local authority48423 completed0: actual no-role registration/history/home/continued403 proof and complete MySQL/Redis/Quartz/OSHI/ACL/permissions/rollback/captcha API PASS. Live OpenAPI equals committed CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C. All parent-owned fixtures/processes cleaned. No fresh local Maven for unchanged Java source; exact CI remains required.
-

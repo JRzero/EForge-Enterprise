@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
@@ -101,7 +102,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}
       <PermissionGate permission={`${permission}:export`}><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
       <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowFilters(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
-      <details className="post-column-menu"><summary>列显示</summary>{columns.filter(column => column.id !== 'actions').map(column => {const id = 'accessorKey' in column ? String(column.accessorKey) : column.id ?? ''; return <label key={id}><input type="checkbox" checked={visibility[id] !== false} onChange={event => setVisibility({...visibility, [id]: event.target.checked})} />{String(column.header)}</label>;})}</details>
+      <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
     </div>
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} getRowId={row => row.id} getRowSelectionLabel={row => `选择日志 ${row.id}`} loading={loading} emptyText="暂无日志" pagination={false} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: current[0]?.id ?? timeField, desc: true}];}); setPage(1);}} columnVisibility={visibility} onColumnVisibilityChange={setVisibility} showColumnVisibility={false} selectable rowSelection={selection} onRowSelectionChange={setSelection} /></div>}

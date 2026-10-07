@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
@@ -177,7 +178,7 @@ export function UsersPage() {
         <PermissionGate permission="system:user:export"><Button label="导出用户" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
         <PermissionGate permission="system:user:import"><Button label="导入用户" variant="secondary" isDisabled={busy} onClick={() => { setActionError(''); setImporting({file: null, updateExisting: false, result: null}); }} /></PermissionGate>
         <Button label="刷新列表" variant="ghost" onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
-        <details><summary>显示列</summary><div className="post-columns">{Object.entries(columnLabels).map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false} onChange={event => setVisibility({...visibility, [key]: event.target.checked})} />{label}</label>)}</div></details>
+        <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
       </div>
       {selectedIds.length ? <div className="user-selection"><span role="status">已选择 {selectedIds.length} 个用户</span><Button label="清空选择" variant="ghost" onClick={() => setSelection({})} /></div> : null}
       {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert">{error}<Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !editor && !action && !importing ? <p role="alert">{actionError}</p> : null}

@@ -1,3 +1,4 @@
+import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
@@ -111,7 +112,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
       <PermissionGate permission="system:dict:export"><Button label="导出字典" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>
       {!entryMode ? <PermissionGate permission="system:dict:remove"><Button label="刷新字典缓存" variant="secondary" isDisabled={busy} onClick={() => {void cacheRefresh();}} /></PermissionGate> : null}
       <Button label="刷新列表" variant="ghost" isDisabled={loading || busy} onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
-      <details><summary>显示列</summary><div className="post-columns">{Object.entries(labels).map(([id, label]) => <label key={id}><input type="checkbox" checked={visibility[id] !== false} onChange={event => setVisibility({...visibility, [id]: event.target.checked})} />{label}</label>)}</div></details>
+      <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
     </div>
     {metadataError ? <div role="alert"><p>字典选项加载失败：{metadataError}</p><Button label="重试字典选项" onClick={() => setMetadataVersion(value => value + 1)} /></div> : null}
     {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !deleting ? <p role="alert">{actionError}</p> : null}
