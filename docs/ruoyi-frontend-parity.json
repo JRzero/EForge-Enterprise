@@ -2029,7 +2029,11 @@
     "fullGoalComplete":false
   }
   ,"rememberedLogin": {
-    "status":"local-accepted-exact-cloud-pending",
+    "status":"exact-cloud-accepted",
+    "implementationSha":"b82e8731c80912804d39b26d9e9b44b6f1e5d38c",
+    "cloudServer":"37619212493-all-three-success",
+    "cloudWeb":"37619212554-success",
+    "cloudRealBrowsersPerProfile":60,
     "reference":"ruoyi-ui/src/views/login.vue@0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
     "frontendUnitTests":98,
     "mockedBrowserTests":130,
