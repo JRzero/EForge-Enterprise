@@ -65,3 +65,18 @@ are exactly CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C.
 81830 all generated hosts terminated0; final backend661 declarations passed.
 Implementation is ready for normal commit/push and precise cloud acceptance;
 cloud success is not yet claimed. Image preview work is isolated separately.
+
+c574001 exact cloud: web37663449678 SUCCESS (98 units/143 mocks/reproduction/build).
+Server37663449661 verify/runtime are SUCCESS; direct completed verify-job logs
+prove661 declarations and both actual generated-host runs, including12-row CRUD/
+sub numbered/jump/30. Auth was CANCELLED, not accepted: GitHub annotation states
+"The job has exceeded the maximum execution time of 20m0s". Cancellation logs
+prove62 browsers passed before subsequent full API steps were interrupted.
+No product failure assertion occurred; enabled profile was not reached.
+
+CI now uses independent default/enabled auth matrix hosts, fail-fast=false,
+35 minutes per complete profile, unique failure artifacts and the same VerifyWeb,
+console/custom-output flags and exact live-contract check. This retains both62/
+fullAPI scopes and shortens serial waiting; it does not weaken assertions or
+rerun the old20-minute source as if changed. The successor exact workflow source
+needs all four server jobs accepted; old successful frontend source is unchanged.

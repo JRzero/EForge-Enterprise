@@ -26,7 +26,11 @@ permissions:
 jobs:
   auth-runtime-integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [default, enabled]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,19 +54,20 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify canonical auth against disposable MySQL and Redis
         shell: pwsh
-        run: ./server/scripts/verify-auth-integration.ps1 -VerifyWeb -OpenApiOutputPath contracts/openapi/api-v1.json
+        run: |
+          $ciAuthOptions = @{VerifyWeb = $true; OpenApiOutputPath = 'contracts/openapi/api-v1.json'}
+          if ('${{ matrix.profile }}' -eq 'enabled') {
+            $ciAuthOptions.EnableConsoles = $true
+            $ciAuthOptions.EnableCustomOutput = $true
+          }
+          ./server/scripts/verify-auth-integration.ps1 @ciAuthOptions
       - name: Verify live OpenAPI snapshot matches the committed contract
-        run: git diff --exit-code -- contracts/openapi/api-v1.json
-      - name: Verify explicitly enabled diagnostic consoles
-        shell: pwsh
-        run: ./server/scripts/verify-auth-integration.ps1 -EnableConsoles -EnableCustomOutput -VerifyWeb -OpenApiOutputPath contracts/openapi/api-v1.json
-      - name: Verify enabled-console OpenAPI remains identical
         run: git diff --exit-code -- contracts/openapi/api-v1.json
       - name: Upload integration logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: auth-integration-logs
+          name: auth-integration-logs-${{ matrix.profile }}
           path: |
             server/eforge-boot/target/auth-integration/*.log
             web/test-results/

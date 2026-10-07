@@ -1366,3 +1366,12 @@ Pagination final local:81830 all installed generated families,43263 both62/fullA
 passed. Both actual contracts remain identical to committed api-v1.json. Normal
 commit/push and exact cloud acceptance follow. Independent image gallery work
 uses an isolated managed checkout; no live pagination fixtures were modified.
+
+Pagination c574001 cloud frontend and server compile/generated/runtime passed;
+auth exceeded its configured20-minute bound after62 browsers, so full server
+acceptance remains pending. The authentication workflow now runs default/enabled
+profiles on independent matrix hosts (fail-fast=false,35 minutes each), preserving
+both fullAPI/browser scopes, console/custom-output flags and exact contracts.
+Future server acceptance requires all four actual jobs; historical three-job
+records remain unchanged. No product runtime or source behavior is changed by
+this CI scheduling adjustment. Image gallery final validation continues separately.
