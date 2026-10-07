@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
@@ -27,12 +28,14 @@ export function RolesPage() {
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<{detail: RoleEditorResponse | null; menus: RoleMenuOption[]} | null>(null);
   const [scope, setScope] = useState<{role: RoleResponse; snapshot: RoleScopeResponse} | null>(null), [action, setAction] = useState<Action | null>(null);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, filters, page, pageSize, version]);if(!complete)return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null); setSelection({});
-    api.listRoles({...filters, page, pageSize}, controller.signal).then(result => { if (!controller.signal.aborted) { setData(result); setLoading(false); } })
-      .catch(cause => { if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false); } });
+    api.listRoles({...filters, page, pageSize}, controller.signal).then(result => { if (!controller.signal.aborted) { setData(result); setLoading(false);complete(); } })
+      .catch(cause => { if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false);complete(); } });
     return () => controller.abort();
-  }, [api, filters, page, pageSize, version]);
+  }, [api, filters, page, pageSize, version,read]);
   function refresh(message = '') { setFeedback(message); setSelection({}); setVersion(previous => previous + 1); }
   async function saved(message: string) { refresh(message); await snapshot.refresh(); }
   const openEditor = useCallback(async (id?: string) => {

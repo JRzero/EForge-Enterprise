@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -34,14 +35,16 @@ export function GeneratorPage() {
   const [creation,setCreation]=useState<Creation|null>(null),[customResult,setCustomResult]=useState<CustomOutputResult|null>(null);
   const actionLock=useRef(false);
   const refresh=useCallback((message='')=>{setFeedback(message);setSelection({});setVersion(value=>value+1);},[]);
+  const read=useRetainedRead();
   useEffect(()=>{
+    const complete=read([api,filters,page,pageSize,sort,direction,version]);if(!complete)return;
     const controller=new AbortController();setLoading(true);setError('');setData(null);setSelection({});
     const bounds:{ $from?:string;to?:string }={$from:filters.from || undefined,to:filters.to || undefined};
     api.listGeneratorTables({name:filters.name,comment:filters.comment,...bounds,page,pageSize,sort,direction},controller.signal)
-      .then(result=>{if(!controller.signal.aborted){setData(result);setLoading(false);if(result.total&&page>Math.ceil(result.total/pageSize))setPage(Math.ceil(result.total/pageSize));}})
-      .catch(cause=>{if(!controller.signal.aborted){setError(errorMessage(cause));setLoading(false);}});
+      .then(result=>{if(!controller.signal.aborted){setData(result);setLoading(false);complete();if(result.total&&page>Math.ceil(result.total/pageSize))setPage(Math.ceil(result.total/pageSize));}})
+      .catch(cause=>{if(!controller.signal.aborted){setError(errorMessage(cause));setLoading(false);complete();}});
     return()=>controller.abort();
-  },[api,filters,page,pageSize,sort,direction,version]);
+  },[api,filters,page,pageSize,sort,direction,version,read]);
   const action=useCallback(async(work:()=>Promise<void>)=>{if(actionLock.current)return;actionLock.current=true;setBusy(true);setActionError('');setFeedback('');try{await work();}catch(cause){setActionError(errorMessage(cause));}finally{actionLock.current=false;setBusy(false);}},[]);
   const edit=useCallback((id:string)=>{void action(async()=>setEditor(await api.getGeneratorTable(id)));},[api,action]);
   const view=useCallback((id:string)=>{void action(async()=>{setPreview(await api.previewGeneratorTable(id));setPreviewIndex(0);});},[api,action]);

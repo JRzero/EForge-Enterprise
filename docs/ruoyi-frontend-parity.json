@@ -1698,4 +1698,24 @@
     "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
     "fullGoalComplete": false
   }
+,
+  "pageTabsRetainedReads": {
+    "status": "local-final-both52-complete-api-passed-exact-cloud-pending",
+    "review": "docs/security-review-page-tabs.md",
+    "backendSourceBaseCommit": "71a53e1ed4d90939b6c1bc43f4c66b25892cbda6",
+    "unchangedBackendTests": 619,
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 83,
+    "fullRealBrowserProfiles": [52, 52],
+    "completedBuiltInReads": 12,
+    "persistence": "per-account-authorized-links-only-no-records-or-forms",
+    "controls": ["dashboard-affix", "close-current-others-left-right-all", "middle-click", "context-dropdown", "refresh-remount", "keyboard-scroll", "fullscreen-escape", "resource-close-removes-cache"],
+    "authorizationEviction": "real-withdrawal-403-and-authorized-profile-save-bootstrap-refresh-same-document",
+    "beforeEvidence": ["page-tabs-selection-before.log", "page-tabs-full-before-runtime.log", "page-tabs-second-before-runtime.log", "page-tabs-strict-mode-before-frontend.log"],
+    "finalEvidence": ["page-tabs-final-captured-read-mocked.log", "page-tabs-accepted-disabled-runtime.log", "page-tabs-accepted-enabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "remaining": ["action-interruption-lifecycle", "installed-generated-cache-selection", "remaining-resource-monitor-embedded-lifecycle", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

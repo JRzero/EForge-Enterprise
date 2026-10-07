@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -35,16 +36,18 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   const operationQuery = useMemo(() => ({...query, title: filters.title, operator: filters.person, businessType: filters.businessType ? Number(filters.businessType) : undefined,
     sort: sorting[0]?.id === 'operator' ? 'operator' as const : sorting[0]?.id === 'duration' ? 'duration' as const : 'time' as const}), [query, filters, sorting]);
   const loginQuery = useMemo(() => ({...query, username: filters.person, sort: sorting[0]?.id === 'username' ? 'username' as const : 'time' as const}), [query, filters, sorting]);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, operation, operationQuery, loginQuery, page, pageSize, version]);if(!complete)return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null); setSelection({});
     const request = operation ? api.listOperationLogs({...operationQuery, page, pageSize}, controller.signal) : api.listLoginLogs({...loginQuery, page, pageSize}, controller.signal);
     request.then(result => {
       if (controller.signal.aborted) return;
       const last = Math.max(1, Math.ceil(result.total / pageSize)); if (page > last) {setPage(last); return;}
-      setData(result); setLoading(false);
-    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+      setData(result); setLoading(false);complete();
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);complete();}});
     return () => controller.abort();
-  }, [api, operation, operationQuery, loginQuery, page, pageSize, version]);
+  }, [api, operation, operationQuery, loginQuery, page, pageSize, version,read]);
   const columns = useMemo<ColumnDef<Row>[]>(() => {
     const common: ColumnDef<Row>[] = [{accessorKey: 'id', header: operation ? '日志编号' : '访问编号', enableSorting: false}];
     if (operation) common.push({accessorKey: 'title', header: '系统模块', enableSorting: false},

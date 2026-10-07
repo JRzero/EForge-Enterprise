@@ -10,6 +10,7 @@ import {BootstrapContext, ApiContext, ApplicationControlsContext, NoticeRefreshC
 import {Navigation} from './Navigation';
 import {NavigationBreadcrumbs, NavigationSearch} from './components/NavigationTools';
 import {routes} from './routes';
+import {PageWorkspace} from './components/PageWorkspace';
 import {toEForgePermissions} from '../integration/permissions';
 const HeaderNotices = lazy(() => import('../features/notices/HeaderNotices').then(module => ({default: module.HeaderNotices})));
 
@@ -46,7 +47,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const snapshot = session.bootstrap;
   const match = matchAppRoute(routes, pathname === '/' ? '/dashboard' : pathname);
   const allowed = match && canAccessRoute(match.route, permissions);
-  const Page = match?.route.component;
+
   return <ApiContext.Provider value={runtime.api}><BootstrapContext.Provider value={snapshot}><ApplicationControlsContext.Provider value={{navigate: path => router.navigate(path), refresh: runtime.refresh}}><NoticeRefreshContext.Provider value={invalidateNotices}><PermissionProvider permissions={permissions}>
     <AppShell brand={<a className="enterprise-brand" href="/dashboard" onClick={event => {
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
@@ -60,8 +61,8 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
         <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
       {match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : null}
       {logoutError ? <p role="alert">{logoutError}</p> : null}
-      {!match ? <StatePage code="404" router={router} /> : !allowed ? <StatePage code="403" router={router} />
-        : Page ? <Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params} /></Suspense> : null}
+      <PageWorkspace key={JSON.stringify([snapshot.user.id,snapshot.user.username,snapshot.roles,snapshot.permissions,snapshot.navigation])} ownerId={snapshot.user.id} href={href} items={navigation} permissions={permissions} router={router}
+        fallback={<StatePage code={match?'403':'404'} router={router} />} />
     </AppShell>
   </PermissionProvider></NoticeRefreshContext.Provider></ApplicationControlsContext.Provider></BootstrapContext.Provider></ApiContext.Provider>;
 }

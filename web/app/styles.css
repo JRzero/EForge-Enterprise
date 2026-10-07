@@ -21,7 +21,7 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .enterprise-navigation a {padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; color: #bdd2d3; font-size: 14px; text-decoration: none; margin-bottom: 4px;}
 .enterprise-navigation a:hover {background: #ffffff0a; color: white;} .enterprise-navigation a[aria-current="page"] {background: #cfe5dc; color: #153e43; font-weight: 600;}
 .navigation-group {font-size: 11px; color: #96b4b6; display: block; padding: 14px 16px 2px; letter-spacing: .08em;}
-.ef-app-shell__header {padding: 15px 32px; background: #fff; border-bottom: 1px solid #e3eaeb;} .enterprise-header, .enterprise-header > div {display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 13px;}
+.ef-app-shell__header {position:relative;z-index:40;padding: 15px 32px; background: #fff; border-bottom: 1px solid #e3eaeb;} .enterprise-header, .enterprise-header > div {display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 13px;}
 .enterprise-header > span {color: #72868b;} .ef-app-shell__content {padding: 36px; background: #f4f7f7;}
 .dashboard {max-width: 1120px; margin: auto;} .dashboard .ef-page-header h1 {font-size: 28px; font-weight: 600;} .dashboard .ef-page-header p {color: #70838a; font-size: 13px;}
 .welcome-panel {margin: 26px 0 36px; padding: 32px; border-radius: 14px; background: #e4eee9; display: flex; justify-content: space-between; align-items: center; overflow: hidden;}
@@ -228,3 +228,21 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .navigation-search-results button>span>span,.navigation-search-results small {display:block;overflow-wrap:anywhere;}
 .navigation-search-results small {color:#637780;margin-top:4px;}
 .navigation-search-results [aria-selected='true'],.navigation-search-results button:hover {background:#d9efe6;}
+.enterprise-workspace {position:relative;min-width:0;}
+.page-tags {display:flex;gap:4px;align-items:center;min-width:0;margin-bottom:18px;}
+.page-tags>button,.page-tag button {border:1px solid #ccdcd6;background:white;color:#29463d;cursor:pointer;border-radius:4px;padding:6px 10px;flex-shrink:0;}
+.page-tags button:disabled {opacity:.4;cursor:default;}
+.page-tags-strip {display:flex;gap:4px;overflow:auto;min-width:0;flex:1;scrollbar-width:thin;}
+.page-tag {display:flex;flex-shrink:0;border:1px solid #ccdcd6;border-radius:4px;background:white;}
+.page-tag a {display:flex;align-items:center;gap:6px;padding:7px 10px;white-space:nowrap;color:#29463d;text-decoration:none;}
+.page-tag a[aria-current=page] {background:#d9efe6;font-weight:600;}
+.page-tag button {border:0;padding:4px 8px;}
+.page-tag-menu {position:absolute;right:0;top:40px;z-index:20;display:grid;min-width:150px;background:white;border:1px solid #91aaa5;border-radius:6px;box-shadow:0 8px 24px #17392b25;padding:6px;}
+.page-tag-menu button {background:transparent;border:0;text-align:left;padding:9px 12px;color:inherit;cursor:pointer;}
+.page-tag-menu button:hover,.page-tag-menu button:focus-visible {background:#d9efe6;}
+.page-tag-menu button:disabled {opacity:.4;cursor:default;}
+.ef-app-shell.enterprise-page-fullscreen {display:block;}
+.enterprise-page-fullscreen>.ef-app-shell__sidebar,.enterprise-page-fullscreen .ef-app-shell__header {display:none;}
+.enterprise-page-fullscreen .ef-app-shell__main {min-height:100vh;margin:0;}
+.page-tags-persist {display:flex;align-items:center;gap:3px;flex-shrink:0;font-size:12px;white-space:nowrap;}
+.page-tags-persist input {margin:0;}

@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -28,15 +29,17 @@ export function NoticesPage() {
   const detailRequest = useRef<AbortController | null>(null);
   useEffect(() => () => detailRequest.current?.abort(), []);
   const query = useMemo(() => ({title: filters.title, author: filters.author, $type: filters.type || undefined}), [filters]);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, query, page, pageSize, version]);if(!complete)return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null); setSelection({});
     api.listNotices({...query, page, pageSize}, controller.signal).then(result => {
       if (controller.signal.aborted) return;
       const last = Math.max(1, Math.ceil(result.total / pageSize)); if (page > last) {setPage(last); return;}
-      setData(result); setLoading(false);
-    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+      setData(result); setLoading(false);complete();
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);complete();}});
     return () => controller.abort();
-  }, [api, query, page, pageSize, version]);
+  }, [api, query, page, pageSize, version,read]);
   const edit = useCallback(async (id: string) => {
     detailRequest.current?.abort(); const controller = new AbortController(); detailRequest.current = controller;
     setBusy(true); setActionError(''); setFeedback('');

@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
@@ -33,16 +34,18 @@ export function PostsPage() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState('');
 
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, filters, page, pageSize, version]);if(!complete)return;
     const controller = new AbortController();
     setLoading(true); setError(''); setData(null); setSelection({});
     api.listPosts({...filters, page, pageSize}, controller.signal).then(result => {
-      if (!controller.signal.aborted) { setData(result); setLoading(false); }
+      if (!controller.signal.aborted) { setData(result); setLoading(false);complete(); }
     }).catch(cause => {
-      if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false); }
+      if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false);complete(); }
     });
     return () => controller.abort();
-  }, [api, filters, page, pageSize, version]);
+  }, [api, filters, page, pageSize, version,read]);
 
   const edit = useCallback(async (id: string) => {
     setBusy(true); setActionError(''); setFeedback('');

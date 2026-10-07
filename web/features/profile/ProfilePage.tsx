@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
 import {useEffect, useState, type FormEvent} from 'react';
 import {PageHeader} from '@eforge/patterns';
@@ -15,14 +16,16 @@ export function ProfilePage() {
   const [passwords, setPasswords] = useState({oldPassword:'',newPassword:'',confirmPassword:''}); const [showPasswords, setShowPasswords] = useState(false);
   const [tab, setTab] = useState<'profile' | 'password'>('profile'); const [busy, setBusy] = useState(false);
   const [error, setError] = useState(''); const [feedback, setFeedback] = useState(''); const [loadError, setLoadError] = useState(''); const [avatar, setAvatar] = useState(false);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api,version]);if(!complete)return;
     const controller = new AbortController(); setLoadError(''); setProfile(null);
     api.getMyProfile(controller.signal).then(result => {
       if (controller.signal.aborted) return;
-      setProfile(result); setForm({displayName:result.displayName,email:result.email ?? '',phone:result.phone ?? '',sex:result.sex ?? '2'});
-    }).catch(cause => { if (!controller.signal.aborted) setLoadError(errorMessage(cause)); });
+      setProfile(result); setForm({displayName:result.displayName,email:result.email ?? '',phone:result.phone ?? '',sex:result.sex ?? '2'});complete();
+    }).catch(cause => { if (!controller.signal.aborted) {setLoadError(errorMessage(cause));complete();} });
     return () => controller.abort();
-  }, [api,version]);
+  }, [api,version,read]);
   async function saveProfile(event: FormEvent) {
     event.preventDefault(); if (busy) return; setError(''); setFeedback('');
     if (!form.displayName.trim() || form.displayName.length > 30 || !/^1[3-9][0-9]{9}$/.test(form.phone) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || form.email.length > 50) {
@@ -59,11 +62,11 @@ export function ProfilePage() {
         <Input label="手机号码" value={form.phone} onChange={value => setForm({...form,phone:value})} isDisabled={busy} />
         <Input label="邮箱" type="email" value={form.email} onChange={value => setForm({...form,email:value})} isDisabled={busy} />
         <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><input type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
-        <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => controls.navigate('/dashboard')} /></div>
+        <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </form> : <form role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
         {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <Input key={key} label={['旧密码','新密码','确认新密码'][index]!} type={showPasswords ? 'text' : 'password'} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}
         <label className="profile-show-password"><input type="checkbox" checked={showPasswords} disabled={busy} onChange={event => setShowPasswords(event.target.checked)} />显示密码</label>
-        <div className="post-row-actions"><Button label={busy ? '正在修改密码…' : '保存密码'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => controls.navigate('/dashboard')} /></div>
+        <div className="post-row-actions"><Button label={busy ? '正在修改密码…' : '保存密码'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </form>}
     </div></div>}
     {avatar && profile ? <AvatarDialog avatarUrl={profile.avatarUrl} onCancel={() => setAvatar(false)} onSaved={async () => { const result = await api.getMyProfile();setProfile(result);setAvatar(false);setFeedback('头像已保存。'); }} /> : null}

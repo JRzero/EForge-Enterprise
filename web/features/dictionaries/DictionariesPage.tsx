@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
@@ -34,13 +35,15 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
       .catch(cause => {if (!controller.signal.aborted) {setMetadataError(errorMessage(cause)); setMetadataLoading(false);}});
     return () => controller.abort();
   }, [api, metadataVersion]);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, entryMode, dictionaryId, filters, page, pageSize, version]);if(!complete)return;
     const controller = new AbortController(); setData(null); setLoading(true); setSelection({}); setError('');
     const request = entryMode ? api.listDictionaryEntries(dictionaryId!, {label: filters.name, status: filters.status, page, pageSize}, controller.signal)
       : api.listDictionaries({name: filters.name, code: filters.code, status: filters.status, $from: filters.from || undefined, to: filters.to || undefined, page, pageSize}, controller.signal);
-    request.then(result => {if (!controller.signal.aborted) {const lastPage = Math.max(1, Math.ceil(result.total / pageSize)); if (page > lastPage) {setPage(lastPage); return;} setData(result); setLoading(false);}}).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+    request.then(result => {if (!controller.signal.aborted) {const lastPage = Math.max(1, Math.ceil(result.total / pageSize)); if (page > lastPage) {setPage(lastPage); return;} setData(result); setLoading(false);complete();}}).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);complete();}});
     return () => controller.abort();
-  }, [api, entryMode, dictionaryId, filters, page, pageSize, version]);
+  }, [api, entryMode, dictionaryId, filters, page, pageSize, version,read]);
   const refresh = useCallback((message = '') => {setFeedback(message); setSelection({}); setVersion(value => value + 1);}, []);
   const saved = () => {refresh('字典已保存。'); setMetadataVersion(value => value + 1);};
   const edit = useCallback(async (id: string) => {
@@ -92,7 +95,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
   function query(event: FormEvent) {event.preventDefault(); if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;} setActionError(''); setFilters({...draft}); setPage(1); setVersion(value => value + 1);}
   const labels: Record<string, string> = entryMode ? {id: '字典编码', name: '字典标签', value: '字典键值', sort: '字典排序', default: '默认项', status: '状态', remark: '备注', createdAt: '创建时间'} : {id: '字典编号', name: '字典名称', code: '字典类型', status: '状态', remark: '备注', createdAt: '创建时间'};
   return <section className="posts-page dictionaries-page"><PageHeader title={entryMode ? '字典数据' : '字典管理'} description={entryMode ? `${selectedType?.name ?? '字典'} · ${selectedType?.code ?? ''}` : '维护字典类型、数据和显示标签。'} eyebrow="系统管理" />
-    {entryMode ? <div className="post-toolbar"><label>选择字典<select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</select></label><Button label="关闭字典数据" variant="secondary" onClick={() => controls.navigate('/dict')} /></div> : null}
+    {entryMode ? <div className="post-toolbar"><label>选择字典<select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</select></label><Button label="关闭字典数据" variant="secondary" onClick={() => (controls.closePage ?? controls.navigate)('/dict')} /></div> : null}
     <form hidden={!showFilters} className="post-filters" onSubmit={query}><Input label={entryMode ? '字典标签筛选' : '字典名称筛选'} value={draft.name} onChange={name => setDraft({...draft, name})} />
       {!entryMode ? <><Input label="字典类型筛选" value={draft.code} onChange={code => setDraft({...draft, code})} /><label>开始日期<input type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label></> : null}
       <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option>{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</select></label>

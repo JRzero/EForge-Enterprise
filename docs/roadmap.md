@@ -949,3 +949,18 @@ framework browsers,619 Maven including10scope,98 units/all75 mocked, complete
 real API/SQL/permission/session/console/captcha regressions and both exact
 OpenAPI gates. Query propagation/cache preference delivery is accepted;
 separate dirty tabs/actual page retention remains under verification.
+### Actual page tabs and retained reads: local phase
+Implemented affixed dashboard, per-path visited tabs/latest query, close/current/
+others/left/right/all/middle-click, context/dropdown, remount refresh, keyboard/
+scroll/fullscreen and per-account optional remembered links. Actual React Activity
+retains cached pages; twelve completed built-in reads preserve data/selection/
+drafts while aborted reads rerun. Resource close controls remove their tag/cache.
+Account/role/grant/navigation transitions evict retained pages; display-name-only
+profile refresh preserves save feedback. Real denied role403 plus permitted profile
+save proves same-document bootstrap eviction and cleared unrelated drafts.
+Both complete52-browser/API profiles47449 pass,98 units/build and final83 mocked
+71098 pass; live OpenAPI exactly matches65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-page-tabs.md for actual failure/repair and exact-request abort
+proof. Exact cloud remains pending. Generated/action/remaining resource cache
+lifecycle, sidebar/topnav/embedded/settings and final active audit remain open.
+No rejected Quartz runtime plan was implemented; form builder stays deferred.

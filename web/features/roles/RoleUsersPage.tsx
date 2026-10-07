@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
@@ -17,12 +18,14 @@ function RoleUserList({roleId, assigned, version, busy, onAction}: {roleId: stri
   const [page, setPage] = useState(1), [pageSize, setPageSize] = useState(10), [reload, setReload] = useState(0), [showFilters, setShowFilters] = useState(true);
   const [data, setData] = useState<PageResponseUserResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [selection, setSelection] = useState<RowSelectionState>({});
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, roleId, filters, assigned, page, pageSize, reload, version]);if(!complete)return;
     const controller = new AbortController(); setLoading(true); setData(null); setSelection({}); setError('');
-    api.listRoleUsers(roleId, {...filters, assigned, page, pageSize}, controller.signal).then(result => { if (!controller.signal.aborted) { setData(result); setLoading(false); } })
-      .catch(cause => { if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false); } });
+    api.listRoleUsers(roleId, {...filters, assigned, page, pageSize}, controller.signal).then(result => { if (!controller.signal.aborted) { setData(result); setLoading(false);complete(); } })
+      .catch(cause => { if (!controller.signal.aborted) { setError(errorMessage(cause)); setLoading(false);complete(); } });
     return () => controller.abort();
-  }, [api, roleId, filters, assigned, page, pageSize, reload, version]);
+  }, [api, roleId, filters, assigned, page, pageSize, reload, version,read]);
   const selected = Object.keys(selection).filter(id => selection[id] && id !== '1');
   const columns = useMemo<ColumnDef<UserResponse>[]>(() => [
     {id: 'selection', header: () => <Checkbox label="选择当前页全部授权用户" isLabelHidden size="sm" isDisabled={busy || loading || !data?.items.some(user => user.id !== '1')}
@@ -63,7 +66,7 @@ function RoleUsersWorkspace({roleId}: {roleId: string}) {
     } catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
   return <section className="posts-page role-users-page"><PageHeader title="用户授权" description={`角色编号：${roleId}`} eyebrow="角色管理" />
-    <div className="post-toolbar"><PermissionGate permission="system:role:edit"><Button label="添加用户" isDisabled={busy || !valid || roleId === '1'} onClick={() => { setError(''); setPicker(true); }} /></PermissionGate><Button label="关闭授权页" variant="secondary" isDisabled={busy} onClick={() => controls.navigate('/role')} /></div>
+    <div className="post-toolbar"><PermissionGate permission="system:role:edit"><Button label="添加用户" isDisabled={busy || !valid || roleId === '1'} onClick={() => { setError(''); setPicker(true); }} /></PermissionGate><Button label="关闭授权页" variant="secondary" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/role')} /></div>
     {!valid ? <p role="alert">角色编号无效，请返回角色列表。</p> : <RoleUserList key={roleId} roleId={roleId} assigned version={version} busy={busy} onAction={ids => { setError(''); setCancelling(ids); }} />}
     {feedback ? <p role="status">{feedback}</p> : null}{error && !picker && !cancelling ? <p role="alert">{error}</p> : null}
     {snapshot.error ? <div role="alert"><p>用户授权操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}

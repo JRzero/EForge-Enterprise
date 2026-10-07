@@ -1,3 +1,4 @@
+import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
@@ -31,25 +32,29 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   useEffect(() => {if (cron === null && cronReturnFocus.current) {cronReturnFocus.current.focus(); cronReturnFocus.current = null;}}, [cron]);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
   const action = useRef<AbortController | null>(null); useEffect(() => () => action.current?.abort(), []);
+  const contextRead=useRetainedRead();
   useEffect(() => {
+    const complete=contextRead([api, jobId, logs, contextVersion]);if(!complete)return;
     if (!logs || jobId === '0') return;
     const controller = new AbortController(); setReady(false); setContextError('');
-    api.getJob(jobId!, controller.signal).then(row => {if (!controller.signal.aborted) {const value = {...empty, name: row.name ?? '', group: row.group ?? ''}; setDraft(value); setFilters(value); setReady(true);}})
-      .catch(cause => {if (!controller.signal.aborted) setContextError(errorMessage(cause));});
+    api.getJob(jobId!, controller.signal).then(row => {if (!controller.signal.aborted) {const value = {...empty, name: row.name ?? '', group: row.group ?? ''}; setDraft(value); setFilters(value); setReady(true);complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setContextError(errorMessage(cause));complete();}});
     return () => controller.abort();
-  }, [api, jobId, logs, contextVersion]);
+  }, [api, jobId, logs, contextVersion,contextRead]);
   const query = useMemo(() => ({name: filters.name, group: filters.group, invokeTarget: filters.target, status: filters.status ? Number(filters.status) : undefined,
     direction: sorting[0]?.desc ? 'desc' as const : 'asc' as const}), [filters, sorting]);
   const jobQuery = useMemo(() => ({...query, sort: sorting[0]?.id === 'name' ? 'name' as const : sorting[0]?.id === 'createdAt' ? 'createdAt' as const : 'id' as const}), [query, sorting]);
   const logQuery = useMemo(() => ({...query, $from: filters.from || undefined, to: filters.to || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone}), [query, filters.from, filters.to]);
+  const read=useRetainedRead();
   useEffect(() => {
+    const complete=read([api, ready, logs, logQuery, jobQuery, page, size, version]);if(!complete)return;
     if (!ready) return;
     const controller = new AbortController(); setData(null); setLoading(true); setError(''); setSelection({});
     const request = logs ? api.listJobLogs({...logQuery, page, pageSize: size}, controller.signal) : api.listJobs({...jobQuery, page, pageSize: size}, controller.signal);
-    request.then(result => {if (!controller.signal.aborted) {const last = Math.max(1, Math.ceil(result.total / size)); if (page > last) {setPage(last); return;} setData(result); setLoading(false);}})
-      .catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+    request.then(result => {if (!controller.signal.aborted) {const last = Math.max(1, Math.ceil(result.total / size)); if (page > last) {setPage(last); return;} setData(result); setLoading(false);complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);complete();}});
     return () => controller.abort();
-  }, [api, ready, logs, logQuery, jobQuery, page, size, version]);
+  }, [api, ready, logs, logQuery, jobQuery, page, size, version,read]);
   const columns = useMemo<ColumnDef<Row>[]>(() => [
     {accessorKey: 'id', header: logs ? '日志编号' : '任务编号', enableSorting: !logs},
     {accessorKey: 'name', header: '任务名称', enableSorting: !logs},
@@ -97,7 +102,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable={logs} rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择日志 ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
     <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={size} disabled={busy} onChange={event => {setSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(value => <option key={value} value={value}>{value}</option>)}</select></label><Button label="上一页" variant="ghost" isDisabled={busy || loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="ghost" isDisabled={busy || loading || page * size >= (data?.total ?? 0)} onClick={() => setPage(value => value + 1)} /></div>
     </>}
-    {logs && <Button label="关闭调度日志" variant="ghost" onClick={() => controls.navigate('/job')} />}
+    {logs && <Button label="关闭调度日志" variant="ghost" onClick={() => (controls.closePage ?? controls.navigate)('/job')} />}
     {confirmation && <ResourceDialog titleId="job-log-confirm" alert busy={busy} onCancel={() => setConfirmation(null)}><h2 id="job-log-confirm">{confirmation.clear ? '确认清空调度日志' : '确认删除调度日志'}</h2><p>{confirmation.clear ? '将清空全部调度日志，此操作无法撤销。' : `将删除所选的 ${confirmation.ids.length} 条日志。`}</p>{actionError && <p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setConfirmation(null)} /><Button label={confirmation.clear ? '确认清空' : '确认删除'} isDisabled={busy} onClick={() => {void mutate();}} /></ResourceDialog>}
     {detail && <JobDetailDialog id={detail} logs={logs} onClose={() => setDetail(null)} onEditCron={expression => {cronReturnFocus.current = detailFocus.current; setDetail(null); setCron(expression);}} />}
     {cron !== null && <CronEditor value={cron} onCancel={() => setCron(null)} onConfirm={expression => {setConfirmedCron(expression); setCron(null);}} />}
