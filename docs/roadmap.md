@@ -1375,3 +1375,11 @@ both fullAPI/browser scopes, console/custom-output flags and exact contracts.
 Future server acceptance requires all four actual jobs; historical three-job
 records remain unchanged. No product runtime or source behavior is changed by
 this CI scheduling adjustment. Image gallery final validation continues separately.
+
+ImagePreview local final stage: first thumbnail/full safe gallery/dimensions,
+error/retry, original2.15.14 keyboard and mask semantics, .2/.015 zoom increments
+without artificial8x cap, rotation/drag/fit and nested Escape/focus are proven by
+actual generated CRUD/tree/sub and preserved originals (53695). All seven
+families and strict frontend101/143 pass; backend661 declarations passed. Source
+publication and exact cloud remain pending. Form builder stays deferred and
+five task mutations stay specifically unapproved/unimplemented; full goal false.

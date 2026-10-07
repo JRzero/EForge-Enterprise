@@ -105,3 +105,13 @@ families,43263 both62/fullAPI profiles,27984 frontend98/143 and full backend661
 passed. All live/committed contracts remain exact. Ready for commit/push; precise
 cloud is pending. ImagePreview and the five task mutations remain incomplete;
 form builder stays deferred. See security-review-pagination-fidelity.md.
+
+The later generated image viewer now has final local original2.15.14 parity
+proof:53695 all seven installed generated families, root/child real SQL galleries,
+original keys/mask/zoom, inert URLs and nested focus;101 units/143 mocks and all
+frontend gates pass. It is awaiting precise publication/cloud acceptance.
+Pagination c574001 frontend/compile/generated/basic runtime cloud passed;
+server authentication exceeded20-minute infrastructure bound after62 browsers.
+Successor f09ea7b separates both full profiles without reducing coverage; all
+four successor server jobs must pass before full cloud acceptance. No pending
+image stage, user-deferred builder or task mutation is called complete here.

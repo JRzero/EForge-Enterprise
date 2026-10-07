@@ -1,9 +1,65 @@
 import {Buffer} from 'node:buffer';
-import {writeFileSync} from 'node:fs';
+import {writeFileSync,readFileSync} from 'node:fs';
 import {join, basename} from 'node:path';
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
 import {chromium, expect} from '@playwright/test';
+async function verifyImageGallery(page,root,category,id,model) {
+  const external='https://images.example.invalid/合法图片.png',unsafe='javascript:window.imageInjected=true';
+  let externalRequests=0,failure;
+  await page.route('https://images.example.invalid/**',async route=>{
+    externalRequests++;assert.equal(route.request().headers().authorization,undefined);assert.equal(route.request().headers().referer,undefined);
+    await route.fulfill(externalRequests===1?{status:503,body:'temporary image failure'}:{contentType:'image/png',body:readFileSync(join(root,'tests/fixtures/avatar.png'))});
+  });
+  try {
+    const sources=model.imagePaths+','+external+','+unsafe;
+    assert.equal(await page.evaluate(async raw=>window.probeImages(JSON.parse(raw)),JSON.stringify({id,model:{...model,imagePaths:sources}})),200);
+    assert.equal((await readDetail(page,id)).data.imagePaths,sources,'Image URLs must remain exact SQL data');
+    await page.getByRole('button',{name:'刷新',exact:true}).click();
+    const row=page.getByRole('row').filter({has:page.getByText(model.label,{exact:true})});
+    const thumbnail=row.getByRole('button',{name:'预览图片 imagePaths',exact:true});await thumbnail.click();
+    const viewer=page.getByRole('dialog',{name:'imagePaths — 图片预览',exact:true});
+    await expect(viewer.getByText('第 1 / 2 张',{exact:true})).toBeVisible();
+    const image=viewer.getByRole('img');await expect.poll(()=>image.evaluate(element=>element.naturalWidth)).toBeGreaterThan(0);
+    const wheelBounds=await image.boundingBox();assert(wheelBounds);await page.mouse.move(wheelBounds.x+wheelBounds.width/2,wheelBounds.y+wheelBounds.height/2);await page.mouse.wheel(0,-100);await expect(image).toHaveAttribute('style',/scale\(1.015\)/);
+    await viewer.getByRole('button',{name:'重置图片视图',exact:true}).click();await expect(image).toHaveAttribute('style',/scale\(1\)/);
+    await page.keyboard.press('ArrowUp');await expect(image).toHaveAttribute('style',/scale\(1.2\)/);await page.keyboard.press('ArrowDown');await expect(image).toHaveAttribute('style',/scale\(1\)/);
+    await page.keyboard.press('Space');await expect(image).toHaveClass('image-preview-original');await page.keyboard.press('Space');await expect(image).toHaveClass('image-preview-fit');
+    for(let step=0;step<40;step++)await page.keyboard.press('ArrowUp');await expect(image).toHaveAttribute('style',/scale\(9\)/);await viewer.getByRole('button',{name:'重置图片视图',exact:true}).click();
+    await viewer.getByRole('button',{name:'放大图片',exact:true}).click();await expect(image).toHaveAttribute('style',/scale\(1.2\)/);
+    await viewer.getByRole('button',{name:'向右旋转图片',exact:true}).click();await expect(image).toHaveAttribute('style',/rotate\(90deg\)/);
+    const bounds=await image.boundingBox();assert(bounds);await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await page.mouse.down();await page.mouse.move(bounds.x+bounds.width/2+40,bounds.y+bounds.height/2+30);await page.mouse.up();
+    await expect(image).toHaveAttribute('style',/translate\(40px, 30px\)/);
+    await page.keyboard.press('ArrowRight');await expect(viewer.getByRole('alert')).toContainText('图片加载失败');
+    await viewer.getByRole('button',{name:'重试图片',exact:true}).click();await expect.poll(()=>viewer.getByRole('img').evaluate(element=>element.naturalWidth)).toBeGreaterThan(0);
+    await expect(viewer.getByText('第 2 / 2 张',{exact:true})).toBeVisible();assert.equal(externalRequests,2);
+    await viewer.getByRole('button',{name:'图片原始大小',exact:true}).click();await expect(viewer.getByRole('img')).toHaveClass('image-preview-original');
+    await viewer.getByRole('button',{name:'下一张图片',exact:true}).click();await expect(viewer.getByText('第 1 / 2 张',{exact:true})).toBeVisible();
+    await page.setViewportSize({width:390,height:844});const rectangle=await viewer.boundingBox();assert(rectangle && rectangle.x>=0 && rectangle.width<=390 && rectangle.y>=0 && rectangle.height<=844);
+    assert.equal(await page.evaluate(()=>window.imageInjected),undefined);
+    await page.keyboard.press('Escape');await expect(viewer).toHaveCount(0);await expect(thumbnail).toBeFocused();
+    await page.setViewportSize({width:1280,height:900});await thumbnail.click();await viewer.getByLabel('图片查看区域',{exact:true}).click({position:{x:5,y:5}});await expect(viewer).toHaveCount(0);await expect(thumbnail).toBeFocused();
+    if(category==='sub') {
+      await row.getByRole('button',{name:'详情',exact:true}).click();
+      const details=page.getByRole('dialog').filter({has:page.locator('#generated-editor-title')});
+      const childThumbnail=details.getByRole('button',{name:'预览图片 childImagePaths',exact:true});await childThumbnail.click();
+      const childViewer=page.getByRole('dialog',{name:'childImagePaths — 图片预览',exact:true});
+      await expect.poll(()=>childViewer.getByRole('img').evaluate(element=>element.naturalWidth)).toBeGreaterThan(0);
+      await expect(childViewer.getByRole('button',{name:'下一张图片',exact:true})).toBeDisabled();
+      await page.keyboard.press('Escape');await expect(childViewer).toHaveCount(0);await expect(childThumbnail).toBeFocused();
+      await details.getByRole('button',{name:'取消',exact:true}).click();await expect(details).toHaveCount(0);
+    }
+    console.log('PASS: '+category+' actual SQL image gallery preserves local/Unicode external sources, rejects script execution, zooms/rotates/drags, retries failure, wraps keys, bounds mobile and restores focus.');
+  } catch(cause) {failure=cause;}
+  try {
+      if(await page.locator('dialog.image-preview-dialog[open]').count())await page.keyboard.press('Escape');
+      if(await page.locator('dialog.post-dialog[open]').count())await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();
+      assert.equal(await page.evaluate(async raw=>window.probeImages(JSON.parse(raw)),JSON.stringify({id,model})),200);
+      await page.unroute('https://images.example.invalid/**');await page.getByRole('button',{name:'刷新',exact:true}).click();
+  } catch(cleanup) {if(!failure)failure=cleanup;else console.error('Gallery cleanup after original failure:',cleanup.message);}
+  if(failure)throw failure;
+}
+
 // Cross the browser automation boundary as JSON text so legal prototype-like keys stay own data properties.
 async function readDetail(page,id) {
   return JSON.parse(await page.evaluate(async value => JSON.stringify(await window.probeDetail(value)),id));
@@ -227,6 +283,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "const runtime = createSessionRuntime(createMemoryStorage()); const router=createBrowserRouterAdapter();",
       "Object.assign(window, {probeLogin:runtime.login, probeLogout:runtime.logout, probeDetail:async (id:string) => {try {const response = await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/' + id); return {status:response.status, data:await response.json()};} catch(error) {return {status:(error as {status:number}).status};}}});",
       "Object.assign(window,{probeWrite:async (method:string,body:unknown)=>{const response=await runtime.api.authenticatedFetch('/api/v1/business/fixture/"+category+"',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return response.status;}});",
+      "Object.assign(window,{probeImages:async (input:{id:string;model:unknown})=>{const response=await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/'+input.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(input.model)});return response.status;}});",
       "function Probe() {return <EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider>;}",
       "Object.assign(window,{probeNavigate:()=>router.navigate(generatedRoute.path),probeHref:router.getCurrentHref});",
       "createRoot(document.getElementById('root')!).render(<StrictMode><Probe /></StrictMode>);",
@@ -312,6 +369,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           assert.equal(new Date(detail.data.eventTime).toISOString(),expectedInitial);assert.equal(new Date(detail.data.eventTime).getTime(),await page.evaluate(value => new Date(value).getTime(),initialDate));
           for(const key of ['imagePaths','filePaths']) {assert(detail.data[key].startsWith('/profile/upload/'));const served=await page.request.get(new URL(detail.data[key],page.url()).href);assert.equal(served.status(),200);if(key==='filePaths')assert.equal(await served.text(),'实际文件内容');}
         }
+        await verifyImageGallery(page,root,category,id,detail.data);
         if (category === 'tree') assert.equal(detail.data.parentId, '0');
         if (category === 'sub') {
           assert.equal(detail.data.fixtureLineList[0].label, '浏览器子表');

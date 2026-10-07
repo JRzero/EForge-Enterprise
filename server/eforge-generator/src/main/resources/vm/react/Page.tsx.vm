@@ -5,6 +5,7 @@ import {Button} from '@eforge/ui';
 import {useApi} from '../../../app/context';
 import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
+import {ImagePreview} from '../../../app/components/ImagePreview';
 #if(!$table.tree)
 import {Pagination} from '../../../app/components/Pagination';
 #end
@@ -85,7 +86,7 @@ function FieldDisplay({field, value}: {field: Field; value: unknown}) {
   if (field.dict) return <DictDisplay field={field} value={value} />;
   if (field.type === 'Date') return <>{displayDate(value)}</>;
   if (field.html === 'editor') return <NoticeRichContent html={text(value)} />;
-  if (field.html === 'imageUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <img key={path} src={path} alt={field.label ?? field.key} width={80} />)}</>;
+  if (field.html === 'imageUpload') return <ImagePreview src={text(value)} label={field.label ?? field.key} />;
   if (field.html === 'fileUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <a key={path} href={path} download rel="noopener">{path.split('/').at(-1)}</a>)}</>;
   return <>{text(value) || '—'}</>;
 }

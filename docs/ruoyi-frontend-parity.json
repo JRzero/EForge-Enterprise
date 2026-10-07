@@ -4082,7 +4082,7 @@
     "mockedBrowsers": 142
   },
   "paginationFidelity": {
-    "status": "local-final-passed-exact-cloud-pending",
+    "status": "source-local-passed-web-cloud-success-server-auth-timeout-successor-matrix-pending",
     "frontEndUnits": 98,
     "mockedBrowsers": 143,
     "mainListConsumers": 10,
@@ -4095,10 +4095,16 @@
     "generatedTemplates": "CRUD/sub use shared pagination; tree retains full hierarchy",
     "frontendAuthority": "27984-terminal0-all-gates-98units143mocks",
     "backendDeclarations": 661,
-    "existingPlatformSkipped": 1
+    "existingPlatformSkipped": 1,
+    "source": "c57400104bb054ccbd6460c2feb29466eee64f56",
+    "serverRun": 37663449661,
+    "webRun": 37663449678,
+    "matrixSource": "f09ea7be071a451f1ba69b68fd411f314b46c02e",
+    "matrixServerRun": 37666836763,
+    "cloudAuthFailure": "GitHub explicitly reports maximum20m execution exceeded;62 browsers passed before interrupted API;not full cloud acceptance"
   },
   "generatedImagePreviewAudit": {
-    "status": "incomplete-thumbnail-only-renderer-observed",
+    "status": "local-final-original-viewer-parity-passed-publication-cloud-pending",
     "source": "server/eforge-generator/src/main/resources/vm/react/Page.tsx.vm",
     "required": [
       "original first thumbnail and complete gallery",
@@ -4106,6 +4112,12 @@
       "interactive viewing and failure recovery",
       "actual generated CRUD/tree/sub compilation/runtime/browser"
     ],
-    "fullGoalComplete": false
+    "fullGoalComplete": false,
+    "realAuthority": "53695-terminal0-all-seven-generated-original-keyboard-wheel-mask-nested",
+    "review": "docs/security-review-image-preview-fidelity.md",
+    "isolatedUnitTests": 3,
+    "frontendUnits": 101,
+    "mockedBrowsers": 143,
+    "originalViewer": "Element UI2.15.14"
   }
 }
