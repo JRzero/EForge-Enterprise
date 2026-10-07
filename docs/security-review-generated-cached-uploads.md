@@ -51,3 +51,12 @@ Exact new-source cloud is pending. This phase does not accept rich-text upload,
 other generated read/action lifecycle, all shared resource/monitor/embedded
 lifecycle, sidebar/topnav/settings or the full goal. Form builder remains
 deferred, not complete. The specific rejected Quartz runtime scheme is unchanged.
+## Exact raw-upload cloud acceptance
+Commit d492318a1424f2cd93d3e547b5f2f9f1ea4187ec is accepted:server37570013535
+all three jobs and web37570013470 are terminal SUCCESS. Direct generated-upload-
+cloud-accepted-server/web.log prove both53 framework browsers, complete API/
+SQL/session/grant and exact OpenAPI gates, both seven actual generated pages
+with eight raw-upload history checks each,98 units and89 mocked browsers.
+619 declared Maven cases have618 applicable executions per platform; Linux
+executes symlink protection and skips the Windows-only junction case. The later
+RichTextEditor source is independent and must receive its own final acceptance.

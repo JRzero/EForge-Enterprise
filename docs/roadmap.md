@@ -1052,3 +1052,11 @@ lint/typecheck/98 units/build pass. See security-review-generated-cached-uploads
 This new upload source still requires exact cloud acceptance. Rich-text/editor/
 other actions, remaining shared lifecycle, sidebar/topnav/settings and final
 active audit remain open; form builder is deferred and Quartz denial unchanged.
+### Generated raw upload exact cloud acceptance
+Exact d492318a1424f2cd93d3e547b5f2f9f1ea4187ec server37570013535 all three
+jobs and web37570013470 are terminal SUCCESS. Direct accepted logs prove both53
+framework browsers, complete APIs and contract gates, both seven generated pages
+with eight real raw-upload history checks each,98 units/89 mocked browsers and
+complementary platform filesystem cases. This accepts only the committed raw
+upload source. Subsequent rich-text owner/content/cursor changes remain under
+independent genuine browser and full-environment verification.

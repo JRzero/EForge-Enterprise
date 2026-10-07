@@ -1781,7 +1781,7 @@
   }
 ,
   "generatedCachedUploads": {
-    "status": "local-both-seven-real-browser-success-exact-cloud-pending",
+    "status": "exact-cloud-accepted-d492318",
     "review": "docs/security-review-generated-cached-uploads.md",
     "beforeEvidence": "generated-upload-before2-runtime.log",
     "finalEvidence": ["generated-upload-final-maven.log", "generated-upload-frontend.log", "generated-upload-disabled-runtime.log", "generated-upload-enabled-runtime.log"],
