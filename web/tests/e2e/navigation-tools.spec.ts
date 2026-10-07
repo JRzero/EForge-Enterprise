@@ -1,13 +1,13 @@
 import {test,expect} from './fixtures';
 import type {Page} from '@playwright/test';
 async function setup(page:Page) {
-  const state={permissions:['app:dashboard:view','system:role:list'],queryText:'',cached:true,extraGroup:false,routeChild:false};
+  const state={permissions:['app:dashboard:view','system:role:list'],queryText:'',cached:true,extraGroup:false,routeChild:false,userRoute:false};
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
   await page.route('**/logout',route=>route.fulfill({json:{code:200}}));
   await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'1',username:'admin',displayName:'管理员'},roles:['admin'],permissions:state.permissions,navigation:[
     {key:'home',type:'ROUTE',routeId:'dashboard',label:'工作台',order:0,children:[]},
-    {key:'system',type:'GROUP',label:'系统管理',order:1,children:[{key:'role',type:'ROUTE',routeId:'system-roles',label:'角色管理',icon:'peoples',queryText:state.queryText,cached:state.cached,order:0,children:state.routeChild?[{key:'post-child',type:'ROUTE',routeId:'system-posts',label:'岗位子页面',order:0,children:[]}]:[]}]},
+    {key:'system',type:'GROUP',label:'系统管理',order:1,children:[{key:'role',type:'ROUTE',routeId:'system-roles',label:'角色管理',icon:'peoples',queryText:state.queryText,cached:state.cached,order:0,children:state.routeChild?[{key:'post-child',type:'ROUTE',routeId:'system-posts',label:'岗位子页面',order:0,children:[]}]:[]},...(state.userRoute?[{key:'user-prefix',type:'ROUTE',routeId:'system-users',label:'用户管理',order:1,children:[]}]:[])]},
     {key:'external',type:'EXTERNAL',label:'文档 İabc (x) <img src=x onerror=alert(1)>',externalUrl:'https://example.com/docs',order:2,children:[]},
     ...(state.extraGroup?[{key:'tools',type:'GROUP',label:'工具菜单',order:4,children:[{key:'nested',type:'GROUP',label:'嵌套工具',order:0,children:[{key:'guide',type:'EXTERNAL',label:'使用指南',externalUrl:'https://example.com/guide',order:0,children:[]}]}]}]:[]),
     {key:'bad',type:'EXTERNAL',label:'非法链接',externalUrl:'javascript:alert(1)',order:3,children:[]} ]}}));
@@ -87,4 +87,10 @@ test('actual route parents retain their links and expose children with a separat
   await expect(nav.getByRole('link',{name:'岗位子页面',exact:true})).toHaveAttribute('href','/post');await expect(page).toHaveURL(/\/dashboard$/);
   await role.click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await expect(children).toHaveAttribute('aria-expanded','true');
   await children.click();await expect(nav.getByRole('link',{name:'岗位子页面',exact:true})).toBeHidden();await expect(role).toBeVisible();await expect(page).toHaveURL(/\/role$/);
+});
+test('personal center does not borrow user-management ancestry from its URL prefix',async({page})=>{
+  const state=await setup(page);state.userRoute=true;state.extraGroup=true;state.permissions.push('system:user:list');await page.reload();const nav=page.locator('.ef-app-shell__nav');
+  const tools=nav.getByRole('button',{name:'工具菜单',exact:true}),system=nav.getByRole('button',{name:'系统管理',exact:true});
+  await tools.click();await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+  await expect(tools).toHaveAttribute('aria-expanded','true');await expect(system).toHaveAttribute('aria-expanded','false');
 });

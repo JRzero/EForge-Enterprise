@@ -1162,3 +1162,19 @@ Final sequential owned authority80422 is active; real and exact-source cloud
 acceptance must still finish. See security-review-sidebar-disclosure.md.
 Desktop collapse/mobile drawer and remaining layout modes/settings are not
 completed by this change. Full active parity remains unfinished.
+Explicit ancestry final local evidence (2026-10-07):99065 terminated0 with all
+seven actual generated React categories (crud/tree/sub/auto/autotree/autosub/
+stringkey), full original Boot/JWT/Redis/MyBatis/audit, actual read cancellation,
+retained drafts/selection,11 owned held upload acknowledgements, no-role denial,
+role withdrawal, exact long/String PK, decimals, bulk/XLSX and no physical child
+orphans passing. This proves the product fix beyond mocked navigation. It does
+not add final nested child-rich upload coverage that the full audit still needs.
+Both personal-center and explicit parameter-child ancestry regressions pass;
+13417 final lint/typecheck and106 full mocked browsers passed.71337 final API
+client reproducibility,98 unit tests and production build passed. No temporary
+react-probe files remain.80422 both57/fullAPI outcomes and identical framework
+OpenAPI belong to the preceding12ec001 source; they are not relabeled as evidence
+of this fix. New exact-source server/full57-both-profiles and web cloud acceptance
+are pending.12ec001 server verify failed and remains failed historical evidence.
+Normal backend Java, schema, permission semantics and denied Quartz runtime were
+not changed. This remains a partial sidebar phase, not the full parity goal.

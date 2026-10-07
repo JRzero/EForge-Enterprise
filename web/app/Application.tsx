@@ -1,7 +1,7 @@
 import {lazy, Suspense, useCallback, useMemo, useState, useSyncExternalStore} from 'react';
 import {AppShell, PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
-import {matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
+import {getRouteAncestry, matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
 import {LoginPage} from '../features/auth/LoginPage';
 import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
@@ -54,7 +54,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
         event.preventDefault(); router.navigate('/dashboard');
       }
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
-      navigation={<Navigation items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} router={router} />}
+      navigation={<Navigation items={navigation} pathname={pathname === '/' ? '/dashboard' : pathname} router={router} activePaths={match ? getRouteAncestry(routes,match.route.id).map(route => route.path) : []} />}
       header={<div className="enterprise-header"><span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
         <Suspense fallback={null}><HeaderNotices version={noticeVersion} /></Suspense>
         <a href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}>个人中心</a>

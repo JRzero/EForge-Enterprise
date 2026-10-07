@@ -246,6 +246,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await page.goto('http://127.0.0.1:' + address.port + '/features/' + basename(owned) + '/' + category + '/index.html');
         await page.waitForFunction(() => typeof window.probeLogin === 'function');
         await page.evaluate(() => window.probeLogin({username:'admin', password:'admin123'}));
+        await page.locator('.ef-app-shell__nav').getByRole('button', {name:'系统工具', exact:true}).click();
         const installedLink = page.getByRole('link', {name:'Installed ' + category, exact:true});
         await expect(installedLink).toBeVisible();
         await installedLink.click();
