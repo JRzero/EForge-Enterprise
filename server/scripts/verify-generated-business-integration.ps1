@@ -47,6 +47,9 @@ try {
         Copy-Item -LiteralPath $generatedDeployContractPath -Destination (Join-Path $repoRoot 'server/eforge-boot/target/generator-react-captured-openapi.json') -Force
         & node (Join-Path $repoRoot 'web/scripts/verify-generator-react-pages.mjs') $generatedBusinessDirectory $generatedDeployContractPath "http://127.0.0.1:$AppPort" $generatedDeployUser.username
         Assert-Check ($LASTEXITCODE -eq 0) 'Actual generated React page verification failed.'
+        $generatedAutoChildRows=Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT COUNT(*) FROM boot_fixture_auto_lines'
+        Assert-Check ([int]$generatedAutoChildRows -eq 0) 'Generated automatic subtable delete left physical orphan rows.'
+        Write-Output 'PASS: generated automatic parent bulk deletion retains no physical child orphan rows.'
     }
     $generatedDeployMenus=(Request '/api/v1/system/menus' 'GET' '' $authorized).Content|ConvertFrom-Json
     $generatedDeployParent=@($generatedDeployMenus|Where-Object {$_.routeId -eq 'system-users'})[0].id

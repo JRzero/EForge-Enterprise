@@ -14,7 +14,7 @@ assert(deployment.startsWith(allowed + sep) && deployment.slice(allowed.length +
 const owned = mkdtempSync(join(root, 'features/react-probe-'));
 try {
   const sources = [];
-  for (const category of ['crud', 'tree', 'sub']) {
+  for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub']) {
     const destination = join(owned, category); mkdirSync(destination);
     for (const name of ['Page.tsx', 'route.ts', 'generate-client.mjs']) {
       copyFileSync(join(deployment, 'web/features/fixture', category, name), join(destination, name));

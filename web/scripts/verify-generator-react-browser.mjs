@@ -34,9 +34,79 @@ async function verifyChildControls(page,row) {
   assert.equal(new Date(row.childEventTime).getTime(),await page.evaluate(()=>new Date('2026-10-07T01:02:03.456').getTime()));
   for(const key of ['childImagePaths','childFilePaths']) {assert(row[key].startsWith('/profile/upload/'));const response=await page.request.get(new URL(row[key],page.url()).href);assert.equal(response.status(),200);if(key==='childFilePaths')assert.equal(await response.text(),'子表实际文件');}
 }
+async function verifyAutomaticKey(page, noRoleUser, category) {
+  const ids = [];
+  for (const index of [0, 1]) {
+    await page.getByRole('button', {name:'新增', exact:true}).click();
+    const editor = page.getByRole('dialog');
+    await expect(editor.getByLabel('oRderKey', {exact:true})).toHaveCount(0);
+    await editor.getByLabel('label', {exact:true}).first().fill('自动编号-' + index);
+    await editor.getByLabel('insertOnly', {exact:true}).fill('自动新增值');
+    if(category === 'autotree') await editor.getByRole('combobox', {name:'parentId',exact:true}).selectOption(index ? ids[0] : '0');
+    else await editor.getByLabel('parentId', {exact:true}).fill('0');
+    await editor.getByLabel('quantity', {exact:true}).fill('0');
+    await editor.getByLabel('ratio', {exact:true}).fill('0');
+    await editor.getByLabel('enabled', {exact:true}).fill('false');
+    await editor.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox').first().check();
+    if(category === 'autosub') {
+      await editor.getByRole('button', {name:'新增子表行'}).click();
+      const children=editor.locator('section[aria-label="子表明细"]');
+      await expect(children.getByLabel('childId', {exact:true})).toHaveCount(0);
+      await expect(children.getByLabel('ownerReference', {exact:true})).toHaveCount(0);
+      await children.getByLabel('label', {exact:true}).fill('自动子表-'+index);
+    }
+    const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/business/fixture/'+category && response.request().method() === 'POST');
+    await editor.getByRole('button', {name:'保存', exact:true}).click();
+    const response = await created; assert.equal(response.status(), 201);
+    const model = await response.json(); assert.equal(model.oRderKey, String(9007199254741101n + BigInt(index)));
+    ids.push(model.oRderKey); await expect(editor).toHaveCount(0);
+    const detail = await readDetail(page, model.oRderKey); assert.equal(detail.status, 200); assert.equal(detail.data.oRderKey, model.oRderKey);
+    assert.equal(detail.data.insertOnly, '自动新增值'); assert.equal(detail.data.quantity, 0); assert.equal(detail.data.enabled, false);
+    if(category === 'autotree') {assert.equal(detail.data.parentId,index?ids[0]:'0');await page.getByRole('button', {name:'展开全部'}).click();}
+    if(category === 'autosub') {
+      assert.equal(detail.data.fixtureAutoLineList.length,1);
+      assert.equal(detail.data.fixtureAutoLineList[0].childId,String(9007199254741201n+BigInt(index)));
+      assert.equal(detail.data.fixtureAutoLineList[0].ownerReference,model.oRderKey);
+      assert.equal(detail.data.fixtureAutoLineList[0].label,'自动子表-'+index);
+    }
+  }
+  const row = page.getByRole('row').filter({hasText:'自动编号-0'});
+  await row.getByRole('button', {name:'修改', exact:true}).click();
+  const editor = page.getByRole('dialog'); await expect(editor.getByLabel('oRderKey', {exact:true})).toHaveCount(0);
+  await editor.getByLabel('label', {exact:true}).first().fill('自动编号-修改');
+  await editor.getByLabel('editOnly', {exact:true}).fill('自动修改值');
+  if(category === 'autosub') {
+    await editor.getByRole('button', {name:'新增子表行'}).click();
+    const children=editor.locator('section[aria-label="子表明细"]');
+    await expect(children.getByLabel('childId', {exact:true})).toHaveCount(0);
+    await children.getByLabel('label', {exact:true}).last().fill('自动子表-追加');
+  }
+  await editor.getByRole('button', {name:'保存', exact:true}).click(); await expect(editor).toHaveCount(0);
+  const changed = await readDetail(page, ids[0]); assert.equal(changed.status, 200); assert.equal(changed.data.oRderKey, ids[0]);
+  assert.equal(changed.data.label, '自动编号-修改'); assert.equal(changed.data.insertOnly, '自动新增值'); assert.equal(changed.data.editOnly, '自动修改值');
+  if(category === 'autotree') await page.getByRole('button', {name:'展开全部'}).click();
+  if(category === 'autosub') {
+    assert.equal(changed.data.fixtureAutoLineList.length,2);
+    const original=changed.data.fixtureAutoLineList.find(line=>line.label === '自动子表-0');
+    const added=changed.data.fixtureAutoLineList.find(line=>line.label === '自动子表-追加');
+    assert.equal(original.childId,'9007199254741201');assert(BigInt(added.childId)>9007199254741202n);
+    assert.equal(original.ownerReference,ids[0]);assert.equal(added.ownerReference,ids[0]);
+  }
+  await page.getByRole('row').filter({hasText:'自动编号-修改'}).getByRole('checkbox').check();
+  await page.getByRole('row').filter({hasText:'自动编号-1'}).getByRole('checkbox').check();
+  await page.getByRole('button', {name:'删除选中', exact:true}).click(); await page.getByRole('button', {name:'确认删除', exact:true}).click();
+  await expect(page.getByRole('row').filter({hasText:'自动编号-修改'})).toHaveCount(0);
+  for (const id of ids) assert.equal((await readDetail(page,id)).status, 404);
+  await page.evaluate(() => window.probeLogout());
+  await page.evaluate(username => window.probeLogin({username,password:'admin123'}), noRoleUser);
+  await expect(page.getByRole('link', {name:'Installed '+category,exact:true})).toHaveCount(0);
+  await page.evaluate(() => window.probeNavigate()); await expect(page.getByRole('heading', {name:'暂无访问权限'})).toBeVisible();
+  assert.equal((await readDetail(page,ids[0])).status,403); await page.evaluate(() => window.probeLogout());
+  console.log('PASS: '+category+' actual automatic PK remains hidden with original insert=1/required=1, SQL-generated exact long IDs, refill/update/preserved insert-only values, bulk deletion and no-role denial.');
+}
 export async function verifyBrowser(root, owned, backend, noRoleUser) {
   assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(backend), 'Owned backend URL required.');
-  for (const category of ['crud', 'tree', 'sub']) {
+  for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub']) {
     writeFileSync(join(owned, category, 'index.html'), '<div id="root"></div><script type="module" src="./probe.tsx"></script>');
     writeFileSync(join(owned, category, 'probe.tsx'), [
       "import {createRoot} from 'react-dom/client';",
@@ -64,7 +134,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     await server.listen();
     const address = server.httpServer.address(); assert(address && typeof address === 'object');
     browser = await chromium.launch({headless:true});
-    for (const [ordinal, category] of ['crud', 'tree', 'sub'].entries()) {
+    for (const [ordinal, category] of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub'].entries()) {
       const context = await browser.newContext({acceptDownloads:true});
       const page = await context.newPage(), errors = [];
       page.on('pageerror', error => errors.push(error.message));
@@ -77,6 +147,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await installedLink.click();
         assert((await page.evaluate(() => window.probeHref())).startsWith('/business/fixture/'));
         await expect(page.getByRole('button', {name:'新增', exact:true})).toBeVisible();
+        if (category.startsWith('auto')) {await verifyAutomaticKey(page, noRoleUser, category);assert.deepEqual(errors, []);continue;}
         const id = String(9007199254741001n + BigInt(ordinal));
         const label = '浏览器-' + category + '-<img src=x onerror=window.injected=true>';
         await page.getByRole('button', {name:'新增', exact:true}).click();
@@ -254,6 +325,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await expect(page.getByRole('button', {name:'新增', exact:true})).toHaveCount(0);
         assert.equal((await readDetail(page,id)).status, 403);
         await page.evaluate(() => window.probeLogout());
+      } catch(cause) {
+        console.error('Generated browser failure state:', category, await page.locator('body').innerText().catch(()=>'Page unavailable.'));
+        throw cause;
       } finally {await context.close();}
     }
     console.log('PASS: actual generated React CRUD/tree/sub create/edit/detail/search/reset/tree/sub update/bulk selection/XLSX/delete, exact IDs/decimal/root-parent/sub FK, literal HTML and no-role backend denial.');

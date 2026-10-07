@@ -869,3 +869,15 @@ MySQL checks and both exact OpenAPI contract gates. The controlled real logout
 test passes in both full live suites. Old3266157 remains failed; the corrected
 exact source supersedes it. Automatic-key expansion is separate uncommitted work
 and is not included in this acceptance. Full active parity goal remains incomplete.
+### Automatic generated primary keys verified locally
+
+Root automatic PK rendering/required validation now respects auto even when the
+original import sets insert=1 and required=1. Actual browser92022 failed before
+the fix; final six-module observer28066 ended0 in default and enabled profiles.
+Manual and automatic CRUD/tree/sub, exact SQL-generated root/child Long IDs,
+tree parent references, preserved old child IDs plus appended new IDs, no-role
+denial and actual SQL zero-orphan bulk deletion pass.618 backend,91 units/71
+mocked, generated production host builds and both matching installed OpenAPI
+snapshots pass. New exact cloud acceptance is pending. Continue remaining typed
+control/value cases and full original shell/auth/shared capability audit.
+Form builder remains deferred and the prior specific Quartz rejection remains.

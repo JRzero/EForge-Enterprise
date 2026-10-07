@@ -1604,5 +1604,26 @@
     "priorFullFrameworkProfiles": [47,47],
     "priorProfilesPrecedeFinalTemplateAndLiveTest": true,
     "fullGoalComplete": false
+  },
+  "generatorAutomaticKeys": {
+    "status": "local-both-six-module-profiles-passed-exact-cloud-pending",
+    "review": "docs/security-review-generator-auto-key.md",
+    "backendTests": 618,
+    "frontendUnitTests": 91,
+    "mockedBrowserTests": 71,
+    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "rootKinds": ["crud", "tree", "sub"],
+    "keys": "manual-keys-retained-automatic-root-and-child-exact-long-ids",
+    "oldAutomaticMetadataInsertAndRequiredFlags": true,
+    "parentReferenceAndOldChildIdPreserved": true,
+    "newChildGetsDistinctGeneratedId": true,
+    "actualSqlOrphanCountAfterBulkDelete": 0,
+    "installedOpenApiSha256": "52CD6F01BE3A40B9099424A4D29A240E0DB4EABBE1A54EAAC1A225C36D32EABF",
+    "mainOpenApiSha256": "36EE572B9178EC84786C721AFBB477588C1F0D006D0CD9250467323831E7763F",
+    "beforeEvidence": "generator-auto-key-before-runtime.log",
+    "afterEvidence": ["generator-auto-matrix-child-final-disabled-runtime.log", "generator-auto-matrix-child-final-enabled-runtime.log"],
+    "remaining": ["supported-control-type-variants", "shared-shell-parity", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
   }
 }

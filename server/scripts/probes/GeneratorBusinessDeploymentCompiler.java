@@ -14,17 +14,18 @@ class GeneratorBusinessDeploymentCompiler {
             throw new IllegalArgumentException("Unexpected owned deployment output.");
         Files.createDirectories(output);
         var sourceFiles=new ArrayList<String>();var ddl=new StringBuilder();
-        for (String category:List.of("crud","tree","sub")) {
+        for (String category:List.of("crud","tree","sub","auto","autotree","autosub")) {
             var fixtureType=Class.forName("io.eforge.enterprise.web.controller.api.v1.tool.GeneratorEforgeApiTemplateTest");
             var constructor=fixtureType.getDeclaredConstructor();constructor.setAccessible(true);var fixture=constructor.newInstance();
             var factory=fixtureType.getDeclaredMethod("fixture",String.class);factory.setAccessible(true);
-            var table=(GenTable)factory.invoke(fixture,category);
+            var table=(GenTable)factory.invoke(fixture,category.equals("auto")?"crud":category.equals("autotree")?"tree":category.equals("autosub")?"sub":category);
             String suffix=category.substring(0,1).toUpperCase()+category.substring(1);
             table.setClassName("Fixture"+suffix);table.setPackageName("io.eforge.enterprise.generated.fixture."+category);
             var options=com.alibaba.fastjson2.JSON.parseObject(table.getOptions());options.put("genView",true);table.setOptions(options.toJSONString());
             table.setFunctionName("Installed "+category);table.setModuleName("fixture");table.setBusinessName(category);table.setTableName("boot_fixture_"+category);
-            if(table.isSub()) {table.getSubTable().setClassName("FixtureLine");table.getSubTable().setPackageName(table.getPackageName());
-                table.getSubTable().setTableName("boot_fixture_lines");table.setSubTableName("boot_fixture_lines");}
+            if(table.isSub()) {table.getSubTable().setClassName(category.equals("autosub")?"FixtureAutoLine":"FixtureLine");table.getSubTable().setPackageName(table.getPackageName());
+                String childTable=category.equals("autosub")?"boot_fixture_auto_lines":"boot_fixture_lines";
+                table.getSubTable().setTableName(childTable);table.setSubTableName(childTable);}
             for(var column:table.getColumns())column.setColumnComment(column.getJavaField());
             if(table.isSub())for(var column:table.getSubTable().getColumns())column.setColumnComment(column.getJavaField());
             {
@@ -66,9 +67,16 @@ class GeneratorBusinessDeploymentCompiler {
                         var column=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,childName,fieldName,spec[1],null);
                         column.setColumnComment(childName);column.setHtmlType(spec[2]);column.setDictType(spec[3]);childControls.add(column);
                     }
+                    if(category.equals("autosub")) {
+                        childControls.get(0).setIsPk("0");childControls.get(0).setIsRequired("1");childControls.get(0).setIsInsert("1");childControls.get(0).setIsEdit("1");
+                        var childKey=(io.eforge.enterprise.generator.domain.GenTableColumn)controlFactory.invoke(fixture,"child_id","childId","Long",null);
+                        childKey.setColumnComment("childId");childKey.setIsPk("1");childKey.setIsIncrement("1");childKey.setIsInsert("1");childKey.setIsRequired("1");childKey.setIsEdit("0");
+                        childControls.add(0,childKey);table.getSubTable().setPkColumn(childKey);
+                    }
                     table.getSubTable().setColumns(childControls);
                 }
             }
+            if(category.startsWith("auto")) {var key=table.getPkColumn();key.setIsIncrement("1");key.setIsInsert("1");key.setIsRequired("1");key.setIsEdit("0");}
             var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
             for(var file:bundle.files()) {
                 if(file.path().endsWith(".java")) {
@@ -88,9 +96,9 @@ class GeneratorBusinessDeploymentCompiler {
                     Files.writeString(path,file.content(),StandardCharsets.UTF_8);
                 }
             }
-            ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3));\n");
+            ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT ").append(category.startsWith("auto")?"AUTO_INCREMENT ":"").append("PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3))").append(category.startsWith("auto")?" AUTO_INCREMENT=9007199254741101":"").append(";\n");
             ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD requiredStatuses VARCHAR(32), ADD insertOnly VARCHAR(64), ADD editOnly VARCHAR(64), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD boolSelected BOOLEAN, ADD boolRadio BOOLEAN, ADD __proto__ VARCHAR(255);\n");
-            if(table.isSub())ddl.append("CREATE TABLE boot_fixture_lines(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childRequiredStatuses VARCHAR(32),childInsertOnly VARCHAR(64),childEditOnly VARCHAR(64),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5));\n");
+            if(table.isSub())ddl.append("CREATE TABLE ").append(table.getSubTableName()).append(category.equals("autosub")?"(child_id BIGINT AUTO_INCREMENT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT NOT NULL,":"(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,").append("childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childRequiredStatuses VARCHAR(32),childInsertOnly VARCHAR(64),childEditOnly VARCHAR(64),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5))").append(category.equals("autosub")?" AUTO_INCREMENT=9007199254741201":"").append(";\n");
         }
         var options=new ArrayList<String>(List.of("-parameters","-encoding","UTF-8","-classpath",System.getProperty("java.class.path"),"-d",output.toString()));options.addAll(sourceFiles);
         var errors=new java.io.ByteArrayOutputStream();

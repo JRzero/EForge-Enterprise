@@ -87,6 +87,9 @@ function FieldDisplay({field, value}: {field: Field; value: unknown}) {
 function fieldValue(values: object | null | undefined, key: string): unknown {
   return values && Object.hasOwn(values, key) ? (values as Record<string, unknown>)[key] : undefined;
 }
+function writableRootField(field: Field, creating: boolean) {
+  return field.pk ? creating && !field.auto : creating ? field.insert : field.edit;
+}
 function missingRequired(value: unknown) {
   return value === null || value === undefined || value === '' || Array.isArray(value) && value.length === 0;
 }
@@ -242,7 +245,7 @@ export function GeneratedPage() {
     event.preventDefault(); if (!editor || busy || editor.viewing) return; setBusy(true); setActionError('');
     try {
       const creating = editor.id === undefined;
-      const requiredError = requiredMessage(fields.filter(field => creating ? field.insert || field.pk && !field.auto : field.edit && !field.pk), editor.form as Record<string, unknown>);
+      const requiredError = requiredMessage(fields.filter(field => writableRootField(field, creating)), editor.form as Record<string, unknown>);
       if (requiredError) {setActionError(requiredError); return;}
 #if($table.sub)
       for (const row of editor.form[childKey] ?? []) {
@@ -299,7 +302,7 @@ export function GeneratedPage() {
     />
     {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
       <form onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
-        {fields.filter(field => editor.viewing || (editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit && !field.pk)).map(field => <label key={field.key}>{field.label}
+        {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <label key={field.key}>{field.label}
           {editor.viewing ? <FieldDisplay field={field} value={fieldValue(editor.model, field.key)} /> :
 #if($table.tree)
           field.key === treeParent ? <select value={text(fieldValue(editor.form, field.key)) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
