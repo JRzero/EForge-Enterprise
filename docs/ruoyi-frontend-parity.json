@@ -1958,5 +1958,20 @@
     "formBuilder": "deferred-not-complete",
     "quartzRuntimeProposal": "awaiting-explicit-approval",
     "fullGoalComplete": false
+  },
+  "headerAvatar": {
+    "status": "exact-cloud-accepted",
+    "implementationSha": "3aed9a8787798456686cc143d40df3d3fd98ee64",
+    "cloudServer": "37606190761",
+    "cloudWeb": "37606190846",
+    "backendDeclarations": 620,
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 118,
+    "cloudRealBrowsersPerProfile": 57,
+    "localFocusedRealBrowsers": 1,
+    "localRealAuthority": "37742-terminal0",
+    "openApiSha256": "80D252BDCF626075609B65CA2EF4FD795ADB50D7A0E242325680984A39E1CA46",
+    "review": "docs/security-review-header-avatar.md",
+    "fullGoalComplete": false
   }
 }
