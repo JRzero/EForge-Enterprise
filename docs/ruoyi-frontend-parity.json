@@ -4169,5 +4169,15 @@
     "cloudWebRun": "37683623639",
     "serverJobs": 4,
     "realBrowsersPerProfile": 62
+  },
+  "originalSharedConsumerAudit": {
+    "review": "docs/original-shared-consumer-audit.md",
+    "status": "consumer-source-and-existing-evidence-reviewed-not-whole-completion",
+    "originalCommit": "0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
+    "verifiedProductSource": "2a20eb3726b75ec663588ac10e4a42281052ed3e",
+    "unconsumedOriginalSource": [
+      "ruoyi-ui/src/components/PanThumb/index.vue"
+    ],
+    "fullGoalComplete": false
   }
 }
