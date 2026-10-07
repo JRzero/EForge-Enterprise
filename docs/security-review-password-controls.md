@@ -29,7 +29,7 @@ existing platform skip). Frontend reproduction/lint/typecheck/build,98 units
 and124 mocked browsers passed. The focused real authority40851 has passed all
 seven personal-profile/user-management browsers and terminated0 with the full
 API suite. Exact live OpenAPI matches the contract; precise cloud acceptance
-is pending. Earlier cursor
+is now accepted:49f1ec335bca42820469b7da6e24cd5047e77826 passed server37617297912 all three jobs and web37617297911. Direct logs prove both59 real-browser/fullAPI/OpenAPI profiles and124 mocks. Earlier cursor
 failures and the isolated test-service startup failure are retained. The final
 focus/selection assertion polls the next owned frame rather than assuming the
 browser has completed input-type processing synchronously.

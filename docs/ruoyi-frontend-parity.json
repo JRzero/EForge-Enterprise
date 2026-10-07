@@ -2013,7 +2013,11 @@
     "fullGoalComplete": false
   }
   ,"passwordDisplayControls": {
-    "status":"local-accepted-exact-cloud-pending",
+    "implementationSha":"49f1ec335bca42820469b7da6e24cd5047e77826",
+    "cloudServer":"37617297912-all-three-success",
+    "cloudWeb":"37617297911-success",
+    "cloudRealBrowsersPerProfile":59,
+    "status":"exact-cloud-accepted",
     "backendDeclarations":634,
     "existingPlatformSkips":1,
     "frontendUnitTests":98,
