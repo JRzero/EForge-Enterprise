@@ -2261,3 +2261,13 @@ Observer93462 exited1 while authoritative jobs succeeded; that observation exit
 is not a product failure. No new source or test rerun was needed for acceptance.
 This accepts scoped native console ownership only; sidebar/layout and the full
 active parity audit remain unfinished. Form builder remains deferred.
+Sidebar GROUP disclosure implemented (2026-10-07), final acceptance pending:
+native keyboard buttons, per-level unique opened groups, route ancestry,
+retained dashboard return, safe static icons and actual ROUTE parent child toggle.
+Frontend lint/typecheck/reproducible client/98 units/build and105 mocked browsers
+pass. Initial real run55 passed, two old page-tabs fixture entry steps failed;
+conditional system-GROUP disclosure now preserves original strict assertions.
+Final sequential owned authority80422 is active; real and exact-source cloud
+acceptance must still finish. See security-review-sidebar-disclosure.md.
+Desktop collapse/mobile drawer and remaining layout modes/settings are not
+completed by this change. Full active parity remains unfinished.

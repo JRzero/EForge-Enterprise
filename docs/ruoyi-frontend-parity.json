@@ -1889,5 +1889,24 @@
     "remaining": ["other-editor-resource-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "dates-timezones-XLSX", "final-active-audit"],
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
+  },
+  "sidebarDisclosure": {
+    "status": "frontend-green-final-real-and-exact-cloud-pending",
+    "review": "docs/security-review-sidebar-disclosure.md",
+    "groupRoutes": false,
+    "keyboard": "native-disclosure-enter-space",
+    "accordion": "one-sibling-per-level",
+    "routeAncestry": "expand-on-path-transition-preserve-on-dashboard-return",
+    "routeParent": "real-link-with-separate-child-toggle",
+    "icons": "existing-static-allowlist",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 105,
+    "realAuthority": "80422-pending",
+    "beforeEvidence": "sidebar-disclosure-before.log",
+    "mockedEvidence": "sidebar-disclosure-final105-mocked.log",
+    "realEvidence": ["sidebar-disclosure-final-enabled-runtime.log", "sidebar-disclosure-final-disabled-runtime.log"],
+    "remaining": ["desktop-collapse-popups", "mobile-drawer", "mixed-top-navigation", "layout-settings", "full-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
   }
 }

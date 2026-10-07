@@ -3,6 +3,10 @@ import {test,expect} from '@playwright/test';
 test('real bootstrap navigation search and internal breadcrumb preserve authorization and logout',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/dashboard');await page.getByLabel('账号',{exact:true}).fill('admin');await page.getByLabel('密码',{exact:true}).fill('admin123');await page.getByRole('button',{name:'登录',exact:true}).click();await expect(page.getByRole('heading',{name:/^你好，/})).toBeVisible();
+  const nav=page.locator('.ef-app-shell__nav'),system=nav.getByRole('button',{name:'系统管理',exact:true}),monitor=nav.getByRole('button',{name:'系统监控',exact:true});
+  await expect(system).toHaveAttribute('aria-expanded','false');await system.focus();await system.press('Enter');await expect(system).toHaveAttribute('aria-expanded','true');
+  await monitor.click();await expect(system).toHaveAttribute('aria-expanded','false');await expect(monitor).toHaveAttribute('aria-expanded','true');await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(nav.getByRole('link',{name:'系统管理',exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'导航搜索',exact:true}).click();const dialog=page.getByRole('dialog',{name:'导航搜索'}),input=dialog.getByRole('combobox',{name:'菜单搜索'});await expect(input).toBeFocused();await input.fill('/role');
   await expect(dialog.getByRole('option')).toHaveCount(1);await input.press('ArrowDown');await input.press('Enter');await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
   await page.goto('/role/users/2');await expect(page.getByRole('heading',{name:'用户授权',exact:true})).toBeVisible();const crumbs=page.getByRole('navigation',{name:'面包屑'});await expect(crumbs.getByRole('link',{name:'面包屑：角色管理'})).toHaveAttribute('href','/role');await expect(crumbs).toContainText('用户授权');await crumbs.getByRole('link',{name:'面包屑：角色管理'}).click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
@@ -28,7 +32,7 @@ test('real SQL menu defaults preserve exact query links, active state, search an
     expect(find((await bootstrap.json()).navigation)).toMatchObject({queryText,cached:false,type:'ROUTE'});
     await page.reload();await expect(page.getByRole('heading',{name:/^你好，/})).toBeVisible();
     const link=page.locator('.ef-app-shell__nav').getByRole('link',{name:'角色管理',exact:true});
-    await expect(link).toHaveAttribute('href',href);await link.click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
+    await page.locator('.ef-app-shell__nav').getByRole('button',{name:'系统管理',exact:true}).click();await expect(link).toHaveAttribute('href',href);await link.click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
     expect(new URL(page.url()).search).toBe(href.slice('/role'.length));await expect(link).toHaveAttribute('aria-current','page');
     await page.goto('/role/users/2');await expect(page.getByRole('heading',{name:'用户授权',exact:true})).toBeVisible();
     await expect(page.getByRole('navigation',{name:'面包屑'}).getByRole('link',{name:'面包屑：角色管理'})).toHaveAttribute('href',href);

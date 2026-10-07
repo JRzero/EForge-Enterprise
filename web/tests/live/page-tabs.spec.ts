@@ -5,7 +5,7 @@ async function login(page:Page,username='admin',password='admin123'){
   await page.getByRole('button',{name:'登录',exact:true}).click();await expect(page.getByRole('heading',{name:/^你好，/})).toBeVisible();
 }
 async function headers(page:Page){const token=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string);return {Authorization:'Bearer '+token};}
-async function navigate(page:Page,name:string){await page.locator('.ef-app-shell__nav').getByRole('link',{name,exact:true}).click();await expect(page.getByRole('heading',{name,exact:true})).toBeVisible();}
+async function navigate(page:Page,name:string){const nav=page.locator('.ef-app-shell__nav'),link=nav.getByRole('link',{name,exact:true});if(!await link.isVisible())await nav.getByRole('button',{name:'系统管理',exact:true}).click();await link.click();await expect(page.getByRole('heading',{name,exact:true})).toBeVisible();}
 test('actual SQL cache preference controls resource drafts, refresh, retained tabs and logout',async({page})=>{
   await login(page);const auth=await headers(page),menus=await (await page.request.get('/api/v1/system/menus',{headers:auth})).json() as MenuResponse[];
   const menu=menus.find(item=>item.key==='system-roles')!;
