@@ -2,9 +2,9 @@ name: web-ci
 on:
   push:
     branches: [main, 'codex/**']
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.gitattributes']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
   pull_request:
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.gitattributes']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
 permissions:
   contents: read
 jobs:
@@ -27,7 +27,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: bash ../.github/scripts/install-browser.sh
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

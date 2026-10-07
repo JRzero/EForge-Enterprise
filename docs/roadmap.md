@@ -1383,3 +1383,17 @@ actual generated CRUD/tree/sub and preserved originals (53695). All seven
 families and strict frontend101/143 pass; backend661 declarations passed. Source
 publication and exact cloud remain pending. Form builder stays deferred and
 five task mutations stay specifically unapproved/unimplemented; full goal false.
+
+2026-10-08 upload-control fidelity: restored editable image viewing/file opening,
+one duplicate deletion, pointer/key ordering, original count/type/comma/strict
+five-MiB validation and partial-success uploads. A real subtable defect expanded
+the whole root form; the full child table now owns its horizontal scrolling.
+83259 final default/enabled runs each passed all seven installed generated
+families with genuine SQL order/root-child/boundary/failure/permission/audit
+proof. Final backend661 and frontend106/client/lint/types/build pass;143 earlier
+mock browsers remained green. Source publication/cloud acceptance follows.
+Prior7fc web and both62/fullAPI profiles/runtime succeeded; verify was cancelled
+while the Azure HTTP Ubuntu apt mirror stalled. New CI uses official HTTPS
+archive and bounded installation retries, preserving all tests/dependencies.
+Form builder remains deferred; the specifically denied Quartz runtime proposal
+is still absent and its five original mutation controls remain unfinished.

@@ -365,3 +365,11 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 
 .image-preview-thumbnail{display:inline-flex;align-items:center;justify-content:center;max-width:100%;overflow:hidden;border:0;border-radius:5px;background:#ebeef5;cursor:zoom-in}.image-preview-thumbnail img{width:100%;height:100%;object-fit:cover}.image-preview-empty{color:var(--color-text-muted,#6b7280)}.image-preview-dialog{position:fixed;inset:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;padding:16px;border:0;background:rgba(10,15,25,.97);color:white;box-sizing:border-box;overflow:hidden}.image-preview-dialog[open]{display:flex;flex-direction:column;gap:12px}.image-preview-dialog::backdrop{background:rgba(0,0,0,.8)}.image-preview-dialog header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.image-preview-dialog h2{font-size:18px;margin:0;overflow-wrap:anywhere}.image-preview-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}.image-preview-stage img{user-select:none;cursor:grab;flex-shrink:0}.image-preview-fit{max-width:100%;max-height:100%;object-fit:contain}.image-preview-original{max-width:none;max-height:none}.image-preview-dialog footer{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}.image-preview-dialog footer span{white-space:nowrap}
 .image-preview-thumbnail{box-shadow:0 0 5px 1px #ccc}.image-preview-thumbnail img{transition:transform .3s}.image-preview-thumbnail:hover img{transform:scale(1.2)}
+.generated-upload-entry{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.generated-upload-entry>span,.generated-upload-entry>a{overflow-wrap:anywhere;max-width:100%}
+.generated-upload-handle {touch-action: none; cursor: grab; padding: .5rem;}
+.generated-upload-handle:active {cursor: grabbing;}
+.generated-business-page {min-width:0;}
+.generated-business-page .post-dialog form {min-width:0;grid-template-columns:minmax(0,1fr);}
+.generated-business-page .post-dialog form>label {min-width:0;overflow-wrap:anywhere;}
+.generated-business-page [aria-label="子表明细"] {min-width:0;max-width:100%;overflow-x:auto;}
+.generated-business-page [aria-label="子表明细"] td {min-width:160px;vertical-align:top;}

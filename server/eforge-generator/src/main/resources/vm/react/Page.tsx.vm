@@ -6,6 +6,9 @@ import {useApi} from '../../../app/context';
 import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
 import {ImagePreview} from '../../../app/components/ImagePreview';
+import {ResourceFileLinks} from '../../../app/components/ResourceFileLinks';
+import {UploadEntries} from '../../../app/components/UploadEntries';
+import {generatedUploadIssue} from '../../generator/uploadPolicy';
 #if(!$table.tree)
 import {Pagination} from '../../../app/components/Pagination';
 #end
@@ -87,7 +90,7 @@ function FieldDisplay({field, value}: {field: Field; value: unknown}) {
   if (field.type === 'Date') return <>{displayDate(value)}</>;
   if (field.html === 'editor') return <NoticeRichContent html={text(value)} />;
   if (field.html === 'imageUpload') return <ImagePreview src={text(value)} label={field.label ?? field.key} />;
-  if (field.html === 'fileUpload') return <>{text(value).split(',').filter(path => path.startsWith('/profile/upload/')).map(path => <a key={path} href={path} download rel="noopener">{path.split('/').at(-1)}</a>)}</>;
+  if (field.html === 'fileUpload') return <ResourceFileLinks src={text(value)} />;
   return <>{text(value) || '—'}</>;
 }
 function fieldValue(values: object | null | undefined, key: string): unknown {
@@ -133,15 +136,20 @@ function FieldControl({field, value, disabled, onChange}: {field: Field; value: 
   if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange}} />;
   if (field.html === 'editor') return <RichTextEditor value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
   if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
-    <input type="file" multiple disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
+    <input type="file" multiple hidden={field.html === 'imageUpload' && text(value).split(',').filter(Boolean).length >= 5} disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
       const files = [...(event.target.files ?? [])]; event.target.value = ''; setError('');
-      if (files.length + text(value).split(',').filter(Boolean).length > 5 || files.some(file => file.size > 5 * 1024 * 1024)) {setError('最多上传五个文件，每个不超过 5 MB。'); return;}
+      if (files.length + text(value).split(',').filter(Boolean).length > 5) {setError('最多上传五个文件。'); return;}
       pending.current?.abort(); const controller = new AbortController(); pending.current = controller; setUploading(true); changeUploads(1);
-      try {const paths = text(value).split(',').filter(Boolean); for (const file of files) {paths.push(await api.uploadGeneratedFile(file, controller.signal)); if (!controller.signal.aborted) onChange(paths.join(','));}}
+      try {const paths = text(value).split(',').filter(Boolean), issues: string[] = []; for (const file of files) {
+        const issue = generatedUploadIssue([file], 0, field.html === 'imageUpload'); if (issue) {issues.push(file.name + '：' + issue); continue;}
+        try {const uploaded = await api.uploadGeneratedFile(file, controller.signal); if (uploaded.includes(',')) throw new Error('上传路径无法保存为文件列表。'); paths.push(uploaded); if (!controller.signal.aborted) onChange(paths.join(','));}
+        catch (cause) {if (controller.signal.aborted) break; issues.push(file.name + '：' + errorMessage(cause));}
+      } if (!controller.signal.aborted) setError(issues.join('；'));}
       catch (cause) {if (!controller.signal.aborted) setError(errorMessage(cause));} finally {changeUploads(-1); if (pending.current === controller) {pending.current = null; setUploading(false);}}
     }} />
     {uploading ? <p role="status">正在上传…</p> : null}{error ? <p role="alert">{error}</p> : null}
-    {text(value).split(',').filter(Boolean).map(path => <div key={path}><span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(item => item !== path).join(','))} /></div>)}
+    <p>最多上传五个文件，每个小于 5 MB。格式：{field.html === 'imageUpload' ? 'JPG/JPEG/PNG/GIF/WEBP' : 'DOC/DOCX/XLS/XLSX/PPT/PPTX/TXT/PDF'}</p>
+    <UploadEntries paths={text(value).split(',').filter(Boolean)} disabled={disabled || uploading} onChange={paths => onChange(paths.join(','))}>{(path, index) => <>{field.html === 'imageUpload' ? <ImagePreview src={path} label={(field.label ?? field.key) + ' 文件 ' + (index + 1)} width={148} height={148} /> : <ResourceFileLinks src={path} />}<span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(Boolean).filter((_item, ordinal) => ordinal !== index).join(','))} /></>}</UploadEntries>
   </div>;
   if (field.html === 'textarea') return <textarea value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
   return <input value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}
@@ -276,7 +284,7 @@ export function GeneratedPage() {
       const link = document.createElement('a'); link.href = url; link.download = 'export.xlsx'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }
-  return <section><PageHeader title={title} />
+  return <section className="generated-business-page"><PageHeader title={title} />
     {showFilters ? <form onSubmit={event => {event.preventDefault(); setPage(1); setFilters({...draft});}}>
       {fields.filter(field => field.query).flatMap(field => (field.between ? ['q_begin_', 'q_end_'] : ['q_']).map(prefix => {
         const wire = prefix + field.key;
@@ -321,7 +329,7 @@ export function GeneratedPage() {
           <FieldControl field={field} value={fieldValue(editor.form, field.key)} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
         </label>)}
 #if($table.sub)
-        <section aria-label="子表明细"><h3>子表明细</h3>
+        <section aria-label="子表明细" tabIndex={0}><h3>子表明细</h3>
           {!editor.viewing ? <Button label="新增子表行" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: [...current.form[childKey], {}]}}))} /> : null}
           <table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
             <tbody>{(editor.form[childKey] ?? []).map((row, index) => <tr key={index}>

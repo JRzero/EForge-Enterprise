@@ -9,6 +9,7 @@ on:
       - 'web/**'
       - 'contracts/openapi/**'
       - '.github/workflows/server-ci.yml'
+      - '.github/scripts/install-browser.sh'
       - '.gitattributes'
   pull_request:
     branches: [main]
@@ -18,6 +19,7 @@ on:
       - 'web/**'
       - 'contracts/openapi/**'
       - '.github/workflows/server-ci.yml'
+      - '.github/scripts/install-browser.sh'
       - '.gitattributes'
 
 permissions:
@@ -51,7 +53,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Install browser
         working-directory: web
-        run: npx playwright install --with-deps chromium
+        run: bash ../.github/scripts/install-browser.sh
       - name: Verify canonical auth against disposable MySQL and Redis
         shell: pwsh
         run: |
@@ -134,7 +136,7 @@ jobs:
           ./server/scripts/verify-generator-output-text.ps1 -LowerCaseTableNames 1
       - name: Install generated-page browser
         working-directory: web
-        run: npx playwright install --with-deps chromium
+        run: bash ../.github/scripts/install-browser.sh
       - name: Verify generated modules and React pages in original Boot JWT Redis and audit
         shell: pwsh
         run: |

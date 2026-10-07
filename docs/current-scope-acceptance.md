@@ -115,3 +115,26 @@ server authentication exceeded20-minute infrastructure bound after62 browsers.
 Successor f09ea7b separates both full profiles without reducing coverage; all
 four successor server jobs must pass before full cloud acceptance. No pending
 image stage, user-deferred builder or task mutation is called complete here.
+
+Latest published source7fc7c8c includes pagination, complete original image
+viewing and the two-profile CI matrix. Web37667177067 is successful. Same
+server37667176845 attempt2 has accepted both62/fullAPI/OpenAPI authentication
+profiles and runtime; generated-page verify remains pending. Attempt1 browser
+installation exceeded job timeouts and did not execute the affected tests.
+New upload-editing parity is a separate uncommitted stage: original file links,
+image picture-card viewing, duplicate deletion, drag/key order, strict five-MiB
+and count/type/comma boundaries plus partial batch success. Its strict frontend
+106/143 and final backend661 passed; real installed-page assertions are pending.
+See security-review-generated-upload-controls.md. No inventory mapping or this
+partial acceptance establishes whole-objective completion.
+
+Final upload-editing local acceptance:83259 terminated0, default and enabled
+configurations each passed all seven installed generated families. Exact
+duplicates/order/partial upload/root-child controls and the subtable's owned
+horizontal region are proven alongside original date/ID/permission/audit/XLSX
+tests. Final backend661 and frontend106 units/client/lint/types/build pass;
+143 mocked browsers passed earlier in this stage. Publication follows, with
+precise successor cloud still pending. The preceding7fc cloud verify did not
+run generated browsers because its Ubuntu Azure HTTP apt mirror stalled through
+both attempts; the other three server jobs and web succeeded. Source cloud
+acceptance requires the successor's four server jobs and web, not this cancellation.

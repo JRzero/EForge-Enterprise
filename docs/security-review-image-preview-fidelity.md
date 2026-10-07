@@ -71,3 +71,23 @@ declarations had passed with one existing platform skip and10 data-scope cases.
 Cleanup no longer throws from finally; original and cleanup failures are retained
 without replacing the primary cause. Latest actual complete source remains
 uncommitted until this stage publication; exact cloud acceptance is pending.
+
+Published implementation:7fc7c8ca4430584bf8c89aaeed4b34b1436d6b80.
+Its web37667177067 completed successfully. Server37667176845 attempt1
+accepted runtime integration and the default full authentication profile;
+verify and enabled authentication were cancelled during browser installation,
+before their generated-page/full enabled tests executed. Browser downloads
+stalled until the respective30/35-minute job limits. No product assertion
+failure was reported in those cancelled steps. Only unsuccessful jobs were
+retried in the same run; attempt2 remains pending. This is not full cloud
+acceptance, and the new upload-editing changes are outside this published SHA.
+
+Attempt2 of37667176845 completed: both authentication profiles and runtime
+passed; verify again exceeded30minutes in OS dependency installation. Direct
+image-preview-cloud-install-cancelled.log proves the Ubuntu Azure HTTP mirror
+stalled apt update before Chromium download or generated-page tests. Both62
+fullAPI/OpenAPI proofs are preserved in image-preview-cloud-default/enabled-
+accepted.log. The remaining generated cloud proof is unaccepted. A successor
+uses the official HTTPS Ubuntu archive, bounded apt connections and two bounded
+browser-install attempts; no test or dependency is skipped. Whole-goal remains
+incomplete, and this infrastructure correction is not product runtime mutation.

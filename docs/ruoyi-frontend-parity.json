@@ -4104,7 +4104,10 @@
     "cloudAuthFailure": "GitHub explicitly reports maximum20m execution exceeded;62 browsers passed before interrupted API;not full cloud acceptance"
   },
   "generatedImagePreviewAudit": {
-    "status": "local-final-original-viewer-parity-passed-publication-cloud-pending",
+    "status": "published-web-both-auth-runtime-cloud-success-verify-apt-mirror-timeout-successor-pending",
+    "implementationSha": "7fc7c8ca4430584bf8c89aaeed4b34b1436d6b80",
+    "cloudServerRun": 37667176845,
+    "cloudWebRun": 37667177067,
     "source": "server/eforge-generator/src/main/resources/vm/react/Page.tsx.vm",
     "required": [
       "original first thumbnail and complete gallery",
@@ -4119,5 +4122,16 @@
     "frontendUnits": 101,
     "mockedBrowsers": 143,
     "originalViewer": "Element UI2.15.14"
+  },
+  "generatedUploadControlsAudit": {
+    "status": "final-local-both-configurations-passed-publication-cloud-pending",
+    "realAuthority": "83259-terminal0-default-enabled-all-seven-installed-generated-families",
+    "backendDeclarations": 661,
+    "existingPlatformSkipped": 1,
+    "review": "docs/security-review-generated-upload-controls.md",
+    "required": ["editable image preview and file opening", "one-item duplicate deletion", "pointer and keyboard order saved in SQL", "original five-file and strict five-MiB boundaries", "mixed-batch and HTTP partial-success fidelity", "root and subtable browser proof"],
+    "frontendUnits": 106,
+    "mockedBrowsers": 143,
+    "fullGoalComplete": false
   }
 }

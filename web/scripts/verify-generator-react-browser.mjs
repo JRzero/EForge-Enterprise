@@ -64,6 +64,73 @@ async function verifyImageGallery(page,root,category,id,model) {
 async function readDetail(page,id) {
   return JSON.parse(await page.evaluate(async value => JSON.stringify(await window.probeDetail(value)),id));
 }
+async function verifyUploadEditing(page,category,id,model) {
+  let failure,writes=0;
+  const original=model.filePaths, second=model.imagePaths;
+  try {
+    const seeded={...model,filePaths:[original,second,original].join(',')};
+    if(category==='sub')seeded.fixtureLineList=model.fixtureLineList.map(child=>({...child,childFilePaths:[child.childFilePaths,child.childImagePaths,child.childFilePaths].join(',')}));
+    assert.equal(await page.evaluate(async raw=>window.probeImages(JSON.parse(raw)),JSON.stringify({id,model:seeded})),200);
+    await page.getByRole('button',{name:'刷新',exact:true}).click();
+    const row=page.getByRole('row').filter({has:page.getByText(model.label,{exact:true})});await row.getByRole('button',{name:'修改',exact:true}).click();
+    const dialog=page.getByRole('dialog'), control=dialog.locator('label').filter({hasText:/^filePaths/}).first();
+    await dialog.getByLabel('editOnly',{exact:true}).fill('上传编辑验证值');
+    const entries=control.locator('.generated-upload-entry');await expect(entries).toHaveCount(3);
+    const popupPromise=page.waitForEvent('popup');await entries.first().getByRole('link').click();const popup=await popupPromise;await expect(popup).toHaveURL(new URL(original,page.url()).href);
+    assert.equal(await popup.evaluate(()=>window.opener),null);
+    // Uploaded documents retain their original bytes; the browser chooses a text encoding when the source has no charset/BOM.
+    const opened=await popup.request.get(new URL(original,page.url()).href);assert.equal(opened.status(),200);assert.deepEqual(await opened.body(),Buffer.from('实际文件内容'));await expect(popup.locator('body')).not.toBeEmpty();await popup.close();
+    await entries.last().getByRole('button',{name:'移除文件',exact:true}).click();await expect(entries).toHaveCount(2);
+    await control.scrollIntoViewIfNeeded();
+    const handle=entries.first().getByRole('button',{name:'拖动文件 1 排序',exact:true});await handle.scrollIntoViewIfNeeded();const from=await handle.boundingBox(),to=await entries.last().getByRole('button',{name:'拖动文件 2 排序',exact:true}).boundingBox();assert(from&&to);
+    const viewport=page.viewportSize();assert(viewport && from.y>=0 && from.y+from.height<=viewport.height && to.y>=0 && to.y+to.height<=viewport.height,'Both owned drag entries must be visible before actual pointer input');
+    const hits=await page.evaluate(points=>points.map(point=>document.elementFromPoint(point.x,point.y)?.closest('button')?.getAttribute('aria-label')),[{x:from.x+from.width/2,y:from.y+from.height/2},{x:to.x+to.width/2,y:to.y+to.height/2}]);assert.deepEqual(hits,['拖动文件 1 排序','拖动文件 2 排序'],'Actual input must hit owned visible handles');
+    await page.mouse.move(from.x+from.width/2,from.y+from.height/2);await page.mouse.down();await page.mouse.move(to.x+to.width/2,to.y+to.height/2,{steps:8});await page.mouse.up();
+    await expect(entries.first().getByRole('link')).toHaveAttribute('href',new URL(second,page.url()).href);
+    await entries.first().getByRole('button',{name:'拖动文件 1 排序',exact:true}).focus();await page.keyboard.press('ArrowDown');await expect(entries.first().getByRole('link')).toHaveAttribute('href',new URL(original,page.url()).href);
+    await entries.last().getByRole('button',{name:'拖动文件 2 排序',exact:true}).focus();await page.keyboard.press('ArrowUp');
+    const imageControl=dialog.locator('label').filter({hasText:/^imagePaths/}).first();await imageControl.getByRole('button',{name:'预览图片 imagePaths 文件 1',exact:true}).click();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();
+    if(category==='sub') {
+      await dialog.getByLabel('childEditOnly',{exact:true}).fill('子表上传编辑验证值');
+      const childSection=dialog.getByRole('region',{name:'子表明细',exact:true});
+      assert(await childSection.evaluate(element=>element.scrollWidth>element.clientWidth),'All child fields must remain in the owned horizontal scroll region');
+      const rootBounds=await control.boundingBox(),dialogBounds=await dialog.boundingBox();assert(rootBounds&&dialogBounds&&rootBounds.width<=dialogBounds.width,'Child columns must not widen root upload controls');
+      const childControl=dialog.locator('label').filter({hasText:/^childFilePaths/}).first(),childEntries=childControl.locator('.generated-upload-entry');
+      await expect(childEntries).toHaveCount(3);await childEntries.last().getByRole('button',{name:'移除文件',exact:true}).click();await expect(childEntries).toHaveCount(2);
+      await childEntries.last().getByRole('button',{name:'拖动文件 2 排序',exact:true}).focus();await page.keyboard.press('ArrowUp');
+      await expect(childEntries.first().getByRole('link')).toHaveAttribute('href',new URL(model.fixtureLineList[0].childImagePaths,page.url()).href);
+      await dialog.locator('label').filter({hasText:/^childImagePaths/}).first().getByRole('button',{name:'预览图片 childImagePaths 文件 1',exact:true}).click();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();
+    }
+    let failNext=false;
+    await page.route('**/common/upload',async route=>{writes++;if(failNext){failNext=false;await route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({code:500,msg:'上传失败，请重试'})});}else await route.continue();});
+    const input=control.locator('input[type=file]');
+    for(const file of [{name:'拒绝,逗号.txt',mimeType:'text/plain',buffer:Buffer.from('x')},{name:'拒绝.exe',mimeType:'application/octet-stream',buffer:Buffer.from('x')},{name:'边界.txt',mimeType:'text/plain',buffer:Buffer.alloc(5*1024*1024)}]) {
+      await input.setInputFiles(file);await expect(control.getByRole('alert')).toBeVisible();assert.equal(writes,0);
+    }
+    await input.setInputFiles(Array.from({length:4},(_,i)=>({name:`超量${i}.txt`,mimeType:'text/plain',buffer:Buffer.from('x')})));await expect(control.getByRole('alert')).toContainText('五个');assert.equal(writes,0);
+    failNext=true;
+    const recovered=page.waitForResponse(response=>new URL(response.url()).pathname==='/common/upload'&&response.status()===200);
+    await input.setInputFiles([{name:'服务失败.txt',mimeType:'text/plain',buffer:Buffer.from('失败不得保存')},{name:'服务恢复.txt',mimeType:'text/plain',buffer:Buffer.from('成功必须保留')}]);await recovered;
+    await expect(entries).toHaveCount(3);await expect(control.getByRole('alert')).toContainText('服务失败.txt');assert.equal(writes,2);
+    await entries.last().getByRole('button',{name:'移除文件',exact:true}).click();await expect(entries).toHaveCount(2);
+    const acknowledgement=page.waitForResponse(response=>new URL(response.url()).pathname==='/common/upload'&&response.status()===200);
+    await input.setInputFiles([{name:'混合,拒绝.txt',mimeType:'text/plain',buffer:Buffer.from('x')},{name:'混合合法.txt',mimeType:'text/plain',buffer:Buffer.from('保留成功文件')}]);await acknowledgement;
+    await expect(entries).toHaveCount(3);await expect(control.getByRole('alert')).toContainText('逗号');assert.equal(writes,3);
+    await dialog.getByRole('button',{name:'保存',exact:true}).click();
+    try {await expect(dialog).toHaveCount(0);}catch(cause){console.error('Upload editor save diagnostics:',await dialog.innerText(),await dialog.locator('input,select,textarea').evaluateAll(elements=>elements.filter(element=>!element.checkValidity()).map(element=>({name:element.name,type:element.type,message:element.validationMessage}))));throw cause;}
+    const changed=(await readDetail(page,id)).data.filePaths.split(',');assert.equal(changed[0],second);assert.equal(changed[1],original);assert.equal(changed.length,3);
+    if(category==='sub')assert.equal((await readDetail(page,id)).data.fixtureLineList[0].childFilePaths,[model.fixtureLineList[0].childImagePaths,model.fixtureLineList[0].childFilePaths].join(','));
+    assert.equal(await (await page.request.get(new URL(changed[2],page.url()).href)).text(),'保留成功文件');
+    console.log('PASS: '+category+' upload editing opens inert files, previews nested images, removes one duplicate, persists actual pointer/keyboard ordering and validates comma/type/size/count before HTTP while retaining mixed-batch success.');
+  }catch(cause){failure=cause;}
+  try {
+    await page.unroute('**/common/upload');
+    if(await page.locator('dialog.image-preview-dialog[open]').count())await page.keyboard.press('Escape');
+    if(await page.locator('dialog.post-dialog[open]').count())await page.getByRole('dialog').getByRole('button',{name:'取消',exact:true}).click();
+    assert.equal(await page.evaluate(async raw=>window.probeImages(JSON.parse(raw)),JSON.stringify({id,model})),200);await page.getByRole('button',{name:'刷新',exact:true}).click();
+  }catch(cleanup){if(!failure)failure=cleanup;else console.error('Upload cleanup after original failure:',cleanup.message);}
+  if(failure)throw failure;
+}
 async function verifyPendingUpload(page,category,field,file){
   const uploadPath='/common/upload';
   const control=page.getByRole('dialog').locator('label').filter({hasText:new RegExp('^'+field)}).first();
@@ -370,6 +437,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           for(const key of ['imagePaths','filePaths']) {assert(detail.data[key].startsWith('/profile/upload/'));const served=await page.request.get(new URL(detail.data[key],page.url()).href);assert.equal(served.status(),200);if(key==='filePaths')assert.equal(await served.text(),'实际文件内容');}
         }
         await verifyImageGallery(page,root,category,id,detail.data);
+        await verifyUploadEditing(page,category,id,detail.data);
         if (category === 'tree') assert.equal(detail.data.parentId, '0');
         if (category === 'sub') {
           assert.equal(detail.data.fixtureLineList[0].label, '浏览器子表');

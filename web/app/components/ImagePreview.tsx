@@ -3,22 +3,13 @@ import {Button} from '@eforge/ui';
 
 function imageScale(current:number,delta:number) {return delta<0 && current<=.2 ? current : Number((current+delta).toFixed(3));}
 
-/** Image sources remain data: no HTML, data schemes, embedded credentials or script URLs. */
-export function imagePreviewUrls(source: string, origin: string): string[] {
-  return source.split(',').flatMap(raw => {
-    const value=raw.trim();
-    if (!value || Array.from(value).some(character=>character.charCodeAt(0)<32 || character.charCodeAt(0)===127)) return [];
-    try {
-      const url=new URL(value,origin+'/');
-      return ['http:','https:'].includes(url.protocol) && !url.username && !url.password ? [url.href] : [];
-    } catch {return [];}
-  });
-}
+import {safeResourceUrls} from './resourceUrls';
+export {safeResourceUrls as imagePreviewUrls} from './resourceUrls';
 
 export function ImagePreview({src, label, width=80, height=80}: {
   src: string; label: string; width?:CSSProperties['width']; height?:CSSProperties['height'];
 }) {
-  const urls=useMemo(()=>imagePreviewUrls(src,window.location.origin),[src]);
+  const urls=useMemo(()=>safeResourceUrls(src,window.location.origin),[src]);
   const [open,setOpen]=useState(false),[failed,setFailed]=useState('');
   const first=urls[0];
   if (!first) return <span className="image-preview-empty">暂无图片</span>;
