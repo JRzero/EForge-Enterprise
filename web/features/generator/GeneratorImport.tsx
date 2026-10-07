@@ -31,7 +31,7 @@ export function GeneratorImport({onCancel,onImported}:{onCancel:()=>void;onImpor
     </form>
     {error?<div role="alert">{error}<Button label="刷新数据库表" isDisabled={busy} onClick={()=>setVersion(value=>value+1)}/></div>:null}
     <DataTable data={data?.items ?? []} columns={columns} loading={loading} pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} getRowId={row=>'table:'+encodeURIComponent(row.name)} getRowSelectionLabel={row=>'选择待导入表 '+row.name} emptyText="没有可导入的数据库表"/>
-    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={busy} onPage={setPage} onSize={setPageSize} unit="张表" previousLabel="待导入上一页" nextLabel="待导入下一页" sizeLabel="待导入每页条数" />
+    <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={busy} onPage={setPage} onSize={setPageSize} unit="张表" previousLabel="待导入上一页" nextLabel="待导入下一页" sizeLabel="待导入每页条数" />
     <Button label={busy?'正在导入…':'导入所选表'} isDisabled={busy||loading||!names.length} onClick={()=>{void submit();}}/><Button label="取消导入" isDisabled={busy} onClick={onCancel}/>
   </ResourceDialog>;
 }

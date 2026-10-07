@@ -124,7 +124,7 @@ export function PostsPage() {
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无岗位" pagination={false} sortable={false}
       selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择岗位 ${row.name}`} /></div>
-    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
+    <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <PostDialog titleId="post-editor-title" busy={busy} onCancel={() => { setEditor(null); setActionError(''); }}><h2 id="post-editor-title">{editor.id ? '修改岗位' : '新增岗位'}</h2>
       <form onSubmit={event => { void save(event); }}>
         <Input label="岗位编码" value={editor.form.code} aria-required="true" isDisabled={busy} onChange={code => setEditor({...editor, form: {...editor.form, code}})} />

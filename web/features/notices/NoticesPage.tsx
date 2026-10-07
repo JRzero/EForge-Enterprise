@@ -93,7 +93,7 @@ export function NoticesPage() {
     </div>
     {feedback && <p role="status">{feedback}</p>}{actionError && !editor && !deleting && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试列表" onClick={() => refresh()} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} emptyText="暂无公告" pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择公告 ${row.title}`} /></div>}
-    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
+    <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor && <ResourceDialog titleId="notice-editor-title" busy={busy} onCancel={() => setEditor(null)}><h2 id="notice-editor-title">{editor.id ? '修改公告' : '新增公告'}</h2>
       <form onSubmit={event => {void save(event);}}><Input label="公告标题" value={editor.form.title} onChange={title => setEditor({...editor, form: {...editor.form, title}})} isDisabled={busy} />
         <label>公告类型<select aria-label="公告类型" value={editor.form.type} disabled={busy || types.loading || !!types.error} onChange={event => setEditor({...editor, form: {...editor.form, type: event.target.value}})}><option value="">请选择公告类型</option><DictionaryOptions options={types.options} current={editor.form.type} /></select></label>

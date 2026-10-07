@@ -100,7 +100,7 @@ export function GeneratorPage() {
     {error?<div role="alert">{error}<Button label="重试列表" onClick={()=>refresh()}/></div>:null}
     {actionError&&!editor&&!confirmation&&!creating&&!preview?<p role="alert">{actionError}</p>:null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无生成配置" pagination={false} sortable={false} selectable showColumnVisibility={false} columnVisibility={visibility} rowSelection={selection} onRowSelectionChange={setSelection} getRowId={row=>row.id} getRowSelectionLabel={row=>'选择表 '+row.name}/></div>
-    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
+    <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor?<GeneratorEditor detail={editor} onCancel={()=>setEditor(null)} onSaved={()=>{setEditor(null);refresh('配置已保存。');}}/>:null}
     {importing?<GeneratorImport onCancel={()=>setImporting(false)} onImported={()=>{setImporting(false);setPage(1);refresh('数据库表已导入。');}}/>:null}
     {confirmation?<ResourceDialog titleId="generator-confirm-title" alert busy={busy} onCancel={()=>{setConfirmation(null);setActionError('');}}>

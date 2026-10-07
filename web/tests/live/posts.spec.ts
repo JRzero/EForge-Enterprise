@@ -108,7 +108,7 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   expect(errors).toEqual([]);
 });
 
-test('real server pagination, page size and multi-row batch deletion', async ({page}) => {
+test('real server pagination, page size, independent-session shrinking totals and multi-row batch deletion', async ({page, browser}) => {
   await login(page);
   const prefix = `paging-${Date.now()}`;
   // Seed enough real rows to exercise page boundaries without twelve identical UI creates.
@@ -135,9 +135,48 @@ test('real server pagination, page size and multi-row batch deletion', async ({p
   await page.getByLabel('每页条数', {exact: true}).selectOption('20');
   await expect(page.getByRole('cell', {name: `${prefix}-11`, exact: true})).toBeVisible();
   await page.getByLabel('每页条数', {exact: true}).selectOption('30'); await expect(page.getByRole('cell', {name: `${prefix}-11`, exact: true})).toBeVisible(); await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
-  for (let index = 0; index < 12; index++) await page.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();
-  await page.getByRole('button', {name: '删除所选岗位', exact: true}).click();
-  await expect(page.getByRole('alertdialog')).toContainText('12 个岗位');
-  await page.getByRole('button', {name: '确认删除', exact: true}).click();
-  await expect(page.getByText('暂无岗位', {exact: true})).toBeVisible();
+  await page.getByLabel('每页条数', {exact: true}).selectOption('10');
+  await page.getByRole('button', {name: '下一页', exact: true}).click();
+  await expect(page.getByText('共 12 条，第 2 页', {exact: true})).toBeVisible();
+  const other = await browser.newPage({baseURL: String(test.info().project.use.baseURL)});
+  try {
+    await login(other);
+    await other.getByLabel('岗位名称筛选', {exact: true}).fill(prefix);
+    await other.getByRole('button', {name: '查询', exact: true}).click();
+    await other.getByLabel('每页条数', {exact: true}).selectOption('30');
+    for (const index of [9, 10, 11]) await other.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();
+    await other.getByRole('button', {name: '删除所选岗位', exact: true}).click();
+    await expect(other.getByRole('alertdialog')).toContainText('3 个岗位');
+    await other.getByRole('button', {name: '确认删除', exact: true}).click();
+    await expect(other.getByText('共 9 条，第 1 页', {exact: true})).toBeVisible();
+    await page.getByRole('button', {name: '刷新列表', exact: true}).click();
+    await expect(page.getByText('共 9 条，第 1 页', {exact: true})).toBeVisible();
+    await expect(page.getByRole('cell', {name: `${prefix}-0`, exact: true})).toBeVisible();
+    await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
+    await other.evaluate(async prefix => {
+      const token = JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken;
+      for (let index = 12; index < 15; index++) {
+        const response = await fetch('/api/v1/system/posts', {method: 'POST', headers: {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'},
+          body: JSON.stringify({code: `${prefix}-${index}`, name: `${prefix}-岗位-${index}`, sort: index, status: '0'})});
+        if (response.status !== 201) throw new Error('Pagination refill fixture creation failed.');
+      }
+    }, prefix);
+    await page.getByRole('button', {name: '刷新列表', exact: true}).click();
+    await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
+    await page.getByRole('button', {name: '下一页', exact: true}).click();
+    await expect(page.getByRole('cell', {name: `${prefix}-13`, exact: true})).toBeVisible();
+    await other.getByRole('button', {name: '刷新列表', exact: true}).click();
+    await expect(other.getByRole('cell', {name: `${prefix}-14`, exact: true})).toBeVisible();
+    for (const index of [...Array.from({length: 9}, (_, index) => index), 12, 13, 14]) {
+      await other.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();
+    }
+    await other.getByRole('button', {name: '删除所选岗位', exact: true}).click();
+    await expect(other.getByRole('alertdialog')).toContainText('12 个岗位');
+    await other.getByRole('button', {name: '确认删除', exact: true}).click();
+    await expect(other.getByText('暂无岗位', {exact: true})).toBeVisible();
+    await page.getByRole('button', {name: '刷新列表', exact: true}).click();
+    await expect(page.getByText('共 0 条，第 1 页', {exact: true})).toBeVisible();
+    await expect(page.getByText('暂无岗位', {exact: true})).toBeVisible();
+    await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
+  } finally { await other.close(); }
 });

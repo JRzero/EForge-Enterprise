@@ -109,7 +109,7 @@ export function ConfigurationsPage() {
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无参数" pagination={false} sortable={false} selectable showColumnVisibility={false}
       rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择参数 ${row.name}`} /></div>
-    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
+    <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <ResourceDialog titleId="configuration-editor-title" busy={busy} onCancel={() => {setEditor(null); setActionError('');}}><h2 id="configuration-editor-title">{editor.id ? '修改参数' : '新增参数'}</h2>
       <form onSubmit={event => {void save(event);}}>
         <Input label="参数名称" value={editor.form.name} aria-required="true" isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
