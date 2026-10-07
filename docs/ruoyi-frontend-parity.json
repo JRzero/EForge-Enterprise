@@ -1868,7 +1868,7 @@
     "fullGoalComplete": false
   },
   "consoleCachedSessions": {
-    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "status": "exact-cloud-accepted-431b56f",
     "review": "docs/security-review-console-cached-session.md",
     "targets": ["druid", "api-docs"],
     "validReturn": "same-native-DOM-input-SQL-response-cookies-zero-ticket-POST-zero-native-reload",

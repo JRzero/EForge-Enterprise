@@ -88,3 +88,14 @@ Full active parity remains unfinished: other editor/resource/action ownership,
 nested rich-image audit, sidebar/topnav/settings, dates/timezones/XLSX and final
 original-capability audit remain. Task mutations still require the specific
 runtime authorization boundary. This phase is not completion of the full goal.
+
+Exact console-source acceptance (2026-10-07):431b56fb2cec333416edbd50557f4cba4c493618
+has server37586911642 all three jobs SUCCESS and web37586911636 SUCCESS.
+Direct console-cached-native-cloud-accepted-server/web.log proves both57 real
+browsers with full MySQL/Redis APIs and unchanged live OpenAPI,619 backend test
+declarations including10 data-scope cases (one platform-specific skip),98 unit
+and102 mocked browser tests. The earlier pending status above is superseded.
+Observer93462 exited1 while authoritative jobs succeeded; that observation exit
+is not a product failure. No new source or test rerun was needed for acceptance.
+This accepts scoped native console ownership only; sidebar/layout and the full
+active parity audit remain unfinished. Form builder remains deferred.
