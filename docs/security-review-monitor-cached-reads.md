@@ -43,7 +43,7 @@ Redis session authentication, generated templates and shared hook are unchanged.
   Captured interrupted requests really abort, return reads receive genuine200,
   and explicit names/keys/value refresh plus online search reach the server.
 
-## Final local acceptance; exact cloud pending
+## Final local and exact cloud acceptance
 Sequential authority90787 ended0. Focused9 browsers plus complete API, default55
 and enabled-console/custom-output55 browsers plus complete API all passed.
 Final logs are monitor-cached-reads-focused-accepted-runtime.log,
@@ -53,12 +53,16 @@ rollback, owned data retention, captcha and enabled console authentication pass.
 Both live contracts and contracts/openapi/api-v1.json have exact SHA256
 65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
 
-Exact new-source cloud acceptance remains pending. Do not use the previous
-rich-text commit's cloud as this source's proof. The unchanged Java backend has
-619 declared/618 locally applicable tests with the existing platform-specific
-skip; no fresh local Maven run is claimed here. The exact preceding2bf7c2d cloud
-backend verify passed, including10 scope cases; the new-source cloud must verify
-its own complete workflow.
+Exact947f70681587d0c518ebd6506ffcb96a51b0f765 server37577784305 all three
+jobs and web37577784304 are terminal SUCCESS. Direct
+monitor-cached-reads-cloud-accepted-server/web.log prove both55 framework browsers,
+complete API/OpenAPI gates,619 declared backend cases with10 scope cases and the
+existing platform-specific skip,93 mocked browsers and98 frontend units. Real
+Linux symlink protection passes; the Windows-only junction case is skipped by
+its OS assumption. The existing local Windows real-junction case passed; its
+symlink privilege skip must not be confused with the Linux OS-only skip.
+No fresh local Maven run is claimed for this frontend-only phase. New statistics
+source under separate verification is not accepted by this committed cloud.
 
 Server/cache statistics, embedded console lifecycle, other resource/editor/action
 lifecycles, nested rich-image-specific audit, sidebar/topnav/settings, date/timezone

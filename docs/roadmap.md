@@ -1092,3 +1092,12 @@ pending. No new clear/revoke write lifecycle acceptance, backend/runtime changes
 form-builder completion or full-goal completion is claimed. Server/cache stats,
 embedded console lifecycle, other editor/actions, nested rich-image audit,
 sidebar/topnav/settings and remaining active final audits stay open.
+### Cache entries and online-session exact cloud acceptance
+Exact947f70681587d0c518ebd6506ffcb96a51b0f765 server37577784305 all three
+jobs and web37577784304 are terminal SUCCESS. Direct accepted logs prove both55
+framework browsers and complete API/OpenAPI,619 backend declarations/10 scope,
+98 units/93 mocked, and complementary filesystem platform gates. This accepts
+only the committed cache-list/online-read source. Subsequent server/cache-statistics
+retention source has independent actual before/after and genuine-browser gates;
+its complete profiles and exact cloud are still pending. Full active goal remains
+open, form builder deferred and the specific Quartz runtime denial unchanged.

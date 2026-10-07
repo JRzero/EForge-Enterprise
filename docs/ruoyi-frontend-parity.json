@@ -1819,7 +1819,9 @@
   }
 ,
   "monitorCachedReads": {
-    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "status": "exact-cloud-accepted-947f706",
+    "cloudServer": "37577784305",
+    "cloudWeb": "37577784304",
     "review": "docs/security-review-monitor-cached-reads.md",
     "pages": ["cache-entries", "online-sessions"],
     "readOwners": "three-independent-cache-tickets-and-one-online-ticket",
