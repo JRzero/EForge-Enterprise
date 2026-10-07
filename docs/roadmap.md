@@ -1101,3 +1101,18 @@ only the committed cache-list/online-read source. Subsequent server/cache-statis
 retention source has independent actual before/after and genuine-browser gates;
 its complete profiles and exact cloud are still pending. Full active goal remains
 open, form builder deferred and the specific Quartz runtime denial unchanged.
+### Server and Redis statistics retained reads: final local verification
+Two actual App/StrictMode tab-return cases failed before this product source and
+pass after. Completed OSHI samples/Redis counters and graphs now survive cached
+return without a GET; interrupted sampling really aborts and resumes with one
+genuine200, while explicit refresh samples again. Original graph keyboard/resize,
+units, thresholds, safe text, failures/denial/retry and permissions remain intact.
+All17 scoped mocked cases and repro/lint/types/98 units/build/all95 mocked pass.
+Final authority72134 ended0:focused9 genuine cases/full API and both default/
+enabled profiles each57 genuine browsers/full API pass. Contract hashes are
+exact. The initial real server case used a page title as its SQL menu tag label;
+only that evidenced test locator was corrected, with no assertion or timeout
+relaxation. See security-review-statistics-cached-reads.md. New exact cloud remains
+pending. Embedded console lifecycle, other editor/actions, nested rich-image audit,
+sidebar/topnav/settings and active final audits remain. Form builder is deferred
+and the specifically rejected Quartz runtime scheme unchanged. Goal not complete.

@@ -4,16 +4,19 @@ import {Button} from '@eforge/ui';
 import type {CacheStatistics} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
+import {useRetainedRead} from '../../app/useRetainedRead';
 const CacheCharts = lazy(() => import('./CacheCharts').then(module => ({default: module.CacheCharts})));
 export function CacheStatisticsPage() {
   const api = useApi(); const [data, setData] = useState<CacheStatistics | null>(null);
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [version, setVersion] = useState(0);
+  const read = useRetainedRead();
   useEffect(() => {
+    const complete = read([api, version]); if (!complete) return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null);
-    api.getCacheStatistics(controller.signal).then(result => {if (!controller.signal.aborted) {setData(result); setLoading(false);}})
-      .catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+    api.getCacheStatistics(controller.signal).then(result => {if (!controller.signal.aborted) {setData(result); setLoading(false); complete();}})
+      .catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, version]);
+  }, [api, version, read]);
   const cpu = Number(data?.info.userChildrenCpuSeconds);
   const entries = data ? [
     ['Redis 版本', data.info.version], ['运行模式', data.info.mode ? (data.info.mode === 'standalone' ? '单机' : '集群') : '—'], ['端口', data.info.port], ['客户端数', data.info.connectedClients],

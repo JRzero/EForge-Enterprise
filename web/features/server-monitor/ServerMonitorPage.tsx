@@ -5,6 +5,7 @@ import {Button} from '@eforge/ui';
 import type {DiskMetrics, ServerMonitorResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
+import {useRetainedRead} from '../../app/useRetainedRead';
 
 const number = (value: number | undefined, unit = '') => value == null ? '—' : `${value}${unit}`;
 const diskColumns: ColumnDef<DiskMetrics>[] = [
@@ -20,13 +21,15 @@ export function ServerMonitorPage() {
   const api = useApi();
   const [data, setData] = useState<ServerMonitorResponse | null>(null);
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [version, setVersion] = useState(0);
+  const read = useRetainedRead();
   useEffect(() => {
+    const complete = read([api, version]); if (!complete) return;
     const controller = new AbortController(); setLoading(true); setError(''); setData(null);
     api.getServerMonitor(controller.signal).then(result => {
-      if (!controller.signal.aborted) {setData(result); setLoading(false);}
-    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
+      if (!controller.signal.aborted) {setData(result); setLoading(false); complete();}
+    }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false); complete();}});
     return () => controller.abort();
-  }, [api, version]);
+  }, [api, version, read]);
   return <section className="server-monitor-page" aria-busy={loading}>
     <PageHeader title="服务器监控" description="查看服务器资源及 Java 运行环境。" />
     <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />

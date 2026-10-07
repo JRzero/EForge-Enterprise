@@ -45,3 +45,12 @@ test('leaving monitor aborts pending sampling', async ({page}) => {
   await login(page); await expect(page.getByRole('heading', {name: 'CPU', exact: true})).toBeVisible(); pending = true;
   await page.getByRole('button', {name: '刷新', exact: true}).click(); await expect(page.getByText('正在加载服务监控数据，请稍候！', {exact: true})).toBeVisible(); await page.getByRole('link', {name: '工作台', exact: true}).click(); await expect(page.getByRole('heading', {name: /^你好，/})).toBeVisible(); await expect.poll(() => aborted).toBe(true);
 });
+
+test('completed monitor server sample survives actual tabs without an implicit resample',async({page})=>{
+  let calls=0,blocked=false;
+  await page.route('**/api/v1/monitor/server',async route=>{calls++;if(!blocked)await route.fulfill({json:sample}).catch(()=>{});});
+  await login(page);await expect(page.locator('time')).toHaveAttribute('datetime',sample.sampledAt);const completed=calls;blocked=true;
+  await page.getByRole('link',{name:'工作台',exact:true}).click();await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：服务器监控',exact:true}).click();
+  await expect(page.locator('time')).toHaveAttribute('datetime',sample.sampledAt);await expect(page.getByRole('heading',{name:'CPU',exact:true})).toBeVisible();
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));expect(calls).toBe(completed);
+});

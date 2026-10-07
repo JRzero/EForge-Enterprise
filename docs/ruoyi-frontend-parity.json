@@ -1842,4 +1842,27 @@
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }
+,
+  "statisticsCachedReads": {
+    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "review": "docs/security-review-statistics-cached-reads.md",
+    "pages": ["server-monitor", "cache-statistics"],
+    "completedReturn": "actual-cached-tab-retained-sample-counter-graphs-zero-GET",
+    "interruptedReturn": "actual-request-abort-exactly-one-genuine200-resume",
+    "refresh": "explicit-real-OSHI-new-sample-and-Redis-response",
+    "chartInteraction": "retained-graphs-original-safe-keyboard-tooltip-and-resize",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 95,
+    "scopedMockedBrowserTests": 17,
+    "focusedRealBrowsers": 9,
+    "realFrameworkBrowserTestsPerProfile": 57,
+    "fullApiProfiles": ["default", "consoles-and-custom-output-enabled"],
+    "beforeEvidence": "statistics-cached-reads-before-browser.log",
+    "finalEvidence": ["statistics-cached-reads-targeted.log", "statistics-cached-reads-final-frontend.log", "statistics-cached-reads-final-static.log", "statistics-cached-reads-focused-final-runtime.log", "statistics-cached-reads-disabled-runtime.log", "statistics-cached-reads-enabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "freshLocalMavenRun": false,
+    "remaining": ["embedded-consoles", "other-editor-actions", "nested-rich-upload-final-audit", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

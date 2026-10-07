@@ -125,3 +125,12 @@ test('completed cache names keys and value survive actual tabs with no implicit 
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   expect(calls).toEqual(before);
 });
+test('completed monitor cache statistics and graphs survive actual tabs without an implicit reread',async({page})=>{
+  let calls=0,blocked=false;const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/api/v1/monitor/cache',async route=>{calls++;if(!blocked)await route.fulfill({json:stats}).catch(()=>{});});
+  await login(page,'/cache');await expect(page.locator('.cache-info dd').filter({hasText:/^9007199254740993$/})).toBeVisible();await expect(page.locator('.cache-chart svg')).toHaveCount(2);const completed=calls;blocked=true;
+  await page.getByRole('link',{name:'工作台',exact:true}).click();await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：缓存监控',exact:true}).click();
+  await expect(page.locator('.cache-info dd').filter({hasText:/^9007199254740993$/})).toBeVisible();await expect(page.locator('.cache-chart svg')).toHaveCount(2);
+  await page.getByRole('button',{name:new RegExp('^'+unsafe+'：')}).focus();await page.keyboard.press('Enter');await expect(page.locator('.cache-chart-tooltip')).toContainText('9007199254740993 次');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));expect(calls).toBe(completed);expect(errors).toEqual([]);
+});
