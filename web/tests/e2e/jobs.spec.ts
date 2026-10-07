@@ -49,3 +49,46 @@ test('task context failure never sends an unfiltered log request and retries saf
   await login(page, `/job/log/${id}`, ['monitor:job:list', 'monitor:job:query']); await expect(page.getByRole('alert')).toBeVisible(); expect(reads).toBe(0); fail = false; await page.getByRole('button', {name: '重试任务信息'}).click(); await expect(page.getByRole('cell', {name: id, exact: true})).toBeVisible(); expect(reads).toBe(1);
   await page.setViewportSize({width: 375, height: 812}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+for(const logs of [false,true])test('cached '+(logs?'log':'task')+' export cancellation allows an explicit new download',async({page})=>{
+  await page.route('**/api/v1/monitor/jobs?*',route=>route.fulfill({json:{items:[job],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/monitor/job-logs?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'2',username:'reader',displayName:'账号',sex:'2',roleNames:'',postNames:''}}));
+  const exportPath='/api/v1/monitor/'+(logs?'job-logs':'jobs')+'/export';
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let reads=0;
+  await page.route('**'+exportPath+'?*',async route=>{reads++;if(reads===1)await gate;await route.fulfill({body:'PK',contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}).catch(()=>{});});
+  await login(page,logs?'/job/log/0':'/job',['monitor:job:list','monitor:job:query','monitor:job:export']);
+  const download=page.getByRole('button',{name:'导出',exact:true});await expect(download).toBeEnabled();
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname===exportPath);await download.click();const pending=await requested;
+  const cancelled=page.waitForEvent('requestfailed',{predicate:request=>request===pending});
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    expect((await cancelled).failure()?.errorText).toMatch(/abort|cancel/i);
+  }finally{release();}
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：'+(logs?'调度日志':'定时任务'),exact:true}).click();
+  await expect(download).toBeEnabled();expect(reads).toBe(1);
+  const saved=page.waitForEvent('download');await download.click();expect((await saved).suggestedFilename()).toBe(logs?'任务调度日志.xlsx':'定时任务.xlsx');expect(reads).toBe(2);
+});
+for(const clear of [false,true])test('cached log '+(clear?'clear':'delete')+' keeps one pending write across browser history navigation',async({page})=>{
+  let total=1;
+  await page.route('**/api/v1/monitor/job-logs?*',route=>route.fulfill({json:{items:total?[row]:[],total,page:1,pageSize:10}}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'2',username:'reader',displayName:'账号',sex:'2',roleNames:'',postNames:''}}));
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let writes=0;
+  const writePath='/api/v1/monitor/job-logs'+(clear?'/clear':'');
+  await page.route('**'+writePath,async route=>{writes++;await gate;total=0;await route.fulfill({status:204}).catch(()=>{});});
+  await login(page,'/job/log/0',['monitor:job:list','monitor:job:query','monitor:job:remove']);
+  await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+  const tabs=page.getByRole('navigation',{name:'页面标签'});await tabs.getByRole('link',{name:'页面标签：调度日志',exact:true}).click();
+  if(!clear)await page.getByRole('checkbox',{name:'选择日志 '+id,exact:true}).check();
+  await page.getByRole('button',{name:clear?'清空':'删除',exact:true}).click();
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname===writePath&&request.method()===(clear?'POST':'DELETE'));
+  await page.getByRole('alertdialog').getByRole('button',{name:clear?'确认清空':'确认删除',exact:true}).click();const pending=await requested;
+  try{
+    await page.goBack();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await tabs.getByRole('link',{name:'页面标签：调度日志',exact:true}).click();
+    await expect(page.getByRole('alertdialog').getByRole('button',{name:clear?'确认清空':'确认删除',exact:true})).toBeDisabled();
+    expect(pending.failure()).toBeNull();expect(writes).toBe(1);
+  }finally{release();}
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);await expect(page.getByText(clear?'日志已清空。':'日志已删除。',{exact:true})).toBeVisible();
+  await expect(page.getByText('暂无记录',{exact:true})).toBeVisible();expect(writes).toBe(1);
+});

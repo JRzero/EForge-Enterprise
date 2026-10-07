@@ -1738,4 +1738,20 @@
     "fullGoalComplete": false,
     "formBuilder": "deferred-not-complete"
   }
+,
+  "jobCachedActions": {
+    "status": "local-both53-full-api-success-exact-cloud-pending",
+    "review": "docs/security-review-job-cached-actions.md",
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 89,
+    "fullRealBrowserProfiles": [53, 53],
+    "exportCancellation": "exact-task-log-get-abort-explicit-retry-genuine-xlsx",
+    "pendingLogWrites": "history-navigation-preserves-locked-single-delete-clear-actual204-and-sql-result",
+    "automaticMutationRetry": false,
+    "beforeEvidence": ["page-cache-jobs-export-before.log", "page-cache-jobs-actions-before.log"],
+    "finalEvidence": ["page-cache-jobs-actions-after.log", "page-cache-jobs-final-frontend.log", "page-cache-jobs-disabled-runtime.log", "page-cache-jobs-enabled-runtime.log"],
+    "openApiSha256": "65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC",
+    "fullGoalComplete": false,
+    "formBuilder": "deferred-not-complete"
+  }
 }

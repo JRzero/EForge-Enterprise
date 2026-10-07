@@ -31,7 +31,12 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   const [detail, setDetail] = useState<string | null>(null), [confirmation, setConfirmation] = useState<{clear: boolean; ids: string[]} | null>(null);
   useEffect(() => {if (cron === null && cronReturnFocus.current) {cronReturnFocus.current.focus(); cronReturnFocus.current = null;}}, [cron]);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
-  const action = useRef<AbortController | null>(null); useEffect(() => () => action.current?.abort(), []);
+  const action = useRef<{kind: 'export' | 'mutation'; controller: AbortController} | null>(null);
+  useEffect(() => {
+    if (action.current?.kind === 'export' && action.current.controller.signal.aborted) {action.current = null; setBusy(false);}
+    // A cancelled export can be explicitly retried. A sent write must settle once.
+    return () => {if (action.current?.kind === 'export') action.current.controller.abort();};
+  }, []);
   const contextRead=useRetainedRead();
   useEffect(() => {
     const complete=contextRead([api, jobId, logs, contextVersion]);if(!complete)return;
@@ -71,17 +76,17 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   function reset() {setDraft(empty); setFilters(empty); setPage(1); setSorting([{id: logs ? 'createdAt' : 'id', desc: logs}]); setActionError(''); setVersion(value => value + 1);}
   async function mutate() {
     if (!confirmation || busy) return;
-    const controller = new AbortController(); action.current = controller; setBusy(true); setActionError('');
+    const controller = new AbortController(); action.current = {kind: 'mutation', controller}; setBusy(true); setActionError('');
     try {if (confirmation.clear) await api.clearJobLogs(controller.signal); else await api.deleteJobLogs(confirmation.ids, controller.signal);
       if (!controller.signal.aborted) {if (confirmation.clear) setPage(1); setConfirmation(null); setFeedback(confirmation.clear ? '日志已清空。' : '日志已删除。'); setVersion(value => value + 1);}}
-    catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted) setBusy(false);}
+    catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted && action.current?.controller === controller) {action.current = null; setBusy(false);}}
   }
   async function download() {
     if (busy) return;
-    const controller = new AbortController(); action.current = controller; setBusy(true); setActionError('');
+    const controller = new AbortController(); action.current = {kind: 'export', controller}; setBusy(true); setActionError('');
     try {const file = logs ? await api.exportJobLogs(logQuery, controller.signal) : await api.exportJobs(jobQuery, controller.signal); if (controller.signal.aborted) return;
       const url = URL.createObjectURL(file), link = document.createElement('a'); link.href = url; link.download = logs ? '任务调度日志.xlsx' : '定时任务.xlsx'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);}
-    catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted) setBusy(false);}
+    catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted && action.current?.controller === controller) {action.current = null; setBusy(false);}}
   }
   return <section className="posts-page"><PageHeader title={logs ? '调度日志' : '定时任务'} eyebrow="系统监控" description={logs ? '查询任务执行结果和异常信息。' : '查看任务计划与执行记录。'} />
     <DictionaryNotice dictionary={groups} /><DictionaryNotice dictionary={statuses} />

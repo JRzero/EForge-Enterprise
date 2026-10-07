@@ -15,6 +15,39 @@ async function download(page: Page, name: string) {
   const pending = page.waitForEvent('download'); await page.getByRole('button', {name: '导出', exact: true}).click(); const file = await pending; expect(file.suggestedFilename()).toBe(name); return workbookXml(await readFile((await file.path())!));
 }
 
+
+async function cancelExportAndResume(page:Page,logs:boolean){
+  const path='/api/v1/monitor/'+(logs?'job-logs':'jobs')+'/export';
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**'+path+'?*',async route=>{await gate;await route.continue().catch(()=>{});});
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname===path);
+  await page.getByRole('button',{name:'导出',exact:true}).click();const captured=await requested;
+  const aborted=page.waitForEvent('requestfailed',{predicate:request=>request===captured});
+  try{
+    await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    expect((await aborted).failure()?.errorText).toMatch(/abort|cancel/i);
+  }finally{release();}
+  await page.unroute('**'+path+'?*');
+  await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：'+(logs?'调度日志':'定时任务'),exact:true}).click();
+  await expect(page.getByRole('button',{name:'导出',exact:true})).toBeEnabled();
+}
+async function completeLogWriteAcrossHistory(page:Page,clear:boolean){
+  const path='/api/v1/monitor/job-logs'+(clear?'/clear':'');
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let writes=0;
+  await page.route('**'+path,async route=>{writes++;await gate;await route.continue();});
+  const sent=page.waitForRequest(request=>new URL(request.url()).pathname===path&&request.method()===(clear?'POST':'DELETE'));
+  const committed=page.waitForResponse(response=>new URL(response.url()).pathname===path&&response.status()===204);
+  const confirm=page.getByRole('alertdialog').getByRole('button',{name:clear?'确认清空':'确认删除',exact:true});
+  await confirm.click();const captured=await sent;
+  try{
+    await page.goBack();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：调度日志',exact:true}).click();
+    await expect(confirm).toBeDisabled();expect(captured.failure()).toBeNull();expect(writes).toBe(1);
+  }finally{release();}
+  await committed;await expect(page.getByRole('alertdialog')).toHaveCount(0);
+  await expect(page.getByText(clear?'日志已清空。':'日志已删除。',{exact:true})).toBeVisible();expect(writes).toBe(1);
+  await page.unroute('**'+path);
+}
 test('actual tasks and Quartz logs retain original context, details, sorting, XLSX, paging and destructive confirmations', async ({page}) => {
   test.setTimeout(120000); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   let savedRemark = '';
@@ -30,7 +63,7 @@ test('actual tasks and Quartz logs retain original context, details, sorting, XL
     await expect.poll(async () => {const response = await page.request.get(`/api/v1/monitor/job-logs?name=${prefix}&pageSize=100`, {headers}); expect(response.status()).toBe(200); logs = (await response.json()).items; return logs.length;}, {timeout: 15000}).toBe(12);
     await page.getByRole('textbox', {name: '任务名称', exact: true}).fill(prefix); await page.getByRole('combobox', {name: '任务组名', exact: true}).selectOption('SYSTEM'); await page.getByRole('combobox', {name: '任务状态', exact: true}).selectOption('1'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
     await page.getByRole('button', {name: `详细任务 ${ids[0]}`, exact: true}).click(); let dialog = page.getByRole('dialog'); await expect(dialog).toContainText('2099'); await expect(dialog).toContainText('不触发立即执行'); await expect(dialog).toContainText(savedRemark); await expect(dialog.locator('img,script')).toHaveCount(0); await page.keyboard.press('Escape'); expect(await page.evaluate(() => document.body.dataset.jobAttack)).toBeUndefined();
-    await page.getByRole('button', {name: '任务名称', exact: true}).click(); const taskXml = await download(page, '定时任务.xlsx'); expect(taskXml).toContain(`${prefix}-11`); expect(taskXml).toContain(`${prefix}-00`); expect(taskXml.indexOf(`${prefix}-00`)).toBeLessThan(taskXml.indexOf(`${prefix}-11`));
+    await page.getByRole('button', {name: '任务名称', exact: true}).click(); await cancelExportAndResume(page,false); const taskXml = await download(page, '定时任务.xlsx'); expect(taskXml).toContain(`${prefix}-11`); expect(taskXml).toContain(`${prefix}-00`); expect(taskXml.indexOf(`${prefix}-00`)).toBeLessThan(taskXml.indexOf(`${prefix}-11`));
     await page.getByRole('button', {name: '下一页', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 12 条，第 2 页', {exact: true})).toBeVisible(); await page.getByRole('button', {name: '上一页', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
     await page.getByRole('button', {name: `任务日志 ${ids[0]}`, exact: true}).click(); await expect(page.getByRole('heading', {name: '调度日志', exact: true})).toBeVisible(); await expect(page.getByRole('textbox', {name: '任务名称', exact: true})).toHaveValue(`${prefix}-00`); await expect(page.locator('[data-page-path]:visible').getByText('共 1 条，第 1 页', {exact: true})).toBeVisible();
     await page.getByRole('button', {name: '关闭调度日志'}).click(); await expect(page.getByRole('heading', {name: '定时任务', exact: true})).toBeVisible(); await page.getByRole('button', {name: '全部调度日志'}).click(); await expect(page.getByRole('heading', {name: '调度日志', exact: true})).toBeVisible();
@@ -39,11 +72,11 @@ test('actual tasks and Quartz logs retain original context, details, sorting, XL
     await page.getByRole('button', {name: `详细日志 ${failure.id}`, exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.getByLabel('异常信息')).toContainText('NoSuchMethodException'); await expect(dialog).toContainText('开始时间'); await page.keyboard.press('Escape');
     await page.getByRole('combobox', {name: '执行状态', exact: true}).selectOption(''); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 12 条，第 1 页', {exact: true})).toBeVisible(); await page.getByRole('button', {name: '执行时间', exact: true}).click();
     const sorted = (await (await page.request.get(`/api/v1/monitor/job-logs?name=${prefix}&direction=asc&pageSize=100`, {headers})).json()).items as JobLogResponse[];
-    const logXml = await download(page, '任务调度日志.xlsx'); for (const row of sorted) expect(logXml).toContain(row.name!); expect(logXml.indexOf(sorted[0]!.name!)).toBeLessThan(logXml.indexOf(sorted[11]!.name!));
+    await cancelExportAndResume(page,true); const logXml = await download(page, '任务调度日志.xlsx'); for (const row of sorted) expect(logXml).toContain(row.name!); expect(logXml.indexOf(sorted[0]!.name!)).toBeLessThan(logXml.indexOf(sorted[11]!.name!));
     await page.locator('[data-page-path]:visible').getByText('列显示', {exact: true}).click(); await page.getByRole('checkbox', {name: '日志信息', exact: true}).uncheck(); await expect(page.getByRole('columnheader', {name: '日志信息', exact: true})).toHaveCount(0); await page.locator('[data-page-path]:visible').getByText('列显示', {exact: true}).click();
     await page.getByRole('button', {name: '下一页', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 12 条，第 2 页', {exact: true})).toBeVisible(); for (const row of sorted.slice(-2)) await page.getByRole('checkbox', {name: `选择日志 ${row.id}`, exact: true}).check();
-    await page.getByRole('button', {name: '删除', exact: true}).click(); await page.getByRole('button', {name: '确认删除', exact: true}).click(); await expect(page.locator('[data-page-path]:visible').getByText('共 10 条，第 1 页', {exact: true})).toBeVisible(); for (const row of sorted.slice(-2)) expect((await page.request.get(`/api/v1/monitor/job-logs/${row.id}`, {headers})).status()).toBe(404);
-    await page.getByRole('button', {name: '清空', exact: true}).click(); await page.keyboard.press('Escape'); await expect(page.locator('[data-page-path]:visible').getByText('共 10 条，第 1 页', {exact: true})).toBeVisible(); await page.getByRole('button', {name: '清空', exact: true}).click(); await page.getByRole('button', {name: '确认清空'}).click(); await expect(page.locator('[data-page-path]:visible').getByText('暂无记录', {exact: true})).toBeVisible(); expect((await (await page.request.get(`/api/v1/monitor/job-logs?name=${prefix}`, {headers})).json()).total).toBe(0); expect(errors).toEqual([]);
+    await page.getByRole('button', {name: '删除', exact: true}).click(); await completeLogWriteAcrossHistory(page,false); await expect(page.locator('[data-page-path]:visible').getByText('共 10 条，第 1 页', {exact: true})).toBeVisible(); for (const row of sorted.slice(-2)) expect((await page.request.get(`/api/v1/monitor/job-logs/${row.id}`, {headers})).status()).toBe(404);
+    await page.getByRole('button', {name: '清空', exact: true}).click(); await page.keyboard.press('Escape'); await expect(page.locator('[data-page-path]:visible').getByText('共 10 条，第 1 页', {exact: true})).toBeVisible(); await page.getByRole('button', {name: '清空', exact: true}).click(); await completeLogWriteAcrossHistory(page,true); await expect(page.locator('[data-page-path]:visible').getByText('暂无记录', {exact: true})).toBeVisible(); expect((await (await page.request.get(`/api/v1/monitor/job-logs?name=${prefix}`, {headers})).json()).total).toBe(0); expect(errors).toEqual([]);
   } finally {if (ids.length) expect((await (await page.request.delete(`${backend}/monitor/job/${ids.join(',')}`, {headers})).json()).code).toBe(200);}
 });
 

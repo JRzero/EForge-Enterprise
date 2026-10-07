@@ -2101,3 +2101,18 @@ prove both53 real framework browsers, complete native/generated/API/SQL/grant/
 session regressions, both exact OpenAPI gates,98 units and85 mocked browsers.
 This accepts the dictionary read/write ownership patch only. The subsequent
 task/log request-lifecycle source remains an independent pending stage.
+### Task/log retained actions: local acceptance
+Cancelled task/log exports release only their own busy state on tab restoration;
+an explicit click produces the actual new XLSX. Pending log delete/clear requests
+continue once across browser history navigation, keep their confirmation locked,
+then display the actual acknowledgement and refresh SQL-backed results.
+Four actual browser failures before repair become23 targeted passes. Final
+frontend reproduction/lint/typecheck/98 units/build/all89 mocked browsers pass.
+99088 ended0 with default/enabled complete API regressions and53 real browser
+cases each. The original real Quartz case retains exact XLSX/sort/ID/paging/
+SQL404/zero-row checks and adds both cancellation and pending-write navigation.
+Both live OpenAPI exports equal65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-job-cached-actions.md. Exact cloud for this patch is pending.
+No Java scheduler/SQL authorization changes or automatic mutation retries were
+introduced. Generated/upload/other lifecycle, sidebar/topnav/settings and the
+final active capability audit remain open; form builder stays deferred.
