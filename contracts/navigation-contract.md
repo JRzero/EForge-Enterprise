@@ -309,3 +309,14 @@ tool:gen:list controls route access; individual original grants control actions
 and authoritative backend endpoints. The deferred tool-form-builder remains
 unbound. The manager imports a statically registered React component through the
 pinned EForge integration; database values cannot resolve component modules.
+
+## Route default query and cache preference
+
+Only ROUTE bootstrap nodes carry optional queryText/cached. queryText is original
+menu JSON metadata; the frontend encodes its values as query data on the compiled
+registered route path. Arrays repeat parameters and null is bare; quoted long
+IDs and Unicode remain exact. Malformed roots disable the affected navigation
+link with a fixed configuration message. This never selects a component or
+changes backend authorization. Active state and static parent ancestry use the
+registered path. cached reflects original is_cache0/1 semantics; delivering this
+preference does not itself implement page retention. GROUP/EXTERNAL omit both.

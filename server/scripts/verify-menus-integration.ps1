@@ -60,6 +60,25 @@ Assert-Check (((Request "$menuBase/$($group.id)" 'GET' '' $authorized).Content |
 
 $postRoute=$menuRows | Where-Object key -eq 'system-posts';$postQuery=$menuRows | Where-Object key -eq 'system-post-query'
 $routePatch=Menu-Patch $postRoute;$queryPatch=Menu-Patch $postQuery
+function Menu-MetadataNode([object[]]$nodes,[string]$key) {
+    foreach($node in $nodes) {
+        if($node.key -eq $key){return $node}
+        $found=Menu-MetadataNode @($node.children) $key;if($null -ne $found){return $found}
+    }
+    return $null
+}
+$menuMetadataPatch=Menu-Patch $postRoute
+$menuMetadataPatch.queryText='{"id":"9007199254740999","__proto__":"文字 &?/#","list":["a","b"],"bare":null}'
+$menuMetadataPatch.cached=$false
+Assert-Check ((Menu-Update $postRoute.id $menuMetadataPatch).StatusCode -eq 204) 'Query/cache fixture update failed.'
+$menuMetadataBootstrap=(Request '/api/v1/app/bootstrap' 'GET' '' $authorized).Content | ConvertFrom-Json
+$menuMetadataNode=Menu-MetadataNode @($menuMetadataBootstrap.navigation) $postRoute.key
+Assert-Check ($menuMetadataNode.type -eq 'ROUTE' -and $menuMetadataNode.queryText -ceq $menuMetadataPatch.queryText -and $menuMetadataNode.cached -is [bool] -and !$menuMetadataNode.cached) 'Real SQL bootstrap must retain exact query text and cache=false.'
+Assert-Check (!$menuMetadataNode.PSObject.Properties['component']) 'Metadata must never expose a component resolver.'
+$menuMetadataGroup=Menu-MetadataNode @($menuMetadataBootstrap.navigation) 'system'
+Assert-Check (!$menuMetadataGroup.PSObject.Properties['queryText'] -and !$menuMetadataGroup.PSObject.Properties['cached']) 'Groups must not have route metadata.'
+Assert-Check ((Menu-Update $postRoute.id $routePatch).StatusCode -eq 204) 'Query/cache fixture restoration failed.'
+Write-Host 'Navigation metadata: actual SQL query Unicode/long-ID/prototype-key text and cache=false reach authorized bootstrap; groups retain no route/component metadata.'
 $badRoute=Menu-Patch $postRoute;$badRoute.routeId='account-profile'
 Assert-Problem (Menu-Update $postRoute.id $badRoute) 400 'VALIDATION_ERROR'
 $badRoute=Menu-Patch $postRoute;$badRoute.permission='system:user:list'

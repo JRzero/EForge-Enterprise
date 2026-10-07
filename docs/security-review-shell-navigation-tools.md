@@ -63,3 +63,14 @@ This stage is not full shell parity: tabs/cache, collapse/top-navigation,
 embedded routes, original query/cache metadata and theme/density/settings remain.
 The active goal stays incomplete; form builder is deferred and the specific
 Quartz runtime rejection remains in force.
+## Exact cloud acceptance
+
+Commit072df8dff25b7599d0c3cb1a3034fce35a43eee9: server37554481245
+(all three jobs) and web37554481231 completed successfully. The unique observer
+4783 ended0. Direct shell-navigation-cloud-accepted-server/web.log proves both49
+framework browser suites, both7 installed generated-module browser suites,
+complete real API regressions,618 Maven tests including10scope,94 units/all74
+mocked browsers and both live OpenAPI equality gates. No infrastructure retry or
+source change was needed. This accepts only this breadcrumb/search stage;
+the newer uncommitted query/cache metadata is a separate stage. Full shell and
+the active goal remain incomplete. Form builder stays deferred.

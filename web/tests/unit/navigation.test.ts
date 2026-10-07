@@ -32,4 +32,11 @@ describe('backend navigation to public EForge routes', () => {
     expect(result[0]?.external).toBe(true);
     expect(diagnostic).toHaveBeenCalledOnce();
   });
-});
+  it('keeps declared route paths for active state while queries and cache defaults remain data', () => {
+    const result = projectNavigation([{...leaf,queryText:'{"id":"9007199254740999","__proto__":"value"}',cached:false}], [route], ['app:dashboard:view']);
+    expect(result[0]?.path).toBe('/dashboard');expect(result[0]?.cached).toBe(false);
+    expect(new URL(result[0]!.href!,'https://app.example').searchParams.get('id')).toBe('9007199254740999');
+    const diagnostic=vi.fn();const invalid=projectNavigation([{...leaf,queryText:'{'}],[route],['app:dashboard:view'],diagnostic);
+    expect(invalid[0]).toMatchObject({key:'dashboard',queryError:true});expect(invalid[0]?.href).toBeUndefined();
+    expect(diagnostic).toHaveBeenCalledWith('Invalid navigation query for dashboard.');
+  });});

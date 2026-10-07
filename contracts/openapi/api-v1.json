@@ -1976,6 +1976,10 @@
       },
       "NavigationNode": {
         "properties": {
+          "cached": {
+            "description": "ROUTE cache preference; absent for navigation groups and external links",
+            "type": "boolean"
+          },
           "children": {
             "items": {
               "$ref": "#/components/schemas/NavigationNode"
@@ -1998,6 +2002,10 @@
           "order": {
             "format": "int32",
             "type": "integer"
+          },
+          "queryText": {
+            "description": "ROUTE default query JSON, retained as data and never interpreted as a component",
+            "type": "string"
           },
           "routeId": {
             "description": "Present only for ROUTE nodes",

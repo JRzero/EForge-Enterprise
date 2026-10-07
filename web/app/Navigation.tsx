@@ -7,10 +7,10 @@ export function Navigation({items, pathname, router}: {items: NavigationItem[]; 
     event.preventDefault(); router.navigate(href);
   }
   return <ul className="enterprise-navigation">{items.map(item => <li key={item.key}>
-    {item.href ? <a href={item.href} aria-current={!item.external && pathname === item.href ? 'page' : undefined}
+    {item.href ? <a href={item.href} aria-current={!item.external && pathname === (item.path ?? item.href) ? 'page' : undefined}
       {...(item.external ? {target: '_blank', rel: 'noopener noreferrer'} : {onClick: (event: MouseEvent<HTMLAnchorElement>) => navigate(event, item.href!)})}>
       <span>{item.label}</span>{item.external ? <span aria-label="在新窗口打开">↗</span> : null}</a>
-      : <span className="navigation-group">{item.label}</span>}
+      : <span className="navigation-group">{item.label}{item.queryError ? <small role="status">菜单参数配置有误，请联系管理员</small> : null}</span>}
     {item.children.length ? <Navigation items={item.children} pathname={pathname} router={router} /> : null}
   </li>)}</ul>;
 }

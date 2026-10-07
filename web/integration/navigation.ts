@@ -1,7 +1,8 @@
 import {canAccessRoute, type AppRouteRecord} from '@eforge/app';
 import type {NavigationNode} from '../generated/api';
 import {toEForgePermissions} from './permissions';
-export interface NavigationItem {key: string; label: string; href?: string; external?: boolean; icon?: string; children: NavigationItem[]}
+import {menuQueryHref} from './menu-query';
+export interface NavigationItem {key: string; label: string; href?: string; external?: boolean; icon?: string; path?: string; cached?: boolean; queryError?: boolean; children: NavigationItem[]}
 export function projectNavigation(nodes: NavigationNode[], routes: readonly AppRouteRecord[], permissions: readonly string[],
   diagnostic: (message: string) => void = message => console.warn(message)): NavigationItem[] {
   const registry = new Map(routes.map(route => [route.id, route]));
@@ -26,7 +27,14 @@ export function projectNavigation(nodes: NavigationNode[], routes: readonly AppR
       const route = registry.get(node.routeId ?? '');
       if (!route) { diagnostic(`Unknown navigation route: ${node.routeId ?? '(missing)'}`); return []; }
       if (!canAccessRoute(route, access)) return [];
-      return [{key: node.key, label: node.label, href: route.path, icon: node.icon, children: visit(node.children, depth + 1)}];
+      const children = visit(node.children, depth + 1);
+      try {
+        return [{key: node.key, label: node.label, href: menuQueryHref(route.path,node.queryText), path:route.path,
+          cached:node.cached ?? true, icon: node.icon, children}];
+      } catch {
+        diagnostic(`Invalid navigation query for ${node.key}.`);
+        return [{key:node.key,label:node.label,queryError:true,icon:node.icon,children}];
+      }
     });
   }
   return visit(nodes, 0);

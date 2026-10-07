@@ -73,4 +73,18 @@ class NavigationProjectionTest
         assertThrows(IllegalArgumentException.class, () -> new NavigationNode("system", NavigationNode.Type.GROUP,
                 "System", 0, null, "fake", null, List.of()));
     }
+    @Test void routeMetadataPreservesOriginalQueryDataAndCacheConventionOnlyAfterAuthorization()
+    {
+        String query = "{\"id\":\"9007199254740999\",\"__proto__\":\"literal\"}";
+        var row = new NavigationMenu(2L,0L,"roles","system-roles","Roles",2,"C","0","0",
+                "role:list","1","role","peoples",query,"1");
+        assertTrue(projection.project(List.of(row),Set.of()).isEmpty());
+        var node = projection.project(List.of(row),Set.of("role:list")).get(0);
+        assertEquals(query,node.queryText()); assertEquals(Boolean.FALSE,node.cached());
+        assertEquals(Boolean.TRUE,projection.project(List.of(route(3,0,"users","")),Set.of()).get(0).cached());
+        var group = projection.project(List.of(group(1,0,"system"),route(3,1,"users","")),Set.of()).get(0);
+        assertNull(group.cached()); assertNull(group.queryText());
+        assertThrows(IllegalArgumentException.class,()->new NavigationNode("system",NavigationNode.Type.GROUP,
+                "System",0,null,null,null,List.of(),true,query));
+    }
 }

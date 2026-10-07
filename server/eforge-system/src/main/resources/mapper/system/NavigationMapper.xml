@@ -14,7 +14,7 @@
   </resultMap>
   <select id="selectGrantedMenus" resultType="io.eforge.enterprise.system.domain.NavigationMenu">
     SELECT m.menu_id, m.parent_id, m.menu_key, m.route_id, m.menu_name AS label,
-           m.order_num, m.menu_type, m.visible, m.status, m.perms, m.is_frame, m.path, m.icon
+           m.order_num, m.menu_type, m.visible, m.status, m.perms, m.is_frame, m.path, m.icon, m.`query` AS query_text, m.is_cache
     FROM sys_menu m
     WHERE m.menu_type IN ('M', 'C') AND m.status = '0'
     <if test="!administrator">

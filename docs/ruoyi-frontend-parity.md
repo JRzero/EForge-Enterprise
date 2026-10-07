@@ -31,7 +31,7 @@ It is a work inventory, not executable proof of completion.
 | Group | Required behaviors | Current evidence/state |
 | --- | --- | --- |
 | Login/account lifecycle | captcha, failed login, remember-account/credential UX, configurable registration, logout, lock/unlock, session expiry, initial/expired password change | Login/captcha/logout/expiry verified; other behaviors missing |
-| Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | RBAC/navigation/403/404 verified; breadcrumb/header search final local two-profile verification passed, exact cloud pending; tabs/cache/collapse/topnav/embedded/settings and full shell parity remain open |
+| Application shell | route and button permissions, hierarchical menus, breadcrumbs, header search, tab open/close/refresh/pin/context menu, sidebar collapse, top navigation, embedded/external routes, responsive layout, theme/density settings, notice badge | RBAC/navigation/403/404 verified; breadcrumb/header search accepted exact072df8d cloud, both49 real profiles; tabs/cache/collapse/topnav/embedded/settings and full shell parity remain open |
 | Dashboard | original landing/workbench behavior and chart/dashboard variants with responsive rendering | Initial workbench verified; complete dashboard parity missing |
 | Profile | view/update account information, password change, avatar upload/crop, roles/posts/department display | Verified API and React/crop page, no-grant real browser flow, bitmap equality, keyboard/mobile and implementation CI; see evidence below |
 | Users | department tree, filtering/date range, pagination, column controls, selection, create/edit/delete/bulk delete, status confirmation, password reset, role assignment, XLSX export, template/download/import with optional updates, account uniqueness and data scope | Administration page and XLS/XLSX import implemented; local security, persistence and browser verification passed; implementation CI passed. Personal profile now has a separate verified page checkpoint; shared dictionaries integrated and verified locally; current CI/audit pending |
@@ -2029,3 +2029,25 @@ installed generated hosts with legal prototype-name IDs, both48 full framework
 browsers/API profiles,618 backend,91 units/71 mocked and exact OpenAPI gates.
 Shared breadcrumb/search code remains separately local under verification;
 full shell and active parity goal remain incomplete. Form builder is deferred.
+### Breadcrumb/search exact cloud acceptance
+072df8d server37554481245 all three jobs and web37554481231 are terminal
+SUCCESS. Direct shell-navigation-cloud-accepted-server/web.log proves both49
+framework browsers, both7 installed generated cases, complete real API/SQL/
+permission/console/captcha regressions,618 Maven (10scope),94 units/74 mocked
+and both exact OpenAPI equality gates. This stage is accepted; newer menu query
+and cache metadata remains under verification. Tabs/cache, other shell functions
+and final active capability audit remain incomplete; form builder stays deferred.
+### Original menu query defaults integrated and verified locally
+
+Canonical authorized ROUTE bootstrap metadata now includes original query JSON
+and cache preference. Registered links, header search and parent breadcrumbs
+carry exact Unicode/quoted long IDs/prototype-name keys/arrays/null; registered
+paths retain correct active state. Invalid query roots show a fixed configuration
+message and cannot create an executable link. GROUP/EXTERNAL metadata stays absent.
+619 Maven including10scope,98 units/all75 mocked and both final2 focused real
+navigation plus complete API profiles20514 pass. Both live OpenAPI snapshots
+match65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-navigation-metadata.md. Exact cloud/full50 framework cases
+remain pending. Actual page retention/tabs/cache/pin/context, sidebar icons/
+collapse/topnav/embedded, settings and final active audit remain incomplete.
+Form builder stays deferred; the specific Quartz runtime denial still applies.

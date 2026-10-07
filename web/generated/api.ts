@@ -15,6 +15,8 @@ export const servers = {
     server1: "/"
 };
 export type NavigationNode = {
+    /** ROUTE cache preference; absent for navigation groups and external links */
+    cached?: boolean;
     children: NavigationNode[];
     /** Present only for EXTERNAL nodes */
     externalUrl?: string;
@@ -22,6 +24,8 @@ export type NavigationNode = {
     key: string;
     label: string;
     order: number;
+    /** ROUTE default query JSON, retained as data and never interpreted as a component */
+    queryText?: string;
     /** Present only for ROUTE nodes */
     routeId?: string;
     "type": "GROUP" | "ROUTE" | "EXTERNAL";

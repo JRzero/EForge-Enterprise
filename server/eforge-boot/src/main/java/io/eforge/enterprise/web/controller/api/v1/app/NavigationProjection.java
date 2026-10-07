@@ -90,7 +90,9 @@ public class NavigationProjection
             }
             else continue;
             result.add(new NavigationNode(menu.menuKey(), type, menu.label(),
-                    menu.orderNum() == null ? 0 : menu.orderNum(), menu.icon(), route, external, descendants));
+                    menu.orderNum() == null ? 0 : menu.orderNum(), menu.icon(), route, external, descendants,
+                    type == NavigationNode.Type.ROUTE ? !"1".equals(menu.isCache()) : null,
+                    type == NavigationNode.Type.ROUTE ? menu.queryText() : null));
         }
         return List.copyOf(result);
     }

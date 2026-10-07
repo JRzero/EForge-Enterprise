@@ -920,3 +920,25 @@ No server source change; existing618 Maven/DataScope10 proof remains applicable.
 Exact cloud/full49-case framework suites are pending. Continue original menu
 query/cache/embedded metadata, tabs/cache/pin/context menu, collapse/topnav and
 settings. Full active parity remains incomplete; form builder stays deferred.
+### Breadcrumb/search exact cloud acceptance
+072df8d server37554481245 all three jobs and web37554481231 are terminal
+SUCCESS. Direct shell-navigation-cloud-accepted-server/web.log proves both49
+framework browsers, both7 installed generated cases, complete real API/SQL/
+permission/console/captcha regressions,618 Maven (10scope),94 units/74 mocked
+and both exact OpenAPI equality gates. This stage is accepted; newer menu query
+and cache metadata remains under verification. Tabs/cache, other shell functions
+and final active capability audit remain incomplete; form builder stays deferred.
+### Original menu query defaults integrated and verified locally
+
+Canonical authorized ROUTE bootstrap metadata now includes original query JSON
+and cache preference. Registered links, header search and parent breadcrumbs
+carry exact Unicode/quoted long IDs/prototype-name keys/arrays/null; registered
+paths retain correct active state. Invalid query roots show a fixed configuration
+message and cannot create an executable link. GROUP/EXTERNAL metadata stays absent.
+619 Maven including10scope,98 units/all75 mocked and both final2 focused real
+navigation plus complete API profiles20514 pass. Both live OpenAPI snapshots
+match65642E8458E11E179197EB8060A2F197E0BB0DB8351E4E18DDAFF8E458DCD8BC.
+See security-review-navigation-metadata.md. Exact cloud/full50 framework cases
+remain pending. Actual page retention/tabs/cache/pin/context, sidebar icons/
+collapse/topnav/embedded, settings and final active audit remain incomplete.
+Form builder stays deferred; the specific Quartz runtime denial still applies.
