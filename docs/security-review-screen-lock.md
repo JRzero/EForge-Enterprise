@@ -55,3 +55,7 @@ SHA256 is CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C.
 Final contrast source passes98 units/137 mocked browsers/reproduction/lint/type/build. Exact cloud and both62 real-browser profiles are still pending. Full project is
 not complete; independent XLSX identity audit and denied task runtime scheme
 are not accepted by this phase.
+
+Exact31a6e86 cloud server37625350654 finished with verify and runtime-integration successful, but auth-runtime-integration failed; web37625350784 succeeded. The failed actual user-page keyboard case exposed an existing PasswordField race: a pending pointer restoration frame stole subsequent button focus and inserted Space into the password. This is a product failure, not infrastructure.
+
+The controlled queued-frame regression fails before the correction and passes after cancelling stale restoration when keyboard focus moves. The correction preserves pointer cursor restoration and keyboard-owned focus; no assertion or timeout was weakened. Frozen frontend gates pass98 units and138 mocked cases. Interrupted local authorities did not finish complete acceptance profiles; partial logs are retained and recovered authorities are required. Until both62 profiles and the correction's exact cloud pass, this phase remains pending. Existing backend648 evidence applies to unchanged Java source only.

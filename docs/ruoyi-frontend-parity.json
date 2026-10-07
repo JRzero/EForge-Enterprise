@@ -204,8 +204,8 @@
         "logout",
         "getCodeImg"
       ],
-      "state": "missing",
-      "evidence": []
+      "state": "implemented-final-unlock-validation-pending",
+      "evidence": ["docs/security-review-registration.md", "docs/security-review-screen-lock.md"], "pendingOperations": ["unlockScreen"], "migration": "canonical login/register/bootstrap and compatible captcha/logout; unlock correction needs exact cloud acceptance"
     },
     {
       "source": "ruoyi-ui/src/api/menu.js",
@@ -2068,12 +2068,12 @@
     "fullGoalComplete":false
   }
   ,"screenLock": {
-    "status":"local-accepted-exact-cloud-pending",
-    "targetedSecurityTests":14,
+    "status":"cloud-failure-corrected-source-under-validation",
+    "targetedSecurityTests":14,"failedCloudSource":"31a6e86082d967638eddd76189eaf4c426b17ac6","failedCloudServer":"37625350654-auth-runtime-password-focus-race","focusRegression":"controlled-before-failed-after-passed","recoveredLocalAuthoritiesRequired":true,
     "backendDeclarations":648,
     "existingPlatformSkips":1,
     "frontendUnitTests":98,
-    "mockedBrowserTests":137,
+    "mockedBrowserTests":138,
     "focusedMockedBrowsers":5,
     "focusedRealBrowsers":1,
     "realAuthority":"34823-terminal0-focused1-full-api-and-dedicated-sql-script",
