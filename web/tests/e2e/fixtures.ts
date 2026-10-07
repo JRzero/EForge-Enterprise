@@ -1,6 +1,7 @@
 import {test as base} from '@playwright/test';
 export {expect} from '@playwright/test';
 export const test = base.extend<{dictionaryLookup: void}>({dictionaryLookup: [async ({page}, use) => {
+  await page.route('**/api/v1/auth/registration',route=>route.fulfill({json:{enabled:false}}));
   await page.route('**/api/v1/system/notices/feed', route => route.fulfill({json: {items: [], unreadCount: 0}}));
   await page.route('**/api/v1/system/dictionaries/lookup/*', route => {
     const code = new URL(route.request().url()).pathname.split('/').at(-1);

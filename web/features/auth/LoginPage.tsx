@@ -4,7 +4,8 @@ import type {SessionRuntime} from '../../integration/session';
 import type {CaptchaChallenge} from '../../integration/legacy-auth';
 import {errorMessage} from '../../integration/errors';
 
-export function LoginPage({runtime}: {runtime: SessionRuntime}) {
+export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onRegister?: () => void}) {
+  const [registrationEnabled,setRegistrationEnabled]=useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -16,6 +17,7 @@ export function LoginPage({runtime}: {runtime: SessionRuntime}) {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
+    runtime.api.registrationStatus(controller.signal).then(value=>{if(!controller.signal.aborted)setRegistrationEnabled(value.enabled);}).catch(()=>{if(!controller.signal.aborted)setRegistrationEnabled(false);});
     runtime.api.captcha(controller.signal).then(value => {
       if (!controller.signal.aborted) { setChallenge(value); setCaptchaLoading(false); }
     }).catch(cause => {
@@ -66,7 +68,7 @@ export function LoginPage({runtime}: {runtime: SessionRuntime}) {
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <Button label={busy ? '正在登录…' : captchaLoading ? '准备中…' : '登录'} type="submit"
           isDisabled={busy || captchaLoading || !challenge} />
-      </form><p className="login-help">账号遇到问题？请联系企业管理员。</p>
+      </form>{registrationEnabled && onRegister ? <a href="/register" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onRegister();}}}>注册账号</a> : null}<p className="login-help">账号遇到问题？请联系企业管理员。</p>
     </div></section>
   </main>;
 }

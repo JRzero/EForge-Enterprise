@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Exercises the production security chain and both advice boundaries. */
 @WebMvcTest
-@ContextConfiguration(classes = {AuthController.class, BootstrapController.class, AuthControllerTest.ProtectedController.class,
+@ContextConfiguration(classes = {AuthController.class, RegistrationController.class, BootstrapController.class, AuthControllerTest.ProtectedController.class,
         ApiExceptionHandler.class, ApiRoutingExceptionResolver.class, GlobalExceptionHandler.class, SpringUtils.class, SecurityConfig.class,
         ApiSecurityProblemHandler.class, AuthenticationEntryPointImpl.class, JwtAuthenticationTokenFilter.class,
         AuthControllerTest.Configuration.class})
@@ -59,10 +59,44 @@ class AuthControllerTest
 
     @Autowired private MockMvc mvc;
     @MockitoBean private SysLoginService loginService;
+    @MockitoBean private RegistrationService registrationService;
     @MockitoBean private TokenService tokenService;
     @MockitoBean private LogoutSuccessHandlerImpl logoutHandler;
     @MockitoBean private BootstrapService bootstrapService;
 
+    @Test
+    void anonymousRegistrationIsExactMethodWhitelistedWithoutSessionOrGrants() throws Exception {
+        mvc.perform(get("/api/v1/auth/registration")).andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.enabled").value(false))
+            .andExpect(jsonPath("$.config").doesNotExist());
+        String body="{\"username\":\"newaccount\",\"password\":\"Register123\",\"confirmPassword\":\"Register123\"}";
+        mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isCreated()).andExpect(header().string("Cache-Control","no-store"))
+            .andExpect(header().doesNotExist("Set-Cookie")).andExpect(content().string(""));
+        verify(registrationService).register(any());verifyNoInteractions(loginService,bootstrapService);
+        mvc.perform(get("/api/v1/auth/register")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/auth/registration")).andExpect(status().isUnauthorized());
+    }
+    @Test
+    void registrationDisabledAndDuplicateResponsesHaveSafeCanonicalErrors() throws Exception {
+        String body="{\"username\":\"newaccount\",\"password\":\"Register123\",\"confirmPassword\":\"Register123\"}";
+        doThrow(new io.eforge.enterprise.common.exception.ApiFailure(403,"REGISTRATION_DISABLED","Registration is not enabled.")).when(registrationService).register(any());
+        mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("REGISTRATION_DISABLED"))
+            .andExpect(header().string("Cache-Control","no-store"));
+        doThrow(new io.eforge.enterprise.common.exception.ApiFailure(409,"REGISTRATION_USERNAME_EXISTS","The account already exists.")).when(registrationService).register(any());
+        mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("REGISTRATION_USERNAME_EXISTS"))
+            .andExpect(jsonPath("$.password").doesNotExist()).andExpect(jsonPath("$.username").doesNotExist());
+    }
+    @ParameterizedTest
+    @ValueSource(strings={"x","a-username-longer-than-twenty-characters"})
+    void invalidRegistrationNeverCallsTheWriteBoundary(String username) throws Exception {
+        mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"username\":\""+username+"\",\"password\":\"Register123\",\"confirmPassword\":\"Register123\"}"))
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        verifyNoInteractions(registrationService);
+    }
     @Test
     void bootstrapUsesAuthenticatedSessionAndReturnsOnlyPublicFields() throws Exception
     {

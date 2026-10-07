@@ -1,8 +1,9 @@
-import {lazy, Suspense, useCallback, useMemo, useState, useSyncExternalStore} from 'react';
+import {lazy, Suspense, useCallback, useEffect, useMemo, useState, useSyncExternalStore} from 'react';
 import {PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
 import {getRouteAncestry, matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
 import {LoginPage} from '../features/auth/LoginPage';
+import {RegistrationPage} from '../features/auth/RegistrationPage';
 import {projectNavigation} from '../integration/navigation';
 import {errorMessage} from '../integration/errors';
 import type {SessionRuntime} from '../integration/session';
@@ -30,6 +31,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
   const [noticeVersion, setNoticeVersion] = useState(0);
   const invalidateNotices = useCallback(() => setNoticeVersion(value => value + 1), []);
   const pathname = new URL(href, 'http://eforge.local').pathname;
+  useEffect(()=>{if(session.phase==='authenticated' && pathname==='/login')router.navigate('/dashboard',{replace:true});},[session.phase,pathname,router]);
   const bootstrap = session.phase === 'authenticated' ? session.bootstrap : null;
   const navigation = useMemo(() => bootstrap ? projectNavigation(bootstrap.navigation, routes, bootstrap.permissions) : [], [bootstrap]);
   const permissions = useMemo(() => bootstrap ? toEForgePermissions(bootstrap.permissions) : [], [bootstrap]);
@@ -40,7 +42,7 @@ export function Application({runtime, router}: {runtime: SessionRuntime; router:
     catch (error) { setLogoutError(errorMessage(error)); }
     finally { setLogoutBusy(false); }
   }
-  if (session.phase === 'signed-out') return <LoginPage runtime={runtime} />;
+  if (session.phase === 'signed-out') return pathname==='/register' ? <RegistrationPage runtime={runtime} onLogin={()=>router.navigate('/login')} /> : <LoginPage runtime={runtime} onRegister={()=>router.navigate('/register')} />;
   if (session.phase === 'restoring') return <main className="state-page" role="status"><h1>正在连接工作空间…</h1></main>;
   if (session.phase === 'error') return <main className="state-page"><h1>暂时无法连接工作空间</h1>
     <p role="alert">{session.message}</p><div className="state-actions">

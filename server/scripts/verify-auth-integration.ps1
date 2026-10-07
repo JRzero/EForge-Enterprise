@@ -201,10 +201,14 @@ try {
         try {
             $response=Invoke-WebRequest -Uri $using:parallelBootstrapUri -Headers $using:parallelBootstrapHeaders -SkipHttpErrorCheck -TimeoutSec 15
             if($response.StatusCode -ne 200){return [pscustomobject]@{Status=[int]$response.StatusCode;UserId='';Safe=$false}}
-            $body=$response.Content | ConvertFrom-Json
+            $content=$response.Content
+            if($content -is [byte[]]){$content=[Text.Encoding]::UTF8.GetString($content)}
+            $body=$content | ConvertFrom-Json
             [pscustomobject]@{Status=200;UserId=$body.user.id;Safe=($body.roles -contains 'admin' -and $null -ne $body.passwordStatus -and !$body.user.PSObject.Properties['password'])}
-        }catch{[pscustomobject]@{Status=0;UserId='';Safe=$false}}
+        }catch{[pscustomobject]@{Status=0;UserId='';Safe=$false;Diagnostic=$_.Exception.GetType().Name}}
     } -ThrottleLimit 32)
+    Write-Host ('Bootstrap safe diagnostics: '+(($parallelBootstrapReads|Group-Object Status|ForEach-Object {"HTTP$($_.Name)=$($_.Count)"}) -join ';')+'; policy/identity failures='+@($parallelBootstrapReads|Where-Object {$_.Status -eq 200 -and ($_.UserId -ne '1' -or !$_.Safe)}).Count)
+    Write-Host ('Bootstrap exception categories: '+(($parallelBootstrapReads|Where-Object Status -eq 0|Group-Object Diagnostic|ForEach-Object {"$($_.Name)=$($_.Count)"}) -join ';'))
     Assert-Check ($parallelBootstrapReads.Count -eq 32 -and @($parallelBootstrapReads | Where-Object {$_.Status -ne 200 -or $_.UserId -ne '1' -or !$_.Safe}).Count -eq 0) 'Concurrent bootstrap reads must preserve authority and release SQL snapshots before guarded configuration reads.'
     Write-Host 'Bootstrap concurrency:32 actual HTTP reads retained admin identity, safe typed policy and completed without held-snapshot connection starvation.'
     $bootstrap = $bootstrapResponse.Content | ConvertFrom-Json
@@ -268,6 +272,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-menus-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-registration-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notices-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notice-images-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-logs-integration.ps1')

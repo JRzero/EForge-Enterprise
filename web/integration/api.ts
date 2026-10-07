@@ -1,3 +1,4 @@
+import {getRegistrationStatus, registerAccount, type RegistrationRequestWrite} from '../generated/api';
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
   listDepartments, getDepartment, createDepartment, updateDepartment, deleteDepartment, sortDepartments,
   type DepartmentRequest, type DepartmentSortRequest, type PostRequest, type LoginRequestWrite, type UserSummary} from '../generated/api';
@@ -421,6 +422,20 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     },
     async exportPosts(query: Parameters<typeof exportPosts>[0]) {
       return (await exportPosts(query, {baseUrl: '', fetch: transport(true)})).data;
+    },
+    async registrationStatus(signal?: AbortSignal) {
+      const response=await getRegistrationStatus({baseUrl:'',fetch:transport(false),signal});
+      if(response.status!==200 || typeof response.data.enabled!=='boolean')throw new ApiError(503,'REGISTRATION_UNAVAILABLE');
+      return response.data;
+    },
+    async register(request: RegistrationRequestWrite) {
+      try {
+        const response=await registerAccount(request,{baseUrl:'',fetch:transport(false)});
+        if(response.status!==201)throw new ApiError(503,'REGISTRATION_UNAVAILABLE');
+      } catch(cause) {
+        if(cause instanceof ApiError)throw cause;
+        throw new ApiError(0,'REGISTRATION_UNCONFIRMED');
+      }
     },
     async login(request: LoginRequestWrite, signal?: AbortSignal) {
       const response = await login(request, {baseUrl: '', fetch: transport(false), signal});

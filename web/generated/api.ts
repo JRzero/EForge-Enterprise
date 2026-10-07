@@ -75,6 +75,19 @@ export type ProblemDetail = {
     title?: string | null;
     "type"?: string;
 };
+export type RegistrationRequest = {
+    username: string;
+};
+export type RegistrationRequestWrite = {
+    code?: string;
+    confirmPassword: string;
+    password: string;
+    username: string;
+    uuid?: string;
+};
+export type RegistrationStatus = {
+    enabled: boolean;
+};
 export type ProfileResponse = {
     avatarUrl?: string;
     createdAt?: string;
@@ -947,6 +960,44 @@ export function login(loginRequest: LoginRequestWrite, opts?: Oazapfts.RequestOp
         method: "POST",
         body: loginRequest
     }));
+}
+/**
+ * Register an account without grants or a login session
+ */
+export function registerAccount(registrationRequest: RegistrationRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+    } | {
+        status: 400;
+        data: ProblemDetail;
+    } | {
+        status: 403;
+        data: ProblemDetail;
+    } | {
+        status: 409;
+        data: ProblemDetail;
+    } | {
+        status: 503;
+        data: ProblemDetail;
+    }>("/api/v1/auth/register", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: registrationRequest
+    }));
+}
+/**
+ * Get public registration availability
+ */
+export function getRegistrationStatus(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: RegistrationStatus;
+    } | {
+        status: 503;
+        data: ProblemDetail;
+    }>("/api/v1/auth/registration", {
+        ...opts
+    });
 }
 export function getMyProfile(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{

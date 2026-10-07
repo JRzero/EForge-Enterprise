@@ -1994,5 +1994,19 @@
     "registrationComplete": false,
     "passwordComplexityComplete": false,
     "fullGoalComplete": false
+  },
+  "registration": {
+    "status": "local-api-and-frozen-ui-passed-final-real-cloud-pending",
+    "backendDeclarations": 633,
+    "existingPlatformSkips": 1,
+    "targetedSecurityTests": 25,
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 123,
+    "actualApiAuthority": "46176-terminal0",
+    "realAuthority": "66393-running",
+    "requiredRealBrowsersPerProfile": 59,
+    "openApiSha256": "51811E0BB00D0B30658965425019CA8FE7319C26146827C46F95A9B1665B8C8F",
+    "review": "docs/security-review-registration.md",
+    "fullGoalComplete": false
   }
 }

@@ -91,6 +91,11 @@ function messageFor(status: number, code: string): string {
   if (code === 'POST_CONFLICT') return '岗位编码或名称已存在，请修改后重试。';
   if (code === 'POST_IN_USE') return '该岗位已分配给用户，无法删除。';
   if (code === 'POST_NOT_FOUND') return '岗位已不存在，请刷新列表后重试。';
+  if (code === 'REGISTRATION_DISABLED') return '注册暂未开放，请联系企业管理员。';
+  if (code === 'REGISTRATION_PASSWORD_MISMATCH') return '两次输入的密码不一致。';
+  if (code === 'REGISTRATION_USERNAME_EXISTS') return '账号已存在，请使用其他账号或返回登录。';
+  if (code === 'REGISTRATION_UNAVAILABLE') return '注册暂时无法完成，请稍后重试。';
+  if (code === 'REGISTRATION_UNCONFIRMED') return '注册结果暂未确认，请先尝试登录；请勿自动重复注册。';
   if (code === 'CAPTCHA_INVALID') return '验证码不正确或已过期，请重新输入。';
   if (code === 'AUTHENTICATION_FAILED') return '账号或密码不正确，或账号暂时无法登录。';
   if (code === 'VALIDATION_ERROR') return '请检查填写内容后重试。';
