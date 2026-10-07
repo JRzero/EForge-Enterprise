@@ -88,6 +88,10 @@ export type RegistrationRequestWrite = {
 export type RegistrationStatus = {
     enabled: boolean;
 };
+export type UnlockScreenRequest = {};
+export type UnlockScreenRequestWrite = {
+    password: string;
+};
 export type ProfileResponse = {
     avatarUrl?: string;
     createdAt?: string;
@@ -998,6 +1002,30 @@ export function getRegistrationStatus(opts?: Oazapfts.RequestOpts) {
     }>("/api/v1/auth/registration", {
         ...opts
     });
+}
+/**
+ * Verify the current account password before resuming its screen
+ */
+export function unlockScreen(unlockScreenRequest: UnlockScreenRequestWrite, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 204;
+    } | {
+        status: 400;
+        data: ProblemDetail;
+    } | {
+        status: 401;
+        data: ProblemDetail;
+    } | {
+        status: 403;
+        data: ProblemDetail;
+    } | {
+        status: 503;
+        data: ProblemDetail;
+    }>("/api/v1/auth/unlock-screen", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: unlockScreenRequest
+    }));
 }
 export function getMyProfile(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{

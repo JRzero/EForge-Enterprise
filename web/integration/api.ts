@@ -1,3 +1,4 @@
+import {unlockScreen,type UnlockScreenRequestWrite} from '../generated/api';
 import {getRegistrationStatus, registerAccount, type RegistrationRequestWrite} from '../generated/api';
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
   listDepartments, getDepartment, createDepartment, updateDepartment, deleteDepartment, sortDepartments,
@@ -58,6 +59,7 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async unlockScreen(request:UnlockScreenRequestWrite,signal?:AbortSignal){await unlockScreen(request,{baseUrl:'',fetch:transport(true),signal});},
     async authenticatedFetch(input: RequestInfo | URL, init?: RequestInit) {
       const origin = typeof window === 'undefined' ? 'http://eforge.local' : window.location.origin;
       const target = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url, origin);

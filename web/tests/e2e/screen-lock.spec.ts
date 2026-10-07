@@ -1,0 +1,32 @@
+import {test,expect} from './fixtures';
+import type {Page} from '@playwright/test';
+async function setup(page:Page){
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'screen-owned',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'9007199254740993',username:'ordinary',displayName:'锁屏用户'},roles:[],permissions:[],navigation:[]}}));
+  await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'9007199254740993',username:'ordinary',displayName:'原昵称',sex:'2',phone:'13900000008',email:'ordinary@example.com',roleNames:'',postNames:''}}));
+  await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill('ordinary');await page.getByLabel('密码',{exact:true}).fill('Current123');await page.getByRole('button',{name:'登录',exact:true}).click();await expect(page.getByRole('button',{name:'锁定屏幕',exact:true})).toBeVisible();
+}
+test('no-role screen lock masks retained dirty forms, verifies only password, and restores original path',async({page})=>{
+  await setup(page);const nickname=page.getByLabel('用户昵称',{exact:true});await nickname.fill('保留未保存内容');let attempts=0;
+  await page.route('**/api/v1/auth/unlock-screen',route=>{attempts++;expect(route.request().postDataJSON()).toEqual({password:attempts===1?'Wrong123':'Current123'});return route.fulfill(attempts===1?{status:403,json:{code:'SCREEN_UNLOCK_PASSWORD_MISMATCH'}}:{status:204});});
+  await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();await expect(page.getByRole('heading',{name:'锁屏用户',exact:true})).toBeVisible();await expect(nickname).not.toBeVisible();await expect(page.getByLabel('解锁密码')).toHaveAttribute('type','password');await page.getByLabel('解锁密码').fill('Wrong123');await page.getByLabel('解锁密码').press('Enter');await expect(page.getByRole('alert')).toHaveText('密码不正确，请重新输入。');await expect(page.getByLabel('解锁密码')).toHaveValue('');await expect(page.getByLabel('解锁密码')).toBeFocused();
+  await page.getByLabel('解锁密码').fill('Current123');await page.getByLabel('解锁密码').press('Enter');await expect(nickname).toBeVisible();await expect(nickname).toHaveValue('保留未保存内容');await expect(page).toHaveURL(/\/user\/profile$/);expect(attempts).toBe(2);expect(await page.evaluate(()=>JSON.stringify({...sessionStorage,...localStorage}))).not.toContain('Current123');
+});
+test('reload and address changes cannot reveal a locked page, and direct lock also persists',async({page})=>{
+  await setup(page);await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();await page.reload();await expect(page.getByLabel('解锁密码')).toBeVisible();await page.goto('/user/profile');await expect(page.getByLabel('解锁密码')).toBeVisible();await expect(page.getByLabel('用户昵称',{exact:true})).not.toBeVisible();
+  await page.evaluate(()=>sessionStorage.removeItem('eforge.enterprise.screen-lock.v1'));await page.goto('/lock');await expect(page.getByLabel('解锁密码')).toBeVisible();await page.goto('/user/profile');await expect(page.getByLabel('解锁密码')).toBeVisible();await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.body.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'test-results/screen-lock-mobile.png',fullPage:true});
+});
+test('unlock waits for refreshed grants, handles database retry, and logout clears only after revocation',async({page})=>{
+  await setup(page);await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();let attempts=0;await page.route('**/api/v1/auth/unlock-screen',route=>{attempts++;return route.fulfill(attempts===1?{status:503,json:{code:'SCREEN_UNLOCK_UNAVAILABLE',detail:'driver-secret'}}:{status:204});});
+  await page.getByLabel('解锁密码').fill('Current123');await page.getByRole('button',{name:'解锁',exact:true}).click();await expect(page.getByRole('alert')).toHaveText('暂时无法验证密码，请稍后重试。');await expect(page.getByLabel('解锁密码')).toHaveValue('');let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>release=resolve);await page.route('**/api/v1/app/bootstrap',async route=>{await gate;await route.fulfill({status:503,json:{code:'HTTP_ERROR'}});});
+  await page.getByLabel('解锁密码').fill('Current123');await page.getByRole('button',{name:'解锁',exact:true}).click();await expect(page.getByRole('button',{name:'正在解锁…'})).toBeDisabled();await expect(page.getByLabel('用户昵称',{exact:true})).not.toBeVisible();release();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('解锁密码')).toHaveValue('');
+  await page.route('**/logout',route=>route.fulfill({json:{code:200}}));await page.getByRole('button',{name:'退出重新登录',exact:true}).click();await expect(page.getByRole('heading',{name:'登录工作空间'})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('eforge.enterprise.screen-lock.v1'))).toBeNull();
+});
+test('an expired session cannot be unlocked by a late password response',async({page})=>{
+  await setup(page);await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();await page.route('**/api/v1/auth/unlock-screen',route=>route.fulfill({status:401,json:{code:'AUTHENTICATION_REQUIRED'}}));await page.getByLabel('解锁密码').fill('Current123');await page.getByRole('button',{name:'解锁',exact:true}).click();await expect(page.getByRole('heading',{name:'登录工作空间'})).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('eforge.enterprise.screen-lock.v1'))).toBeNull();
+});
+
+test('a refreshed replacement account cannot inherit the old unlock or return path',async({page})=>{
+  await setup(page);await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();await page.route('**/api/v1/auth/unlock-screen',route=>route.fulfill({status:204}));await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'8',username:'replacement',displayName:'替换账号'},roles:[],permissions:[],navigation:[]}}));await page.getByLabel('解锁密码').fill('Current123');await page.getByRole('button',{name:'解锁',exact:true}).click();await expect(page.getByRole('heading',{name:'替换账号',exact:true})).toBeVisible();await expect(page.getByLabel('解锁密码')).toBeVisible();await expect(page.getByLabel('用户昵称',{exact:true})).not.toBeVisible();expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.screen-lock.v1')??'{}'))).toEqual({ownerId:'8',username:'replacement',returnHref:'/dashboard'});
+});

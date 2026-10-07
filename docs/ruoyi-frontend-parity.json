@@ -2049,7 +2049,11 @@
     "fullGoalComplete":false
   }
   ,"dashboardCharts": {
-    "status":"local-accepted-exact-cloud-pending",
+    "status":"exact-cloud-accepted",
+    "implementationSha":"9ad0cb542d1c0087e5d7773cd3dff5294fe8ff47",
+    "cloudServer":"37621235869-all-three-success",
+    "cloudWeb":"37621235851-success",
+    "cloudRealBrowsersPerProfile":61,
     "reference":"ruoyi-ui/src/views/index_v1.vue@0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
     "frontendUnitTests":98,
     "mockedBrowserTests":132,
@@ -2061,6 +2065,26 @@
     "sampleDataExplicitlyLabelled":true,
     "freshMavenRun":false,
     "review":"docs/security-review-dashboard-parity.md",
+    "fullGoalComplete":false
+  }
+  ,"screenLock": {
+    "status":"local-accepted-exact-cloud-pending",
+    "targetedSecurityTests":14,
+    "backendDeclarations":648,
+    "existingPlatformSkips":1,
+    "frontendUnitTests":98,
+    "mockedBrowserTests":137,
+    "focusedMockedBrowsers":5,
+    "focusedRealBrowsers":1,
+    "realAuthority":"34823-terminal0-focused1-full-api-and-dedicated-sql-script",
+    "requiredCloudRealBrowsersPerProfile":62,
+    "openApiSha256":"CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C",
+    "sessionRevocationByLock":false,
+    "currentSqlPassword":true,
+    "actorBoundTabMarker":true,
+    "retainedDraftsWithoutReload":true,
+    "freshBootstrapBeforeResume":true,
+    "review":"docs/security-review-screen-lock.md",
     "fullGoalComplete":false
   }
 }

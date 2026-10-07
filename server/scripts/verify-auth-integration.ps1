@@ -273,6 +273,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-registration-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-screen-lock-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notices-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-notice-images-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-logs-integration.ps1')

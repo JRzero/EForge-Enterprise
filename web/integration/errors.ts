@@ -4,6 +4,8 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if(code==='SCREEN_UNLOCK_PASSWORD_MISMATCH')return '密码不正确，请重新输入。';
+  if(code==='SCREEN_UNLOCK_UNAVAILABLE')return '暂时无法验证密码，请稍后重试。';
   if (code === 'GENERATOR_CREATE_DDL_FAILED') return '部分数据库表创建失败，请查看建表结果；已创建的表仍然保留。';
   if (code === 'GENERATOR_IMPORT_FAILED') return '生成配置导入失败，请查看已创建的表并通过导入表恢复配置。';
   if (code === 'GENERATOR_CREATE_TARGET_EXISTS') return '目标表已存在，请检查现有表后通过导入表管理配置。';

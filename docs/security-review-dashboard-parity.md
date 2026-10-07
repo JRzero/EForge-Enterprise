@@ -39,3 +39,5 @@ no fresh Maven run is claimed; precise source cloud and both61-browser profiles
 remain required. Exact OpenAPI is unchanged. Lock-screen restoration, remaining
 active audits and specifically unapproved task mutations remain separate. Form
 builder is deferred and the full goal is incomplete.
+
+Exact implementation9ad0cb542d1c0087e5d7773cd3dff5294fe8ff47 is cloud accepted: server37621235869 all three jobs and web37621235851 SUCCESS. Direct accepted logs prove both61 real-browser/fullAPI/OpenAPI profiles,634 unchanged backend declarations (10 scope/one existing skip),98 units and132 mocked browsers. The independent screen-lock stage is not covered by this evidence. Full active goal remains incomplete.
