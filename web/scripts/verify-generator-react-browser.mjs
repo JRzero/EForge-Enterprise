@@ -104,9 +104,57 @@ async function verifyAutomaticKey(page, noRoleUser, category) {
   assert.equal((await readDetail(page,ids[0])).status,403); await page.evaluate(() => window.probeLogout());
   console.log('PASS: '+category+' actual automatic PK remains hidden with original insert=1/required=1, SQL-generated exact long IDs, refill/update/preserved insert-only values, bulk deletion and no-role denial.');
 }
+async function verifyStringKey(page, noRoleUser) {
+  const ids=['__proto__','constructor','toString'];
+  for(const [index,id] of ids.entries()) {
+    await page.getByRole('button',{name:'新增',exact:true}).click();
+    const editor=page.getByRole('dialog');
+    await editor.getByLabel('oRderKey',{exact:true}).fill(id);
+    await editor.getByLabel('label',{exact:true}).fill('字符串编号-'+index);
+    await editor.getByLabel('insertOnly',{exact:true}).fill('字符串新增保持');
+    await editor.getByLabel('parentId',{exact:true}).fill('0');
+    await editor.getByLabel('quantity',{exact:true}).fill('0');await editor.getByLabel('ratio',{exact:true}).fill('0');
+    await editor.getByLabel('enabled',{exact:true}).fill('false');
+    await editor.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox').first().check();
+    const created=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/business/fixture/stringkey'&&response.request().method()==='POST');
+    await editor.getByRole('button',{name:'保存',exact:true}).click();
+    const response=await created;assert.equal(response.status(),201);assert.equal((await response.json()).oRderKey,id);
+    await expect(editor).toHaveCount(0);
+    const row=page.getByRole('row').filter({hasText:'字符串编号-'+index});await expect(row).toBeVisible();
+    await expect(page.getByRole('button',{name:'删除选中',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button',{name:'修改选中',exact:true})).toBeDisabled();
+    await expect(row.getByRole('checkbox')).not.toBeChecked();
+    const detail=await readDetail(page,id);assert.equal(detail.status,200);assert.equal(detail.data.oRderKey,id);
+  }
+  await page.getByRole('row').filter({hasText:'字符串编号-0'}).getByRole('checkbox').check();
+  await page.getByRole('button',{name:'修改选中',exact:true}).click();
+  const editor=page.getByRole('dialog');await expect(editor.getByLabel('oRderKey',{exact:true})).toHaveCount(0);
+  await editor.getByLabel('label',{exact:true}).fill('字符串编号-修改');
+  await editor.getByLabel('editOnly',{exact:true}).fill('字符串修改值');
+  await editor.getByRole('button',{name:'保存',exact:true}).click();await expect(editor).toHaveCount(0);
+  const changed=await readDetail(page,ids[0]);assert.equal(changed.status,200);assert.equal(changed.data.oRderKey,ids[0]);
+  assert.equal(changed.data.label,'字符串编号-修改');assert.equal(changed.data.insertOnly,'字符串新增保持');
+  await expect(page.getByRole('button',{name:'删除选中',exact:true})).toBeDisabled();
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出',exact:true}).click();
+  assert((await download).suggestedFilename().endsWith('.xlsx'));
+  for(const label of ['字符串编号-修改','字符串编号-1','字符串编号-2']) {
+    await page.getByRole('row').filter({hasText:label}).getByRole('checkbox').check();
+  }
+  await expect(page.getByRole('button',{name:'修改选中',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'删除选中',exact:true}).click();
+  const deleted=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/business/fixture/stringkey'&&response.request().method()==='DELETE');
+  await page.getByRole('button',{name:'确认删除',exact:true}).click();
+  const response=await deleted;assert.equal(response.status(),204);assert.deepEqual([...response.request().postDataJSON().ids].sort(),[...ids].sort());
+  for(const id of ids)assert.equal((await readDetail(page,id)).status,404);
+  await page.evaluate(()=>window.probeLogout());await page.evaluate(username=>window.probeLogin({username,password:'admin123'}),noRoleUser);
+  await expect(page.getByRole('link',{name:'Installed stringkey',exact:true})).toHaveCount(0);await page.evaluate(()=>window.probeNavigate());
+  await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();assert.equal((await readDetail(page,ids[0])).status,403);
+  await page.evaluate(()=>window.probeLogout());
+  console.log('PASS: actual legal String PK prototype names are initially unselected, explicitly selectable, exact in CRUD/XLSX/delete requests, retained after edit and denied without role.');
+}
 export async function verifyBrowser(root, owned, backend, noRoleUser) {
   assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(backend), 'Owned backend URL required.');
-  for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub']) {
+  for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub', 'stringkey']) {
     writeFileSync(join(owned, category, 'index.html'), '<div id="root"></div><script type="module" src="./probe.tsx"></script>');
     writeFileSync(join(owned, category, 'probe.tsx'), [
       "import {createRoot} from 'react-dom/client';",
@@ -134,7 +182,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
     await server.listen();
     const address = server.httpServer.address(); assert(address && typeof address === 'object');
     browser = await chromium.launch({headless:true});
-    for (const [ordinal, category] of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub'].entries()) {
+    for (const [ordinal, category] of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub', 'stringkey'].entries()) {
       const context = await browser.newContext({acceptDownloads:true});
       const page = await context.newPage(), errors = [];
       page.on('pageerror', error => errors.push(error.message));
@@ -148,6 +196,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         assert((await page.evaluate(() => window.probeHref())).startsWith('/business/fixture/'));
         await expect(page.getByRole('button', {name:'新增', exact:true})).toBeVisible();
         if (category.startsWith('auto')) {await verifyAutomaticKey(page, noRoleUser, category);assert.deepEqual(errors, []);continue;}
+        if (category === 'stringkey') {await verifyStringKey(page,noRoleUser);assert.deepEqual(errors, []);continue;}
         const id = String(9007199254741001n + BigInt(ordinal));
         const label = '浏览器-' + category + '-<img src=x onerror=window.injected=true>';
         await page.getByRole('button', {name:'新增', exact:true}).click();

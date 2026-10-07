@@ -126,7 +126,7 @@ try {
         Get-Content -LiteralPath (Join-Path $generatedBusinessDirectory 'physical-fixtures.sql') -Raw -Encoding utf8 |
             & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
         Assert-Check ($LASTEXITCODE -eq 0) 'Owned generated physical fixture initialization failed.'
-        foreach($generatedMenuCategory in @('crud','tree','sub','auto','autotree','autosub')) {
+        foreach($generatedMenuCategory in @('crud','tree','sub','auto','autotree','autosub','stringkey')) {
             $generatedMenuSql=Get-Content -LiteralPath (Join-Path $generatedBusinessDirectory "menu-$generatedMenuCategory.sql") -Raw -Encoding utf8
             $generatedMenuBefore=(Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT * FROM sys_menu ORDER BY menu_id') -join [Environment]::NewLine
             $generatedMenuFaultSql=$generatedMenuSql.Replace('SELECT @parentId := LAST_INSERT_ID();',"SELECT @parentId := LAST_INSERT_ID();"+[Environment]::NewLine+"SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Owned install fault';")

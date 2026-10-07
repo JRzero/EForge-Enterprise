@@ -881,3 +881,14 @@ mocked, generated production host builds and both matching installed OpenAPI
 snapshots pass. New exact cloud acceptance is pending. Continue remaining typed
 control/value cases and full original shell/auth/shared capability audit.
 Form builder remains deferred and the prior specific Quartz rejection remains.
+### Generated String primary-key selection verified locally
+
+Actual installed browser59941 reproduced Delete selected being enabled without
+selection for legal String PK __proto__. Generated UI row identities now use an
+opaque prefix and only own true selection properties; API IDs remain original.
+Final618 Maven/91 units/71 mocked browsers and42172 both actual seven-module
+profiles pass. The new String prototype-name CRUD/edit/XLSX download/exact bulk
+request/no-role flow and all prior manual/automatic CRUD/tree/sub regressions
+pass with matching installed OpenAPI D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386.
+Exact cloud is pending; shared shell and final active capability audit remain.
+Form builder stays deferred, and the specific Quartz runtime rejection remains.

@@ -39,6 +39,7 @@ const childFields: readonly (Field & {key: keyof ChildWrite})[] = [
 const childForeignKey = $outputText.jsonLiteral($subTableFkclassName) satisfies keyof ChildWrite;
 #end
 const idOf = (row: Model) => row[pk] as Id;
+const rowKey = (row: Model) => 'row:' + String(idOf(row));
 const fields: readonly (Field & {key: keyof Model})[] = [
 #foreach($column in $columns)
   {key: $outputText.jsonLiteral($column.javaField), label: $outputText.jsonLiteral($column.columnComment), type: $outputText.jsonLiteral($column.javaType),
@@ -209,7 +210,7 @@ export function GeneratedPage() {
     }).catch(cause => {if (!controller.signal.aborted) {setError(errorMessage(cause)); setLoading(false);}});
     return () => controller.abort();
   }, [query, options, version]);
-  const selected = rows.filter(row => selection[String(idOf(row))]).map(idOf);
+  const selected = rows.filter(row => Object.hasOwn(selection, rowKey(row)) && selection[rowKey(row)] === true).map(idOf);
   function refresh(message = '') {setFeedback(message); setSelection({}); setVersion(value => value + 1);}
   const edit = useCallback(async (id: Id, viewing = false) => {
     if (busy) return; setBusy(true); setActionError('');
@@ -291,7 +292,7 @@ export function GeneratedPage() {
     <Button label="收起全部" variant="ghost" onClick={() => setExpanded(new Set())} />
 #end
     <p>共 {total} 条</p>
-    <DataTable data={#if($table.tree)tree.visible#else rows#end} columns={columns} loading={loading} getRowId={row => String(idOf(row))}
+    <DataTable data={#if($table.tree)tree.visible#else rows#end} columns={columns} loading={loading} getRowId={rowKey}
       selectable rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} onColumnVisibilityChange={setVisibility} showColumnVisibility
 #if($table.tree)
       pagination={false}

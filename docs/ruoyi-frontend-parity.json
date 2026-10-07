@@ -1626,4 +1626,19 @@
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }
+,
+  "generatorStringKeySelection": {
+    "status": "local-both-seven-module-profiles-passed-exact-cloud-pending",
+    "review": "docs/security-review-generator-string-key.md",
+    "backendTests": 618,
+    "frontendUnitTests": 91,
+    "mockedBrowserTests": 71,
+    "actualHostProfiles": ["default", "enabled-console-custom-output"],
+    "legalStringIds": ["__proto__", "constructor", "toString"],
+    "uiRowKeyPrefixDoesNotChangeApiId": true,
+    "beforeEvidence": "generator-string-key-before-runtime.log",
+    "afterEvidence": ["generator-string-key-final-disabled-runtime.log", "generator-string-key-final-enabled-runtime.log"],
+    "installedOpenApiSha256": "D203057072F9DADB7D936EEB5109D69E3976F1B98D15F17DD7A8D608B575A386",
+    "fullGoalComplete": false
+  }
 }

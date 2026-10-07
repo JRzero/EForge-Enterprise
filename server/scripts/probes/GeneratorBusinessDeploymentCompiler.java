@@ -14,11 +14,11 @@ class GeneratorBusinessDeploymentCompiler {
             throw new IllegalArgumentException("Unexpected owned deployment output.");
         Files.createDirectories(output);
         var sourceFiles=new ArrayList<String>();var ddl=new StringBuilder();
-        for (String category:List.of("crud","tree","sub","auto","autotree","autosub")) {
+        for (String category:List.of("crud","tree","sub","auto","autotree","autosub","stringkey")) {
             var fixtureType=Class.forName("io.eforge.enterprise.web.controller.api.v1.tool.GeneratorEforgeApiTemplateTest");
             var constructor=fixtureType.getDeclaredConstructor();constructor.setAccessible(true);var fixture=constructor.newInstance();
             var factory=fixtureType.getDeclaredMethod("fixture",String.class);factory.setAccessible(true);
-            var table=(GenTable)factory.invoke(fixture,category.equals("auto")?"crud":category.equals("autotree")?"tree":category.equals("autosub")?"sub":category);
+            var table=(GenTable)factory.invoke(fixture,category.equals("auto")?"crud":category.equals("autotree")?"tree":category.equals("autosub")?"sub":category.equals("stringkey")?"crud":category);
             String suffix=category.substring(0,1).toUpperCase()+category.substring(1);
             table.setClassName("Fixture"+suffix);table.setPackageName("io.eforge.enterprise.generated.fixture."+category);
             var options=com.alibaba.fastjson2.JSON.parseObject(table.getOptions());options.put("genView",true);table.setOptions(options.toJSONString());
@@ -77,6 +77,7 @@ class GeneratorBusinessDeploymentCompiler {
                 }
             }
             if(category.startsWith("auto")) {var key=table.getPkColumn();key.setIsIncrement("1");key.setIsInsert("1");key.setIsRequired("1");key.setIsEdit("0");}
+            if(category.equals("stringkey")) {var key=table.getPkColumn();key.setJavaType("String");key.setIsIncrement("0");key.setIsInsert("1");key.setIsRequired("1");key.setIsEdit("0");}
             var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
             for(var file:bundle.files()) {
                 if(file.path().endsWith(".java")) {
@@ -96,7 +97,7 @@ class GeneratorBusinessDeploymentCompiler {
                     Files.writeString(path,file.content(),StandardCharsets.UTF_8);
                 }
             }
-            ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id BIGINT ").append(category.startsWith("auto")?"AUTO_INCREMENT ":"").append("PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3))").append(category.startsWith("auto")?" AUTO_INCREMENT=9007199254741101":"").append(";\n");
+            ddl.append("CREATE TABLE boot_fixture_").append(category).append(" (root_id ").append(category.equals("stringkey")?"VARCHAR(255) ":"BIGINT ").append(category.startsWith("auto")?"AUTO_INCREMENT ":"").append("PRIMARY KEY,label VARCHAR(255),parent_id BIGINT,amount DECIMAL(30,5),create_time DATETIME(3))").append(category.startsWith("auto")?" AUTO_INCREMENT=9007199254741101":"").append(";\n");
             ddl.append("ALTER TABLE boot_fixture_").append(category).append(" ADD notes TEXT, ADD selectedStatus VARCHAR(16), ADD radioStatus VARCHAR(16), ADD checkedStatuses VARCHAR(32), ADD requiredStatuses VARCHAR(32), ADD insertOnly VARCHAR(64), ADD editOnly VARCHAR(64), ADD eventTime DATETIME(3), ADD imagePaths TEXT, ADD filePaths TEXT, ADD richContent TEXT, ADD quantity INT, ADD ratio DOUBLE, ADD enabled BOOLEAN, ADD boolSelected BOOLEAN, ADD boolRadio BOOLEAN, ADD __proto__ VARCHAR(255);\n");
             if(table.isSub())ddl.append("CREATE TABLE ").append(table.getSubTableName()).append(category.equals("autosub")?"(child_id BIGINT AUTO_INCREMENT PRIMARY KEY,label VARCHAR(255),parent_id BIGINT NOT NULL,":"(label VARCHAR(255) PRIMARY KEY,parent_id BIGINT NOT NULL,").append("childNotes TEXT,childSelectedStatus VARCHAR(16),childRadioStatus VARCHAR(16),childCheckedStatuses VARCHAR(32),childRequiredStatuses VARCHAR(32),childInsertOnly VARCHAR(64),childEditOnly VARCHAR(64),childEventTime DATETIME(3),childImagePaths TEXT,childFilePaths TEXT,childRichContent TEXT,childQuantity INT,childRatio DOUBLE,childEnabled BOOLEAN,childBoolSelected BOOLEAN,childBoolRadio BOOLEAN,childPrototype VARCHAR(255),childLong BIGINT,childAmount DECIMAL(30,5))").append(category.equals("autosub")?" AUTO_INCREMENT=9007199254741201":"").append(";\n");
         }
