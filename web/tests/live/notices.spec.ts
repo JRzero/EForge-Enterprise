@@ -8,12 +8,32 @@ async function filter(page: Page, title: string) {await page.getByLabel('公告�
 
 test('real notice editor uploads PNG/JPG/SVG, retains rich text, reads, clears and deletes', async ({page}) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message)); await login(page);
+  await page.getByRole('link', {name:'个人中心',exact:true}).click();
+  await expect(page.getByRole('heading', {name:'个人中心',exact:true})).toBeVisible();
+  await page.locator('.ef-app-shell__nav').getByRole('link', {name:'通知公告',exact:true}).click();
   const title = `浏览器公告${Date.now()}`;
   await page.getByRole('button', {name: '新增公告', exact: true}).click(); let dialog = page.getByRole('dialog');
   await dialog.getByRole('button', {name: '保存公告'}).click(); await expect(dialog.getByRole('alert')).toContainText('请填写');
   await dialog.getByLabel('公告标题', {exact: true}).fill(title); await dialog.getByLabel('公告类型', {exact: true}).selectOption('2');
   const editor = dialog.getByRole('textbox', {name: '公告内容'}); await editor.fill('中文富文本'); await editor.press('Control+a'); await dialog.getByRole('button', {name: '粗体', exact: true}).click(); await editor.press('ArrowRight');
-  await dialog.locator('input[type=file]').setInputFiles('tests/fixtures/avatar.png'); await expect(editor.locator('img')).toHaveCount(1);
+  const imagePath='/api/v1/system/notices/images';let release!:()=>void;let uploads=0;
+  const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**'+imagePath,async route=>{uploads++;await gate;await route.continue().catch(()=>{});});
+  const requested=page.waitForRequest(request=>new URL(request.url()).pathname===imagePath&&request.method()==='POST');
+  const acknowledged=page.waitForResponse(response=>new URL(response.url()).pathname===imagePath&&response.status()===201).catch(cause=>({error:cause}));
+  await dialog.locator('input[type=file]').setInputFiles('tests/fixtures/avatar.png');const request=await requested;
+  try {
+    await page.goBack();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+    await page.locator('.ef-app-shell__nav').getByRole('link',{name:'通知公告',exact:true}).click();
+    await expect(dialog.getByRole('button',{name:'图片上传中…',exact:true})).toBeDisabled();
+    expect(request.failure()).toBeNull();expect(uploads).toBe(1);
+    await page.goBack();await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+  } finally {release();}
+  const response=await acknowledged;if('error' in response)throw response.error;
+  await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible();
+  await page.locator('.ef-app-shell__nav').getByRole('link',{name:'通知公告',exact:true}).click();
+  await expect(editor.locator('img')).toHaveCount(1);await expect(dialog.getByRole('button',{name:'保存公告',exact:true})).toBeEnabled();expect(uploads).toBe(1);
+  await page.unroute('**'+imagePath);
   const jpeg = await page.evaluate(() => {const canvas = document.createElement('canvas'); canvas.width = 3; canvas.height = 2; canvas.getContext('2d')!.fillRect(0, 0, 3, 2); return canvas.toDataURL('image/jpeg').split(',')[1]!;});
   await dialog.locator('input[type=file]').setInputFiles({name: '真实.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(jpeg, 'base64')}); await expect(editor.locator('img')).toHaveCount(2);
   await dialog.locator('input[type=file]').setInputFiles({name: '安全图.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" onload="document.body.dataset.noticeAttack=1"><defs><linearGradient id="paint"><stop stop-color="red" offset="0%"/></linearGradient></defs><style>.shape{fill:url(#paint);background:url(https://external.invalid)}</style><rect class="shape" width="10" height="10"/><script>document.body.dataset.noticeAttack=1</script></svg>')}); await expect(editor.locator('img')).toHaveCount(3);

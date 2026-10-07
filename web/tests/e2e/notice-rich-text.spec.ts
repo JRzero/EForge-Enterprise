@@ -46,3 +46,51 @@ test('complete notice editor formats, sanitizes paste, uploads images and cleans
   await page.getByRole('button', {name: '切换编辑器'}).click(); await expect(page.getByLabel('上传状态')).toHaveText('空闲');
   await page.getByRole('button', {name: '切换编辑器'}).click(); await expect(editor).toHaveCount(1); await expect(page.locator('.ql-toolbar')).toHaveCount(1);
 });
+
+test('hidden Activity retains one rich-text upload, queues its genuine result and recreates one toolbar', async ({page}) => {
+  await page.goto('/tests/fixtures/notice-rich-text.html');
+  await page.getByRole('button', {name:'阻塞上传',exact:true}).click();
+  await page.locator('input[type=file]').setInputFiles('tests/fixtures/avatar.png');
+  await expect(page.getByLabel('开始上传')).toHaveText('1');
+  await page.getByRole('button', {name:'切换可见',exact:true}).click();
+  await expect(page.getByRole('textbox', {name:'公告内容'})).toBeHidden();
+  await expect(page.getByLabel('上传状态')).toHaveText('正在上传');
+  await expect(page.getByLabel('取消上传')).toHaveText('0');
+  await page.getByRole('button', {name:'释放一次上传',exact:true}).click();
+  await expect(page.getByLabel('完成上传')).toHaveText('1');
+  await page.getByRole('button', {name:'切换可见',exact:true}).click();
+  await expect(page.getByRole('textbox', {name:'公告内容'}).locator('img')).toHaveCount(1);
+  await expect(page.getByLabel('保存内容')).toContainText('<img');
+  await expect(page.locator('.ql-toolbar')).toHaveCount(1);
+  await expect(page.getByLabel('上传状态')).toHaveText('空闲');
+  await expect(page.getByLabel('开始上传')).toHaveText('1');
+  await page.getByRole('button',{name:'阻塞上传',exact:true}).click();
+  for(const width of [3,10]) {
+    const payload=await page.evaluate(size=>{const canvas=document.createElement('canvas');canvas.width=size;canvas.height=2;return canvas.toDataURL('image/png').split(',')[1]!;},width);
+    await page.locator('input[type=file]').setInputFiles({name:'next.png',mimeType:'image/png',buffer:Buffer.from(payload,'base64')});
+    await expect(page.getByLabel('上传状态')).toHaveText('空闲');
+    await expect(page.getByRole('textbox',{name:'公告内容'}).locator('img')).toHaveCount(width===3?2:3);
+  }
+  await expect.poll(()=>page.getByRole('textbox',{name:'公告内容'}).locator('img').evaluateAll(images=>images.map(image=>(image as HTMLImageElement).naturalWidth))).toEqual([4,3,10]);
+});
+
+test('a disposed rich-text editor cannot insert its old upload into a new form or unlock its pending upload', async ({page}) => {
+  await page.goto('/tests/fixtures/notice-rich-text.html');
+  await page.getByRole('button', {name:'阻塞上传',exact:true}).click();
+  await page.locator('input[type=file]').setInputFiles('tests/fixtures/avatar.png');
+  await expect(page.getByLabel('开始上传')).toHaveText('1');
+  await page.getByRole('button', {name:'切换编辑器',exact:true}).click();
+  await page.getByRole('button', {name:'切换编辑器',exact:true}).click();
+  await page.locator('input[type=file]').setInputFiles('tests/fixtures/avatar.png');
+  await expect(page.getByLabel('开始上传')).toHaveText('2');
+  await page.getByRole('button', {name:'释放一次上传',exact:true}).click();
+  await expect(page.getByLabel('完成上传')).toHaveText('1');
+  await expect(page.getByRole('textbox', {name:'公告内容'}).locator('img')).toHaveCount(0);
+  await expect(page.getByLabel('保存内容')).not.toContainText('<img');
+  await expect(page.getByLabel('上传状态')).toHaveText('正在上传');
+  await page.getByRole('button', {name:'释放一次上传',exact:true}).click();
+  await expect(page.getByRole('textbox', {name:'公告内容'}).locator('img')).toHaveCount(1);
+  await expect(page.getByLabel('完成上传')).toHaveText('2');
+  await expect(page.getByLabel('上传状态')).toHaveText('空闲');
+  await expect(page.getByLabel('取消上传')).toHaveText('0');
+});

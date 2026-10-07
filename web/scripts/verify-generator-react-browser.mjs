@@ -22,7 +22,7 @@ async function verifyPendingUpload(page,category,field,file){
     await expect(page.getByRole('dialog').getByRole('button',{name:'保存',exact:true})).toBeDisabled();
     assert.equal(captured.failure(),null,'Sent upload must settle once instead of aborting on Activity hide');assert.equal(writes,1);
   }finally{release();}
-  const acknowledgement=await committed;if(acknowledgement.error)throw acknowledgement.error;await expect(control.getByRole('button',{name:'移除文件',exact:true})).toBeVisible();
+  const acknowledgement=await committed;if(acknowledgement.error)throw acknowledgement.error;if(field==='richContent'){await expect(control.getByRole('textbox',{name:'公告内容'}).locator('img')).toBeVisible();}else{await expect(control.getByRole('button',{name:'移除文件',exact:true})).toBeVisible();}
   await expect(control.locator('input[type=file]')).toBeEnabled();assert.equal(writes,1);
   await page.unroute('**'+uploadPath);
   console.log('PASS: '+category+' '+field+' real browser history retains one pending upload and form lock until genuine200 acknowledgement.');
@@ -282,6 +282,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await verifyPendingUpload(page,category,'imagePaths',join(root,'tests/fixtures/avatar.png'));
           await expect(dialog.locator('label').filter({hasText:/^imagePaths/})).toContainText('移除文件');
           await verifyPendingUpload(page,category,'filePaths',{name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
+          await verifyPendingUpload(page,category,'richContent',join(root,'tests/fixtures/avatar.png'));
           await expect(dialog.locator('label').filter({hasText:/^filePaths/})).toContainText('移除文件');
           await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
         }
@@ -300,7 +301,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         {
           assert.equal(detail.data.notes,'多行中文\n<script>保持文本</script>');assert.equal(detail.data.selectedStatus,'1');assert.equal(detail.data.radioStatus,'0');
           assert.equal(detail.data.boolSelected,true);assert.equal(detail.data.boolRadio,true);assert.equal(detail.data.enabled,true);assert.equal(detail.data.checkedStatuses,'0,1');assert.equal(detail.data.quantity,17);assert.equal(detail.data.ratio,0.125);
-          assert.equal(detail.data.__proto__,'合法字段保持精确');assert(detail.data.richContent.includes('生成富文本中文'));
+          assert.equal(detail.data.__proto__,'合法字段保持精确');assert(detail.data.richContent.includes('生成富文本中文'));assert(detail.data.richContent.includes('<img'),'The uploaded editor image must persist in SQL and actual detail JSON');
           assert.equal(new Date(detail.data.eventTime).getTime(),await page.evaluate(() => new Date('2026-10-07T01:02:03.456').getTime()));
           for(const key of ['imagePaths','filePaths']) {assert(detail.data[key].startsWith('/profile/upload/'));const served=await page.request.get(new URL(detail.data[key],page.url()).href);assert.equal(served.status(),200);if(key==='filePaths')assert.equal(await served.text(),'实际文件内容');}
         }

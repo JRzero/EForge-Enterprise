@@ -2169,3 +2169,20 @@ with eight real raw-upload history checks each,98 units/89 mocked browsers and
 complementary platform filesystem cases. This accepts only the committed raw
 upload source. Subsequent rich-text owner/content/cursor changes remain under
 independent genuine browser and full-environment verification.
+### Shared rich-text upload, retained content and cursor: final local phase
+Sent rich uploads now retain independent request ownership across Activity hide;
+hidden results queue only inside their original editor instance. Counted notice
+upload ownership prevents older settlement from unlocking a newer upload. Local
+emitted HTML/received parent value/cursor survive StrictMode reconstruction;
+real [3,10,4] image order failure was repaired to [4,3,10] without weakening SVG
+checks. Existing formats, paste/video sanitization, readonly and backfill remain.
+Final authority1488 ended0:actual notice/all APIs, both seven generated categories
+with11 held upload writes each, both53 full framework browsers and full APIs.
+619 Maven declared/618 locally applicable/10 scope, client reproduction/lint/
+types/98 units/build/all91 mocked pass. Cache confirmation500ms test race uses
+response ownership instead, with original busy/Escape/error/clear checks retained.
+Both framework and generated contract scopes match their own exact hashes.
+See security-review-rich-text-cached-uploads.md. Exact new-source cloud is pending.
+Remaining editor/actions and resource/monitor/embedded cache behavior, nested-rich
+final audit, sidebar/topnav/settings and final active audit stay open. Form builder
+is deferred; the specific Quartz runtime denial remains unchanged.

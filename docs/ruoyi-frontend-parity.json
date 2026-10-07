@@ -1796,4 +1796,23 @@
     "formBuilder": "deferred-not-complete",
     "fullGoalComplete": false
   }
+,
+  "richTextCachedUploads": {
+    "status": "local-full-both-profile-success-exact-cloud-pending",
+    "review": "docs/security-review-rich-text-cached-uploads.md",
+    "backendDeclaredTests": 619,
+    "localApplicableTestsPassed": 618,
+    "frontendUnitTests": 98,
+    "mockedBrowserTests": 91,
+    "realFrameworkBrowserTestsPerProfile": 53,
+    "realInstalledGeneratedCategoriesPerProfile": 7,
+    "heldGeneratedUploadsPerProfile": 11,
+    "actualNoticeUpload": "one-POST-genuine201-hidden-result-original-PNG-JPG-SVG-persistence",
+    "ownership": "per-editor-pending-and-queue-counted-busy-retained-emitted-received-selection",
+    "cursorBeforeAfter": "actual-failed-3-10-4-repaired-4-3-10",
+    "finalEvidence": ["rich-upload-final-maven.log", "rich-upload-owned-final-frontend.log", "rich-upload-cursor-owned-browser.log", "rich-upload-notice-owned-runtime.log", "rich-upload-generated-disabled-runtime.log", "rich-upload-generated-enabled-runtime.log", "rich-upload-full-disabled-runtime.log", "rich-upload-full-enabled-runtime.log"],
+    "remaining": ["editor-detail-read-other-actions", "nested-rich-upload-final-audit", "resource-monitor-embedded-cache", "sidebar-topnav-settings", "final-active-audit"],
+    "formBuilder": "deferred-not-complete",
+    "fullGoalComplete": false
+  }
 }

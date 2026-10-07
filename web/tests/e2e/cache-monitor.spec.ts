@@ -65,9 +65,10 @@ test('names, keys and values each retry independently, selection remains literal
   await page.getByRole('button', {name: '刷新内容', exact: true}).click(); await expect(page.getByLabel('缓存值', {exact: true})).toHaveText(unsafe);
 });
 test('scoped confirmation cancels, survives failure, blocks busy escape and clears only the selected key/name', async ({page}) => {
+  let releaseDelete!: () => void; const pendingDelete = new Promise<void>(resolve => {releaseDelete = resolve;});
   let failed = true, writes = 0; const keys = new Map([['sys_config:', ['sys_config:first', 'sys_config:last']], ['sys_dict:', ['sys_dict:keep']]]);
   await page.route('**/api/v1/monitor/cache/**', async route => {const url = new URL(route.request().url());
-    if (route.request().method() === 'DELETE') {writes++; if (failed) return route.fulfill({status: 503, json: {code: 'CACHE_UNAVAILABLE'}}); await new Promise(resolve => setTimeout(resolve, 500));
+    if (route.request().method() === 'DELETE') {writes++; if (failed) return route.fulfill({status: 503, json: {code: 'CACHE_UNAVAILABLE'}}); if (url.pathname.endsWith('/keys')) await pendingDelete;
       if (url.pathname.endsWith('/keys')) {const body = route.request().postDataJSON() as {name: string; key: string}; keys.set(body.name, keys.get(body.name)!.filter(key => key !== body.key));} else keys.set(decodeURIComponent(url.pathname.split('/').at(-1)!), []);
       return route.fulfill({status: 204});}
     if (url.pathname.endsWith('/names')) return route.fulfill({json: names}); if (url.pathname.endsWith('/keys')) return route.fulfill({json: keys.get(url.searchParams.get('name')!) ?? []});
@@ -77,7 +78,8 @@ test('scoped confirmation cancels, survives failure, blocks busy escape and clea
   await page.getByRole('button', {name: '清理键 sys_config:last', exact: true}).click(); await page.keyboard.press('Escape'); expect(writes).toBe(0);
   await page.getByRole('button', {name: '查看键 sys_config:last', exact: true}).click(); await expect(page.getByLabel('缓存值', {exact: true})).toHaveText('last-value');
   await page.getByRole('button', {name: '清理键 sys_config:last', exact: true}).click(); await page.getByRole('button', {name: '确认清理', exact: true}).click(); await expect(page.getByRole('alertdialog').getByRole('alert')).toContainText('缓存服务暂时不可用');
-  failed = false; await page.getByRole('button', {name: '确认清理', exact: true}).click(); await expect(page.getByRole('button', {name: '取消', exact: true})).toBeDisabled(); await page.keyboard.press('Escape'); await expect(page.getByRole('alertdialog')).toBeVisible();
+  failed = false; await page.getByRole('button', {name: '确认清理', exact: true}).click();
+  try {await expect(page.getByRole('button', {name: '取消', exact: true})).toBeDisabled(); await page.keyboard.press('Escape'); await expect(page.getByRole('alertdialog')).toBeVisible();} finally {releaseDelete();}
   await expect(page.getByRole('alertdialog')).toHaveCount(0); await expect(page.getByRole('button', {name: '查看键 sys_config:last', exact: true})).toHaveCount(0); await expect(page.getByRole('button', {name: '查看键 sys_config:first', exact: true})).toBeVisible(); await expect(page.getByLabel('缓存值', {exact: true})).toHaveCount(0); expect(keys.get('sys_dict:')).toEqual(['sys_dict:keep']);
   await page.getByRole('button', {name: '清理类别 sys_config:', exact: true}).click(); await page.getByRole('button', {name: '确认清理', exact: true}).click(); await expect(page.getByText('暂无缓存键', {exact: true})).toBeVisible(); expect(keys.get('sys_dict:')).toEqual(['sys_dict:keep']);
 });

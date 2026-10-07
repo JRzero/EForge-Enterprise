@@ -22,7 +22,9 @@ export function NoticesPage() {
   const [draft, setDraft] = useState(emptyFilters), [filters, setFilters] = useState(emptyFilters), [showFilters, setShowFilters] = useState(true);
   const [page, setPage] = useState(1), [pageSize, setPageSize] = useState(10), [version, setVersion] = useState(0);
   const [data, setData] = useState<PageResponseNoticeResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
-  const [feedback, setFeedback] = useState(''), [actionError, setActionError] = useState(''), [busy, setBusy] = useState(false), [imageBusy, setImageBusy] = useState(false);
+  const [feedback, setFeedback] = useState(''), [actionError, setActionError] = useState(''), [busy, setBusy] = useState(false), [imageUploads, setImageUploads] = useState(0);
+  const imageBusy = imageUploads > 0;
+  const imageBusyChanged = useCallback((uploading: boolean) => setImageUploads(count => Math.max(0, count + (uploading ? 1 : -1))), []);
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<{id?: string; form: NoticeRequest} | null>(null), [deleting, setDeleting] = useState<string[] | null>(null);
   const [preview, setPreview] = useState<string | null>(null), [readers, setReaders] = useState<string | null>(null);
@@ -95,7 +97,7 @@ export function NoticesPage() {
       <form onSubmit={event => {void save(event);}}><Input label="公告标题" value={editor.form.title} onChange={title => setEditor({...editor, form: {...editor.form, title}})} isDisabled={busy} />
         <label>公告类型<select aria-label="公告类型" value={editor.form.type} disabled={busy || types.loading || !!types.error} onChange={event => setEditor({...editor, form: {...editor.form, type: event.target.value}})}><option value="">请选择公告类型</option><DictionaryOptions options={types.options} current={editor.form.type} /></select></label>
         <fieldset disabled={busy || statuses.loading || !!statuses.error}><legend>公告状态</legend>{statuses.options.map(option => <label key={option.value}><input type="radio" name="notice-status" value={option.value} checked={editor.form.status === option.value} onChange={() => setEditor({...editor, form: {...editor.form, status: option.value}})} />{option.label}</label>)}</fieldset>
-        <RichTextEditor value={editor.form.content ?? ''} onChange={content => setEditor(current => current ? {...current, form: {...current.form, content}} : null)} uploadImage={async (file, signal) => (await api.uploadNoticeImage(file, signal)).imageUrl} disabled={busy} onBusyChange={setImageBusy} />
+        <RichTextEditor value={editor.form.content ?? ''} onChange={content => setEditor(current => current ? {...current, form: {...current.form, content}} : null)} uploadImage={async (file, signal) => (await api.uploadNoticeImage(file, signal)).imageUrl} disabled={busy} onBusyChange={imageBusyChanged} />
         <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
         {actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label={imageBusy ? '图片上传中…' : '保存公告'} type="submit" isDisabled={busy || imageBusy || types.loading || statuses.loading || !!types.error || !!statuses.error} /><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setEditor(null)} /></div>
       </form></ResourceDialog>}

@@ -32,16 +32,22 @@ type Props = {
   onBusyChange?: (busy: boolean) => void;
 };
 
+function insertUploadedImage(quill: Quill, index: number, source: string) {
+  quill.insertEmbed(Math.min(index, quill.getLength() - 1), 'image', source, 'user');
+  const range = {index: Math.min(index + 1, quill.getLength() - 1), length: 0}; quill.setSelection(range.index, range.length, 'silent'); return range;
+}
 export function RichTextEditor(props: Props) {
   const container = useRef<HTMLDivElement>(null), editor = useRef<Quill | null>(null);
-  const latest = useRef(props), emitted = useRef('');
+  const latest = useRef(props), emitted = useRef(''), received = useRef('');
+  const selection = useRef<{index: number; length: number} | null>(null);
+  const pending = useRef<AbortController | null>(null), completedImages = useRef<{index: number; source: string}[]>([]);
   const [error, setError] = useState('');
   useEffect(() => {latest.current = props;});
   useEffect(() => {
     const host = container.current;
     if (!host) return;
     const surface = document.createElement('div'); host.append(surface);
-    const controller = new AbortController(); let uploading = false;
+    const controller = new AbortController();
     const quill = new Quill(surface, {theme: 'snow', placeholder: '请输入内容', modules: {toolbar}, readOnly: latest.current.disabled});
     editor.current = quill;
     quill.root.setAttribute('aria-label', '公告内容'); quill.root.setAttribute('role', 'textbox');
@@ -51,25 +57,26 @@ export function RichTextEditor(props: Props) {
       if (format) {const label = labels[format.slice(3)]!; control.setAttribute('aria-label', label); control.setAttribute('title', label);}
     });
     async function insertImage(file: File) {
-      if (uploading || latest.current.disabled || controller.signal.aborted) return;
+      if (pending.current || latest.current.disabled || controller.signal.aborted) return;
       if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type) || file.size >= 5 * 1024 * 1024) {setError('请选择小于 5 MB 的 JPG、PNG 或 SVG 图片。'); return;}
       const index = quill.getSelection(true)?.index ?? quill.getLength() - 1;
-      uploading = true; latest.current.onBusyChange?.(true); setError('');
+      const uploadController = new AbortController(); pending.current = uploadController;
+      const busyChanged = latest.current.onBusyChange; busyChanged?.(true); setError('');
       try {
-        const url = await latest.current.uploadImage(file, controller.signal);
-        if (controller.signal.aborted || latest.current.disabled) return;
+        const url = await latest.current.uploadImage(file, uploadController.signal);
+        if (uploadController.signal.aborted) return;
         const safe = document.createElement('div'); safe.innerHTML = sanitizeNoticeHtml(`<img src="${url.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}">`);
         const source = safe.querySelector('img')?.getAttribute('src');
         if (!source) throw new Error('图片地址不可用。');
-        quill.insertEmbed(Math.min(index, quill.getLength() - 1), 'image', source, 'user');
-        quill.setSelection(Math.min(index + 1, quill.getLength() - 1), 0, 'silent');
-      } catch (cause) {if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : '图片上传失败，请重试。');}
-      finally {uploading = false; if (!controller.signal.aborted) latest.current.onBusyChange?.(false);}
+        if (editor.current && !latest.current.disabled) selection.current = insertUploadedImage(editor.current, index, source);
+        else completedImages.current.push({index, source});
+      } catch (cause) {if (!uploadController.signal.aborted) setError(cause instanceof Error ? cause.message : '图片上传失败，请重试。');}
+      finally {if (pending.current === uploadController) pending.current = null; busyChanged?.(false);}
     }
     const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/jpeg,image/png,image/svg+xml'; input.hidden = true; host.append(input);
     input.addEventListener('change', () => {const file = input.files?.[0]; if (file) void insertImage(file); input.value = '';});
     const toolbarModule = quill.getModule('toolbar') as {addHandler: (name: string, handler: () => void) => void};
-    toolbarModule.addHandler('image', () => {if (!latest.current.disabled && !uploading) input.click();});
+    toolbarModule.addHandler('image', () => {if (!latest.current.disabled && !pending.current) input.click();});
     function paste(event: ClipboardEvent) {
       if (latest.current.disabled) return;
       const file = [...(event.clipboardData?.items ?? [])].find(item => item.kind === 'file' && item.type.startsWith('image/'))?.getAsFile();
@@ -84,14 +91,19 @@ export function RichTextEditor(props: Props) {
     quill.root.addEventListener('paste', paste, true);
     function change() {const clean = quill.getLength() === 1 ? '' : sanitizeNoticeHtml(quill.getSemanticHTML()); emitted.current = clean; latest.current.onChange(clean);}
     quill.on('text-change', change);
-    emitted.current = sanitizeNoticeHtml(latest.current.value); quill.clipboard.dangerouslyPasteHTML(emitted.current, 'silent');
-    return () => {controller.abort(); latest.current.onBusyChange?.(false); quill.off('text-change', change); quill.root.removeEventListener('paste', paste, true); editor.current = null; host.replaceChildren();};
+    function selected(range: {index: number; length: number} | null) {if (range) selection.current = {index: range.index, length: range.length};}
+    quill.on('selection-change', selected);
+    const incoming = sanitizeNoticeHtml(latest.current.value); if (incoming !== received.current) {received.current = incoming; emitted.current = incoming;}
+    quill.clipboard.dangerouslyPasteHTML(emitted.current, 'silent');
+    if (selection.current) quill.setSelection(Math.min(selection.current.index, quill.getLength() - 1), selection.current.length, 'silent');
+    return () => {controller.abort(); quill.off('text-change', change); quill.off('selection-change', selected); quill.root.removeEventListener('paste', paste, true); editor.current = null; host.replaceChildren();};
   }, []);
   useEffect(() => {
     const quill = editor.current; if (!quill) return;
     quill.enable(!props.disabled);
     const clean = sanitizeNoticeHtml(props.value);
-    if (clean !== emitted.current) {emitted.current = clean; quill.clipboard.dangerouslyPasteHTML(clean, 'silent');}
+    if (clean !== received.current) {received.current = clean; if (clean !== emitted.current) {emitted.current = clean; quill.clipboard.dangerouslyPasteHTML(clean, 'silent');}}
+    if (!props.disabled) for (const image of completedImages.current.splice(0)) selection.current = insertUploadedImage(quill, image.index, image.source);
   }, [props.value, props.disabled]);
   return <div><div ref={container} />{error && <p role="alert">{error}</p>}</div>;
 }
