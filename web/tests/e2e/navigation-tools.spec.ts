@@ -1,7 +1,7 @@
 import {test,expect} from './fixtures';
 import type {Page} from '@playwright/test';
 async function setup(page:Page) {
-  const state={permissions:['app:dashboard:view','system:role:list'],queryText:'',cached:true,extraGroup:false,routeChild:false,userRoute:false};
+  const state={permissions:['app:dashboard:view','system:role:list'],queryText:'',cached:true,extraGroup:false,routeChild:false,userRoute:false,manyGroups:false};
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
   await page.route('**/logout',route=>route.fulfill({json:{code:200}}));
@@ -10,6 +10,7 @@ async function setup(page:Page) {
     {key:'system',type:'GROUP',label:'系统管理',order:1,children:[{key:'role',type:'ROUTE',routeId:'system-roles',label:'角色管理',icon:'peoples',queryText:state.queryText,cached:state.cached,order:0,children:state.routeChild?[{key:'post-child',type:'ROUTE',routeId:'system-posts',label:'岗位子页面',order:0,children:[]}]:[]},...(state.userRoute?[{key:'user-prefix',type:'ROUTE',routeId:'system-users',label:'用户管理',order:1,children:[]}]:[])]},
     {key:'external',type:'EXTERNAL',label:'文档 İabc (x) <img src=x onerror=alert(1)>',externalUrl:'https://example.com/docs',order:2,children:[]},
     ...(state.extraGroup?[{key:'tools',type:'GROUP',label:'工具菜单',order:4,children:[{key:'nested',type:'GROUP',label:'嵌套工具',order:0,children:[{key:'guide',type:'EXTERNAL',label:'使用指南',externalUrl:'https://example.com/guide',order:0,children:[]}]}]}]:[]),
+    ...(state.manyGroups?Array.from({length:10},(_,index)=>({key:'extra-'+index,type:'GROUP',label:'扩展菜单'+index,order:10+index,children:[{key:'extra-link-'+index,type:'EXTERNAL',label:'帮助'+index,externalUrl:'https://example.com/guide'+index,order:0,children:[]}]})):[]),
     {key:'bad',type:'EXTERNAL',label:'非法链接',externalUrl:'javascript:alert(1)',order:3,children:[]} ]}}));
   await page.route('**/api/v1/system/roles?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
   await page.route('**/api/v1/system/roles/*/users?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
@@ -125,4 +126,31 @@ test('collapsed popup stays within the viewport, closes outside and preserves pr
   await page.setViewportSize({width:991,height:844});await page.getByRole('button',{name:'打开菜单',exact:true}).click();const drawer=page.getByRole('dialog',{name:'菜单',exact:true});
   await drawer.getByRole('button',{name:'系统管理',exact:true}).click();await drawer.getByRole('link',{name:'角色管理',exact:true}).click();await expect(drawer).toHaveCount(0);await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
   await page.setViewportSize({width:992,height:844});await expect.poll(async()=>Math.round((await sidebar.boundingBox())!.width)).toBe(64);await expect(page.getByRole('button',{name:'展开菜单',exact:true})).toBeVisible();await expect(popup).toHaveCount(0);
+});
+
+test('mixed navigation selects groups without routes, retains drafts and restores real child ancestry',async({page})=>{
+  const state=await setup(page);state.extraGroup=true;await page.reload();
+  await page.getByRole('button',{name:'布局设置',exact:true}).click();const settings=page.getByRole('dialog',{name:'布局设置',exact:true});
+  await settings.getByLabel('混合菜单',{exact:true}).check();await settings.getByRole('button',{name:'保存配置',exact:true}).click();await expect(settings.getByRole('status')).toHaveText('布局已保存');await settings.getByRole('button',{name:'关闭设置',exact:true}).click();
+  const top=page.getByRole('navigation',{name:'顶部菜单',exact:true}),side=page.locator('.ef-app-shell__nav');
+  await expect(page.locator('.ef-app-shell__sidebar')).toBeHidden();await top.getByRole('button',{name:'系统管理',exact:true}).click();
+  await expect(page).toHaveURL(/\/dashboard$/);await expect(page.locator('.ef-app-shell__sidebar')).toBeVisible();await expect(side.getByRole('button',{name:'系统管理',exact:true})).toHaveCount(0);
+  await side.getByRole('link',{name:'角色管理',exact:true}).click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();await page.getByLabel('角色名称筛选',{exact:true}).fill('布局草稿');
+  const tools=top.getByRole('button',{name:'工具菜单',exact:true});if(!await tools.isVisible())await top.getByRole('button',{name:'更多菜单',exact:true}).click();await tools.click();await expect(side.getByRole('button',{name:'嵌套工具',exact:true})).toBeVisible();await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('布局草稿');
+  await page.goto('/role/users/2');await expect(page.getByRole('heading',{name:'用户授权',exact:true})).toBeVisible();await expect(top.getByRole('button',{name:'系统管理',exact:true})).toHaveAttribute('aria-pressed','true');await expect(side.getByRole('link',{name:'角色管理',exact:true})).toBeVisible();
+  state.permissions=['app:dashboard:view'];await page.reload();await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();await expect(top.getByRole('button',{name:'系统管理',exact:true})).toHaveCount(0);await expect(side.getByRole('link',{name:'角色管理',exact:true})).toHaveCount(0);
+});
+
+test('pure top navigation keeps overflow groups reachable, keyboard escape and mobile fallback',async({page})=>{
+  const state=await setup(page);state.manyGroups=true;await page.reload();await page.setViewportSize({width:1100,height:844});
+  await page.getByRole('button',{name:'布局设置',exact:true}).click();const settings=page.getByRole('dialog',{name:'布局设置',exact:true});await settings.getByLabel('顶部菜单',{exact:true}).check();await settings.getByRole('button',{name:'保存配置',exact:true}).click();await settings.getByRole('button',{name:'关闭设置',exact:true}).click();
+  const top=page.getByRole('navigation',{name:'顶部菜单',exact:true});await expect(page.locator('.ef-app-shell__sidebar')).toBeHidden();
+  const more=top.getByRole('button',{name:'更多菜单',exact:true});await more.click();const overflow=top.locator('.top-navigation-overflow');await expect(overflow).toBeVisible();
+  await overflow.getByRole('button',{name:'扩展菜单9',exact:true}).focus();await overflow.getByRole('button',{name:'扩展菜单9',exact:true}).press('Enter');await expect(overflow.getByRole('link',{name:'帮助9 在新窗口打开',exact:true})).toHaveAttribute('rel','noopener noreferrer');
+  await page.keyboard.press('Escape');await expect(overflow.getByRole('button',{name:'扩展菜单9',exact:true})).toBeFocused();await page.keyboard.press('Escape');await expect(overflow).toBeHidden();await expect(more).toBeFocused();
+  await top.getByRole('button',{name:'系统管理',exact:true}).focus();await top.getByRole('button',{name:'系统管理',exact:true}).press('Enter');await top.getByRole('link',{name:'角色管理',exact:true}).click();await expect(page.getByRole('heading',{name:'角色管理',exact:true})).toBeVisible();
+  await page.reload();await expect(top).toBeVisible();await expect(page.locator('.ef-app-shell__sidebar')).toBeHidden();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await more.click();const bounds=(await overflow.boundingBox())!;expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(1100);await page.getByRole('heading',{name:'角色管理',exact:true}).click();await expect(overflow).toBeHidden();
+  await page.setViewportSize({width:390,height:844});await expect(top).toHaveCount(0);await page.getByRole('button',{name:'打开菜单',exact:true}).click();const drawer=page.getByRole('dialog',{name:'菜单',exact:true});await expect(drawer.getByRole('button',{name:'扩展菜单9',exact:true})).toBeVisible();await page.keyboard.press('Escape');
+  await page.setViewportSize({width:1100,height:844});await expect(top).toBeVisible();await page.getByRole('button',{name:'布局设置',exact:true}).click();await settings.getByRole('button',{name:'恢复默认',exact:true}).click();await settings.getByRole('button',{name:'关闭设置',exact:true}).click();await expect(top).toHaveCount(0);await expect(page.locator('.ef-app-shell__sidebar')).toBeVisible();
 });

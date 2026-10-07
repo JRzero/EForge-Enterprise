@@ -282,3 +282,23 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 .enterprise-navigation img.menu-icon {filter:brightness(0) invert(1);}
 .enterprise-navigation a[aria-current="page"] img.menu-icon {filter:none;}
 @media (min-width:992px) {.enterprise-layout[data-sidebar-collapsed="true"] .ef-app-shell__sidebar {z-index:60;}}
+.enterprise-layout[data-sidebar-hidden="true"] > .ef-app-shell {display:block;}
+.enterprise-layout[data-sidebar-hidden="true"] > .ef-app-shell > .ef-app-shell__sidebar {display:none;}
+.top-navigation {width:100%; margin-top:12px; min-width:0;}
+.top-navigation ul {list-style:none; padding:0; margin:0;}
+.top-navigation > ul {display:flex; gap:8px; align-items:center;}
+.top-navigation li {position:relative; min-width:0;}
+.top-navigation a,.top-navigation button {display:inline-flex; gap:6px; align-items:center; padding:10px 12px; color:#203b43; background:transparent; border:0; border-radius:6px; font-size:14px; text-decoration:none; cursor:pointer; max-width:100%;}
+.top-navigation > ul > li > a > span,.top-navigation > ul > li > button > span {max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.top-navigation button[data-active="true"],.top-navigation a[aria-current="page"] {color:#315c4d; background:#e7f2ee;}
+.top-navigation-popup,.top-navigation-overflow {position:absolute; top:100%; left:0; width:240px; max-width:calc(100vw - 32px); max-height:calc(100dvh - 180px); overflow:auto; z-index:110; padding:8px!important; background:#fff; border:1px solid #d8e4e1; border-radius:8px; box-shadow:0 8px 24px #0002;}
+.top-navigation [hidden] {display:none;}
+.top-navigation-overflow .top-navigation-popup {position:static; width:auto; border:0; box-shadow:none;}
+.top-navigation > ul > li {max-width:180px;}
+.top-navigation-overflow {left:auto;right:0;}
+.top-navigation .enterprise-navigation a,.top-navigation .navigation-disclosure,.top-navigation .navigation-group {color:#203b43;}
+.top-navigation .enterprise-navigation img.menu-icon {filter:none;}
+.top-navigation .enterprise-navigation a:hover,.top-navigation .navigation-disclosure:hover {background:#e7f2ee;}
+.navigation-settings fieldset {display:grid; gap:14px; padding:16px; border:1px solid #d8e4e1; border-radius:8px; margin:18px 0;}
+.navigation-settings label {display:flex; gap:10px; align-items:center;}
+.enterprise-layout[data-navigation-mode="mixed"] .ef-app-shell__header,.enterprise-layout[data-navigation-mode="top"] .ef-app-shell__header {flex-direction:column;align-items:stretch;}

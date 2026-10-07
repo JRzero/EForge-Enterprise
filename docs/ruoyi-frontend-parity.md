@@ -2355,3 +2355,35 @@ user-deferred and not complete. The specifically denied Quartz runtime scheme
 remains unapproved. The isolated sidebar worktree was archived after integration
 and preservation of needed ignored validation evidence. Local owned ports are
 released and the main working tree is clean at pause.
+
+## Development resumed; three navigation modes (2026-10-07)
+
+The user resumed the full current project scope and requested a 1.5x development
+pace. This is a workflow target, not a guaranteed execution-time multiplier;
+independent work is interleaved while all required acceptance checks remain.
+The previous pause instruction is superseded. Form builder remains deferred,
+and the specifically rejected Quartz runtime schemes remain unapproved.
+
+Actual EnterpriseShell now offers left, mixed and pure-top navigation. Mixed
+GROUP selection changes only the authorized sidebar projection and does not
+navigate a fake GROUP route. Registered route ancestry restores the active root.
+Pure-top includes multi-level child navigation and reachable overflow groups;
+all root entries remain reachable after width changes. Native links retain exact
+query strings and external noopener behavior. Mobile991px uses the verified full
+native drawer independently of desktop mode. Layout mode can be previewed,
+explicitly saved and reset; only an allowlisted local preference is stored.
+PageWorkspace stays mounted, preserving page drafts. Permission refresh derives
+all shown nodes from the current authorized projection; stored selections cannot
+reintroduce revoked routes.
+
+Focused mixed/top tests passed after fixing actual pinned AppShell header flex
+compression. Final frozen-source lint/typecheck/build and111 mocked browsers
+passed;98 units/client reproducibility passed before the final small popup-close
+and active-indicator patch. Exact cloud will independently rerun all checks.
+The first full browser run was modified during execution and is not accepted;
+it showed a native console nonce mismatch and Cron login failure. Frozen rerun
+kept all original assertions and passed111 without changing those tests.
+Real authority72605 runs both complete profiles, including actual SQL navigation
+mode/draft/reload/route assertions; it is pending, not claimed accepted.
+Full theme/density/layout switches, remaining action audits and final active
+parity acceptance remain required. This is a navigation mode phase only.
