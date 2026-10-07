@@ -2937,6 +2937,8 @@
       "runJob"
     ],
     "independentRemaining": [
+      "Pagination original numbered/jump/size/scroll parity and exact acceptance",
+      "Generated image gallery preview parity and exact acceptance",
       "Final whole-objective acceptance after task mutations"
     ],
     "deferred": [
@@ -4078,5 +4080,32 @@
     "realBrowsersPerProfile": 62,
     "frontEndUnits": 98,
     "mockedBrowsers": 142
+  },
+  "paginationFidelity": {
+    "status": "local-final-passed-exact-cloud-pending",
+    "frontEndUnits": 98,
+    "mockedBrowsers": 143,
+    "mainListConsumers": 10,
+    "realAuthority": "81830-terminal0-all-generated;43263-terminal0-both62-fullAPI",
+    "remaining": [
+      "precise source cloud acceptance"
+    ],
+    "fullGoalComplete": false,
+    "dialogConsumers": 3,
+    "generatedTemplates": "CRUD/sub use shared pagination; tree retains full hierarchy",
+    "frontendAuthority": "27984-terminal0-all-gates-98units143mocks",
+    "backendDeclarations": 661,
+    "existingPlatformSkipped": 1
+  },
+  "generatedImagePreviewAudit": {
+    "status": "incomplete-thumbnail-only-renderer-observed",
+    "source": "server/eforge-generator/src/main/resources/vm/react/Page.tsx.vm",
+    "required": [
+      "original first thumbnail and complete gallery",
+      "original accepted URL/path preservation with safe scheme handling",
+      "interactive viewing and failure recovery",
+      "actual generated CRUD/tree/sub compilation/runtime/browser"
+    ],
+    "fullGoalComplete": false
   }
 }

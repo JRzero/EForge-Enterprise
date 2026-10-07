@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -183,7 +184,7 @@ export function UsersPage() {
       {selectedIds.length ? <div className="user-selection"><span role="status">已选择 {selectedIds.length} 个用户</span><Button label="清空选择" variant="ghost" onClick={() => setSelection({})} /></div> : null}
       {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert">{error}<Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !editor && !action && !importing ? <p role="alert">{actionError}</p> : null}
       <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无用户" pagination={false} sortable={false} showColumnVisibility={false} rowSelection={selection} columnVisibility={visibility} getRowId={row => row.id} /></div>
-      <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => { setPageSize(Number(event.target.value)); setPage(1); }}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label><Button label="上一页" variant="secondary" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="secondary" isDisabled={loading || !data || page * pageSize >= data.total} onClick={() => setPage(value => value + 1)} /></div>
+      <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     </div></div>
     {editor ? <ResourceDialog titleId="user-editor-title" busy={busy} onCancel={close}><h2 id="user-editor-title">{editor.id ? '修改用户' : '新增用户'}</h2><form noValidate onSubmit={event => { void save(event); }}>
       <Input label="登录账号" value={editor.form.username} isDisabled={busy || !!editor.id} aria-required="true" onChange={username => setEditor({...editor, form: {...editor.form, username}})} />

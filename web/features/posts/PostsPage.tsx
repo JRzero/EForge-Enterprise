@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -123,11 +124,7 @@ export function PostsPage() {
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无岗位" pagination={false} sortable={false}
       selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择岗位 ${row.name}`} /></div>
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span>
-      <label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => { setPageSize(Number(event.target.value)); setPage(1); }}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label>
-      <Button label="上一页" variant="secondary" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} />
-      <Button label="下一页" variant="secondary" isDisabled={loading || !data || page * pageSize >= data.total} onClick={() => setPage(value => value + 1)} />
-    </div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <PostDialog titleId="post-editor-title" busy={busy} onCancel={() => { setEditor(null); setActionError(''); }}><h2 id="post-editor-title">{editor.id ? '修改岗位' : '新增岗位'}</h2>
       <form onSubmit={event => { void save(event); }}>
         <Input label="岗位编码" value={editor.form.code} aria-required="true" isDisabled={busy} onChange={code => setEditor({...editor, form: {...editor.form, code}})} />

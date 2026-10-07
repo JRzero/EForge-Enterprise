@@ -1344,3 +1344,25 @@ Denied-page local authority48423 completed0 with the real no-role account and co
 Shared column controls now work on nine actual page consumers. Local39021 terminal0 proves6 actual user browsers/fullAPI;98 units/142 mocks and all frontend gates pass. Exact new cloud remains pending; original task mutation approval and deferred builder boundaries are unchanged.
 
 2026-10-08 final exact error430892c server37652335274 all3/web37652335172 and shared columns29bb545 server37653562598 all3/web37653562840 are SUCCESS. Each has direct both62/fullAPI/OpenAPI,661 declarations with10 scope/one existing skip,98 units/142 mocks and actual generated-host evidence. Local error48423 and columns39021 terminated0. Inventory reconciliation preserves175 source files/19 original API modules/119 operations, with114 accepted and five task mutations pending. File/class evidence resolves; inventory mapping is not standalone functional proof. Original form builder is deferred, specific denied Quartz runtime scheme remains unapproved and the entire objective is not complete.
+
+Continued original component audit identifies missing numbered/jump/30/scroll
+pagination and complete generated image previews. Ten main lists now have
+uncommitted page-number/jump/30 controls;98 units/143 mocks/all frontend checks
+pass, real92148 posts2/fullAPI is live. Resume that authority; do not package or
+change frozen source before termination. Remaining total5/7 pager-boundary count,
+scroll, other dialogs/generated tables and image galleries retain full scope;
+see security-review-pagination-fidelity.md. This is new progress, not completion.
+
+Pagination follow-up: full5/7 numeric counts, owned automatic scrolling and three
+reader/import/allocation contexts now use shared controls. Generated CRUD/sub
+also use these controls; trees retain hierarchy.98 units/143 mocks and frontend
+checks passed. Earlier92148 posts2/fullAPI terminated0. Generated strict lint
+found an unused tree import and it was fixed conditionally.52751 owns final
+Maven/generated runtime verification after stopped isolated Java attach attempt;
+final profiles/cloud remain pending. Image galleries remain an independent gap.
+
+Pagination final local:81830 all installed generated families,43263 both62/fullAPI,
+27984 lint/type/client reproduction/build/98 units/143 mocks and full backend661
+passed. Both actual contracts remain identical to committed api-v1.json. Normal
+commit/push and exact cloud acceptance follow. Independent image gallery work
+uses an isolated managed checkout; no live pagination fixtures were modified.

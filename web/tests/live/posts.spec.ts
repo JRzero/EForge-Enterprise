@@ -128,9 +128,13 @@ test('real server pagination, page size and multi-row batch deletion', async ({p
   await expect(page.getByRole('cell', {name: `${prefix}-10`, exact: true})).toBeVisible();
   await expect(page.getByRole('cell', {name: `${prefix}-0`, exact: true})).toHaveCount(0);
   await expect(page.getByRole('button', {name: '下一页', exact: true})).toBeDisabled();
+  await page.getByRole('button', {name: '第 1 页', exact: true}).click(); await expect(page.getByRole('cell', {name: `${prefix}-0`, exact: true})).toBeVisible();
+  await page.getByLabel('跳至页码', {exact: true}).fill('2'); await page.getByRole('button', {name: '跳转', exact: true}).click(); await expect(page.getByRole('cell', {name: `${prefix}-10`, exact: true})).toBeVisible();
+  await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
   await page.getByRole('button', {name: '上一页', exact: true}).click();
   await page.getByLabel('每页条数', {exact: true}).selectOption('20');
   await expect(page.getByRole('cell', {name: `${prefix}-11`, exact: true})).toBeVisible();
+  await page.getByLabel('每页条数', {exact: true}).selectOption('30'); await expect(page.getByRole('cell', {name: `${prefix}-11`, exact: true})).toBeVisible(); await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
   for (let index = 0; index < 12; index++) await page.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();
   await page.getByRole('button', {name: '删除所选岗位', exact: true}).click();
   await expect(page.getByRole('alertdialog')).toContainText('12 个岗位');

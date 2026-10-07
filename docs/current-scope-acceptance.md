@@ -53,7 +53,14 @@ pending: `addJob`, `updateJob`, `delJob`, `changeJobStatus`, `runJob`. Task-log
 operations are independently accepted and are not incorrectly held incomplete
 because task CRUD is pending. Historical source/operation lists are unchanged.
 
-Remaining active work is canonical task mutation APIs,
+Further original-component audit has reopened independent pagination fidelity
+(numbered/jump/30/scroll and all consumers) and generated image gallery viewing;
+see security-review-pagination-fidelity.md. The first ten main-list changes are
+uncommitted with143 mocked browsers and98 units passing; real authority92148 is
+live and must be resumed rather than restarted. These new changes are not
+covered by the previously accepted29bb545.
+
+Remaining active work also includes canonical task mutation APIs,
 invocation whitelist, database/Quartz fault/concurrency consistency, generated
 client and create/edit/status/run/delete controls integrating the Cron editor,
 followed by whole-objective acceptance. Source/operation inventory reconciliation
@@ -89,3 +96,12 @@ keys. Local39021 users6/fullAPI and exact29bb545 server37653562598 all3/
 web37653562840 succeed, including both62 profiles. See
 security-review-column-selection.md. Whole goal remains incomplete; no deferred
 builder or task mutation is falsely marked complete.
+
+2026-10-08 shared pagination final local stage: ten main lists plus allocation,
+readers and import retain typed request ownership with numbered/jump/30/scroll,
+5 mobile/7 desktop numeric counts and boundary aria-current. Generated CRUD/sub
+share these controls while trees remain complete.81830 all installed generated
+families,43263 both62/fullAPI profiles,27984 frontend98/143 and full backend661
+passed. All live/committed contracts remain exact. Ready for commit/push; precise
+cloud is pending. ImagePreview and the five task mutations remain incomplete;
+form builder stays deferred. See security-review-pagination-fidelity.md.

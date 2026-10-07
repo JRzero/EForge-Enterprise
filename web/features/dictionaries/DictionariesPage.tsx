@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
@@ -117,7 +118,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
     {metadataError ? <div role="alert"><p>字典选项加载失败：{metadataError}</p><Button label="重试字典选项" onClick={() => setMetadataVersion(value => value + 1)} /></div> : null}
     {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无字典记录" pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择字典 ${rowName(row)}`} /></div>
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => {setSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(value => <option key={value} value={value}>{value}</option>)}</select></label><Button label="上一页" variant="secondary" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="secondary" isDisabled={loading || !data || page * pageSize >= data.total} onClick={() => setPage(value => value + 1)} /></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setSize} />
     {editor ? <DictionaryEditor initial={editor} statusOptions={statusOptions} code={selectedType?.code} onClose={() => setEditor(null)} onSaved={saved} /> : null}
     {preview ? <DictionaryPreview type={preview} statusOptions={statusOptions} onClose={() => setPreview(null)} /> : null}
     {deleting ? <ResourceDialog titleId="dictionary-delete-title" alert busy={busy} onCancel={() => {setDeleting(null); setActionError('');}}><h2 id="dictionary-delete-title">确认删除字典</h2><p>将删除所选的 {deleting.length} 条记录。{!entryMode ? '包含数据的类型不能删除。' : ''}</p>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setDeleting(null); setActionError('');}} /></div></ResourceDialog> : null}

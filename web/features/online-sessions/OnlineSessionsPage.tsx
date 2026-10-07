@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
@@ -49,7 +50,7 @@ export function OnlineSessionsPage() {
     <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading || busy} onClick={() => setVersion(value => value + 1)} /></div>
     {feedback && <p role="status">{feedback}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} getRowId={row => row.id} loading={loading} emptyText="暂无在线会话" pagination={false} showColumnVisibility={false} /></div>}
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => {setPageSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select></label><Button label="上一页" variant="ghost" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="ghost" isDisabled={loading || page * pageSize >= (data?.total ?? 0)} onClick={() => setPage(value => value + 1)} /></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {selected && <ResourceDialog titleId="online-confirm-title" alert busy={busy} onCancel={() => setSelected(null)}><h2 id="online-confirm-title">确认强退会话</h2><p>强退账号 {selected.username} 的此会话？</p><p>会话编号：{selected.id}</p>{actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setSelected(null)} /><Button label="确认强退" variant="secondary" isDisabled={busy} onClick={() => {void revoke();}} /></div></ResourceDialog>}
   </section>;
 }

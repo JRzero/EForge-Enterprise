@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {useEffect, useRef, useState, type FormEvent} from 'react';
 import {Button, Input} from '@eforge/ui';
 import {DataTable, type ColumnDef} from '@eforge/data';
@@ -49,8 +50,7 @@ export function NoticeReaders({id, onClose}: {id: string; onClose: () => void}) 
     <h2 id="notice-readers-title">已读用户</h2>
     <form className="post-filters" onSubmit={apply}><Input label="读者账号或姓名" value={draft} onChange={setDraft} /><Button label="搜索读者" type="submit" /><Button label="重置读者" variant="ghost" onClick={() => {setDraft(''); setSearch(''); setPage(1); setVersion(value => value + 1);}} /></form>
     {error ? <><p role="alert">{error}</p><Button label="重试读者" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={readerColumns} data={data?.items ?? []} getRowId={row => row.userId} loading={loading} emptyText="暂无已读用户" pagination={false} sortable={false} showColumnVisibility={false} /></div>}
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 位读者，第 {page} 页</span><label>读者每页条数<select aria-label="读者每页条数" value={pageSize} onChange={event => {setPageSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select></label>
-      <Button label="读者上一页" variant="ghost" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="读者下一页" variant="ghost" isDisabled={loading || page * pageSize >= (data?.total ?? 0)} onClick={() => setPage(value => value + 1)} /></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} onPage={setPage} onSize={setPageSize} unit="位读者" previousLabel="读者上一页" nextLabel="读者下一页" sizeLabel="读者每页条数" />
     <Button label="关闭读者" variant="ghost" onClick={onClose} />
   </ResourceDialog>;
 }

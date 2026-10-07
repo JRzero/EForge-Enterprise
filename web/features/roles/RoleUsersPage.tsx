@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
@@ -45,7 +46,7 @@ function RoleUserList({roleId, assigned, version, busy, onAction}: {roleId: stri
     <Button label="刷新用户列表" variant="ghost" isDisabled={busy || loading} onClick={() => setReload(previous => previous + 1)} /><Button label={showFilters ? '隐藏用户筛选' : '显示用户筛选'} variant="ghost" isDisabled={busy} onClick={() => setShowFilters(previous => !previous)} />
   </div>{error ? <div role="alert"><p>{error}</p><Button label="重试用户列表" onClick={() => setReload(previous => previous + 1)} /></div> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText={assigned ? '暂无已授权用户' : '暂无可添加用户'} pagination={false} sortable={false} showColumnVisibility={false} getRowId={row => row.id} /></div>
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>用户每页条数<select aria-label="用户每页条数" disabled={busy} value={pageSize} onChange={event => { setPageSize(Number(event.target.value)); setPage(1); }}><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label><Button label="用户上一页" variant="secondary" isDisabled={busy || loading || page === 1} onClick={() => setPage(previous => previous - 1)} /><Button label="用户下一页" variant="secondary" isDisabled={busy || loading || !data || page * pageSize >= data.total} onClick={() => setPage(previous => previous + 1)} /></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} onPage={setPage} onSize={setPageSize} busy={busy} previousLabel="用户上一页" nextLabel="用户下一页" sizeLabel="用户每页条数" />
   </div>;
 }
 export function RoleUsersPage({params}: AppRoutePageProps) {

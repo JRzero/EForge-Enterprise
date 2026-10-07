@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -99,7 +100,7 @@ export function GeneratorPage() {
     {error?<div role="alert">{error}<Button label="重试列表" onClick={()=>refresh()}/></div>:null}
     {actionError&&!editor&&!confirmation&&!creating&&!preview?<p role="alert">{actionError}</p>:null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无生成配置" pagination={false} sortable={false} selectable showColumnVisibility={false} columnVisibility={visibility} rowSelection={selection} onRowSelectionChange={setSelection} getRowId={row=>row.id} getRowSelectionLabel={row=>'选择表 '+row.name}/></div>
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event=>{setPageSize(Number(event.target.value));setPage(1);}}>{[10,20,50,100].map(value=><option key={value}>{value}</option>)}</select></label><Button label="上一页" isDisabled={loading||page===1} onClick={()=>setPage(value=>value-1)}/><Button label="下一页" isDisabled={loading||!data||page*pageSize>=data.total} onClick={()=>setPage(value=>value+1)}/></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor?<GeneratorEditor detail={editor} onCancel={()=>setEditor(null)} onSaved={()=>{setEditor(null);refresh('配置已保存。');}}/>:null}
     {importing?<GeneratorImport onCancel={()=>setImporting(false)} onImported={()=>{setImporting(false);setPage(1);refresh('数据库表已导入。');}}/>:null}
     {confirmation?<ResourceDialog titleId="generator-confirm-title" alert busy={busy} onCancel={()=>{setConfirmation(null);setActionError('');}}>

@@ -1,3 +1,4 @@
+import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
@@ -92,8 +93,7 @@ export function NoticesPage() {
     </div>
     {feedback && <p role="status">{feedback}</p>}{actionError && !editor && !deleting && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试列表" onClick={() => refresh()} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} emptyText="暂无公告" pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择公告 ${row.title}`} /></div>}
-    <div className="post-pagination"><span>共 {data?.total ?? 0} 条，第 {page} 页</span><label>每页条数<select aria-label="每页条数" value={pageSize} onChange={event => {setPageSize(Number(event.target.value)); setPage(1);}}>{[10, 20, 50, 100].map(size => <option key={size} value={size}>{size}</option>)}</select></label>
-      <Button label="上一页" variant="ghost" isDisabled={loading || page === 1} onClick={() => setPage(value => value - 1)} /><Button label="下一页" variant="ghost" isDisabled={loading || page * pageSize >= (data?.total ?? 0)} onClick={() => setPage(value => value + 1)} /></div>
+    <Pagination page={page} pageSize={pageSize} total={data?.total ?? 0} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor && <ResourceDialog titleId="notice-editor-title" busy={busy} onCancel={() => setEditor(null)}><h2 id="notice-editor-title">{editor.id ? '修改公告' : '新增公告'}</h2>
       <form onSubmit={event => {void save(event);}}><Input label="公告标题" value={editor.form.title} onChange={title => setEditor({...editor, form: {...editor.form, title}})} isDisabled={busy} />
         <label>公告类型<select aria-label="公告类型" value={editor.form.type} disabled={busy || types.loading || !!types.error} onChange={event => setEditor({...editor, form: {...editor.form, type: event.target.value}})}><option value="">请选择公告类型</option><DictionaryOptions options={types.options} current={editor.form.type} /></select></label>

@@ -226,6 +226,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "import {generatedRoute} from './route';",
       "const runtime = createSessionRuntime(createMemoryStorage()); const router=createBrowserRouterAdapter();",
       "Object.assign(window, {probeLogin:runtime.login, probeLogout:runtime.logout, probeDetail:async (id:string) => {try {const response = await runtime.api.authenticatedFetch('/api/v1/business/fixture/" + category + "/' + id); return {status:response.status, data:await response.json()};} catch(error) {return {status:(error as {status:number}).status};}}});",
+      "Object.assign(window,{probeWrite:async (method:string,body:unknown)=>{const response=await runtime.api.authenticatedFetch('/api/v1/business/fixture/"+category+"',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return response.status;}});",
       "function Probe() {return <EForgeProvider><Application runtime={runtime} router={router} /></EForgeProvider>;}",
       "Object.assign(window,{probeNavigate:()=>router.navigate(generatedRoute.path),probeHref:router.getCurrentHref});",
       "createRoot(document.getElementById('root')!).render(<StrictMode><Probe /></StrictMode>);",
@@ -406,6 +407,23 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await childRow.getByRole('button', {name:'删除', exact:true}).click();
           await page.getByRole('button', {name:'确认删除', exact:true}).click();
           await expect(childRow).toHaveCount(0);
+        }
+        if(category==='crud'||category==='sub') {
+          const prefix='paging-'+id,ids=Array.from({length:12},(_,index)=>String(BigInt(id)+1000n+BigInt(index))),createdIds=[];
+          try {
+            for(const [index,key]of ids.entries()) {
+              assert.equal(await page.evaluate(async body=>window.probeWrite('POST',body),{oRderKey:key,label:prefix+'-'+index,insertOnly:'新增专用保持',quantity:0,ratio:0,enabled:false,parentId:'0',requiredStatuses:'0',...(category==='sub'?{fixtureLineList:[]}:{})}),201);
+              createdIds.push(key);
+            }
+            await page.getByRole('textbox',{name:'label',exact:true}).fill(prefix);await page.getByRole('button',{name:'搜索',exact:true}).click();
+            await expect(page.getByText('共 12 条，第 1 页',{exact:true})).toBeVisible();
+            await page.getByRole('button',{name:'第 2 页',exact:true}).click();await expect(page.getByText('共 12 条，第 2 页',{exact:true})).toBeVisible();
+            await page.getByLabel('跳至页码',{exact:true}).fill('1');await page.getByRole('button',{name:'跳转',exact:true}).click();await expect(page.getByText('共 12 条，第 1 页',{exact:true})).toBeVisible();
+            await page.getByLabel('每页条数',{exact:true}).selectOption('30');await expect(page.getByRole('cell',{name:prefix+'-11',exact:true})).toBeVisible();
+            await expect(page.getByRole('textbox',{name:'label',exact:true})).toHaveValue(prefix);
+            console.log('PASS: '+category+' installed generated numbered/jump/30 paging preserves actual filtered SQL rows and exact IDs.');
+          } finally { if(createdIds.length)assert.equal(await page.evaluate(async ids=>window.probeWrite('DELETE',{ids}),createdIds),204); }
+          await page.getByLabel('每页条数',{exact:true}).selectOption('10');await page.getByRole('button',{name:'重置',exact:true}).click();await expect(updated).toBeVisible();
         }
         const downloadEvent = page.waitForEvent('download');
         await page.getByRole('button', {name:'导出', exact:true}).click();

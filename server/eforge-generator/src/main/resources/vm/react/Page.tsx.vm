@@ -5,6 +5,9 @@ import {Button} from '@eforge/ui';
 import {useApi} from '../../../app/context';
 import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
+#if(!$table.tree)
+import {Pagination} from '../../../app/components/Pagination';
+#end
 import {useDictionary, DictionaryOptions, DictionaryNotice} from '../../../app/useDictionary';
 import {DictionaryTag} from '../../../app/components/DictionaryTag';
 import {RichTextEditor} from '../../notices/RichTextEditor';
@@ -300,10 +303,12 @@ export function GeneratedPage() {
 #if($table.tree)
       pagination={false}
 #else
-      manualPagination paginationState={{pageIndex: page - 1, pageSize: size}} pageCount={Math.max(1, Math.ceil(total / size))}
-      onPaginationChange={next => {const value = typeof next === 'function' ? next({pageIndex: page - 1, pageSize: size}) : next; setPage(value.pageIndex + 1); setSize(value.pageSize);}}
+      pagination={false}
 #end
     />
+#if(!$table.tree)
+    <Pagination page={page} pageSize={size} total={total} loading={loading} busy={busy} onPage={setPage} onSize={setSize} />
+#end
     {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
       <form onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
         {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <label key={field.key}>{field.label}
