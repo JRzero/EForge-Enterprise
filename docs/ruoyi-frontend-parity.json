@@ -1846,7 +1846,7 @@
   "statisticsCachedReads": {
     "status": "exact-cloud-accepted-f583a38",
     "cloudServer": "37580421117",
-    "cloudWeb": "37580420897",,
+    "cloudWeb": "37580420897",
     "review": "docs/security-review-statistics-cached-reads.md",
     "pages": ["server-monitor", "cache-statistics"],
     "completedReturn": "actual-cached-tab-retained-sample-counter-graphs-zero-GET",
