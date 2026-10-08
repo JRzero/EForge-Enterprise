@@ -124,3 +124,43 @@ the screenshot flag controls image saving only. Final repaired cloud acceptance
 remains pending. Superseded `f5f3cb1` workflows were cancelled deliberately after
 the product-theme fixture update; cancellation is not a test pass.
 Form builder remains deferred by the user.
+
+## Final source acceptance — 2026-10-09
+
+Exact product source `745a91ac8567fc4196d648bd22a8275cba7fc2e5` passed web
+`37803938342` and all four server `37803938248` jobs. Direct logs:
+`ui-public-cloud-745-web-accepted.log`,
+`ui-public-cloud-745-server-accepted.log` and
+`ui-public-cloud-745-verify-accepted.log`. Web checks passed lint/typecheck,
+reproducible client, 126 units, production build with both HTML entries, and
+184 browser cases. Default/enabled framework configurations each passed all
+64 real browsers plus their complete API/MySQL/Redis/Quartz/ACL/OpenAPI checks.
+Both installed generated React configurations passed all seven variants with
+the public theme, exact primary color, viewport and rich-editor layout checks,
+real CRUD/export/upload/retained-page behavior, permission withdrawal/logout
+and mutation/export audit.
+
+The final local generated deployment also passed the same strict checks
+(`ui-public-generated-final.log`); 26 desktop/mobile list/editor captures in
+`web/test-results/generated-appearance` were inspected. Its Java host reused
+the existing preview jar because Java source is unchanged; fixture generation
+used the current verified Maven classpath/resources. The cloud deployments
+packaged the exact accepted source. Earlier unused imports, launcher-relative
+entry paths and tree body/toolbar selector failures remain documented above.
+
+| Requested capability | Delivered and verified |
+| --- | --- |
+| Public UI components | Control/data/pattern entry boundaries; tags, controlled tag strip/menu, common dialogs, pagination/columns, trees/icons, rich text, files/images, account widgets and charts; product imports and native controls checked by ESLint |
+| spcore component colors/details | Actual reference palette, shared CSS entry, focus/disabled/error states, desktop/mobile gallery and page regressions; saved user accents remain supported |
+| List/form page templates | Existing lists and forms, profile and standalone examples, plus actual generated CRUD/tree/sub and automatic/String-key variants |
+| Layout without tag navigation | FrontendLayout and buildable `/frontend-template.html`, responsive navigation, no admin API requests, actual list/form interactions |
+| Login and logo | Shared account frame, aligned CAPTCHA row with pointer/keyboard refresh, original SVG brand assets used in login/sidebar/favicon |
+
+Local frontend preview at port 5174 reflects the accepted UI source. The running
+backend jar still contains the earlier generator template: an attempted managed
+backend refresh was rejected by automatic approval review before execution,
+citing the running-app packaging constraint and interruption/old-jar overwrite
+risk. No preview process, database or Redis container was changed. Activating
+the new generator resource in that existing backend requires an explicitly
+approved backend refresh; this does not invalidate the accepted source and
+isolated/cloud deployment evidence above.
