@@ -101,5 +101,8 @@ were relative to the launcher working directory. Vite inputs now resolve from
 the config's file URL. The actual programmatic Vite build launched from the
 repository root passed for both entries (`ui-public-root-build.log`). This is
 a corrected build configuration defect; no assertion or browser behavior was
-weakened. Exact repaired cloud generated React browser acceptance remains pending.
+weakened. The generated-page browser fixture now imports `ui/theme.css` and the
+public provider entries, matching the application's actual cascade including
+list/form templates. Its original operation and boundary assertions remain.
+Exact repaired cloud generated React browser acceptance remains pending.
 Form builder remains deferred by the user.
