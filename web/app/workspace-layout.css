@@ -102,7 +102,10 @@
 .generator-page .post-dialog [role=tabpanel]:not([hidden]):not(.post-table) { display: grid; gap: 16px; }
 .rich-text-editor { min-width: 0; }
 .rich-text-editor .ql-toolbar { border-radius: 4px 4px 0 0; padding: 8px; background: #fafafa; }
-.rich-text-editor .ql-container { border-radius: 0 0 4px 4px; font-family: inherit; font-size: 14px; }
+.rich-text-editor .ql-container { height: auto; border-radius: 0 0 4px 4px; font-family: inherit; font-size: 14px; }
+.rich-text-editor .ql-editor { height: auto; }
+.rich-text-editor .ql-editor:focus-visible { outline: none; }
+.rich-text-editor .ql-container:has(.ql-editor:focus) { border-color: var(--ui-primary); }
 .rich-text-editor .ql-editor { min-height: 180px; padding: 12px; }
 .post-dialog label:has(> input:is([type=checkbox],[type=radio])) { display: flex; flex-direction: row; align-items: center; gap: 8px; }
 .top-navigation .menu-icon { width: 16px; height: 16px; flex: 0 0 16px; }
@@ -267,6 +270,34 @@
 .demo-chart-card { border-color: #ebeef5; border-radius: 4px; }
 .demo-chart-card h3 { font-size: 16px; font-weight: 500; }
 .demo-chart-table th { background: #f8f8f9; color: #515a6e; }
+.generated-business-page > form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 16px 0; }
+.generated-business-page > form > label { display: grid; gap: 6px; flex: 0 1 200px; min-width: 0; font-size: 13px; color: #606266; }
+.generated-business-page > div:has(> button[data-variant]) { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.generated-business-page .post-dialog form > label { display: grid; gap: 6px; min-width: 0; text-align: left; color: #606266; }
+.generated-business-page .post-dialog form { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 10px; }
+.generated-business-page .post-dialog form > :not(button) { grid-column: 1 / -1; }
+.generated-business-page .post-dialog form > button { width: auto; justify-self: end; }
+.generated-business-page .post-dialog form > button + button { justify-self: start; }
+.generated-business-page .post-dialog form > button:only-of-type { grid-column: 1 / -1; }
+.generated-business-page .post-dialog label > :is(input:not([type=checkbox]):not([type=radio]),select,textarea,div,fieldset) { min-width: 0; max-width: 100%; width: 100%; }
+.generated-business-page :is(textarea,input[type=datetime-local]) { border: 1px solid #d4dbe3; border-radius: 4px; background: white; color: var(--ui-text); padding: 5px 10px; font: inherit; min-height: var(--ui-control-height); }
+.generated-business-page .post-dialog fieldset { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 6px 0; border: 0; }
+.generated-business-page input[type=file] { font: inherit; font-size: 13px; }
+.generated-business-page input[type=file]::file-selector-button { border: 1px solid var(--ui-primary); border-radius: 4px; background: var(--ui-primary); color: white; padding: 6px 10px; margin-right: 8px; cursor: pointer; }
+.generated-business-page input[type=file]:disabled::file-selector-button { opacity: .5; cursor: not-allowed; }
+.generated-business-page .post-dialog label > div > p:not([role]) { font-size: 12px; line-height: 1.5; color: #909399; margin: 8px 0; overflow-wrap: anywhere; }
+.generated-business-page [aria-label="子表明细"] { border: 1px solid #ebeef5; border-radius: 4px; padding: 12px; }
+.generated-business-page [aria-label="子表明细"] table { border-collapse: collapse; margin-top: 12px; }
+.generated-business-page [aria-label="子表明细"] :is(th,td) { padding: 10px; border: 1px solid #ebeef5; }
+.generated-business-page [aria-label="子表明细"] th { background: #f8f8f9; font-size: 13px; color: #515a6e; }
+.generated-business-page [aria-label="子表明细"] td > label { display: grid; gap: 6px; }
+.generated-business-page [aria-label="子表明细"] td:has(input[type=file]) { min-width: 240px; }
+.generated-business-page [aria-label="子表明细"] td:has(.rich-text-editor) { min-width: 340px; }
+@media(min-width:992px) {
+  .generated-business-page .post-dialog form > label { grid-template-columns: 110px minmax(0,1fr); gap: 8px; text-align: right; }
+  .generated-business-page .post-dialog form > label > * { text-align: left; }
+  .generated-business-page .post-dialog:has([aria-label="子表明细"]) { width: 900px; }
+}
 @media(max-width:600px) {
   .login-layout { padding: 24px 16px 60px; }
   .login-panel { padding: 24px; }

@@ -336,11 +336,22 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
   if(appearanceDirectory) mkdirSync(appearanceDirectory,{recursive:true});
   async function captureAppearance(page,category,state) {
     if(!appearanceDirectory) return;
-    await page.setViewportSize({width:1440,height:1000});
-    await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-desktop.png'),fullPage:true});
-    await page.setViewportSize({width:390,height:844});
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit phone width');
-    await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-mobile.png'),fullPage:true});
+    for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+      await page.setViewportSize(viewport);
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
+      if(state==='editor') {
+        const richBounds=await page.locator('.post-dialog form > label:has(.rich-text-editor) .ql-container').first().boundingBox();
+        const nextBounds=await page.locator('.post-dialog form > label').filter({has:page.getByLabel('quantity',{exact:true})}).boundingBox();
+        assert(richBounds && nextBounds && richBounds.y+richBounds.height<=nextBounds.y+1,'Rich editor must not overlap the following generated field');
+      }
+      await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'.png'),fullPage:true});
+      const dialog=page.locator('.post-dialog');
+      if(await dialog.count()) {
+        const previous=await dialog.evaluate(element=>{const top=element.scrollTop;element.scrollTop=element.scrollHeight;return top;});
+        await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'-bottom.png'),fullPage:true});
+        await dialog.evaluate((element,top)=>{element.scrollTop=top;},previous);
+      }
+    }
     await page.setViewportSize({width:1440,height:1000});
   }
   for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub', 'stringkey']) {
