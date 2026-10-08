@@ -196,3 +196,12 @@ Its exact `web-ci` run `37778837048` and `server-ci` run `37778836912` are still
 pending final cloud acceptance at the time of this entry. Local visual review
 is complete for the families above; pending cloud checks are not reported as
 successful. Form builder remains explicitly deferred.
+
+Cloud follow-up: product UI `011b30e` web run `37778837048` completed
+successfully. The final opt-in capture wait and evidence commit
+`3858f84c1d80b7417285cbfd4cf95ed0adb40d03` has exact runs web `37779845297`
+and server `37779845337`; both remain in progress. Its local focused runtime
+(`ui-generated-final-runtime.log`) is terminal success and all 26 final captures
+are preserved. The dedicated worktree is confirmed archived. Final cloud
+acceptance is the only outstanding verification; no UI family in the table
+remains unreviewed.
