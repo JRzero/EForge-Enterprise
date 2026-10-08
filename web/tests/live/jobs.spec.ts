@@ -15,6 +15,43 @@ async function download(page: Page, name: string) {
   const pending = page.waitForEvent('download'); await page.getByRole('button', {name: '导出', exact: true}).click(); const file = await pending; expect(file.suggestedFilename()).toBe(name); return workbookXml(await readFile((await file.path())!));
 }
 
+test('actual task management creates paused, edits with Cron, enables, dispatches and deletes through canonical UI',async({page})=>{
+  test.setTimeout(120000);const headers=await login(page),name=`ui-write-${Date.now()}`;let ownedId:string|undefined;const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  try{
+    await page.getByRole('button',{name:'新增任务',exact:true}).click();const editor=page.getByRole('dialog',{name:'新增任务',exact:true});
+    await editor.getByLabel(/^任务名称/).fill(name);await editor.getByLabel(/^调用目标字符串/).fill(`ryTask.ryParams('${name},中文 (data)')`);
+    await editor.getByRole('button',{name:'编辑表单Cron表达式',exact:true}).click();const cron=page.getByRole('dialog',{name:'Cron表达式编辑',exact:true});await cron.getByLabel('Cron表达式',{exact:true}).fill('0 0 0 1 1 ? 2099');await cron.getByRole('button',{name:'确认表达式',exact:true}).click();
+    await editor.getByLabel('备注',{exact:true}).fill('原备注');
+    const created=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/jobs'&&response.request().method()==='POST');await editor.getByRole('button',{name:'保存任务',exact:true}).click();const creation=await created;expect(creation.status()).toBe(201);ownedId=(await creation.json()).id;expect(typeof ownedId).toBe('string');await expect(editor).toHaveCount(0);
+    await page.getByRole('textbox',{name:'任务名称',exact:true}).fill(name);await page.getByRole('button',{name:'搜索',exact:true}).click();await expect(page.getByRole('cell',{name:ownedId!,exact:true})).toBeVisible();
+    const current=await (await page.request.get(`/api/v1/monitor/jobs/${ownedId}`,{headers})).json();expect(current.status).toBe('1');expect(current.cronExpression).toBe('0 0 0 1 1 ? 2099');
+    await page.getByRole('button',{name:`修改任务 ${ownedId}`,exact:true}).click();const edit=page.getByRole('dialog',{name:'修改任务',exact:true});await expect(edit.getByLabel(/^任务名称/)).toHaveValue(name);await edit.getByLabel('备注',{exact:true}).fill('');await edit.getByLabel('并发执行',{exact:true}).selectOption('0');await edit.getByRole('button',{name:'保存任务',exact:true}).click();await expect(edit).toHaveCount(0);
+    const updated=await (await page.request.get(`/api/v1/monitor/jobs/${ownedId}`,{headers})).json();expect(updated.remark).toBe('');expect(updated.concurrent).toBe(true);
+    await page.getByRole('button',{name:`启用任务 ${ownedId}`,exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);await expect(page.getByRole('button',{name:`暂停任务 ${ownedId}`,exact:true})).toBeVisible();
+    await page.getByRole('button',{name:`执行一次任务 ${ownedId}`,exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);
+    await expect.poll(async()=>{const logs=await (await page.request.get(`/api/v1/monitor/job-logs?name=${name}`,{headers})).json();return logs.items.filter((row:JobLogResponse)=>row.status==='0'&&row.invokeTarget===updated.invokeTarget).length;}).toBe(1);
+    await page.getByRole('button',{name:`暂停任务 ${ownedId}`,exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);await expect(page.getByRole('button',{name:`启用任务 ${ownedId}`,exact:true})).toBeVisible();
+    await page.getByRole('checkbox',{name:`选择任务 ${ownedId}`,exact:true}).check();await page.getByRole('button',{name:'删除',exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);await expect(page.getByText('暂无记录',{exact:true})).toBeVisible();expect((await page.request.get(`/api/v1/monitor/jobs/${ownedId}`,{headers})).status()).toBe(404);expect(errors).toEqual([]);
+  }finally{if(ownedId)expect((await page.request.delete('/api/v1/monitor/jobs',{headers,data:{ids:[ownedId]}})).status()).toBe(204);}
+});
+
+test('actual add-only account uses form Cron and saves without borrowing query permission',async({page})=>{
+  const headers=await login(page),marker=`cron${Date.now()}`;let roleId:string|undefined,userId:string|undefined,taskId:string|undefined;const writer=await page.context().newPage();
+  try{
+    const menus=await (await page.request.get('/api/v1/system/roles/menus',{headers})).json();const keys=menus.filter((menu:{permission?:string})=>['monitor:job:list','monitor:job:add'].includes(menu.permission??'')).map((menu:{key:string})=>menu.key);expect(keys).toHaveLength(2);
+    const role=await page.request.post('/api/v1/system/roles',{headers,data:{name:marker,key:marker,sort:1,status:'0',remark:'Owned Cron form',menuLinked:true,menuKeys:keys}});expect(role.status()).toBe(201);roleId=(await role.json()).id;
+    const user=await page.request.post('/api/v1/system/users',{headers,data:{user:{username:marker,displayName:'Cron新增账号',departmentId:'103',email:'',phone:'',sex:'2',status:'0',roleIds:[roleId],postIds:[]},password:'User12345'}});expect(user.status()).toBe(201);userId=(await user.json()).id;
+    await writer.goto('/job');await writer.getByLabel('账号',{exact:true}).fill(marker);await writer.getByLabel('密码',{exact:true}).fill('User12345');await writer.getByRole('button',{name:'登录',exact:true}).click();await writer.getByRole('button',{name:'新增任务',exact:true}).click();const editor=writer.getByRole('dialog',{name:'新增任务',exact:true});
+    await editor.getByLabel(/^任务名称/).fill(marker);await editor.getByLabel(/^调用目标字符串/).fill('ryTask.ryNoParams');await editor.getByRole('button',{name:'编辑表单Cron表达式',exact:true}).click();const cron=writer.getByRole('dialog',{name:'Cron表达式编辑',exact:true});await cron.getByLabel('Cron表达式',{exact:true}).fill('0 0 0 1 1 ? 2099');await cron.getByRole('button',{name:'确认表达式',exact:true}).click();
+    const created=writer.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/jobs'&&response.request().method()==='POST');await editor.getByRole('button',{name:'保存任务',exact:true}).click();const saved=await created;expect(saved.status()).toBe(201);taskId=(await saved.json()).id;await expect(editor).toHaveCount(0);
+    const token=await writer.evaluate(()=>JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken as string);expect((await writer.request.get(`/api/v1/monitor/jobs/${taskId}`,{headers:{Authorization:`Bearer ${token}`}})).status()).toBe(403);const detail=await (await page.request.get(`/api/v1/monitor/jobs/${taskId}`,{headers})).json();expect(detail.status).toBe('1');expect(detail.cronExpression).toBe('0 0 0 1 1 ? 2099');
+  }finally{
+    if(taskId)expect((await page.request.delete('/api/v1/monitor/jobs',{headers,data:{ids:[taskId]}})).status()).toBe(204);
+    if(userId)expect((await page.request.delete('/api/v1/system/users',{headers,data:{ids:[userId]}})).status()).toBe(204);
+    if(roleId)expect((await page.request.delete('/api/v1/system/roles',{headers,data:{ids:[roleId]}})).status()).toBe(204);await writer.close();
+  }
+});
+
 
 async function cancelExportAndResume(page:Page,logs:boolean){
   const path='/api/v1/monitor/'+(logs?'job-logs':'jobs')+'/export';

@@ -4191,4 +4191,20 @@
     "realBrowsersPerProfile": 62,
     "cloudServerRun": "37705061672"
   }
+,
+  "taskCanonicalWrites": {
+    "status": "implemented-local-verified-final-runtime-and-cloud-pending",
+    "review": "docs/security-review-task-writes-v1.md",
+    "originalOperations": ["addJob", "updateJob", "delJob", "changeJobStatus", "runJob"],
+    "canonicalOperations": ["createJob", "updateJob", "deleteJobs", "changeJobStatus", "runJob"],
+    "backendTestDeclarations": 690,
+    "dataScopeTests": 10,
+    "existingPlatformSkips": 1,
+    "frontEndUnits": 107,
+    "mockedBrowsers": 147,
+    "finalNativeChecksPerMode": 35,
+    "openApiSha256": "7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E",
+    "cloudAccepted": false,
+    "wholeObjectiveComplete": false
+  }
 }

@@ -39,7 +39,7 @@ whole-product completion percentage.
 | Notices | live/e2e notices; verify-notices/notice-images integration; notices/rich-text-cached-upload reviews | Accepted actual JPG/PNG/static SVG, inert rich content, retained upload/cursor, newest five/readers and actor-isolated read state |
 | Operation/login logs | live/e2e logs; verify-logs integration; logs review | Accepted actual audit payload, safe JSON/copy, sorting/calendar/paging/deletion/clear/XLSX and real Redis password unlock |
 | Online sessions | live/e2e online-sessions; verify-online-sessions integration; online/cached-monitor reviews | Accepted scoped filters, twelve-session paging, exact revocation and own force-logout |
-| Task reads/logs/Cron editor | live/e2e jobs/cron-editor; verify-job-logs integration; job-read/pages/log/calendar/cron/cached-action reviews | Accepted read/detail/sort/export, real Quartz success/failure logs, date boundaries/DST and actual special Cron preview. **Task mutations remain unimplemented** |
+| Task reads/logs/Cron editor | live/e2e jobs/cron-editor; verify-job-logs integration; job-read/pages/log/calendar/cron/cached-action reviews | Accepted read/detail/sort/export, real Quartz success/failure logs, date boundaries/DST and actual special Cron preview. Task mutation foundation is accepted; canonical contracts/forms are implemented under verification and are not yet accepted |
 | Server/cache monitoring | live/e2e server-monitor/cache-monitor; corresponding integration scripts/reviews | Accepted actual OSHI/Redis values, thresholds, charts, all clearing levels/session isolation/SQL retention and retained read/retry behavior |
 | Native consoles | live/e2e consoles; verify-consoles integration; diagnostic/cached-session/viewport reviews | Accepted both default-disabled and enabled Druid/Swagger, original authenticated HTML/resources/actions, viewport, expiry/revocation/logout and production defaults |
 | Generator management/output | live/e2e generator; generator integration scripts; manager/creation/sync/canonical/custom-output reviews | Accepted read/import/create/config/delete/sync, immutable preview/ZIP, guarded custom files, permissions, physical partial DDL reporting and retained original rows |
@@ -69,10 +69,12 @@ All evidence files and named test classes resolve. This static reconciliation
 does not prove every implementation utility independently equivalent.
 The user explicitly approved the specific execution-gated runtime proposal on
 2026-10-08, including delay/rejection under slow or unavailable SQL. The narrower
-boundary is now being implemented; 17 targeted Quartz/transaction tests and
-both MySQL table-name modes with 32 checks each pass. Full runtime and exact
-cloud acceptance are pending. Canonical write APIs and task controls remain
-incomplete. See [security-review-task-mutation-boundary.md](security-review-task-mutation-boundary.md).
+boundary is accepted at exact `fb7c7b12de8e157942d5132e79c7eac134d23f82`,
+server `37705061672`, all four jobs. Both MySQL table-name modes pass35 checks
+and both authenticated profiles pass62 browsers/full API. Canonical write APIs
+and task controls are implemented under separate verification, not accepted
+yet. See [security-review-task-mutation-boundary.md](security-review-task-mutation-boundary.md)
+and [security-review-task-writes-v1.md](security-review-task-writes-v1.md).
 
 Local generated1545 and framework default40541/sequential-enabled38045 completed
 successfully. The failed same-root parallel enabled run is retained; generated
@@ -153,3 +155,7 @@ Exact cloud acceptance: 2a20eb3726b75ec663588ac10e4a42281052ed3e has terminal SU
 ## Task runtime boundary acceptance — 2026-10-08
 
 Approved boundary source fb7c7b12de8e157942d5132e79c7eac134d23f82 is accepted by exact server run37705061672 (all four jobs terminal SUCCESS). Direct task-boundary-final-cloud-accepted.log proves675 backend declarations including10 data-scope cases (one existing platform skip), actual MySQL modes0/1 each35 checks, both62 real browser/fullAPI profiles, all seven generated families, safe task failure audit/retry and unchanged exact OpenAPI. The initial59e5ddaa source failed both authenticated profiles on stale-group manual dispatch; that product failure was corrected and independently reverified, not relabeled as infrastructure. No frontend source changed, so no new web workflow is claimed. Canonical task writes/typed invocation policy/client/forms and five original mutation operations still require their own acceptance; current inventory remains119 operations/114 accepted/five pending. Form builder remains deferred; whole goal incomplete. See security-review-task-mutation-boundary.md.
+
+## Canonical task management checkpoint — 2026-10-08
+
+Five canonical mutation operations, generated client, safe literal invocation policy and task create/edit/status/run/delete controls are implemented. The approved affected-task boundary remains authoritative; the abandoned global scheduler rebuild is excluded. Final Maven passes690 declarations including10 data-scope cases (one existing platform skip), native MySQL modes0/1 each35 checks, frontend107 units/147 mocked browsers/lint/types/client reproduction/build. Earlier live profiles passed63 default and64 enabled with fullAPI but predate the final registered-bean-alias compatibility fix. Final-source task-file browser and fullAPI profiles are running; exact source cloud remains pending. The five operation inventory entries stay unaccepted until that evidence exists. See security-review-task-writes-v1.md. Whole-objective semantic acceptance remains outstanding; form builder stays deferred.

@@ -63,6 +63,12 @@ class TaskLegacyMutationPrivacyTest {
             mvc.perform(request.contentType("application/json").content(BODY)).andExpect(status().isOk()).andExpect(jsonPath("$.code").value(403));
         verifyNoInteractions(jobs);
     }
+    @Test void creationCannotSelectAnExistingTaskIdAndBypassEditPermission() throws Exception {
+        actor(Set.of("monitor:job:add"));when(jobs.insertJob(any())).thenReturn(1);
+        mvc.perform(post("/monitor/job").contentType("application/json").content(BODY)).andExpect(jsonPath("$.code").value(200));
+        var captured=org.mockito.ArgumentCaptor.forClass(io.eforge.enterprise.quartz.domain.SysJob.class);verify(jobs).insertJob(captured.capture());
+        assertNull(captured.getValue().getJobId());assertEquals("owned_actor",captured.getValue().getCreateBy());
+    }
     @TestConfiguration static class Configuration {
         @Bean PermitAllUrlProperties permitAll(){var value=new PermitAllUrlProperties();value.setUrls(List.of());return value;}
         @Bean CorsFilter corsFilter(){return new CorsFilter(new UrlBasedCorsConfigurationSource());}

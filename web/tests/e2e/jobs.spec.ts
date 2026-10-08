@@ -10,6 +10,43 @@ async function login(page: Page, path: string, permissions: string[]) {
   await page.goto(path); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click();
 }
 
+test('task editor retains failed drafts, integrates validated Cron and sends exact canonical fields',async({page})=>{
+  let saved:unknown,fail=true,edited:unknown;
+  await page.route('**/api/v1/monitor/jobs?*',route=>route.fulfill({json:{items:[job],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/monitor/jobs',route=>{saved=route.request().postDataJSON();return route.fulfill(fail?{status:503,json:{code:'JOB_SCHEDULE_UNAVAILABLE'}}:{status:201,json:{id}});});
+  await page.route(`**/api/v1/monitor/jobs/${id}`,route=>{if(route.request().method()==='PUT'){edited=route.request().postDataJSON();return route.fulfill({status:204});}return route.fulfill({json:job});});
+  await page.route('**/api/v1/monitor/jobs/cron-preview?*',route=>route.fulfill({json:{zone:'UTC',times:['2099-01-01T00:00:00Z']}}));
+  await login(page,'/job',['monitor:job:list','monitor:job:query','monitor:job:add','monitor:job:edit']);
+  await page.getByRole('button',{name:'新增任务',exact:true}).click();const editor=page.getByRole('dialog',{name:'新增任务',exact:true});
+  await editor.getByLabel(/^任务名称/).fill('新任务');await editor.getByLabel(/^调用目标字符串/).fill("ryTask.ryParams('中文, data')");
+  await editor.getByRole('button',{name:'编辑表单Cron表达式',exact:true}).click();const cron=page.getByRole('dialog',{name:'Cron表达式编辑',exact:true});
+  await cron.getByLabel('Cron表达式',{exact:true}).fill(job.cronExpression);await cron.getByRole('button',{name:'确认表达式',exact:true}).click();
+  await expect(editor.getByLabel('表单Cron表达式')).toHaveValue(job.cronExpression);await editor.getByRole('button',{name:'保存任务',exact:true}).click();await expect(editor.getByRole('alert')).toContainText('任务调度暂时不可用');
+  expect(saved).toMatchObject({name:'新任务',invokeTarget:"ryTask.ryParams('中文, data')",cronExpression:job.cronExpression,status:'1',concurrent:false});await expect(editor.getByLabel(/^任务名称/)).toHaveValue('新任务');
+  fail=false;await editor.getByRole('button',{name:'保存任务',exact:true}).click();await expect(editor).toHaveCount(0);
+  await page.getByRole('button',{name:`修改任务 ${id}`,exact:true}).click();const change=page.getByRole('dialog',{name:'修改任务',exact:true});await expect(change.getByLabel(/^任务名称/)).toHaveValue(job.name);await change.getByLabel('备注',{exact:true}).fill('');await change.getByRole('button',{name:'保存任务',exact:true}).click();await expect(change).toHaveCount(0);expect(edited).toMatchObject({remark:'',invokeTarget:job.invokeTarget,cronExpression:job.cronExpression});
+});
+
+test('add-only task form retains the original Cron helper without query permission',async({page})=>{
+  await page.route('**/api/v1/monitor/jobs?*',route=>route.fulfill({json:{items:[job],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/monitor/jobs/cron-preview?*',route=>route.fulfill({json:{zone:'UTC',times:['2099-01-01T00:00:00Z']}}));
+  await login(page,'/job',['monitor:job:list','monitor:job:add']);await expect(page.getByRole('button',{name:'Cron表达式编辑',exact:true})).toHaveCount(0);
+  await page.getByRole('button',{name:'新增任务',exact:true}).click();const editor=page.getByRole('dialog',{name:'新增任务',exact:true});await editor.getByRole('button',{name:'编辑表单Cron表达式',exact:true}).click();const cron=page.getByRole('dialog',{name:'Cron表达式编辑',exact:true});await cron.getByLabel('Cron表达式',{exact:true}).fill(job.cronExpression);await cron.getByRole('button',{name:'确认表达式',exact:true}).click();await expect(editor.getByLabel('表单Cron表达式')).toHaveValue(job.cronExpression);await editor.getByRole('button',{name:'取消',exact:true}).click();await expect(editor).toHaveCount(0);
+});
+
+test('task status, manual run and batch delete capture identities and retain one pending dispatch',async({page})=>{
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let runs=0,status:unknown,deleted:unknown;
+  await page.route('**/api/v1/monitor/jobs?*',route=>route.fulfill({json:{items:[job],total:1,page:1,pageSize:10}}));
+  await page.route(`**/api/v1/monitor/jobs/${id}/status`,route=>{status=route.request().postDataJSON();return route.fulfill({status:204});});
+  await page.route(`**/api/v1/monitor/jobs/${id}/run`,async route=>{runs++;await gate;await route.fulfill({status:202});});
+  await page.route('**/api/v1/monitor/jobs',route=>{deleted=route.request().postDataJSON();return route.fulfill({status:204});});
+  await login(page,'/job',['monitor:job:list','monitor:job:changeStatus','monitor:job:remove']);
+  await expect(page.getByRole('button',{name:'新增任务',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:`修改任务 ${id}`,exact:true})).toHaveCount(0);
+  await page.getByRole('button',{name:`启用任务 ${id}`,exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);expect(status).toEqual({status:'0'});
+  await page.getByRole('button',{name:`执行一次任务 ${id}`,exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect.poll(()=>runs).toBe(1);await expect(page.getByRole('button',{name:'确认操作',exact:true})).toBeDisabled();await page.keyboard.press('Escape');await expect(page.getByRole('alertdialog')).toBeVisible();release();await expect(page.getByRole('alertdialog')).toHaveCount(0);expect(runs).toBe(1);
+  await page.getByRole('checkbox',{name:`选择任务 ${id}`,exact:true}).check();await page.getByRole('button',{name:'删除',exact:true}).click();await page.getByRole('button',{name:'确认操作',exact:true}).click();await expect(page.getByRole('alertdialog')).toHaveCount(0);expect(deleted).toEqual({ids:[id]});
+});
+
 test('task read permissions, retry, server sorting and mobile route denial', async ({page}) => {
   let fail = true; const queries: URLSearchParams[] = [];
   await page.route('**/api/v1/monitor/jobs?*', route => {queries.push(new URL(route.request().url()).searchParams); return route.fulfill(fail ? {status: 503, json: {}} : {json: {items: [job], total: 1, page: 1, pageSize: 10}});});

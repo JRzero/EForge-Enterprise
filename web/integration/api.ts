@@ -32,7 +32,8 @@ import {getServerMonitor} from '../generated/api';
 import {getCacheStatistics, listCacheNames, listCacheKeys, getCacheValue, clearCacheName, clearCacheKey, clearAllCache, type ClearCacheKeyRequest} from '../generated/api';
 import {getDruidConsoleStatus, getApiDocsConsoleStatus, openDruidConsole, openApiDocsConsole} from '../generated/api';
 
-import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs} from '../generated/api';
+import {previewJobCron, listJobs, getJob, exportJobs, listJobLogs, getJobLog, deleteJobLogs, clearJobLogs, exportJobLogs,
+  createJob, updateJob, changeJobStatus, runJob, deleteJobs, type JobWriteRequest, type JobStatusRequest} from '../generated/api';
 
 import {previewGeneratorTable, downloadGeneratorTables, writeGeneratorCustomOutput, type DownloadRequest} from '../generated/api';
 import {GeneratorCustomOutputError, GeneratorCreationError} from './generator-errors';
@@ -164,6 +165,11 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async previewJobCron(expression: string, signal?: AbortSignal) {return (await previewJobCron(expression, {baseUrl: '', fetch: transport(true), signal})).data;},
     async listJobs(query: Parameters<typeof listJobs>[0], signal?: AbortSignal) {return (await listJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
     async getJob(id: string, signal?: AbortSignal) {return (await getJob(id, {baseUrl: '', fetch: transport(true), signal})).data;},
+    async createJob(request: JobWriteRequest, signal?: AbortSignal) {try {return (await createJob(request, {baseUrl: '', fetch: transport(true), signal})).data;} catch(cause) {if(cause instanceof ApiError)throw cause;throw new ApiError(0,'JOB_WRITE_UNCONFIRMED');}},
+    async updateJob(id: string, request: JobWriteRequest, signal?: AbortSignal) {try {await updateJob(id, request, {baseUrl: '', fetch: transport(true), signal});} catch(cause) {if(cause instanceof ApiError)throw cause;throw new ApiError(0,'JOB_WRITE_UNCONFIRMED');}},
+    async changeJobStatus(id: string, status: JobStatusRequest['status'], signal?: AbortSignal) {try {await changeJobStatus(id, {status}, {baseUrl: '', fetch: transport(true), signal});} catch(cause) {if(cause instanceof ApiError)throw cause;throw new ApiError(0,'JOB_WRITE_UNCONFIRMED');}},
+    async runJob(id: string, signal?: AbortSignal) {try {await runJob(id, {baseUrl: '', fetch: transport(true), signal});} catch(cause) {if(cause instanceof ApiError)throw cause;throw new ApiError(0,'JOB_WRITE_UNCONFIRMED');}},
+    async deleteJobs(ids: string[], signal?: AbortSignal) {try {await deleteJobs({ids}, {baseUrl: '', fetch: transport(true), signal});} catch(cause) {if(cause instanceof ApiError)throw cause;throw new ApiError(0,'JOB_WRITE_UNCONFIRMED');}},
     async exportJobs(query: Parameters<typeof exportJobs>[0], signal?: AbortSignal) {return (await exportJobs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
     async listJobLogs(query: Parameters<typeof listJobLogs>[0], signal?: AbortSignal) {return (await listJobLogs(query, {baseUrl: '', fetch: transport(true), signal})).data;},
     async getJobLog(id: string, signal?: AbortSignal) {return (await getJobLog(id, {baseUrl: '', fetch: transport(true), signal})).data;},

@@ -1,8 +1,18 @@
 import {expect, it, vi} from 'vitest';
 import {createMemoryStorage} from '@eforge/core';
 import {createSessionRuntime} from '../../integration/session';
+import type {JobWriteRequest} from '../../generated/api';
 const snapshot = {user: {id: '2', username: 'reader', displayName: 'Reader'}, roles: [], permissions: [], navigation: []};
 const json = (value: unknown, status = 200) => new Response(JSON.stringify(value), {status, headers: {'Content-Type': 'application/json'}});
+it('task writes use canonical generated methods, exact string IDs and safe unconfirmed outcomes without retry',async()=>{
+  const fetcher=vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot)).mockResolvedValueOnce(json({id:'9007199254740993'},201)).mockResolvedValueOnce(new Response(null,{status:204})).mockResolvedValueOnce(new Response(null,{status:204})).mockResolvedValueOnce(new Response(null,{status:202})).mockResolvedValueOnce(new Response(null,{status:204})).mockRejectedValueOnce(new TypeError('lost response'));
+  const runtime=createSessionRuntime(createMemoryStorage({'eforge.enterprise.session.v1':JSON.stringify({accessToken:'token'})}),fetcher);await runtime.restore();
+  const request:JobWriteRequest={name:'中文',group:'SYSTEM',invokeTarget:"ryTask.ryParams('data')",cronExpression:'0 0 0 1 1 ? 2099',misfirePolicy:'3',concurrent:false,status:'1',remark:''};
+  const id=(await runtime.api.createJob(request)).id;expect(id).toBe('9007199254740993');await runtime.api.updateJob(id,request);await runtime.api.changeJobStatus(id,'0');await runtime.api.runJob(id);await runtime.api.deleteJobs([id]);
+  expect(fetcher.mock.calls.slice(1).map(([input,init])=>[String(input),init?.method])).toEqual([['/api/v1/monitor/jobs','POST'],[`/api/v1/monitor/jobs/${id}`,'PUT'],[`/api/v1/monitor/jobs/${id}/status`,'PUT'],[`/api/v1/monitor/jobs/${id}/run`,'POST'],['/api/v1/monitor/jobs','DELETE']]);
+  expect(JSON.parse(String(fetcher.mock.calls[3]![1]?.body))).toEqual({status:'0'});expect(JSON.parse(String(fetcher.mock.calls[5]![1]?.body))).toEqual({ids:[id]});
+  await expect(runtime.api.runJob(id)).rejects.toMatchObject({status:0,code:'JOB_WRITE_UNCONFIRMED'});expect(fetcher).toHaveBeenCalledTimes(7);expect(runtime.getSnapshot().phase).toBe('authenticated');
+});
 it('generated task/log transports preserve filters, long IDs, abort and full binary export', async () => {
   const id = '9007199254740993', entry = {id, name: '任务 & 名称'};
   const fetcher = vi.fn<typeof fetch>().mockResolvedValueOnce(json(snapshot)).mockResolvedValueOnce(json({items: [entry], total: 1, page: 1, pageSize: 10}))

@@ -14,6 +14,7 @@ import type {JobResponse, JobLogResponse, JobLogDetail} from '../../generated/ap
 import {errorMessage} from '../../integration/errors';
 
 import {CronEditor} from './CronEditor';
+import {JobEditor} from './JobEditor';
 type Row = JobResponse | JobLogResponse;
 const empty = {name: '', group: '', target: '', status: '', from: '', to: ''};
 const time = (value?: string) => value ? new Date(value).toLocaleString('zh-CN') : '—';
@@ -31,6 +32,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   const detailFocus = useRef<HTMLElement | null>(null), cronReturnFocus = useRef<HTMLElement | null>(null);
   const [cron, setCron] = useState<string | null>(null), [confirmedCron, setConfirmedCron] = useState('');
   const [detail, setDetail] = useState<string | null>(null), [confirmation, setConfirmation] = useState<{clear: boolean; ids: string[]} | null>(null);
+  const [editor,setEditor]=useState<{id:string|null}|null>(null),[taskConfirmation,setTaskConfirmation]=useState<{kind:'delete'|'run'|'status';ids:string[];status?:'0'|'1'}|null>(null);
   useEffect(() => {if (cron === null && cronReturnFocus.current) {cronReturnFocus.current.focus(); cronReturnFocus.current = null;}}, [cron]);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
   const action = useRef<{kind: 'export' | 'mutation'; controller: AbortController} | null>(null);
@@ -71,8 +73,12 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     {id: 'status', header: logs ? '执行状态' : '任务状态', enableSorting: false, cell: ({row}) => <DictionaryTag options={statuses.options} value={row.original.status ?? ''} />},
     {accessorKey: 'createdAt', header: logs ? '执行时间' : '创建时间', sortDescFirst: logs, cell: ({row}) => time(row.original.createdAt)},
     {id: 'actions', header: '操作', enableSorting: false, cell: ({row}) => <div className="post-row-actions"><PermissionGate permission="monitor:job:query"><Button label="详细" aria-label={`详细${logs ? '日志' : '任务'} ${row.original.id}`} size="sm" variant="ghost" onClick={event => {detailFocus.current = event.currentTarget; setDetail(row.original.id);}} />
-      {!logs && <Button label="日志" aria-label={`任务日志 ${row.original.id}`} size="sm" variant="ghost" onClick={() => controls.navigate(`/job/log/${row.original.id}`)} />}</PermissionGate></div>}
-  ], [logs, groups.options, statuses.options, controls]);
+      {!logs && <Button label="日志" aria-label={`任务日志 ${row.original.id}`} size="sm" variant="ghost" onClick={() => controls.navigate(`/job/log/${row.original.id}`)} />}</PermissionGate>
+      {!logs&&<><PermissionGate permission="monitor:job:edit"><Button label="修改" aria-label={`修改任务 ${row.original.id}`} size="sm" variant="ghost" isDisabled={busy} onClick={()=>setEditor({id:row.original.id})}/></PermissionGate>
+      <PermissionGate permission="monitor:job:changeStatus"><Button label={row.original.status==='0'?'暂停':'启用'} aria-label={`${row.original.status==='0'?'暂停':'启用'}任务 ${row.original.id}`} size="sm" variant="ghost" isDisabled={busy} onClick={()=>{setActionError('');setTaskConfirmation({kind:'status',ids:[row.original.id],status:row.original.status==='0'?'1':'0'});}}/><Button label="执行一次" aria-label={`执行一次任务 ${row.original.id}`} size="sm" variant="ghost" isDisabled={busy} onClick={()=>{setActionError('');setTaskConfirmation({kind:'run',ids:[row.original.id]});}}/></PermissionGate>
+      <PermissionGate permission="monitor:job:remove"><Button label="删除" aria-label={`删除任务 ${row.original.id}`} size="sm" variant="ghost" isDisabled={busy} onClick={()=>{setActionError('');setTaskConfirmation({kind:'delete',ids:[row.original.id]});}}/></PermissionGate></>}
+      </div>}
+  ], [logs, groups.options, statuses.options, controls,busy]);
   const selected = Object.keys(selection).filter(id => selection[id]);
   function search(event: FormEvent) {event.preventDefault(); setActionError(''); if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;} setFilters({...draft}); setPage(1); setVersion(value => value + 1);}
   function reset() {setDraft(empty); setFilters(empty); setPage(1); setSorting([{id: logs ? 'createdAt' : 'id', desc: logs}]); setActionError(''); setVersion(value => value + 1);}
@@ -90,6 +96,13 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
       const url = URL.createObjectURL(file), link = document.createElement('a'); link.href = url; link.download = logs ? '任务调度日志.xlsx' : '定时任务.xlsx'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);}
     catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));} finally {if (!controller.signal.aborted && action.current?.controller === controller) {action.current = null; setBusy(false);}}
   }
+  async function mutateTask(){
+    if(!taskConfirmation||action.current)return;
+    const captured=taskConfirmation,controller=new AbortController();action.current={kind:'mutation',controller};setBusy(true);setActionError('');
+    try{if(captured.kind==='delete')await api.deleteJobs(captured.ids,controller.signal);else if(captured.kind==='run')await api.runJob(captured.ids[0]!,controller.signal);else await api.changeJobStatus(captured.ids[0]!,captured.status!,controller.signal);
+      setTaskConfirmation(null);setFeedback(captured.kind==='delete'?'任务已删除。':captured.kind==='run'?'已提交执行请求，请在调度日志中查看结果。':captured.status==='0'?'任务已启用。':'任务已暂停。');setVersion(value=>value+1);
+    }catch(cause){setActionError(errorMessage(cause));}finally{if(action.current?.controller===controller){action.current=null;setBusy(false);}}
+  }
   return <section className="posts-page"><PageHeader title={logs ? '调度日志' : '定时任务'} eyebrow="系统监控" description={logs ? '查询任务执行结果和异常信息。' : '查看任务计划与执行记录。'} />
     <DictionaryNotice dictionary={groups} /><DictionaryNotice dictionary={statuses} />
     {contextError ? <><p role="alert">{contextError}</p><Button label="重试任务信息" onClick={() => setContextVersion(value => value + 1)} /></> : !ready ? <p role="status">正在加载任务信息…</p> : <>
@@ -99,20 +112,22 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
       <label>{logs ? '执行状态' : '任务状态'}<select aria-label={logs ? '执行状态' : '任务状态'} value={draft.status} disabled={busy} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></select></label>
       {logs && <><label>开始日期<input type="date" aria-label="开始日期" value={draft.from} disabled={busy} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" aria-label="结束日期" value={draft.to} disabled={busy} onChange={event => setDraft({...draft, to: event.target.value})} /></label></>}
       <Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={reset} /></form>
-    <div className="post-toolbar">{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} />}
+    <div className="post-toolbar">{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <><PermissionGate permission="monitor:job:add"><Button label="新增任务" isDisabled={busy} onClick={()=>setEditor({id:null})}/></PermissionGate><PermissionGate permission="monitor:job:edit"><Button label="修改" isDisabled={busy||selected.length!==1} onClick={()=>setEditor({id:selected[0]!})}/></PermissionGate><PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy||!selected.length} onClick={()=>{setActionError('');setTaskConfirmation({kind:'delete',ids:[...selected]});}}/></PermissionGate><Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} /></>}
       <PermissionGate permission="monitor:job:export"><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
       <Button label={showSearch ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowSearch(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy || loading} onClick={() => setVersion(value => value + 1)} />
       <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
     </div>
     {!logs && <PermissionGate permission="monitor:job:query"><Button label="Cron表达式编辑" variant="ghost" onClick={event => {cronReturnFocus.current = event.currentTarget; setCron(confirmedCron);}} />{confirmedCron && <p>已确认Cron表达式：<output aria-label="已确认Cron表达式">{confirmedCron}</output></p>}</PermissionGate>}
-    {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}
-    {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable={logs} rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择日志 ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
+    {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && !taskConfirmation && <p role="alert">{actionError}</p>}
+    {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择${logs?'日志':'任务'} ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
     <Pagination page={page} pageSize={size} total={data?.total} loading={loading} busy={busy} onPage={setPage} onSize={setSize} />
     </>}
     {logs && <Button label="关闭调度日志" variant="ghost" onClick={() => (controls.closePage ?? controls.navigate)('/job')} />}
     {confirmation && <ResourceDialog titleId="job-log-confirm" alert busy={busy} onCancel={() => setConfirmation(null)}><h2 id="job-log-confirm">{confirmation.clear ? '确认清空调度日志' : '确认删除调度日志'}</h2><p>{confirmation.clear ? '将清空全部调度日志，此操作无法撤销。' : `将删除所选的 ${confirmation.ids.length} 条日志。`}</p>{actionError && <p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setConfirmation(null)} /><Button label={confirmation.clear ? '确认清空' : '确认删除'} isDisabled={busy} onClick={() => {void mutate();}} /></ResourceDialog>}
     {detail && <JobDetailDialog id={detail} logs={logs} onClose={() => setDetail(null)} onEditCron={expression => {cronReturnFocus.current = detailFocus.current; setDetail(null); setCron(expression);}} />}
     {cron !== null && <CronEditor value={cron} onCancel={() => setCron(null)} onConfirm={expression => {setConfirmedCron(expression); setCron(null);}} />}
+    {editor&&<JobEditor key={editor.id??'new'} id={editor.id} onClose={()=>setEditor(null)} onSaved={()=>{setEditor(null);setFeedback(editor.id?'任务已更新。':'任务已创建，当前为暂停状态。');setVersion(value=>value+1);}}/>}
+    {taskConfirmation&&<ResourceDialog titleId="task-confirm-title" alert busy={busy} onCancel={()=>setTaskConfirmation(null)}><h2 id="task-confirm-title">{taskConfirmation.kind==='delete'?'确认删除任务':taskConfirmation.kind==='run'?'确认执行一次':taskConfirmation.status==='0'?'确认启用任务':'确认暂停任务'}</h2><p>{taskConfirmation.kind==='delete'?`将删除所选的 ${taskConfirmation.ids.length} 个任务，调度日志保留。`:taskConfirmation.kind==='run'?'将按服务器当前配置执行一次，结果请查看调度日志。':'将修改该任务的调度状态。已开始的执行可以继续完成。'}</p>{actionError&&<p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={()=>setTaskConfirmation(null)}/><Button label="确认操作" isDisabled={busy} onClick={()=>{void mutateTask();}}/></ResourceDialog>}
   </section>;
 }
 function JobDetailDialog({id, logs, onClose, onEditCron}: {id: string; logs: boolean; onClose: () => void; onEditCron: (expression: string) => void}) {

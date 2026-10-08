@@ -1493,6 +1493,34 @@
         ],
         "type": "object"
       },
+      "JobCreatedResponse": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "JobDeleteRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
       "JobLogDetail": {
         "properties": {
           "entry": {
@@ -1589,6 +1617,82 @@
         },
         "required": [
           "id"
+        ],
+        "type": "object"
+      },
+      "JobStatusRequest": {
+        "properties": {
+          "status": {
+            "enum": [
+              "0",
+              "1"
+            ],
+            "pattern": "[01]",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "JobWriteRequest": {
+        "properties": {
+          "concurrent": {
+            "type": "boolean"
+          },
+          "cronExpression": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "group": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "invokeTarget": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "misfirePolicy": {
+            "enum": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ],
+            "pattern": "[0-3]",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "remark": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "0",
+              "1"
+            ],
+            "pattern": "[01]",
+            "type": "string"
+          }
+        },
+        "required": [
+          "concurrent",
+          "cronExpression",
+          "group",
+          "invokeTarget",
+          "misfirePolicy",
+          "name",
+          "status"
         ],
         "type": "object"
       },
@@ -4789,6 +4893,27 @@
       }
     },
     "/api/v1/monitor/jobs": {
+      "delete": {
+        "operationId": "deleteJobs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Deleted selected tasks"
+          }
+        },
+        "tags": [
+          "job-write-controller"
+        ]
+      },
       "get": {
         "operationId": "listJobs",
         "parameters": [
@@ -4897,6 +5022,34 @@
         },
         "tags": [
           "job-read-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createJob",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobCreatedResponse"
+                }
+              }
+            },
+            "description": "Created paused task"
+          }
+        },
+        "tags": [
+          "job-write-controller"
         ]
       }
     },
@@ -5072,6 +5225,93 @@
         },
         "tags": [
           "job-read-controller"
+        ]
+      },
+      "put": {
+        "operationId": "updateJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Updated task"
+          }
+        },
+        "tags": [
+          "job-write-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/jobs/{id}/run": {
+      "post": {
+        "operationId": "runJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Manual execution dispatched after commit"
+          }
+        },
+        "tags": [
+          "job-write-controller"
+        ]
+      }
+    },
+    "/api/v1/monitor/jobs/{id}/status": {
+      "put": {
+        "operationId": "changeJobStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Changed task status"
+          }
+        },
+        "tags": [
+          "job-write-controller"
         ]
       }
     },

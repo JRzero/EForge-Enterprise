@@ -187,6 +187,9 @@ export type JobLogDetail = {
     entry: JobLogResponse;
     exceptionInfo?: string;
 };
+export type JobDeleteRequest = {
+    ids: string[];
+};
 export type JobResponse = {
     concurrent?: boolean;
     createdAt?: string;
@@ -207,9 +210,25 @@ export type PageResponseJobResponse = {
     pageSize: number;
     total: number;
 };
+export type JobWriteRequest = {
+    concurrent: boolean;
+    cronExpression: string;
+    group: string;
+    invokeTarget: string;
+    misfirePolicy: "0" | "1" | "2" | "3";
+    name: string;
+    remark?: string;
+    status: "0" | "1";
+};
+export type JobCreatedResponse = {
+    id: string;
+};
 export type CronPreviewResponse = {
     times: string[];
     zone: string;
+};
+export type JobStatusRequest = {
+    status: "0" | "1";
 };
 export type LoginLogResponse = {
     browser?: string;
@@ -1233,6 +1252,13 @@ export function getJobLog(id: string, opts?: Oazapfts.RequestOpts) {
         ...opts
     });
 }
+export function deleteJobs(jobDeleteRequest: JobDeleteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/v1/monitor/jobs", oazapfts.json({
+        ...opts,
+        method: "DELETE",
+        body: jobDeleteRequest
+    }));
+}
 export function listJobs({ page, pageSize, name, group, invokeTarget, status, sort, direction }: {
     page?: number;
     pageSize?: number;
@@ -1258,6 +1284,16 @@ export function listJobs({ page, pageSize, name, group, invokeTarget, status, so
     }))}`, {
         ...opts
     });
+}
+export function createJob(jobWriteRequest: JobWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: JobCreatedResponse;
+    }>("/api/v1/monitor/jobs", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: jobWriteRequest
+    }));
 }
 export function previewJobCron(expression: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
@@ -1303,6 +1339,26 @@ export function getJob(id: string, opts?: Oazapfts.RequestOpts) {
     }>(`/api/v1/monitor/jobs/${encodeURIComponent(id)}`, {
         ...opts
     });
+}
+export function updateJob(id: string, jobWriteRequest: JobWriteRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/monitor/jobs/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: jobWriteRequest
+    }));
+}
+export function runJob(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/monitor/jobs/${encodeURIComponent(id)}/run`, {
+        ...opts,
+        method: "POST"
+    });
+}
+export function changeJobStatus(id: string, jobStatusRequest: JobStatusRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText(`/api/v1/monitor/jobs/${encodeURIComponent(id)}/status`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: jobStatusRequest
+    }));
 }
 export function deleteLoginLogs(deleteLogsRequest: DeleteLogsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/monitor/login-logs", oazapfts.json({

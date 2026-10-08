@@ -434,6 +434,30 @@ choices survive metadata save and subsequent read/preview. The field cannot name
 an arbitrary template resource. Original edit permission and transaction/physical
 identity guards apply; business rows are not rewritten by template selection.
 The generated TypeScript request carries this exact optional enum.
+
+## Task mutation contracts
+
+POST `/api/v1/monitor/jobs` requires original `monitor:job:add`, accepts a
+`JobWriteRequest` and returns 201, Location and a concrete string ID. Creation
+retains the original paused default. PUT `/{id}` uses `monitor:job:edit` and
+returns 204 for complete configuration replacement. Blank/null remark clears
+the previous remark. PUT `/{id}/status` accepts `JobStatusRequest` under
+`monitor:job:changeStatus`; it changes only status and the authenticated actor.
+POST `/{id}/run` uses the same grant and returns 202 after committed manual
+dispatch; business completion is reported by the existing execution log.
+DELETE the collection accepts `JobDeleteRequest.ids`, validates the full set,
+deduplicates and returns idempotent 204 under `monitor:job:remove`.
+
+IDs remain positive decimal strings through HTTP and generated TypeScript.
+Writes use the approved affected-task SQL/Quartz boundary, preserve original
+audit ownership, and do not borrow list/query permission. Canonical invocation
+targets require a real public allowed-package method with five original literal
+argument types; strings are data rather than expressions. Valid exhausted Cron
+expressions may be stored, but have no runnable scheduled key and return 409 on
+manual dispatch. Scheduling/SQL failures return a fixed safe 503 ProblemDetail.
+No response promises exactly-once execution after an uncertain commit or lost
+transport response. Original compatibility envelopes remain behind their
+separate controller boundary.
 ## Generator manager menu choices
 
 GET /api/v1/tool/generator/menu-options requires authentication and returns concrete

@@ -49,8 +49,12 @@ avatar/gallery claim and not evidence for header/profile behavior. Header and
 profile have their own actual image upload/fallback/refresh proofs.
 
 Online form builder stays explicitly user-deferred, including its original
-source inventory. Task add/update/delete/status/run remain unimplemented;
-the refused execution-gated runtime proposal still requires specific approval.
+source inventory. Task add/update/delete/status/run now have implementation in
+progress, but their canonical contracts/forms still await final acceptance.
+The user explicitly approved the narrower execution-gated runtime proposal on
+2026-10-08; its foundation is accepted at exact `fb7c7b12de8e157942d5132e79c7eac134d23f82`,
+server `37705061672` (four successful jobs). The abandoned scheduler-wide rebuild
+remains excluded. See task-mutation-boundary and task-writes-v1 security reviews.
 This audit does not make the whole objective complete, does not waive the final
 requirement-by-requirement audit, and does not treat test counts as a completion
 percentage.

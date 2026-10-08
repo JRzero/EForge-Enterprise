@@ -101,6 +101,11 @@ function messageFor(status: number, code: string): string {
   if (code === 'CAPTCHA_INVALID') return '验证码不正确或已过期，请重新输入。';
   if (code === 'AUTHENTICATION_FAILED') return '账号或密码不正确，或账号暂时无法登录。';
   if (code === 'VALIDATION_ERROR') return '请检查填写内容后重试。';
+  if (code === 'JOB_TARGET_INVALID') return '调用目标或参数无效，或不在允许的任务范围内。';
+  if (code === 'JOB_NOT_FOUND') return '任务已不存在，请刷新列表。';
+  if (code === 'JOB_NOT_RUNNABLE') return '任务已不存在或计划已经过期，请刷新任务信息。';
+  if (code === 'JOB_SCHEDULE_UNAVAILABLE') return '任务调度暂时不可用，请先刷新确认当前状态后再操作。';
+  if (code === 'JOB_WRITE_UNCONFIRMED') return '操作结果尚未确认，请先刷新检查；请勿重复提交或运行任务。';
   if (code === 'ONLINE_SESSIONS_UNAVAILABLE') return '在线会话暂时无法读取或撤销，请稍后重试。';
   if (code === 'SERVER_MONITOR_UNAVAILABLE') return '服务器监控暂时无法采集，请稍后重试。';
   if (code === 'CACHE_UNAVAILABLE') return '缓存服务暂时不可用，请稍后重试。';

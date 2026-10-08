@@ -1,4 +1,4 @@
-# Approved task mutation boundary — implementation pending
+# Approved task mutation boundary — runtime foundation accepted
 
 Human approval: on 2026-10-08 the user explicitly replied “批准” to the
 concrete request covering per-execution SQL verification and the shared
@@ -8,10 +8,12 @@ the abandoned scheduler-wide replacement proposal. Normal implementation,
 targeted fault/concurrency verification and already-authorized commit/push may
 proceed. Approval is not implementation or acceptance evidence.
 
-Current status: the approved narrower boundary is being implemented, with
-targeted Quartz/transaction-advisor tests passing. Actual MySQL verification,
-complete HTTP/browser regression and exact-commit cloud acceptance remain
-pending. The rejection history below records the pre-approval state. The
+Current status: the approved narrower runtime boundary is accepted at
+`fb7c7b12de8e157942d5132e79c7eac134d23f82`, server run `37705061672`,
+all four jobs terminal SUCCESS. Actual MySQL modes each pass35 checks and both
+authenticated profiles pass62 real browsers/full API. Canonical write contracts,
+invocation policy and complete task forms remain a separate unfinished phase;
+see `security-review-task-writes-v1.md`. The rejection history below records the pre-approval state. The
 scheduler-wide replacement proposal remains abandoned because it could
 interrupt unrelated tasks.
 

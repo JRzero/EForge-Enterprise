@@ -2,8 +2,10 @@
 
 The user explicitly approved the concrete narrower runtime proposal on
 2026-10-08. The abandoned scheduler-wide replacement is not implemented.
-This review describes the current implementation; complete runtime/cloud
-acceptance and canonical write APIs/forms are still pending.
+The runtime foundation is accepted at exact source `fb7c7b12de8e157942d5132e79c7eac134d23f82`,
+server `37705061672`, all four jobs terminal SUCCESS. The evidence checkpoints
+below retain their chronological scope. Canonical write APIs/forms remain a
+separate phase described in `security-review-task-writes-v1.md`.
 
 ## Transaction and scheduling behavior
 

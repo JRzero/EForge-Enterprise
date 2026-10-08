@@ -22,21 +22,7 @@ public class JobInvokeUtil
      */
     public static void invokeMethod(SysJob sysJob) throws Exception
     {
-        String invokeTarget = sysJob.getInvokeTarget();
-        String beanName = getBeanName(invokeTarget);
-        String methodName = getMethodName(invokeTarget);
-        List<Object[]> methodParams = getMethodParams(invokeTarget);
-
-        if (!isValidClassName(beanName))
-        {
-            Object bean = SpringUtils.getBean(beanName);
-            invokeMethod(bean, methodName, methodParams);
-        }
-        else
-        {
-            Object bean = Class.forName(beanName).getDeclaredConstructor().newInstance();
-            invokeMethod(bean, methodName, methodParams);
-        }
+        TaskInvocationPolicy.invoke(sysJob.getInvokeTarget());
     }
 
     /**

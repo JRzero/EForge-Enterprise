@@ -99,6 +99,12 @@ public final class SpringUtils implements BeanFactoryPostProcessor, ApplicationC
         return beanFactory.getType(name);
     }
 
+    /** Inspect bean metadata without constructing a FactoryBean when requested. */
+    public static Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException
+    {
+        return beanFactory.getType(name, allowFactoryBeanInit);
+    }
+
     /**
      * 如果给定的bean名字在bean定义中有别名，则返回这些别名
      *
