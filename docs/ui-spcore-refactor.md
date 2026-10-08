@@ -108,11 +108,11 @@ messages appear in normal flow below the input without an attached color block.
 | Icon picker and column visibility popover | Expanded actual menu editor plus gallery desktop/phone | Reviewed |
 | Menu and department grant trees, including mixed selection | Actual role dialogs; gallery mixed state and existing keyboard/payload tests | Reviewed |
 | Log metadata, formatted JSON and copy controls | Actual expanded log dialog plus existing copy/permissions tests | Reviewed |
-| Files and image preview | Real shared components in browser-only gallery; ordering, focus restoration, title contrast and phone screenshot | Reviewed in fixture |
+| Files and image preview | Shared gallery plus installed generated pages against disposable real SQL/files; ordering, upload recovery, focus restoration and phone bounds | Reviewed |
 | Generator editor basic/fields/output tabs | Populated browser fixtures and local empty-state page | Reviewed in fixture |
 | Rich editor, Cron and profile/avatar controls | Actual local dialogs and existing formatting/upload/keyboard tests | Reviewed |
 | Login/registration/lock and alternate dashboard views | Desktop/390px appearance captures, focus/error geometry and original authentication/dashboard regressions | Reviewed |
-| Generated business CRUD/tree/subtable page instances | Shared controls adapted; installed/generated page instances not yet visually inspected | Pending appearance review |
+| Generated business CRUD/tree/subtable page instances | Seven installed page categories; actual desktop/phone lists and CRUD/tree/sub editor upper/lower screenshots, real HTTP/SQL regression | Reviewed |
 
 2026-10-08 expanded evidence: `ui-component-real-audit.log` passed 44 actual
 local checks. After final password layout and label adjustments, the six relevant
@@ -154,3 +154,45 @@ browser checks. Reviewed final chart captures are in
 `web/test-results/fixtures`. These account appearance tests use explicit fixtures
 and are not evidence of a new real-backend registration. Generated business
 page-instance appearance remains pending; no backend source changed.
+
+## Installed generated page acceptance
+
+The seven categories (`crud`, `tree`, `sub`, `auto`, `autotree`, `autosub`,
+`stringkey`) were actually generated, compiled, installed and run in a separately
+owned Boot/MySQL/Redis environment. The browser entry now loads the complete host
+theme/layout CSS. Opt-in captures wait for the current page heading, cover desktop
+and 390px lists, and include both upper and lower scroll positions for the three
+representative editors. Final images are retained in
+`web/test-results/generated-final`, with the terminal success log in
+`ui-generated-final-runtime.log`.
+
+This revealed missing native date/text borders, cramped phone labels and a rich
+editor whose percentage height overlapped later fields. Generated filters,
+toolbar, labels, native date/text/file controls and action rows now use the host
+proportions. Radio/checkbox groups remain inline. Wide child tables scroll within
+their own section; upload/editor columns have enough space for their controls.
+Rich editors use natural height and a single focused container border. Actual
+browser geometry asserts that the editor ends before the next generated field.
+
+The final focused runtime passed actual CRUD/tree/sub mutation/detail/search,
+automatic and String-key CRUD, pointer/keyboard file ordering, upload retry and
+history retention, gallery controls, exact Long/decimal/date values, paging,
+XLSX, parent/child cleanup, original permission withdrawal, logout and SQL audit.
+The temporary runtime owns and cleans its fixtures; the user preview database
+and service were not used for these writes. Backend product source and generated
+templates were unchanged. The temporary worktree was archived after retaining
+evidence.
+
+Final lint/typecheck and build passed. The full frontend suite passed 179, unit
+tests passed 125 and client reproduction passed before the final rich-editor and
+child-column-only adjustments; all 17 affected rich-editor/notice/generator
+checks and the complete actual generated-page runtime then passed. One earlier
+focused runtime timed out during the first cold OpenAPI request while broad
+frontend work ran concurrently; sequential retries succeeded. It is recorded as
+a failed verification attempt, not silently counted as a pass.
+
+Product UI implementation `011b30e80bb40198ae99ac311345f2e49a7910cf` is pushed.
+Its exact `web-ci` run `37778837048` and `server-ci` run `37778836912` are still
+pending final cloud acceptance at the time of this entry. Local visual review
+is complete for the families above; pending cloud checks are not reported as
+successful. Form builder remains explicitly deferred.

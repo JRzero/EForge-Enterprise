@@ -336,6 +336,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
   if(appearanceDirectory) mkdirSync(appearanceDirectory,{recursive:true});
   async function captureAppearance(page,category,state) {
     if(!appearanceDirectory) return;
+    if(state==='list') await expect(page.getByRole('heading',{name:'Installed '+category,exact:true})).toBeVisible();
     for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
       await page.setViewportSize(viewport);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
