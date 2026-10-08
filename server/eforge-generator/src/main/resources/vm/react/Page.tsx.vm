@@ -299,7 +299,7 @@ export function GeneratedPage() {
           <NativeInput value={text(fieldValue(draft, wire))} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} />}</label>;
       }))}
     </ListFilters> : null}
-    <ListToolbar><PermissionGate permission={permission + ':add'}><Button label="新增" isDisabled={busy} onClick={() => {setActionError(''); setEditor({form: initial(), viewing: false});}} /></PermissionGate>
+    <ListToolbar><PermissionGate permission={permission + ':add'}><Button label="新增" variant="primary" isDisabled={busy} onClick={() => {setActionError(''); setEditor({form: initial(), viewing: false});}} /></PermissionGate>
       <PermissionGate permission={permission + ':edit'}><Button label="修改选中" isDisabled={busy || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>
       <PermissionGate permission={permission + ':remove'}><Button label="删除选中" isDisabled={busy || !selected.length} onClick={() => setDeleting(selected)} /></PermissionGate>
       <PermissionGate permission={permission + ':export'}><Button label="导出" isDisabled={busy} onClick={() => {void exportRows();}} /></PermissionGate>

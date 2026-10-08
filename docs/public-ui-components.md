@@ -104,5 +104,23 @@ a corrected build configuration defect; no assertion or browser behavior was
 weakened. The generated-page browser fixture now imports `ui/theme.css` and the
 public provider entries, matching the application's actual cascade including
 list/form templates. Its original operation and boundary assertions remain.
-Exact repaired cloud generated React browser acceptance remains pending.
+Source `321e712` passed server `37801256465` (all four jobs) and web
+`37801256483`. Local default/enabled generated deployments also passed with
+identical installed OpenAPI hashes. That proves functional integration, but the
+additional screenshot/size run found a real generated tree-list layout defect:
+the legacy direct-div toolbar selector matched ListPage's entire body because
+tree expand/collapse buttons are direct body children. It made the body a flex
+toolbar and widened the document. The selector now targets `.list-toolbar`.
+The same strict run then passed all seven generated variants at desktop/mobile
+sizes and verified rich-text fields do not overlap following fields
+(`ui-public-generated-appearance.log` before,
+`ui-public-generated-appearance-after.log` after). Both local complete frontend
+checks and 184 browsers passed after the selector repair.
+
+Generated primary create actions now explicitly use the public primary Button
+variant, matching the existing management pages. Generated browser checks always
+verify the exact primary color, both viewport widths and editor non-overlap;
+the screenshot flag controls image saving only. Final repaired cloud acceptance
+remains pending. Superseded `f5f3cb1` workflows were cancelled deliberately after
+the product-theme fixture update; cancellation is not a test pass.
 Form builder remains deferred by the user.

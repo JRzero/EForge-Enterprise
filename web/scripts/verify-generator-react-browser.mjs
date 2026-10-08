@@ -335,8 +335,10 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
   const appearanceDirectory = process.env.EFORGE_UI_AUDIT === '1' ? join(root,'test-results','generated-appearance') : null;
   if(appearanceDirectory) mkdirSync(appearanceDirectory,{recursive:true});
   async function captureAppearance(page,category,state) {
-    if(!appearanceDirectory) return;
-    if(state==='list') await expect(page.getByRole('heading',{name:'Installed '+category,exact:true})).toBeVisible();
+    if(state==='list') {
+      await expect(page.getByRole('heading',{name:'Installed '+category,exact:true})).toBeVisible();
+      await expect(page.getByRole('button',{name:'新增',exact:true})).toHaveCSS('background-color','rgb(36, 104, 242)');
+    }
     for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
       await page.setViewportSize(viewport);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
@@ -345,9 +347,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         const nextBounds=await page.locator('.post-dialog form > label').filter({has:page.getByLabel('quantity',{exact:true})}).boundingBox();
         assert(richBounds && nextBounds && richBounds.y+richBounds.height<=nextBounds.y+1,'Rich editor must not overlap the following generated field');
       }
-      await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'.png'),fullPage:true});
+      if(appearanceDirectory) await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'.png'),fullPage:true});
       const dialog=page.locator('.post-dialog');
-      if(await dialog.count()) {
+      if(appearanceDirectory && await dialog.count()) {
         const previous=await dialog.evaluate(element=>{const top=element.scrollTop;element.scrollTop=element.scrollHeight;return top;});
         await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'-bottom.png'),fullPage:true});
         await dialog.evaluate((element,top)=>{element.scrollTop=top;},previous);

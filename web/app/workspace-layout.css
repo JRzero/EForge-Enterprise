@@ -281,7 +281,7 @@
 .demo-chart-table th { background: #f8f8f9; color: #515a6e; }
 .generated-business-page > form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 16px 0; }
 .generated-business-page > form > label { display: grid; gap: 6px; flex: 0 1 200px; min-width: 0; font-size: 13px; color: #606266; }
-.generated-business-page > div:has(> button[data-variant]) { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.generated-business-page .list-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .generated-business-page .post-dialog form > label { display: grid; gap: 6px; min-width: 0; text-align: left; color: #606266; }
 .generated-business-page .post-dialog form { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 10px; }
 .generated-business-page .post-dialog form > :not(button) { grid-column: 1 / -1; }
