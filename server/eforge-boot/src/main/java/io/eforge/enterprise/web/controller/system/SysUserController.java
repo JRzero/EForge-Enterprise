@@ -41,6 +41,7 @@ import io.eforge.enterprise.system.service.ISysUserService;
 import io.eforge.enterprise.system.mapper.DepartmentMutationMapper;
 import io.eforge.enterprise.web.controller.api.v1.system.RoleSessionRefresher;
 import io.eforge.enterprise.web.controller.api.v1.system.UserImportService;
+import io.eforge.enterprise.web.controller.api.v1.system.UserImportFileReader;
 import io.eforge.enterprise.web.controller.api.v1.system.UserImportController.UserImportResponse;
 
 /**
@@ -73,6 +74,9 @@ public class SysUserController extends BaseController
     @Autowired
     private UserImportService userImporter;
 
+    @Autowired
+    private UserImportFileReader importFiles;
+
     /**
      * 获取用户列表
      */
@@ -100,20 +104,20 @@ public class SysUserController extends BaseController
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception
     {
-        ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
-        List<SysUser> userList = util.importExcel(file.getInputStream());
-        if (userList == null || userList.isEmpty())
-        {
-            throw new ServiceException("导入用户数据不能为空！");
-        }
         UserImportResponse result;
         try
         {
             // Both HTTP contracts share committed-row accounting and session propagation.
-            result = userImporter.importUsers(userList, updateSupport);
+            result = userImporter.importUsers(importFiles.read(file), updateSupport);
         }
         catch (ApiFailure failure)
         {
+            if ("USER_IMPORT_EMPTY".equals(failure.code()))
+                throw new ServiceException("导入用户数据不能为空！");
+            if ("USER_IMPORT_TOO_LARGE".equals(failure.code()))
+                throw new ServiceException("用户工作簿最多包含 1000 行数据。", 400);
+            if ("USER_IMPORT_FILE_INVALID".equals(failure.code()))
+                throw new ServiceException("请上传有效的 XLS 或 XLSX 用户工作簿。", 400);
             if ("USER_IMPORT_SESSION_REFRESH_FAILED".equals(failure.code()))
             {
                 ServiceException unavailable = new ServiceException("成功条目已保存，但登录会话同步失败；已提交的数据未回滚，请联系管理员处理。", 503);

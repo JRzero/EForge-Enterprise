@@ -22,7 +22,7 @@ export const ApplicationControlsContext = createContext<{
   closePage?: (fallback: string) => void;
   href?: string;
   /** Retained pages keep their draft marker while Activity suspends their effects. */
-  setPageDirty?: (dirty: boolean) => void;
+  setPageDirty?: (dirty: boolean, pendingSave?: boolean) => void;
 } | null>(null);
 export function useApplicationControls() {
   const value = useContext(ApplicationControlsContext);

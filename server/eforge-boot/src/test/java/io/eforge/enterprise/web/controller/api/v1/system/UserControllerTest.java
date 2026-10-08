@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes = {UserController.class, UserImportController.class, PermissionService.class, ApiExceptionHandler.class,
+@ContextConfiguration(classes = {UserController.class, UserImportController.class, UserImportFileReader.class, PermissionService.class, ApiExceptionHandler.class,
         ApiRoutingExceptionResolver.class, SpringUtils.class, SecurityConfig.class, ApiSecurityProblemHandler.class,
         AuthenticationEntryPointImpl.class, JwtAuthenticationTokenFilter.class, UserControllerTest.Configuration.class})
 class UserControllerTest

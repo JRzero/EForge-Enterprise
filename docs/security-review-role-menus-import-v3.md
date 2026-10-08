@@ -8,6 +8,10 @@ This follow-up closes the two HTTP identity boundaries left in the
 legacy role creation/editing, and session publication after user imports.
 It builds on the [v2 session concurrency rules](security-review-session-concurrency-v2.md).
 
+Follow-up: the [v4 file and editor review](security-review-import-files-ui-v4.md)
+closes the legacy file-validation gap described below. This document records
+the v3 transaction/session boundary and its validation at that revision.
+
 ## Review conclusion and architecture
 
 The change adds server-side object authorization and committed-row accounting.

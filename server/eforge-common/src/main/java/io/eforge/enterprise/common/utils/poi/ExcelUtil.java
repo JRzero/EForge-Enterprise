@@ -356,8 +356,18 @@ public class ExcelUtil<T>
      */
     public List<T> importExcel(String sheetName, InputStream is, int titleNum) throws Exception
     {
+        return importExcel(sheetName, WorkbookFactory.create(is), titleNum);
+    }
+
+    /**
+     * Read a workbook already validated by a caller. The caller retains ownership
+     * and must close the workbook after conversion; existing stream imports keep
+     * their original behavior.
+     */
+    public List<T> importExcel(String sheetName, Workbook workbook, int titleNum) throws Exception
+    {
         this.type = Type.IMPORT;
-        this.wb = WorkbookFactory.create(is);
+        this.wb = workbook;
         List<T> list = new ArrayList<T>();
         // 如果指定sheet名,则取指定sheet中的内容 否则默认指向第1个sheet
         Sheet sheet = StringUtils.isNotEmpty(sheetName) ? wb.getSheet(sheetName) : wb.getSheetAt(0);

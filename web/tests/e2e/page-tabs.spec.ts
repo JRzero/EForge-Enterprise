@@ -50,14 +50,21 @@ test('dropdown, fullscreen escape, mobile scrolling and revoked cache isolate re
 
 test('opt-in remembered tags restore only authorized static routes and never another account cache',async({page})=>{
   const state=await setup(page);await navigate(page,'角色管理');await navigate(page,'岗位管理');
-  await page.getByLabel('记住标签',{exact:true}).check();await page.reload();await expect(page.getByRole('heading',{name:'岗位管理',exact:true})).toBeVisible();
+  await page.getByLabel('记住标签',{exact:true}).check();
+  const remembered=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('eforge.enterprise.page-tabs.v1.1')??'null')?.hrefs);
+  await expect.poll(remembered).toEqual(['/role','/post']);
+  await page.reload();await expect(page.getByRole('heading',{name:'岗位管理',exact:true})).toBeVisible();
   const tabs=page.getByRole('navigation',{name:'页面标签'});await expect(tabs.getByRole('link')).toHaveCount(3);
-  state.permissions=['app:dashboard:view','system:post:list'];await page.reload();await expect(tabs.getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);
-  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('eforge.enterprise.page-tabs.v1.1')!));
-  expect(stored.hrefs).toEqual(['/post']);
+  state.permissions=['app:dashboard:view','system:post:list'];await page.reload();
+  // Absence alone also matches the lazy loading screen; first wait for the restored workspace.
+  await expect(page.getByRole('heading',{name:'岗位管理',exact:true})).toBeVisible();
+  await expect(tabs.getByRole('link',{name:'页面标签：岗位管理',exact:true})).toBeVisible();
+  await expect(tabs.getByRole('link')).toHaveCount(2);
+  await expect(tabs.getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);
+  await expect.poll(remembered).toEqual(['/post']);
   await page.evaluate(()=>localStorage.setItem('eforge.enterprise.page-tabs.v1.1',JSON.stringify({enabled:true,hrefs:['https://evil.example/role','javascript:alert(1)','/role','/unknown','/role/users/%']})));
   await page.reload();await expect(page.getByRole('heading',{name:'岗位管理',exact:true})).toBeVisible();await expect(tabs.getByRole('link')).toHaveCount(2);
-  await page.getByLabel('记住标签',{exact:true}).uncheck();expect(await page.evaluate(()=>localStorage.getItem('eforge.enterprise.page-tabs.v1.1'))).toBeNull();
+  await page.getByLabel('记住标签',{exact:true}).uncheck();await expect.poll(()=>page.evaluate(()=>localStorage.getItem('eforge.enterprise.page-tabs.v1.1'))).toBeNull();
 });
 test('hidden cached page cancels pending reads and resumes them when restored',async({page})=>{
   await setup(page);const rows={items:[{id:'2',name:'恢复读取角色',key:'resumed',sort:1,status:'0'}],total:1,page:1,pageSize:10};

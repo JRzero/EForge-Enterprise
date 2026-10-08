@@ -8,7 +8,8 @@ import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState}
 import {PageHeader, PermissionGate} from '@eforge/patterns';
 import {Button, Checkbox, Input} from '@eforge/ui';
 import type {DepartmentResponse, PageResponseUserResponse, UserResponse, UserWriteRequest, UserOptionsResponseRead, UserOption, UserImportResponse} from '../../generated/api';
-import {useApi, useApplicationControls, useBootstrap} from '../../app/context';
+import {useApi, useBootstrap} from '../../app/context';
+import {usePageDraft} from '../../app/useDraftProtection';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {PasswordField} from '../../app/components/PasswordField';
 import {ApiError, errorMessage} from '../../integration/errors';
@@ -32,7 +33,7 @@ function Choices({label, options, selected, disabled, onChange}: {label: string;
 
 export function UsersPage() {
   const statusDictionary = useDictionary('sys_normal_disable'), sexDictionary = useDictionary('sys_user_sex');
-  const api = useApi(); const bootstrap = useBootstrap(); const {setPageDirty} = useApplicationControls();
+  const api = useApi(); const bootstrap = useBootstrap();
   const [draft, setDraft] = useState(emptyFilters); const [filters, setFilters] = useState(emptyFilters);
   const [showFilters, setShowFilters] = useState(true); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10);
   const [version, setVersion] = useState(0); const [data, setData] = useState<PageResponseUserResponse | null>(null);
@@ -46,10 +47,7 @@ export function UsersPage() {
   const [busy, setBusy] = useState(false); const [actionError, setActionError] = useState(''); const [parentSearch, setParentSearch] = useState('');
   const [importing, setImporting] = useState<{file: File | null; updateExisting: boolean; result: UserImportResponse | null} | null>(null);
   const editorDirty = !!editor && editor.initial !== JSON.stringify([editor.form, editor.password]);
-  useEffect(() => {
-    setPageDirty?.(editorDirty);
-    // Do not clear on Activity cleanup: a hidden cached editor still owns its draft.
-  }, [editorDirty, setPageDirty]);
+  const pageDraft = usePageDraft(editorDirty);
 
   const read=useRetainedRead();
   useEffect(() => {
@@ -110,7 +108,7 @@ export function UsersPage() {
     </div>}
   ], [busy, data, loading, selection, openEditor, openRoles, statusDictionary.options]);
   function refresh(message = '') { setFeedback(message); setSelection({}); setVersion(value => value + 1); }
-  function close() { setEditor(null); setDiscardEditor(false); setAction(null); setImporting(null); setActionError(''); }
+  function close() { pageDraft.setDirty(false); setEditor(null); setDiscardEditor(false); setAction(null); setImporting(null); setActionError(''); }
   function cancelEditor() {
     if (busy) return;
     if (editorDirty) setDiscardEditor(true);
@@ -126,11 +124,12 @@ export function UsersPage() {
       setActionError('请检查账号（2–20 字符）、昵称、手机、邮箱和密码（5–20 字符，不含非法符号）。'); return;
     }
     setBusy(true); setActionError('');
+    const finishSave = pageDraft.beginSave();
     try {
       if (editor.id) await api.updateUser(editor.id, form); else await api.createUser({user: form, password: editor.password});
       close(); refresh(editor.id ? '用户已更新。' : '用户已创建。');
     } catch (cause) { setActionError(errorMessage(cause)); }
-    finally { setBusy(false); }
+    finally { finishSave(); setBusy(false); }
   }
   async function confirmAction() {
     if (!action || busy) return;

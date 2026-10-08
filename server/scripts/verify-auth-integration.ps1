@@ -270,6 +270,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-profile-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-roles-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-identity-lifecycle-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-user-import-files-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-menus-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-dictionaries-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-configurations-integration.ps1')
