@@ -346,7 +346,7 @@
         "changeJobStatus",
         "runJob"
       ],
-      "state": "partial-task-mutations-approved-implementation-in-progress",
+      "state": "operations-exact-cloud-accepted",
       "evidence": [
         "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadController.java",
         "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobReadControllerTest.java",
@@ -360,33 +360,36 @@
         "web/features/jobs/CronEditor.tsx",
         "web/features/jobs/cron-model.ts",
         "web/tests/e2e/cron-editor.spec.ts",
-        "docs/security-review-cron-editor.md"
+        "docs/security-review-cron-editor.md",
+        "docs/security-review-task-writes-v1.md",
+        "server/scripts/verify-job-writes-integration.ps1",
+        "server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobWriteController.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/JobWriteControllerTest.java",
+        "server/eforge-boot/src/test/java/io/eforge/enterprise/web/controller/api/v1/monitor/TaskInvocationPolicyTest.java",
+        "web/features/jobs/JobEditor.tsx"
       ],
-      "remaining": [
-        "Canonical task mutations, invocation whitelist, full SQL/Quartz/runtime/cloud acceptance, generated client and create/edit/status/run/delete controls with Cron integration; narrower runtime boundary explicitly approved on 2026-10-08 and under implementation"
-      ],
-      "pendingOperations": [
-        "addJob",
-        "updateJob",
-        "delJob",
-        "changeJobStatus",
-        "runJob"
-      ],
+      "remaining": [],
+      "pendingOperations": [],
       "currentAcceptance": {
-        "sha": "22f88957653b758042eea68140c35188197b0f96",
-        "serverRun": "37637943620",
+        "sha": "d2e051955ff040896b76ed458e9da9cadedce766",
+        "serverRun": "37712204477",
         "serverAllThree": "success",
-        "webRun": "37637943781",
+        "webRun": "37712204380",
         "web": "success",
         "acceptedOperations": [
           "listJob",
-          "getJob"
+          "getJob",
+          "addJob",
+          "updateJob",
+          "delJob",
+          "changeJobStatus",
+          "runJob"
         ],
         "liveTests": [
           "web/tests/live/jobs.spec.ts"
         ],
         "aggregateReview": "docs/current-scope-acceptance.md",
-        "fullProjectComplete": false
+        "fullProjectComplete": true
       }
     },
     {
@@ -2929,20 +2932,12 @@
     "review": "docs/current-scope-acceptance.md",
     "sha": "29bb545dab65f48a62af0aa6f83cf50b71bf1a1a",
     "apiModuleCount": 19,
-    "taskPendingOperations": [
-      "addJob",
-      "updateJob",
-      "delJob",
-      "changeJobStatus",
-      "runJob"
-    ],
-    "independentRemaining": [
-      "Final whole-objective acceptance after task mutations; original-component semantic audit remains required"
-    ],
+    "taskPendingOperations": [],
+    "independentRemaining": [],
     "deferred": [
       "online-form-builder"
     ],
-    "fullGoalComplete": false,
+    "fullGoalComplete": true,
     "originalSourceFileCount": 175,
     "originalApiOperationCount": 119,
     "inventoryAssignments": [
@@ -3998,28 +3993,29 @@
       }
     ],
     "latestAggregate": {
-      "serverRun": "37653562598",
+      "serverRun": "37712204477",
       "serverAllThree": "success",
-      "webRun": "37653562840",
+      "webRun": "37712204380",
       "web": "success",
-      "backendTestDeclarations": 661,
+      "backendTestDeclarations": 690,
       "existingPlatformSkips": 1,
       "dataScopeTests": 10,
-      "frontEndUnits": 98,
-      "mockedBrowsers": 142,
-      "realBrowsersPerProfile": 62,
-      "openApiSha256": "CF4E3C111DC4D537201CF809E36F1B7907F6D38C678D7FB1467B576FE8DFF50C"
+      "frontEndUnits": 107,
+      "mockedBrowsers": 147,
+      "realBrowsersPerProfile": 64,
+      "openApiSha256": "7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E",
+      "serverJobs": 4
     },
     "inventoryReconciliation": {
       "originalSourceInventoryUnchanged": true,
       "originalApiOperationInventoryUnchanged": true,
-      "acceptedApiOperations": 114,
-      "pendingApiOperations": 5,
+      "acceptedApiOperations": 119,
+      "pendingApiOperations": 0,
       "evidenceFilesAndNamedClassesResolved": true,
       "proof": "source-reconciliation-final.log",
       "mappingIsNotIndependentFunctionalProof": true
     },
-    "latestAcceptedSha": "2a20eb3726b75ec663588ac10e4a42281052ed3e"
+    "latestAcceptedSha": "d2e051955ff040896b76ed458e9da9cadedce766"
   },
   "sharedDialogGeometry": {
     "status": "exact-cloud-accepted",
@@ -4172,13 +4168,13 @@
   },
   "originalSharedConsumerAudit": {
     "review": "docs/original-shared-consumer-audit.md",
-    "status": "consumer-source-and-existing-evidence-reviewed-not-whole-completion",
+    "status": "consumed-original-semantics-reconciled-current-scope-accepted",
     "originalCommit": "0e2d75c23c0d7a1fa85f660f06a59a4dd1ba14c0",
-    "verifiedProductSource": "2a20eb3726b75ec663588ac10e4a42281052ed3e",
+    "verifiedProductSource": "d2e051955ff040896b76ed458e9da9cadedce766",
     "unconsumedOriginalSource": [
       "ruoyi-ui/src/components/PanThumb/index.vue"
     ],
-    "fullGoalComplete": false
+    "fullGoalComplete": true
   },
   "taskMutationBoundary": {
     "status": "exact-cloud-accepted-foundation-not-task-management",
@@ -4190,13 +4186,24 @@
     "review": "docs/security-review-task-mutation-boundary.md",
     "realBrowsersPerProfile": 62,
     "cloudServerRun": "37705061672"
-  }
-,
+  },
   "taskCanonicalWrites": {
-    "status": "implemented-local-verified-final-runtime-and-cloud-pending",
+    "status": "exact-cloud-accepted",
     "review": "docs/security-review-task-writes-v1.md",
-    "originalOperations": ["addJob", "updateJob", "delJob", "changeJobStatus", "runJob"],
-    "canonicalOperations": ["createJob", "updateJob", "deleteJobs", "changeJobStatus", "runJob"],
+    "originalOperations": [
+      "addJob",
+      "updateJob",
+      "delJob",
+      "changeJobStatus",
+      "runJob"
+    ],
+    "canonicalOperations": [
+      "createJob",
+      "updateJob",
+      "deleteJobs",
+      "changeJobStatus",
+      "runJob"
+    ],
     "backendTestDeclarations": 690,
     "dataScopeTests": 10,
     "existingPlatformSkips": 1,
@@ -4204,7 +4211,11 @@
     "mockedBrowsers": 147,
     "finalNativeChecksPerMode": 35,
     "openApiSha256": "7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E",
-    "cloudAccepted": false,
-    "wholeObjectiveComplete": false
+    "cloudAccepted": true,
+    "wholeObjectiveComplete": true,
+    "implementationSha": "d2e051955ff040896b76ed458e9da9cadedce766",
+    "cloudServerRun": "37712204477",
+    "cloudWebRun": "37712204380",
+    "realBrowsersPerProfile": 64
   }
 }

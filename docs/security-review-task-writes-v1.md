@@ -3,9 +3,10 @@
 The approved affected-task transaction/admission boundary is accepted separately
 at `fb7c7b12de8e157942d5132e79c7eac134d23f82` (server `37705061672`, all four
 jobs). This document concerns the subsequent invocation policy, canonical write
-contracts, generated client and management controls. They are not yet accepted
-by exact-source cloud or both full browser profiles. The whole goal is incomplete;
-the form builder remains deferred.
+contracts, generated client and management controls. They are accepted at exact
+source d2e051955ff040896b76ed458e9da9cadedce766 by server37712204477 (four
+successful jobs) and web37712204380. The final current-scope audit is recorded in
+current-scope-acceptance.md; the form builder remains deferred.
 
 ## Authority and compatibility
 
@@ -84,7 +85,9 @@ directs readers to logs rather than claiming successful business execution.
 - Earlier real profiles pass 63 default / 64 enabled browsers plus full HTTP
   integration. Their jar predates the final registered-alias compatibility fix;
   those counts are not claimed as final-source full browser evidence. Final
-  jar task-file browsers plus full HTTP integration are still running.
+  jar task-file browsers (five per profile) plus full HTTP integration passed
+  both default and enabled configurations, process32918 terminal0. The actual
+  large task ID XLSX cell is literal text and matches every SQL/HTTP digit.
   Two earlier fixture failures were
   corrected: an empty validated DTO was rejected with 400 before method
   authorization, and a generated role name exceeded the existing 30-character
@@ -97,9 +100,41 @@ directs readers to logs rather than claiming successful business execution.
   file pattern and started zero tests; it was corrected to jobs.spec.ts.
 - Actual OpenAPI matches the generated contract at SHA256
   `7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E`.
-  Exact-source cloud remains pending. The owned SQL fixture also tests IDs above
+  Exact-source server cloud remains pending. Web37712204380 is terminal SUCCESS
+  for d2e051955ff040896b76ed458e9da9cadedce766, directly proving107 units and147
+  mocked browsers plus types/lint/reproducibility/build. The owned SQL fixture tests IDs above
   JavaScript's safe integer range and XLSX literal text precision; the existing
   CanonicalExcelUtil remains the authoritative export boundary.
 
 No source-path assignment, component implementation or this checkpoint is a
 substitute for final acceptance of the five original operations.
+
+## Original consumer reconciliation
+
+The pinned archive's `views/monitor/job/index.vue` was read directly (local
+`task-management-original-job.vue`), rather than inferred from the API list.
+The original add/edit/remove/changeStatus/query/export grants remain distinct.
+Toolbar single-selection edit, multi-selection delete, row actions, confirmation,
+task/log navigation, detail, group/status dictionaries, filters, sorting, full
+filtered XLSX and existing log cleanup are retained at the actual JobsPage
+consumer. Full configuration includes name/group/target/Cron, all four misfire
+choices, concurrency and remark; add stays paused. Cron is available in the
+add/edit form using the existing add/edit/query preview grant union; its
+confirmation does not save the task. Real add-only creation proves that query
+permission is not borrowed for the write response. UI status actions use explicit
+confirmation and server authority; manual feedback states acceptance and directs
+the reader to actual execution logs. Decimal-string identities and literal XLSX
+cells intentionally correct the original unsafe large-number transport.
+
+This closes implementation gaps for this consumer; exact-source local runtime
+passed, while server cloud evidence is still required for acceptance. Whole-source reconciliation
+resolved all229 API evidence references (13 named test classes) without missing
+files; that structural check is explicitly weaker than these behavior proofs.
+
+## Final current-scope acceptance — 2026-10-08
+
+Product source d2e051955ff040896b76ed458e9da9cadedce766 is accepted at exact server37712204477 (all four jobs terminal SUCCESS) and web37712204380 (SUCCESS). Direct task-management-cloud-server/web-accepted.log proves690 backend declarations including10 data-scope cases (one existing platform skip), actual MySQL task boundary modes0/1 each35,107 frontend units,147 mocked browsers, default and enabled configurations each64 real framework browsers/fullAPI, and both configurations of all seven installed generated families (CRUD/tree/sub, auto/autotree/autosub, String-key). Both live OpenAPI snapshots match the committed/generated contract at7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E. The first observer ended with GitHub unexpected EOF; authoritative success and downloaded logs establish acceptance, not that observer's exit code. No product failure occurred in this final source's cloud runs.
+
+The final original-consumer review combines the existing capability table and original-shared-consumer-audit with direct pinned task-page review and actual task-management/browser/SQL evidence. All19 original API modules now account for119 accepted operations and zero pending;175 original source paths remain inventoried. File assignment and counts alone are not the acceptance criterion: original grants, full task configuration/Cron, bulk/single actions, literal target delivery, actual manual/automatic execution, transaction recovery, SQL fault/audit privacy, large identities/XLSX and add-only access have direct consumer proofs. Existing shell/shared, calendar/timezone/XLSX, generator output and seven installed generated families are re-exercised by the final source's complete cloud suites. PanThumb remains an unconsumed original component, not a fabricated implemented feature. The online form builder remains explicitly user-deferred and is neither developed nor marked complete. Baselines and architecture remain unchanged; only the approved affected-task runtime boundary was implemented, never the abandoned global scheduler rebuild.
+
+Current requested scope is complete and automatic development can stop. Historical pending checkpoints above remain chronology, not current blockers. This evidence does not promise mathematically bug-free operation, exactly-once scheduling, rollback after uncertain commit, completion of the deferred builder, or identical standalone Vue helper APIs. The user's finish-then-pause instruction applies now.

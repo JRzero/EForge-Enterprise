@@ -4,7 +4,8 @@ This index reconciles the original inventory with actual later acceptance. The
 chronological checkpoints remain historical evidence; an earlier “pending” does
 not override a later accepted exact source. An inventory mapping is not proof
 that every source-file utility has identical semantics. The complete objective
-is still incomplete.
+is accepted for the current user-approved scope at the final checkpoint below.
+The online form builder remains deferred, not implemented.
 
 Verifier source `22f88957653b758042eea68140c35188197b0f96` is accepted in
 [server37637943620](https://github.com/JRzero/EForge-Enterprise/actions/runs/37637943620)
@@ -159,3 +160,11 @@ Approved boundary source fb7c7b12de8e157942d5132e79c7eac134d23f82 is accepted by
 ## Canonical task management checkpoint — 2026-10-08
 
 Five canonical mutation operations, generated client, safe literal invocation policy and task create/edit/status/run/delete controls are implemented. The approved affected-task boundary remains authoritative; the abandoned global scheduler rebuild is excluded. Final Maven passes690 declarations including10 data-scope cases (one existing platform skip), native MySQL modes0/1 each35 checks, frontend107 units/147 mocked browsers/lint/types/client reproduction/build. Earlier live profiles passed63 default and64 enabled with fullAPI but predate the final registered-bean-alias compatibility fix. Final-source task-file browser and fullAPI profiles are running; exact source cloud remains pending. The five operation inventory entries stay unaccepted until that evidence exists. See security-review-task-writes-v1.md. Whole-objective semantic acceptance remains outstanding; form builder stays deferred.
+
+## Final current-scope acceptance — 2026-10-08
+
+Product source d2e051955ff040896b76ed458e9da9cadedce766 is accepted at exact server37712204477 (all four jobs terminal SUCCESS) and web37712204380 (SUCCESS). Direct task-management-cloud-server/web-accepted.log proves690 backend declarations including10 data-scope cases (one existing platform skip), actual MySQL task boundary modes0/1 each35,107 frontend units,147 mocked browsers, default and enabled configurations each64 real framework browsers/fullAPI, and both configurations of all seven installed generated families (CRUD/tree/sub, auto/autotree/autosub, String-key). Both live OpenAPI snapshots match the committed/generated contract at7FE11E39D73C1CA0C58C5E4B9F49DE073DD621CF50126A173FC7752E7D9B914E. The first observer ended with GitHub unexpected EOF; authoritative success and downloaded logs establish acceptance, not that observer's exit code. No product failure occurred in this final source's cloud runs.
+
+The final original-consumer review combines the existing capability table and original-shared-consumer-audit with direct pinned task-page review and actual task-management/browser/SQL evidence. All19 original API modules now account for119 accepted operations and zero pending;175 original source paths remain inventoried. File assignment and counts alone are not the acceptance criterion: original grants, full task configuration/Cron, bulk/single actions, literal target delivery, actual manual/automatic execution, transaction recovery, SQL fault/audit privacy, large identities/XLSX and add-only access have direct consumer proofs. Existing shell/shared, calendar/timezone/XLSX, generator output and seven installed generated families are re-exercised by the final source's complete cloud suites. PanThumb remains an unconsumed original component, not a fabricated implemented feature. The online form builder remains explicitly user-deferred and is neither developed nor marked complete. Baselines and architecture remain unchanged; only the approved affected-task runtime boundary was implemented, never the abandoned global scheduler rebuild.
+
+Current requested scope is complete and automatic development can stop. Historical pending checkpoints above remain chronology, not current blockers. This evidence does not promise mathematically bug-free operation, exactly-once scheduling, rollback after uncertain commit, completion of the deferred builder, or identical standalone Vue helper APIs. The user's finish-then-pause instruction applies now.
