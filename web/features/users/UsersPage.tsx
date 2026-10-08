@@ -115,7 +115,9 @@ export function UsersPage() {
   function errorAttributes(field: UserFormField) {
     // EForge owns native ARIA through its status API; raw aria-* props are overridden.
     const message = fieldErrors[field];
-    return {status: message ? {type: 'error' as const, message} : undefined};
+    const label = {username: '登录账号', displayName: '用户昵称', password: '用户密码', phone: '手机号码', email: '邮箱'}[field];
+    // Keep the Chinese accessible name stable; requiredness is announced via aria-required.
+    return {'aria-label': label, status: message ? {type: 'error' as const, message} : undefined};
   }
   function validPassword(password: string) { return password.length >= 5 && password.length <= 20 && !/[<>"'|\\]/.test(password); }
   async function save(event: FormEvent) {
