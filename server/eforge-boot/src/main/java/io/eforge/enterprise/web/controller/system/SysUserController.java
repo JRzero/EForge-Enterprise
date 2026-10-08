@@ -151,6 +151,7 @@ public class SysUserController extends BaseController
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody SysUser user)
     {
+        user = LegacyUserEditFields.copyOf(user);
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
         deptService.checkDeptDataScope(user.getDeptId());

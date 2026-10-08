@@ -1,0 +1,58 @@
+name: security-regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/security-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive the exact reviewed source without Git credentials or build caches
+        run: git archive --format=tar.gz -o "$RUNNER_TEMP/review-source.tar.gz" HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: security-review-source-${{ github.sha }}
+          path: ${{ runner.temp }}/review-source.tar.gz
+          retention-days: 3
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: 'server/**/pom.xml'
+      - name: Verify compatibility boundaries and data-scope parity
+        run: >-
+          mvn -B -ntp -f server/pom.xml test
+          -Dtest=LegacyManagementBoundaryTest,DataScopeAspectParityTest,TokenServiceConcurrencyTest,TokenServiceRedisIntegrationTest,RoleSessionRefresherTest
+          -Dsurefire.failIfNoSpecifiedTests=false
+          -Deforge.test.redis.port=6379
+      - name: Preserve test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-regression-results-${{ github.sha }}
+          path: server/**/target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,9 @@
+:root {
+  --enterprise-text-help: #52666d;
+  --enterprise-error-text: #ae3644;
+}
+.login-help { color: var(--enterprise-text-help); }
+.user-field { min-width: 0; }
+.user-field-error { color: var(--enterprise-error-text); margin-top: 6px; line-height: 1.5; }
+.user-field input[aria-invalid="true"] { border-color: var(--enterprise-error-text); }
+.page-error-panel { min-height: 260px; padding: 28px; }

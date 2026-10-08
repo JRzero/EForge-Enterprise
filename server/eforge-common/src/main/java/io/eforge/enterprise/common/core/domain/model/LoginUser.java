@@ -16,6 +16,25 @@ public class LoginUser implements UserDetails
 {
     private static final long serialVersionUID = 1L;
 
+    /** Request-local optimistic-write evidence, never part of the cached/API payload. */
+    @JSONField(serialize = false, deserialize = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private transient byte[] cacheSnapshot;
+
+    @JSONField(serialize = false, deserialize = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public void rememberCacheSnapshot(byte[] snapshot)
+    {
+        this.cacheSnapshot = snapshot == null ? null : snapshot.clone();
+    }
+
+    @JSONField(serialize = false, deserialize = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public byte[] cacheSnapshot()
+    {
+        return cacheSnapshot == null ? null : cacheSnapshot.clone();
+    }
+
     /**
      * 用户ID
      */

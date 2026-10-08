@@ -3,7 +3,6 @@ package io.eforge.enterprise.framework.web.service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +54,9 @@ public class TokenService
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private RedisLoginSessionStore sessionStore;
+
     /**
      * 获取用户身份信息
      * 
@@ -71,13 +73,11 @@ public class TokenService
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                String userKey = getTokenKey(uuid);
-                LoginUser user = redisCache.getCacheObject(userKey);
-                return user;
+                return getLoginUserByToken(uuid);
             }
             catch (Exception e)
             {
-                log.error("获取用户信息异常'{}'", e.getMessage());
+                log.warn("Login session could not be read or verified");
             }
         }
         return null;
@@ -88,10 +88,22 @@ public class TokenService
      */
     public void setLoginUser(LoginUser loginUser)
     {
-        if (StringUtils.isNotNull(loginUser) && StringUtils.isNotEmpty(loginUser.getToken()))
-        {
-            refreshToken(loginUser);
-        }
+        updateLoginUser(loginUser);
+    }
+
+    /** Read exact persisted content and lifetime before allowing conditional changes. */
+    public LoginUser getLoginUserByToken(String token)
+    {
+        if (StringUtils.isEmpty(token)) return null;
+        LoginUser user = sessionStore.read(getTokenKey(token));
+        return user != null && token.equals(user.getToken()) ? user : null;
+    }
+
+    /** Stale ordinary requests must not replace newly committed authorization. */
+    public boolean updateLoginUser(LoginUser loginUser)
+    {
+        return loginUser != null && StringUtils.isNotEmpty(loginUser.getToken())
+                && sessionStore.update(getTokenKey(loginUser.getToken()), loginUser);
     }
 
     /**
@@ -117,12 +129,16 @@ public class TokenService
         String token = IdUtils.fastUUID();
         loginUser.setToken(token);
         setUserAgent(loginUser);
-        refreshToken(loginUser);
+        loginUser.setLoginTime(System.currentTimeMillis());
+        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, token);
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
-        return createToken(claims);
+        String jwt = createToken(claims);
+        if (!sessionStore.create(getTokenKey(token), loginUser, expireTime * MILLIS_MINUTE))
+            throw new IllegalStateException("Could not create a unique login session");
+        return jwt;
     }
 
     /**
@@ -133,26 +149,24 @@ public class TokenService
      */
     public void verifyToken(LoginUser loginUser)
     {
-        long expireTime = loginUser.getExpireTime();
-        long currentTime = System.currentTimeMillis();
-        if (expireTime - currentTime <= MILLIS_MINUTE_TWENTY)
-        {
-            refreshToken(loginUser);
-        }
+        if (loginUser == null) return;
+        Long expiresAt = loginUser.getExpireTime();
+        if (expiresAt == null || expiresAt - System.currentTimeMillis() <= MILLIS_MINUTE_TWENTY)
+            renewLifetime(loginUser, MILLIS_MINUTE_TWENTY);
     }
 
-    /**
-     * 刷新令牌有效期
-     * 
-     * @param loginUser 登录信息
-     */
+    /** Refresh lifetime only. Content changes use setLoginUser/updateLoginUser. */
     public void refreshToken(LoginUser loginUser)
     {
-        loginUser.setLoginTime(System.currentTimeMillis());
-        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
-        // 根据uuid将loginUser缓存
-        String userKey = getTokenKey(loginUser.getToken());
-        redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
+        renewLifetime(loginUser, Long.MAX_VALUE);
+    }
+
+    private void renewLifetime(LoginUser loginUser, long thresholdMillis)
+    {
+        if (loginUser == null || StringUtils.isEmpty(loginUser.getToken())) return;
+        long ttl = sessionStore.renew(getTokenKey(loginUser.getToken()),
+                expireTime * MILLIS_MINUTE, thresholdMillis);
+        if (ttl > 0) loginUser.setExpireTime(System.currentTimeMillis() + ttl);
     }
 
     /**
@@ -239,32 +253,24 @@ public class TokenService
      */
     public void refreshPermissionByRoleId(Long roleId, SysPermissionService permissionService)
     {
-        // 扫描所有在线 token
-        String pattern = CacheConstants.LOGIN_TOKEN_KEY + "*";
-        Collection<String> keys = redisCache.keys(pattern);
-        if (keys == null || keys.isEmpty())
-        {
-            return;
-        }
+        Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+        if (keys == null) return;
         for (String key : keys)
         {
-            LoginUser loginUser = redisCache.getCacheObject(key);
-            if (loginUser == null || loginUser.getUser() == null || loginUser.getUser().isAdmin())
+            if (!key.startsWith(CacheConstants.LOGIN_TOKEN_KEY)) continue;
+            String token = key.substring(CacheConstants.LOGIN_TOKEN_KEY.length());
+            for (int attempt = 0; attempt < 4; attempt++)
             {
-                // 管理员拥有所有权限，跳过
-                continue;
+                LoginUser user = getLoginUserByToken(token);
+                if (user == null || user.getUser() == null || user.getUser().isAdmin()) break;
+                boolean hasRole = user.getUser().getRoles() != null
+                        && user.getUser().getRoles().stream().anyMatch(r -> roleId.equals(r.getRoleId()));
+                if (!hasRole) break;
+                user.setPermissions(permissionService.getMenuPermission(user.getUser()));
+                if (updateLoginUser(user)) break;
+                // Re-read on conflict; never turn a failed compare into an unconditional write.
+                if (attempt == 3) delLoginUser(token);
             }
-            // 判断该用户是否拥有此角色
-            boolean hasRole = loginUser.getUser().getRoles() != null
-                    && loginUser.getUser().getRoles().stream().anyMatch(r -> roleId.equals(r.getRoleId()));
-            if (!hasRole)
-            {
-                continue;
-            }
-            // 刷新权限缓存
-            loginUser.setPermissions(permissionService.getMenuPermission(loginUser.getUser()));
-            refreshToken(loginUser);
-            log.info("角色[{}]权限变更，已刷新在线用户[{}]的权限缓存", roleId, loginUser.getUsername());
         }
     }
 }

@@ -81,7 +81,7 @@ public class SysLoginController
         if (!loginUser.getPermissions().equals(permissions))
         {
             loginUser.setPermissions(permissions);
-            tokenService.refreshToken(loginUser);
+            tokenService.setLoginUser(loginUser);
         }
         AjaxResult ajax = AjaxResult.success();
         ajax.put("user", user);

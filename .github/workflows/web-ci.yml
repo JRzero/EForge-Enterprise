@@ -34,3 +34,17 @@ jobs:
         with:
           name: web-browser-failures
           path: web/test-results/
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: web-production-build-${{ github.sha }}
+          path: web/dist/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-ui-hardening-evidence-${{ github.sha }}
+          path: web/test-results/ui-hardening-*.png
+          if-no-files-found: ignore
+          retention-days: 7
