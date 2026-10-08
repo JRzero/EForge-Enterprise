@@ -7,6 +7,16 @@ async function setup(page:Page){
   await page.route('**/api/v1/me',route=>route.fulfill({json:{id:'9007199254740993',username:'ordinary',displayName:'原昵称',sex:'2',phone:'13900000008',email:'ordinary@example.com',roleNames:'',postNames:''}}));
   await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill('ordinary');await page.getByLabel('密码',{exact:true}).fill('Current123');await page.getByRole('button',{name:'登录',exact:true}).click();await expect(page.getByRole('button',{name:'锁定屏幕',exact:true})).toBeVisible();
 }
+
+test('screen lock component appearance retains single field focus and phone bounds',async({page},info)=>{
+  await page.setViewportSize({width:1440,height:1000});await setup(page);
+  await page.getByRole('button',{name:'锁定屏幕',exact:true}).click();
+  await expect(page.getByLabel('解锁密码')).toBeFocused();
+  expect(await page.getByLabel('解锁密码').evaluate(element=>getComputedStyle(element).outlineStyle)).toBe('none');
+  await page.screenshot({path:info.outputPath('desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('mobile.png'),fullPage:true});
+});
 test('no-role screen lock masks retained dirty forms, verifies only password, and restores original path',async({page})=>{
   await setup(page);const nickname=page.getByLabel('用户昵称',{exact:true});await nickname.fill('保留未保存内容');let attempts=0;
   await page.route('**/api/v1/auth/unlock-screen',route=>{attempts++;expect(route.request().postDataJSON()).toEqual({password:attempts===1?'Wrong123':'Current123'});return route.fulfill(attempts===1?{status:403,json:{code:'SCREEN_UNLOCK_PASSWORD_MISMATCH'}}:{status:204});});

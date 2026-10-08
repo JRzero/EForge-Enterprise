@@ -3,6 +3,17 @@ async function openDashboard(page:import('@playwright/test').Page){
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'dashboard-fixture',tokenType:'Bearer'}}));await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'1',username:'admin',displayName:'管理员'},roles:['admin'],permissions:['app:dashboard:view'],navigation:[{key:'dashboard',type:'ROUTE',routeId:'dashboard',label:'工作台',order:0,children:[]}]}}));
   await page.goto('/dashboard');await page.getByLabel('账号',{exact:true}).fill('admin');await page.getByLabel('密码',{exact:true}).fill('Password123');await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('button',{name:'图表演示',exact:true}).click();await expect(page.getByRole('region',{name:'图表演示工作台'})).toBeVisible();
 }
+
+test('dashboard panels and chart cards appearance at desktop and phone widths',async({page},info)=>{
+  await page.setViewportSize({width:1440,height:1000});await openDashboard(page);
+  await page.getByRole('button',{name:'工作台',exact:true}).click();
+  await page.screenshot({path:info.outputPath('workspace-desktop.png'),fullPage:true});
+  await page.getByRole('button',{name:'图表演示',exact:true}).click();await expect(page.locator('.dashboard-demo-chart svg')).toHaveCount(4);
+  await expect(page.getByRole('button',{name:/^订单：/}).locator('[aria-hidden=true]')).toHaveText('13,600');
+  await page.screenshot({path:info.outputPath('charts-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('charts-mobile.png'),fullPage:true});
+});
 test('original four metrics switch complete line data and preserve radar rose and stacked bar charts',async({page})=>{
   await openDashboard(page);await expect(page.locator('.dashboard-demo-chart svg')).toHaveCount(4);await expect(page.getByText('演示数据用于展示图表交互，不代表当前企业的实际业务统计。')).toBeVisible();
   const checkpoints=[['访客','100','120','165','145'],['消息','200','180','140','130'],['金额','80','120','100','130'],['订单','130','120','160','130']];

@@ -111,7 +111,7 @@ messages appear in normal flow below the input without an attached color block.
 | Files and image preview | Real shared components in browser-only gallery; ordering, focus restoration, title contrast and phone screenshot | Reviewed in fixture |
 | Generator editor basic/fields/output tabs | Populated browser fixtures and local empty-state page | Reviewed in fixture |
 | Rich editor, Cron and profile/avatar controls | Actual local dialogs and existing formatting/upload/keyboard tests | Reviewed |
-| Login/registration/lock and alternate dashboard views | Existing functional regressions; new proportions not fully compared to reference yet | Pending appearance review |
+| Login/registration/lock and alternate dashboard views | Desktop/390px appearance captures, focus/error geometry and original authentication/dashboard regressions | Reviewed |
 | Generated business CRUD/tree/subtable page instances | Shared controls adapted; installed/generated page instances not yet visually inspected | Pending appearance review |
 
 2026-10-08 expanded evidence: `ui-component-real-audit.log` passed 44 actual
@@ -130,3 +130,27 @@ dialogs. The frozen-source full run subsequently passed. The last status test's
 strict-locator failure was a fixture selector problem; both visible and live
 region text matched, and the production announcement behavior was retained.
 No backend source, authorization, sessions, business rows or DDL changed.
+
+## Account and dashboard appearance
+
+Login and registration now share a centered white 400px panel following the
+reference login's proportions, with 40px controls, 25px panel padding and a 6px
+corner. The backdrop is owned CSS, rather than a copied reference image. Lock
+retains its existing background and authentication behavior with compact panel,
+input and button proportions. Mobile fields remain inside the viewport; inner
+inputs do not introduce a second focus outline. Visible registration errors use
+the same red text as login validation.
+
+Dashboard cards use restrained 4px corners and borders. Appearance review found
+default chart legends overlapping weekday labels; line and stacked-bar legends
+now explicitly occupy the top. Long radar labels wrap without changing their
+data. Accessible legend controls, animations and complete data tables remain.
+
+2026-10-08 validation: lint/typecheck, reproducible client, 125 unit tests and
+production build passed; the full mocked browser suite passed 179. Final
+legend/radar-only adjustments then passed lint/typecheck and all three dashboard
+browser checks. Reviewed final chart captures are in
+`web/test-results/dashboard-final`; account/lock captures are in
+`web/test-results/fixtures`. These account appearance tests use explicit fixtures
+and are not evidence of a new real-backend registration. Generated business
+page-instance appearance remains pending; no backend source changed.

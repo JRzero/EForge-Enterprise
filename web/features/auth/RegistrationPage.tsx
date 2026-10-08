@@ -3,6 +3,7 @@ import {Button,Input} from '@eforge/ui';
 import type {SessionRuntime} from '../../integration/session';
 import type {CaptchaChallenge} from '../../integration/legacy-auth';
 import {errorMessage} from '../../integration/errors';
+import {AuthenticationLayout} from './AuthenticationLayout';
 export function RegistrationPage({runtime,onLogin}:{runtime:SessionRuntime;onLogin:()=>void}) {
   const [username,setUsername]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[code,setCode]=useState('');
   const [version,setVersion]=useState(0),[enabled,setEnabled]=useState(false),[challenge,setChallenge]=useState<CaptchaChallenge|null>(null);
@@ -26,10 +27,7 @@ export function RegistrationPage({runtime,onLogin}:{runtime:SessionRuntime;onLog
     catch(cause){setError(errorMessage(cause));setPassword('');setConfirm('');reload();}
     finally{setBusy(false);}
   }
-  return <main className="login-layout"><section className="login-story" aria-label="EForge Enterprise">
-    <span className="brand-mark">E</span><span className="brand-name">EForge Enterprise</span>
-    <div className="login-story-copy"><p className="eyebrow">连接你的工作空间</p><h1>创建账号，<br/>开始协作。</h1><p>注册后使用新账号登录。</p></div></section>
-    <section className="login-panel"><div className="login-card"><h2>注册账号</h2>
+  return <AuthenticationLayout><h2>注册账号</h2>
       {success?<div role="status"><p>恭喜你，您的账号 {username} 注册成功！</p><Button label="前往登录" onClick={onLogin}/></div>:
       loading?<p role="status">正在获取注册设置…</p>:loadError?<div role="alert"><p>{loadError}</p><Button label="重试" onClick={reload}/></div>:
       !enabled?<p role="status">注册暂未开放，请联系企业管理员。</p>:
@@ -42,5 +40,5 @@ export function RegistrationPage({runtime,onLogin}:{runtime:SessionRuntime;onLog
         {error?<p role="alert">{error}</p>:null}<Button label={busy?'正在注册…':'注册'} type="submit" isDisabled={busy || !challenge}/>
       </form>}
       {!success?<a href="/login" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onLogin();}}}>使用已有账户登录</a>:null}
-    </div></section></main>;
+  </AuthenticationLayout>;
 }

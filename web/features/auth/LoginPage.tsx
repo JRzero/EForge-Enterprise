@@ -4,6 +4,7 @@ import type {SessionRuntime} from '../../integration/session';
 import type {CaptchaChallenge} from '../../integration/legacy-auth';
 import {errorMessage} from '../../integration/errors';
 import {clearRememberedLogin,loadRememberedLogin,saveRememberedLogin} from './remembered-login';
+import {AuthenticationLayout} from './AuthenticationLayout';
 
 export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onRegister?: () => void}) {
   const [registrationEnabled,setRegistrationEnabled]=useState(false);
@@ -67,14 +68,7 @@ export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onReg
       if(owner===formOwnership.current){setError(errorMessage(cause));setPassword('');refreshCaptcha();}
     } finally { if(owner===formOwnership.current)setBusy(false); }
   }
-  return <main className="login-layout">
-    <section className="login-story" aria-label="EForge Enterprise">
-      <span className="brand-mark">E</span><span className="brand-name">EForge Enterprise</span>
-      <div className="login-story-copy"><p className="eyebrow">让工作有序，让协作简单</p>
-        <h1>从这里，<br />开始今天的工作。</h1><p>一个入口，连接你的团队与日常事务。</p></div>
-      <span className="login-story-footer">你的工作空间 · EForge Enterprise</span>
-    </section>
-    <section className="login-panel"><div className="login-card">
+  return <AuthenticationLayout>
       <p className="eyebrow">欢迎回来</p><h2>登录工作空间</h2><p className="muted">使用你的企业账号继续。</p>
       <form onSubmit={event => { void submit(event); }}>
         <Input label="账号" htmlName="username" autoComplete="username" value={username} onChange={value=>{credentialEdited.current=true;setUsername(value);}}
@@ -94,6 +88,5 @@ export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onReg
         <Button label={busy ? '正在登录…' : captchaLoading ? '准备中…' : '登录'} type="submit"
           isDisabled={busy || captchaLoading || !challenge || !rememberReady} />
       </form>{registrationEnabled && onRegister ? <a href="/register" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onRegister();}}}>注册账号</a> : null}<p className="login-help">账号遇到问题？请联系企业管理员。</p>
-    </div></section>
-  </main>;
+  </AuthenticationLayout>;
 }
