@@ -1,10 +1,11 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import {useApi, useApplicationControls} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -103,20 +104,20 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
       setTaskConfirmation(null);setFeedback(captured.kind==='delete'?'任务已删除。':captured.kind==='run'?'已提交执行请求，请在调度日志中查看结果。':captured.status==='0'?'任务已启用。':'任务已暂停。');setVersion(value=>value+1);
     }catch(cause){setActionError(errorMessage(cause));}finally{if(action.current?.controller===controller){action.current=null;setBusy(false);}}
   }
-  return <section className="posts-page"><PageHeader title={logs ? '调度日志' : '定时任务'} eyebrow="系统监控" description={logs ? '查询任务执行结果和异常信息。' : '查看任务计划与执行记录。'} />
+  return <ListPage className="posts-page" title={logs ? '调度日志' : '定时任务'} eyebrow="系统监控" description={logs ? '查询任务执行结果和异常信息。' : '查看任务计划与执行记录。'}>
     <DictionaryNotice dictionary={groups} /><DictionaryNotice dictionary={statuses} />
     {contextError ? <><p role="alert">{contextError}</p><Button label="重试任务信息" onClick={() => setContextVersion(value => value + 1)} /></> : !ready ? <p role="status">正在加载任务信息…</p> : <>
-    <form className="post-filters" hidden={!showSearch} onSubmit={search}><Input label="任务名称" value={draft.name} onChange={name => setDraft({...draft, name})} isDisabled={busy} />
+    <ListFilters actions={<><Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={reset} /></>} hidden={!showSearch} onSubmit={search}><Input label="任务名称" value={draft.name} onChange={name => setDraft({...draft, name})} isDisabled={busy} />
       <label>任务组名<select aria-label="任务组名" value={draft.group} disabled={busy} onChange={event => setDraft({...draft, group: event.target.value})}><option value="">全部组名</option><DictionaryOptions options={groups.options} current={draft.group} /></select></label>
       <Input label="调用目标" value={draft.target} onChange={target => setDraft({...draft, target})} isDisabled={busy} />
       <label>{logs ? '执行状态' : '任务状态'}<select aria-label={logs ? '执行状态' : '任务状态'} value={draft.status} disabled={busy} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></select></label>
       {logs && <><label>开始日期<input type="date" aria-label="开始日期" value={draft.from} disabled={busy} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" aria-label="结束日期" value={draft.to} disabled={busy} onChange={event => setDraft({...draft, to: event.target.value})} /></label></>}
-      <Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={reset} /></form>
-    <div className="post-toolbar">{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <><PermissionGate permission="monitor:job:add"><Button label="新增任务" variant="primary" isDisabled={busy} onClick={()=>setEditor({id:null})}/></PermissionGate><PermissionGate permission="monitor:job:edit"><Button label="修改" isDisabled={busy||selected.length!==1} onClick={()=>setEditor({id:selected[0]!})}/></PermissionGate><PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy||!selected.length} onClick={()=>{setActionError('');setTaskConfirmation({kind:'delete',ids:[...selected]});}}/></PermissionGate><Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} /></>}
+      </ListFilters>
+    <ListToolbar >{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <><PermissionGate permission="monitor:job:add"><Button label="新增任务" variant="primary" isDisabled={busy} onClick={()=>setEditor({id:null})}/></PermissionGate><PermissionGate permission="monitor:job:edit"><Button label="修改" isDisabled={busy||selected.length!==1} onClick={()=>setEditor({id:selected[0]!})}/></PermissionGate><PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy||!selected.length} onClick={()=>{setActionError('');setTaskConfirmation({kind:'delete',ids:[...selected]});}}/></PermissionGate><Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} /></>}
       <PermissionGate permission="monitor:job:export"><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
       <Button label={showSearch ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowSearch(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy || loading} onClick={() => setVersion(value => value + 1)} />
       <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
-    </div>
+    </ListToolbar>
     {!logs && <PermissionGate permission="monitor:job:query"><Button label="Cron表达式编辑" variant="ghost" onClick={event => {cronReturnFocus.current = event.currentTarget; setCron(confirmedCron);}} />{confirmedCron && <p>已确认Cron表达式：<output aria-label="已确认Cron表达式">{confirmedCron}</output></p>}</PermissionGate>}
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && !taskConfirmation && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择${logs?'日志':'任务'} ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
@@ -128,7 +129,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     {cron !== null && <CronEditor value={cron} onCancel={() => setCron(null)} onConfirm={expression => {setConfirmedCron(expression); setCron(null);}} />}
     {editor&&<JobEditor key={editor.id??'new'} id={editor.id} onClose={()=>setEditor(null)} onSaved={()=>{setEditor(null);setFeedback(editor.id?'任务已更新。':'任务已创建，当前为暂停状态。');setVersion(value=>value+1);}}/>}
     {taskConfirmation&&<ResourceDialog titleId="task-confirm-title" alert busy={busy} onCancel={()=>setTaskConfirmation(null)}><h2 id="task-confirm-title">{taskConfirmation.kind==='delete'?'确认删除任务':taskConfirmation.kind==='run'?'确认执行一次':taskConfirmation.status==='0'?'确认启用任务':'确认暂停任务'}</h2><p>{taskConfirmation.kind==='delete'?`将删除所选的 ${taskConfirmation.ids.length} 个任务，调度日志保留。`:taskConfirmation.kind==='run'?'将按服务器当前配置执行一次，结果请查看调度日志。':'将修改该任务的调度状态。已开始的执行可以继续完成。'}</p>{actionError&&<p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={()=>setTaskConfirmation(null)}/><Button label="确认操作" isDisabled={busy} onClick={()=>{void mutateTask();}}/></ResourceDialog>}
-  </section>;
+  </ListPage>;
 }
 function JobDetailDialog({id, logs, onClose, onEditCron}: {id: string; logs: boolean; onClose: () => void; onEditCron: (expression: string) => void}) {
   const api = useApi(), groups = useDictionary('sys_job_group'), statuses = useDictionary(logs ? 'sys_common_status' : 'sys_job_status');

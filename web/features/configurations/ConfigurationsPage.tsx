@@ -1,9 +1,10 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {ConfigurationRequest, ConfigurationResponse, PageResponseConfigurationResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
@@ -93,24 +94,24 @@ export function ConfigurationsPage() {
     catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
-  return <section className="posts-page">
-    <PageHeader title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理" /><DictionaryNotice dictionary={dictionary} />
-    <form hidden={!showFilters} className="post-filters" onSubmit={applyFilters}>
+  return <ListPage className="posts-page" title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理">
+    <DictionaryNotice dictionary={dictionary} />
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
       <Input label="参数名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名筛选" value={draft.key} onChange={key => setDraft({...draft, key})} />
       <label>系统内置筛选<select aria-label="系统内置筛选" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></select></label>
       <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label>
       <label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
-      <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} />
-    </form>
-    <div className="post-toolbar">
+
+    </ListFilters>
+    <ListToolbar >
       <PermissionGate permission="system:config:add"><Button label="新增参数" variant="primary" isDisabled={busy} onClick={() => {setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm}));}} /></PermissionGate>
       <PermissionGate permission="system:config:edit"><Button label="修改所选参数" variant="secondary" isDisabled={busy || selectedIds.length !== 1} onClick={() => {void edit(selectedIds[0]!);}} /></PermissionGate>
       <PermissionGate permission="system:config:remove"><Button label="删除所选参数" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => {setActionError(''); setDeleting(selectedIds);}} /><Button label="刷新参数缓存" variant="secondary" isDisabled={busy} onClick={() => {void refreshCache();}} /></PermissionGate>
       <PermissionGate permission="system:config:export"><Button label="导出参数" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
       <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
-    </div>
+    </ListToolbar>
     {feedback ? <p role="status">{feedback}</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
@@ -130,5 +131,5 @@ export function ConfigurationsPage() {
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setDeleting(null); setActionError('');}} /></div>
     </ResourceDialog> : null}
     {discard.dialog}
-  </section>;
+  </ListPage>;
 }

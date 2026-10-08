@@ -1,3 +1,4 @@
+import {ListToolbar} from '../../app/components/ListPage';
 import {useEffect, useRef, useState, type FormEvent} from 'react';
 import {Button, Input} from '@eforge/ui';
 import type {GeneratorConfigurationUpdate, GeneratorFieldUpdate, TableDetail, DictionaryTypeOption, MenuChoice} from '../../generated/api';
@@ -86,9 +87,9 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
   return <ResourceDialog titleId="generator-editor-title" busy={busy} onCancel={cancel}>
     <h2 id="generator-editor-title">编辑生成配置</h2>
     {discard?<div role="alert"><p>有未保存的修改，是否放弃？</p><Button label="继续编辑" onClick={()=>setDiscard(false)}/><Button label="放弃修改" variant="secondary" onClick={onCancel}/></div>:null}
-    <div className="post-toolbar" role="tablist" aria-label="生成配置">
+    <ListToolbar  role="tablist" aria-label="生成配置">
       {([['basic','基本信息'],['fields','字段信息'],['output','生成信息']] as const).map(([id,label])=><button type="button" role="tab" id={'generator-tab-'+id} aria-controls={'generator-panel-'+id} tabIndex={tab===id?0:-1} onKeyDown={event=>{const tabs=['basic','fields','output'];let position=tabs.indexOf(id);if(event.key==='ArrowRight')position=(position+1)%3;else if(event.key==='ArrowLeft')position=(position+2)%3;else if(event.key==='Home')position=0;else if(event.key==='End')position=2;else return;event.preventDefault();setTab(tabs[position]!);(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role=tab]')[position])?.focus();}} aria-selected={tab===id} key={id} disabled={busy} onClick={()=>setTab(id)}>{label}</button>)}
-    </div>
+    </ListToolbar>
     <form onSubmit={event=>{void save(event);}}>
       <div hidden={tab!=='basic'} role="tabpanel" id="generator-panel-basic" aria-labelledby="generator-tab-basic">
         <label>备注<textarea aria-label="备注" value={form.remark ?? ''} disabled={busy} onChange={event=>change({...form,remark:event.target.value})}/></label>

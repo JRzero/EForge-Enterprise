@@ -11,6 +11,7 @@ import {browserSessionStorage, createSessionRuntime} from '../integration/sessio
 import './styles.css';
 import './enterprise-theme.css';
 import './workspace-layout.css';
+import './list-layout.css';
 const runtime = createSessionRuntime(browserSessionStorage());
 const router = createBrowserRouterAdapter();
 void runtime.restore();

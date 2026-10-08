@@ -36,7 +36,7 @@ export function RegistrationPage({runtime,onLogin}:{runtime:SessionRuntime;onLog
         <Input label="密码" htmlName="password" type="password" autoComplete="new-password" value={password} onChange={setPassword} aria-required="true" isDisabled={busy}/>
         <Input label="确认密码" htmlName="confirmPassword" type="password" autoComplete="new-password" value={confirm} onChange={setConfirm} aria-required="true" isDisabled={busy}/>
         {challenge?.enabled?<div className="captcha-row"><Input label="验证码" htmlName="code" value={code} onChange={setCode} aria-required="true" isDisabled={busy}/>
-          <button type="button" className="captcha-image" onClick={reload} disabled={busy} aria-label="更换验证码"><img src={challenge.image} alt="注册验证码"/><span>换一张</span></button></div>:null}
+          <button type="button" className="captcha-image" title="点击更换验证码" onClick={reload} disabled={busy} aria-label="更换验证码"><img src={challenge.image} alt="注册验证码"/><span>换一张</span></button></div>:null}
         {error?<p role="alert">{error}</p>:null}<Button label={busy?'正在注册…':'注册'} type="submit" isDisabled={busy || !challenge}/>
       </form>}
       {!success?<a href="/login" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onLogin();}}}>使用已有账户登录</a>:null}

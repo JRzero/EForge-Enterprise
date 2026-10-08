@@ -1,3 +1,4 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
@@ -5,7 +6,7 @@ import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useD
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Checkbox, Input} from '@eforge/ui';
 import type {DepartmentResponse, PageResponseUserResponse, UserResponse, UserWriteRequest, UserOptionsResponseRead, UserOption, UserImportResponse} from '../../generated/api';
 import {useApi, useBootstrap} from '../../app/context';
@@ -168,7 +169,7 @@ export function UsersPage() {
   const tree = useMemo(() => searchedDepartmentTree(departments, departmentSearch, collapsed), [departments, departmentSearch, collapsed]);
   const parentOptions = editor ? departmentTree(editor.options.departments).filter(row =>
     (row.department.status === '0' || row.department.id === editor.form.departmentId) && (row.path.toLowerCase().includes(parentSearch.trim().toLowerCase()) || row.department.id === editor.form.departmentId)) : [];
-  return <section className="posts-page users-page"><PageHeader title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={sexDictionary} />
+  return <ListPage className="posts-page users-page" title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={sexDictionary} />
     <div className="user-layout"><aside className="user-departments" aria-label="用户部门筛选">
       <Input label="搜索部门" value={departmentSearch} onChange={setDepartmentSearch} />
       <Button label="全部部门" variant="ghost" onClick={() => { setDraft({...draft, departmentId: undefined}); setFilters({...filters, departmentId: undefined}); setPage(1); }} />
@@ -178,13 +179,13 @@ export function UsersPage() {
         <button aria-label={`筛选部门 ${row.path}`} aria-pressed={filters.departmentId === row.department.id} onClick={() => { setDraft({...draft, departmentId: row.department.id}); setFilters({...filters, departmentId: row.department.id}); setPage(1); }}>{row.department.name}</button>
       </li>)}</ul>
     </aside><div className="user-content">
-      <form hidden={!showFilters} className="post-filters" onSubmit={event => { event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; } setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
+      <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} /></>} onSubmit={event => { event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; } setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
         <Input label="登录账号筛选" value={draft.username} onChange={username => setDraft({...draft, username})} /><Input label="手机号码筛选" value={draft.phone} onChange={phone => setDraft({...draft, phone})} />
         <label>用户状态筛选<select aria-label="用户状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
         <label>开始日期<input aria-label="开始日期" type="date" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<input aria-label="结束日期" type="date" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
-        <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} />
-      </form>
-      <div className="post-toolbar">
+
+      </ListFilters>
+      <ListToolbar >
         <PermissionGate permission="system:user:add"><Button label="新增用户" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
         <PermissionGate permission="system:user:edit"><Button label="修改所选用户" variant="secondary" isDisabled={busy || selectedIds.length !== 1 || selectedIds[0] === '1'} onClick={() => { void openEditor(selectedIds[0]); }} /></PermissionGate>
         <PermissionGate permission="system:user:remove"><Button label="删除所选用户" variant="secondary" isDisabled={busy || selectedIds.length === 0} onClick={() => { setActionError(''); setAction({kind: 'delete', ids: selectedIds}); }} /></PermissionGate>
@@ -192,7 +193,7 @@ export function UsersPage() {
         <PermissionGate permission="system:user:import"><Button label="导入用户" variant="secondary" isDisabled={busy} onClick={() => { setActionError(''); setImporting({file: null, updateExisting: false, result: null}); }} /></PermissionGate>
         <Button label="刷新列表" variant="ghost" onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
         <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
-      </div>
+      </ListToolbar>
       {selectedIds.length ? <div className="user-selection"><span role="status">已选择 {selectedIds.length} 个用户</span><Button label="清空选择" variant="ghost" onClick={() => setSelection({})} /></div> : null}
       {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert">{error}<Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !editor && !action && !importing ? <p role="alert">{actionError}</p> : null}
       <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无用户" pagination={false} sortable={false} showColumnVisibility={false} rowSelection={selection} columnVisibility={visibility} getRowId={row => row.id} /></div>
@@ -230,5 +231,5 @@ export function UsersPage() {
         <table><thead><tr><th>记录</th><th>登录账号</th><th>结果</th></tr></thead><tbody>{importing.result.rows.map(row => <tr key={row.row}><td>{row.row}</td><td>{row.username}</td><td>{row.outcome === 'CREATED' ? '新增成功' : row.outcome === 'UPDATED' ? '更新成功' : errorMessage(new ApiError(400, row.code ?? 'USER_IMPORT_FAILED'))}</td></tr>)}</tbody></table>
       </section> : null}<div className="post-row-actions"><Button label={busy ? '正在处理…' : '开始导入'} isDisabled={busy} onClick={() => { void importFile(); }} /><Button label="关闭" variant="secondary" isDisabled={busy} onClick={close} /></div>
     </ResourceDialog> : null}
-  </section>;
+  </ListPage>;
 }

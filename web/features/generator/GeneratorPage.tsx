@@ -1,9 +1,10 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {TableSummary, TableDetail, PageResponseTableSummary, PreviewResponse, Creation, CustomOutputResult} from '../../generated/api';
 import {useApi, useBootstrap} from '../../app/context';
@@ -77,15 +78,15 @@ export function GeneratorPage() {
       catch(cause){if(cause instanceof GeneratorCreationError)setCreation(cause.creation);throw cause;}});
   }
   const creationResult=creation?<div aria-label="建表结果"><h3>建表结果</h3><ul>{creation.physical?.map((item,index)=><li key={index}>{item.name}：{stateLabels[item.state ?? ''] ?? '结果未确认'}</li>)}</ul><p>配置导入：{stateLabels[creation.importState ?? ''] ?? '结果未确认'}</p><ul>{creation.imported?.map((item,index)=><li key={index}>{item.actualName} · {item.id} · {item.columnCount} 个字段</li>)}</ul></div>:null;
-  return <section className="posts-page generator-page">
-    <PageHeader title="代码生成" description="管理生成配置、同步字段并预览生成文件。" eyebrow="系统工具"/>
-    <form hidden={!showFilters} className="post-filters" onSubmit={event=>{event.preventDefault();if(draft.from&&draft.to&&draft.from>draft.to){setActionError('开始日期不能晚于结束日期。');return;}setPage(1);setFilters({...draft});refresh();}}>
+  return <ListPage className="posts-page generator-page" title="代码生成" description="管理生成配置、同步字段并预览生成文件。" eyebrow="系统工具">
+
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit"/><Button label="重置" variant="secondary" onClick={()=>{setDraft(emptyFilters);setFilters(emptyFilters);setPage(1);refresh();}}/></>} onSubmit={event=>{event.preventDefault();if(draft.from&&draft.to&&draft.from>draft.to){setActionError('开始日期不能晚于结束日期。');return;}setPage(1);setFilters({...draft});refresh();}}>
       <Input label="表名称筛选" value={draft.name} onChange={name=>setDraft({...draft,name})}/><Input label="表描述筛选" value={draft.comment} onChange={comment=>setDraft({...draft,comment})}/>
       <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/></label>
       <label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/></label>
-      <Button label="查询" type="submit"/><Button label="重置" variant="secondary" onClick={()=>{setDraft(emptyFilters);setFilters(emptyFilters);setPage(1);refresh();}}/>
-    </form>
-    <div className="post-toolbar">
+
+    </ListFilters>
+    <ListToolbar >
       <PermissionGate permission="tool:gen:import"><Button label="导入表" isDisabled={busy} onClick={()=>{setActionError('');setImporting(true);}}/></PermissionGate>
       {bootstrap.roles.includes('admin')?<Button label="创建表" isDisabled={busy} onClick={()=>{setActionError('');setCreation(null);setCreating(true);}}/>:null}
       <PermissionGate permission="tool:gen:edit"><Button label="编辑所选" isDisabled={busy||ids.length!==1} onClick={()=>edit(ids[0]!)}/></PermissionGate>
@@ -95,7 +96,7 @@ export function GeneratorPage() {
       <label>排序字段<select aria-label="排序字段" value={sort} onChange={event=>{setSort(event.target.value as typeof sort);setPage(1);}}>{(['name','comment','createdAt','updatedAt'] as const).map(value=><option key={value} value={value}>{labels[value]}</option>)}</select></label>
       <Button label={direction==='asc'?'升序':'降序'} onClick={()=>{setDirection(value=>value==='asc'?'desc':'asc');setPage(1);}}/>
       <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
-    </div>
+    </ListToolbar>
     {feedback?<p role="status">{feedback}</p>:null}
     {error?<div role="alert">{error}<Button label="重试列表" onClick={()=>refresh()}/></div>:null}
     {actionError&&!editor&&!confirmation&&!creating&&!preview?<p role="alert">{actionError}</p>:null}
@@ -118,5 +119,5 @@ export function GeneratorPage() {
       <label>初始前端类型<select aria-label="初始前端类型" value={template} disabled={busy} onChange={event=>{setTemplate(event.target.value);setCreation(null);setActionError('');}}>{['eforge-react','element-ui','element-plus','element-plus-typescript'].map(value=><option key={value}>{value}</option>)}</select></label>
       {creationResult}{actionError?<p role="alert">{actionError}</p>:null}<div className="post-dialog-actions"><Button label={busy?'正在建表…':'执行建表'} variant="primary" isDisabled={busy} onClick={()=>{void create();}}/><Button label="关闭" variant="secondary" isDisabled={busy} onClick={()=>setCreating(false)}/></div>
     </ResourceDialog>:null}
-  </section>;
+  </ListPage>;
 }

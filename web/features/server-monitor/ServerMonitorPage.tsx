@@ -1,3 +1,4 @@
+import {ListToolbar} from '../../app/components/ListPage';
 import {useEffect, useState, type ReactNode} from 'react';
 import {DataTable, type ColumnDef} from '@eforge/data';
 import {PageHeader} from '@eforge/patterns';
@@ -32,9 +33,9 @@ export function ServerMonitorPage() {
   }, [api, version, read]);
   return <section className="server-monitor-page" aria-busy={loading}>
     <PageHeader title="服务器监控" description="查看服务器资源及 Java 运行环境。" />
-    <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
+    <ListToolbar ><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
       {data && <span>采集时间：<time dateTime={data.sampledAt}>{new Date(data.sampledAt).toLocaleString('zh-CN')}</time></span>}
-    </div>
+    </ListToolbar>
     {loading && <p role="status">正在加载服务监控数据，请稍候！</p>}
     {error && <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></>}
     {data && <>

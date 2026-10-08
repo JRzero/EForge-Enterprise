@@ -77,7 +77,7 @@ export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onReg
           onChange={value=>{credentialEdited.current=true;setPassword(value);}} aria-required="true" isDisabled={busy} />
         {challenge?.enabled ? <div className="captcha-row">
           <Input label="验证码" htmlName="code" value={code} onChange={setCode} aria-required="true" isDisabled={busy} />
-          <button type="button" className="captcha-image" onClick={refreshCaptcha} disabled={busy} aria-label="更换验证码">
+          <button type="button" className="captcha-image" title="点击更换验证码" onClick={refreshCaptcha} disabled={busy} aria-label="更换验证码">
             <img src={challenge.image} alt="登录验证码" /><span>换一张</span>
           </button></div> : null}
         <label className="login-remember"><input type="checkbox" checked={remember} disabled={busy || !rememberReady} onChange={event=>changeRemember(event.target.checked)} />在此浏览器记住密码（30天）</label>

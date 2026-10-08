@@ -11,6 +11,28 @@ async function login(page: Page, path: string, permissions: string[]) {
   await page.route('**/api/v1/system/dictionaries/lookup/sys_common_status', route => route.fulfill({json: [{value: '0', label: '成功标签', style: 'SUCCESS', defaultEntry: false}, {value: '1', label: '失败标签', style: 'DANGER', defaultEntry: false}]}));
   await page.goto(path); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click();
 }
+
+test('object-model list template aligns mixed filters and separates its heading from the list body',async({page},info)=>{
+  await page.route('**/api/v1/monitor/operation-logs?*',route=>route.fulfill({json:{items:[operation],total:1,page:1,pageSize:10}}));
+  await page.setViewportSize({width:1600,height:1000});await login(page,'/operlog',['monitor:operlog:list']);
+  await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
+  const heading=(await page.locator('.list-page > header').boundingBox())!,body=(await page.locator('.list-page-body').boundingBox())!;
+  expect(heading.y+heading.height).toBeLessThanOrEqual(body.y+1);
+  await page.screenshot({path:info.outputPath('list-desktop.png'),fullPage:true});
+  for(const field of await page.locator('.list-filter-field').all()) {
+    const metrics=await field.evaluate(el=>{const label=el.querySelector('label')!,control=el.querySelector('input,select')!;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return {labelX:a.x,controlX:b.x,labelY:a.y,labelHeight:a.height,controlY:b.y,controlHeight:b.height};});
+    expect(metrics.controlX).toBeGreaterThan(metrics.labelX+8);
+    expect(Math.abs(metrics.labelY+metrics.labelHeight/2-metrics.controlY-metrics.controlHeight/2)).toBeLessThanOrEqual(3);
+  }
+  const fields=await page.locator('.list-filter-field').all();
+  for(let i=1;i<fields.length;i++) {
+    const previous=(await fields[i-1]!.boundingBox())!,current=(await fields[i]!.boundingBox())!;
+    if(Math.abs(previous.y-current.y)<3)expect(current.x-previous.x-previous.width).toBeGreaterThanOrEqual(12);
+  }
+  await page.screenshot({path:info.outputPath('list-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('list-mobile.png'),fullPage:true});
+});
 test('read-only operation logs use exact IDs/custom labels, recover failure and respect route grants/mobile bounds', async ({page}) => {
   let failure = true;
   await page.route('**/api/v1/monitor/operation-logs?*', route => route.fulfill(failure ? {status: 503, json: {}} : {json: {items: [operation], total: 1, page: 1, pageSize: 10}}));

@@ -1,3 +1,4 @@
+import {ListToolbar} from '../../app/components/ListPage';
 import {lazy, Suspense, useEffect, useState} from 'react';
 import {PageHeader} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
@@ -25,7 +26,7 @@ export function CacheStatisticsPage() {
     ['网络入口/出口', `${data.info.inputKbps ?? '—'} kps / ${data.info.outputKbps ?? '—'} kps`]
   ] : [];
   return <section className="cache-statistics-page" aria-busy={loading}><PageHeader title="缓存监控" description="查看 Redis 运行状态、命令统计和内存消耗。" />
-    <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} /></div>
+    <ListToolbar ><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} /></ListToolbar>
     {loading && <p role="status">正在加载缓存监控数据，请稍候！</p>}
     {error && <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></>}
     {data && <><section className="server-card" aria-labelledby="cache-info-title"><h2 id="cache-info-title">基本信息</h2><dl className="server-details cache-info">{entries.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}</dl></section>

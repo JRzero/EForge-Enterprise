@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs><linearGradient id="forge" x2="1" y2="1"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#1647b8"/></linearGradient></defs>
+  <path fill="url(#forge)" d="M14 3h36l11 11v36L50 61H14L3 50V14Z"/>
+  <path fill="#fff" d="M17 17h30l-5 7H25v6h18l-5 7H25v6h22l-5 7H17Z"/>
+  <path fill="#67e8f9" d="m49 8 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/>
+</svg>

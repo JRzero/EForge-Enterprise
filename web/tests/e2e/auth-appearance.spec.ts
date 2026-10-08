@@ -1,4 +1,27 @@
 import {test,expect} from './fixtures';
+import {readFileSync} from 'node:fs';
+
+for (const route of ['/login','/register']) test(`${route} aligns captcha with its input and refreshes by keyboard`,async({page},info)=>{
+  let requests=0;
+  const image=readFileSync(new URL('./assets/captcha-example.jpg',import.meta.url)).toString('base64');
+  await page.route('**/api/v1/auth/registration',r=>r.fulfill({json:{enabled:true}}));
+  await page.route('**/captchaImage',r=>{requests++;return r.fulfill({json:{code:200,captchaEnabled:true,uuid:`challenge-${requests}`,img:image}});});
+  await page.goto(route);
+  for(const width of [1440,390]) {
+    await page.setViewportSize({width,height:900});
+    const input=page.getByLabel('验证码',{exact:true}), refresh=page.getByRole('button',{name:'更换验证码',exact:true});
+    await expect(input).toBeVisible();await expect(refresh.locator('img')).toBeVisible();
+    await expect.poll(()=>refresh.locator('img').evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
+    const a=(await input.locator('..').boundingBox())!,b=(await refresh.boundingBox())!;
+    expect(Math.abs(a.y-b.y)).toBeLessThanOrEqual(2);expect(Math.abs(a.height-b.height)).toBeLessThanOrEqual(2);
+    expect(a.x+a.width).toBeLessThan(b.x);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await expect(page.locator('.auth-brand img')).toHaveAttribute('src','/eforge-mark.svg');
+    expect(await page.locator('.auth-brand img').evaluate((el:HTMLImageElement)=>el.complete&&el.naturalWidth>0)).toBe(true);
+    await page.screenshot({path:info.outputPath(`captcha-${width}.png`),fullPage:true});
+  }
+  const count=requests;await page.getByRole('button',{name:'更换验证码',exact:true}).focus();await page.keyboard.press('Enter');
+  await expect.poll(()=>requests).toBeGreaterThan(count);
+});
 
 test('centered account panel retains focus and readable errors at desktop and phone widths',async({page},info)=>{
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));

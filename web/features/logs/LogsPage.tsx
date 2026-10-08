@@ -1,9 +1,10 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {LoginLogResponse, OperationLogResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
@@ -91,24 +92,24 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
     try {const file = operation ? await api.exportOperationLogs(operationQuery) : await api.exportLoginLogs(loginQuery), url = URL.createObjectURL(file), link = document.createElement('a'); link.href = url; link.download = `${title}.xlsx`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);}
     catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }
-  return <section className="logs-page"><PageHeader title={title} description={operation ? '查看系统操作记录和执行详情。' : '查看登录记录并管理账号解锁。'} />
+  return <ListPage className="logs-page" title={title} description={operation ? '查看系统操作记录和执行详情。' : '查看登录记录并管理账号解锁。'}>
     <DictionaryNotice dictionary={statuses} />{types && <DictionaryNotice dictionary={types} />}
-    {showFilters && <form className="post-filters" onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
+    {showFilters && <ListFilters actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
       {operation && <label>操作类型<select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></select></label>}
       <label>{operation ? '操作状态' : '登录状态'}<select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></select></label>
       <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
-      <Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></form>}
-    <div className="post-toolbar"><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
+      </ListFilters>}
+    <ListToolbar ><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}
       <PermissionGate permission={`${permission}:export`}><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
       <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowFilters(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
       <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
-    </div>
+    </ListToolbar>
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} getRowId={row => row.id} getRowSelectionLabel={row => `选择日志 ${row.id}`} loading={loading} emptyText="暂无日志" pagination={false} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: current[0]?.id ?? timeField, desc: true}];}); setPage(1);}} columnVisibility={visibility} onColumnVisibilityChange={setVisibility} showColumnVisibility={false} selectable rowSelection={selection} onRowSelectionChange={setSelection} /></div>}
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {confirmation && <ResourceDialog titleId="log-confirm-title" alert busy={busy} onCancel={() => setConfirmation(null)}><h2 id="log-confirm-title">{confirmation.action === 'unlock' ? '确认解锁' : confirmation.action === 'clear' ? '确认清空日志' : '确认删除日志'}</h2><p>{confirmation.action === 'unlock' ? `解锁账号 ${confirmation.username}？` : confirmation.action === 'clear' ? `清空全部${title}？此操作无法撤销。` : `删除所选 ${confirmation.ids.length} 条日志？`}</p>{actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setConfirmation(null)} /><Button label={confirmation.action === 'unlock' ? '确认解锁' : confirmation.action === 'clear' ? '确认清空' : '确认删除'} variant={confirmation.action === 'unlock' ? 'primary' : 'secondary'} isDisabled={busy} onClick={() => {void perform();}} /></div></ResourceDialog>}
     {detail && <OperationLogDetailDialog id={detail} onClose={() => setDetail(null)} />}
-  </section>;
+  </ListPage>;
 }

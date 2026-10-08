@@ -1,7 +1,8 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {OnlineSessionResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
@@ -45,12 +46,12 @@ export function OnlineSessionsPage() {
     try {await api.revokeOnlineSession(selected.id); setFeedback(`账号 ${selected.username} 的所选会话已强退。`); setSelected(null); setVersion(value => value + 1);}
     catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }
-  return <section className="online-sessions-page"><PageHeader title="在线用户" description="查看当前登录会话，按账号和登录地址精确查询。" />
-    <form className="post-filters" onSubmit={apply}><Input label="登录地址" value={draft.ip} onChange={ip => setDraft({...draft, ip})} /><Input label="用户名称" value={draft.username} onChange={username => setDraft({...draft, username})} /><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></form>
-    <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading || busy} onClick={() => setVersion(value => value + 1)} /></div>
+  return <ListPage className="online-sessions-page" title="在线用户" description="查看当前登录会话，按账号和登录地址精确查询。">
+    <ListFilters actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label="登录地址" value={draft.ip} onChange={ip => setDraft({...draft, ip})} /><Input label="用户名称" value={draft.username} onChange={username => setDraft({...draft, username})} /></ListFilters>
+    <ListToolbar ><Button label="刷新" variant="ghost" isDisabled={loading || busy} onClick={() => setVersion(value => value + 1)} /></ListToolbar>
     {feedback && <p role="status">{feedback}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} getRowId={row => row.id} loading={loading} emptyText="暂无在线会话" pagination={false} showColumnVisibility={false} /></div>}
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {selected && <ResourceDialog titleId="online-confirm-title" alert busy={busy} onCancel={() => setSelected(null)}><h2 id="online-confirm-title">确认强退会话</h2><p>强退账号 {selected.username} 的此会话？</p><p>会话编号：{selected.id}</p>{actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setSelected(null)} /><Button label="确认强退" variant="secondary" isDisabled={busy} onClick={() => {void revoke();}} /></div></ResourceDialog>}
-  </section>;
+  </ListPage>;
 }

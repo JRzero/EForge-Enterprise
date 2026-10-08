@@ -1,10 +1,11 @@
+import {ListToolbar, ListFilters, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import {useApi, useApplicationControls} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -101,20 +102,20 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
   }
   function query(event: FormEvent) {event.preventDefault(); if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;} setActionError(''); setFilters({...draft}); setPage(1); setVersion(value => value + 1);}
   const labels: Record<string, string> = entryMode ? {id: '字典编码', name: '字典标签', value: '字典键值', sort: '字典排序', default: '默认项', status: '状态', remark: '备注', createdAt: '创建时间'} : {id: '字典编号', name: '字典名称', code: '字典类型', status: '状态', remark: '备注', createdAt: '创建时间'};
-  return <section className="posts-page dictionaries-page"><PageHeader title={entryMode ? '字典数据' : '字典管理'} description={entryMode ? `${selectedType?.name ?? '字典'} · ${selectedType?.code ?? ''}` : '维护字典类型、数据和显示标签。'} eyebrow="系统管理" />
-    {entryMode ? <div className="post-toolbar"><label>选择字典<select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</select></label><Button label="关闭字典数据" variant="secondary" onClick={() => (controls.closePage ?? controls.navigate)('/dict')} /></div> : null}
-    <form hidden={!showFilters} className="post-filters" onSubmit={query}><Input label={entryMode ? '字典标签筛选' : '字典名称筛选'} value={draft.name} onChange={name => setDraft({...draft, name})} />
+  return <ListPage className="posts-page dictionaries-page" title={entryMode ? '字典数据' : '字典管理'} description={entryMode ? `${selectedType?.name ?? '字典'} · ${selectedType?.code ?? ''}` : '维护字典类型、数据和显示标签。'} eyebrow="系统管理">
+    {entryMode ? <ListToolbar ><label>选择字典<select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</select></label><Button label="关闭字典数据" variant="secondary" onClick={() => (controls.closePage ?? controls.navigate)('/dict')} /></ListToolbar> : null}
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setDraft(initialFilters); setFilters(initialFilters); setPage(1); refresh();}} /></>} onSubmit={query}><Input label={entryMode ? '字典标签筛选' : '字典名称筛选'} value={draft.name} onChange={name => setDraft({...draft, name})} />
       {!entryMode ? <><Input label="字典类型筛选" value={draft.code} onChange={code => setDraft({...draft, code})} /><label>开始日期<input type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label></> : null}
       <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option>{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</select></label>
-      <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setDraft(initialFilters); setFilters(initialFilters); setPage(1); refresh();}} /></form>
-    <div className="post-toolbar"><PermissionGate permission="system:dict:add"><Button label={entryMode ? '新增字典数据' : '新增字典类型'} isDisabled={busy || metadataLoading || !!metadataError || entryMode && !selectedType} onClick={add} /></PermissionGate>
+      </ListFilters>
+    <ListToolbar ><PermissionGate permission="system:dict:add"><Button label={entryMode ? '新增字典数据' : '新增字典类型'} isDisabled={busy || metadataLoading || !!metadataError || entryMode && !selectedType} onClick={add} /></PermissionGate>
       <PermissionGate permission="system:dict:edit"><Button label="修改所选字典" variant="secondary" isDisabled={busy || metadataLoading || !!metadataError || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>
       <PermissionGate permission="system:dict:remove"><Button label="删除所选字典" variant="secondary" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setDeleting(selected);}} /></PermissionGate>
       <PermissionGate permission="system:dict:export"><Button label="导出字典" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>
       {!entryMode ? <PermissionGate permission="system:dict:remove"><Button label="刷新字典缓存" variant="secondary" isDisabled={busy} onClick={() => {void cacheRefresh();}} /></PermissionGate> : null}
       <Button label="刷新列表" variant="ghost" isDisabled={loading || busy} onClick={() => refresh()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
       <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
-    </div>
+    </ListToolbar>
     {metadataError ? <div role="alert"><p>字典选项加载失败：{metadataError}</p><Button label="重试字典选项" onClick={() => setMetadataVersion(value => value + 1)} /></div> : null}
     {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无字典记录" pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择字典 ${rowName(row)}`} /></div>
@@ -122,5 +123,5 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
     {editor ? <DictionaryEditor initial={editor} statusOptions={statusOptions} code={selectedType?.code} onClose={() => setEditor(null)} onSaved={saved} /> : null}
     {preview ? <DictionaryPreview type={preview} statusOptions={statusOptions} onClose={() => setPreview(null)} /> : null}
     {deleting ? <ResourceDialog titleId="dictionary-delete-title" alert busy={busy} onCancel={() => {setDeleting(null); setActionError('');}}><h2 id="dictionary-delete-title">确认删除字典</h2><p>将删除所选的 {deleting.length} 条记录。{!entryMode ? '包含数据的类型不能删除。' : ''}</p>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setDeleting(null); setActionError('');}} /></div></ResourceDialog> : null}
-  </section>;
+  </ListPage>;
 }

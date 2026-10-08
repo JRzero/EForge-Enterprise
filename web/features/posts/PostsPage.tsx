@@ -1,3 +1,4 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
@@ -5,7 +6,7 @@ import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useD
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {PostRequest, PostResponse, PageResponsePostResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
@@ -113,22 +114,22 @@ export function PostsPage() {
     finally { setBusy(false); }
   }
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
-  return <section className="posts-page">
-    <PageHeader title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} />
-    <form hidden={!showFilters} className="post-filters" onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
+  return <ListPage className="posts-page" title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理">
+    <DictionaryNotice dictionary={statusDictionary} />
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} /></>} onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
       <Input label="岗位编码筛选" value={draft.code} onChange={code => setDraft({...draft, code})} />
       <Input label="岗位名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
-      <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} />
-    </form>
-    <div className="post-toolbar">
+
+    </ListFilters>
+    <ListToolbar >
       <PermissionGate permission="system:post:add"><Button label="新增岗位" variant="primary" isDisabled={busy} onClick={() => { setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm})); }} /></PermissionGate>
       <PermissionGate permission="system:post:remove"><Button label="删除所选岗位" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => { setActionError(''); setDeleting(selectedIds); }} /></PermissionGate>
       <PermissionGate permission="system:post:export"><Button label="导出岗位" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} />
       <Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
       <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
-    </div>
+    </ListToolbar>
     {feedback ? <p role="status">{feedback}</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
@@ -149,5 +150,5 @@ export function PostsPage() {
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => { void remove(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setDeleting(null); setActionError(''); }} /></div>
     </PostDialog> : null}
     {discard.dialog}
-  </section>;
+  </ListPage>;
 }

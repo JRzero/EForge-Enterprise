@@ -1,6 +1,33 @@
 # spcore visual alignment
 
-Current acceptance: complete for the requested product UI scope on
+## Object-model lists, account CAPTCHA and original logo
+
+The 2026-10-08 follow-up replaces individual list shells with product-owned
+`ListPage`, `ListFilters` and `ListToolbar`. Titles/descriptions sit on the gray
+canvas outside the white list body. Labels and controls share a horizontal row,
+with explicit query/reset actions, consistent spacing and responsive wrapping.
+Users, roles/role assignments, departments, menus, posts, dictionaries, settings,
+notices, logs, jobs and generator lists use the template; import/reader filters
+reuse the same filter layout. Monitoring pages reuse only its toolbar.
+
+Login and registration CAPTCHA controls and images share a 40px outer height.
+The entire image remains a button with a descriptive accessible name, focus ring,
+keyboard activation and hover title; the old caption no longer offsets the image.
+Original SVG branding uses a beveled blue E and cyan spark. The square mark is
+used in authentication, sidebar and favicon; a standalone wordmark is also
+provided in `web/public`. No upstream component source or baseline changed.
+
+Local evidence: lint/typecheck/client reproduction, 126 unit tests and build
+passed. The complete browser suite passed 183 cases before the final filter-width
+override; all 9 affected login/registration/log cases then passed on the final
+override. The added checks compare actual desktop/mobile outer bounds, adjacent
+filter spacing, loaded image assets and keyboard CAPTCHA refresh. Real integration
+and exact-commit cloud acceptance are pending; earlier acceptance below belongs
+to the preceding phase.
+
+## Preceding phase acceptance
+
+Acceptance: complete for the preceding product UI scope on
 `codex/spcore-ui-refactor`. Final product source is
 `53a13389b34d5a18d5ce4dbf67f190b25643d123`; web run `37784488537` and
 all four jobs of server run `37784488380` are terminal success. Later notes below
@@ -23,7 +50,7 @@ AMIS/Vue migration or an upstream dependency change.
 - Error and disabled fields keep distinct states. Native select, number,
   pagination and checkbox controls retain native keyboard behavior.
 - Desktop editor labels align right beside controls; phone labels stack above
-  them. Filter labels remain above controls. Submit and explicit add actions have primary
+  them. Shared list filter labels sit beside controls. Submit and explicit add actions have primary
   styling; other actions do not become primary based on their DOM position.
 - Shared list, table, pagination, dialog, profile, dashboard and monitoring
   surfaces use the same product-owned theme. Tables scroll within their container

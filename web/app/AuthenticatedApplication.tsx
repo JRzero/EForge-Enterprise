@@ -1,3 +1,4 @@
+import {BrandMark} from './components/BrandMark';
 import {Activity, useRef, useCallback, useEffect, useMemo, useState} from 'react';
 import {PermissionProvider} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
@@ -85,7 +86,7 @@ export function AuthenticatedApplication({runtime, router, bootstrap, href}: {ru
       if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); router.navigate('/dashboard');
       }
-    }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
+    }}><BrandMark/><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
       header={(menuButton, shellTools) => <div className="enterprise-header"><div className="enterprise-header-left">{menuButton}{match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : <span className="enterprise-header-title">EForge Enterprise</span>}</div><div className="enterprise-header-actions"><NavigationSearch items={navigation} router={router} />{shellTools}
         <DeferredFeature load={loadHeaderNotices} componentProps={{version: noticeVersion}} fallback={null}
           errorFallback={retry => <span role="alert">公告暂时无法加载<Button label="重试通知公告" variant="ghost" size="sm" onClick={retry} /></span>} />

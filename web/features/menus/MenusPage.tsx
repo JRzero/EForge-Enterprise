@@ -1,8 +1,9 @@
+import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
+import {PermissionGate} from '@eforge/patterns';
 import {Button, Input} from '@eforge/ui';
 import type {MenuResponse, MenuRouteOption} from '../../generated/api';
 import {useApi} from '../../app/context';
@@ -74,19 +75,19 @@ export function MenusPage() {
     catch (cause) { setActionError(errorMessage(cause)); } finally { setBusy(false); }
   }
   function query(event: FormEvent) { event.preventDefault(); setFilters({...draft}); setVersion(value => value + 1); }
-  return <section className="posts-page menus-page"><PageHeader title="菜单管理" description="维护目录、页面、外链和按钮权限。" eyebrow="系统管理" /><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={visibilityDictionary} />
-    <form hidden={!showFilters} className="post-filters" onSubmit={query}><Input label="菜单名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
+  return <ListPage className="posts-page menus-page" title="菜单管理" description="维护目录、页面、外链和按钮权限。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={visibilityDictionary} />
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></>} onSubmit={query}><Input label="菜单名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <label>菜单状态筛选<select aria-label="菜单状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
       <label>显示状态筛选<select aria-label="显示状态筛选" value={draft.visible} onChange={event => setDraft({...draft, visible: event.target.value})}><option value="">全部</option><DictionaryOptions options={visibilityOptions} current={draft.visible} /></select></label>
-      <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></form>
-    <div className="post-toolbar"><PermissionGate permission="system:menu:add"><Button label="新增菜单" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
+      </ListFilters>
+    <ListToolbar ><PermissionGate permission="system:menu:add"><Button label="新增菜单" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:menu:edit"><Button label="保存菜单排序" variant="secondary" isDisabled={busy || !rows.some(row => sorts[row.id] !== undefined && sorts[row.id] !== row.sort)} onClick={() => { void saveSort(); }} /></PermissionGate>
       <Button label={collapsed.size ? '展开全部菜单' : '折叠全部菜单'} variant="secondary" isDisabled={busy || loading || !rows.length} onClick={() => setCollapsed(collapsed.size ? new Set() : new Set(rows.map(row => row.id)))} />
-      <Button label="刷新列表" variant="ghost" isDisabled={busy || loading} onClick={() => reload()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} /></div>
+      <Button label="刷新列表" variant="ghost" isDisabled={busy || loading} onClick={() => reload()} /><Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} /></ListToolbar>
     {feedback ? <p role="status">{feedback}</p> : null}{snapshot.error ? <div role="alert"><p>菜单操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => reload()} /></div> : null}{actionError && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={tree} columns={columns} loading={loading} emptyText="暂无菜单" pagination={false} sortable={false} showColumnVisibility={false} getRowId={row => row.menu.id} /></div>
     {editor ? <MenuEditor visibilityOptions={visibilityOptions} statusOptions={statusDictionary.options} {...editor} onClose={() => setEditor(null)} onSaved={() => saved('菜单已保存。')} /> : null}
     {deleting ? <ResourceDialog titleId="menu-delete-title" busy={busy} onCancel={() => { setDeleting(null); setActionError(''); }}><h2 id="menu-delete-title">确认删除菜单</h2><p>确定删除「{deleting.name}」？</p>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => { void remove(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setDeleting(null); setActionError(''); }} /></div></ResourceDialog> : null}
-  </section>;
+  </ListPage>;
 }

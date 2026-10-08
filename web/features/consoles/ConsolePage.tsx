@@ -1,3 +1,4 @@
+import {ListToolbar} from '../../app/components/ListPage';
 import {useLayoutEffect, useRef, useState, type SyntheticEvent} from 'react';
 import {PageHeader} from '@eforge/patterns';
 import {Button} from '@eforge/ui';
@@ -115,7 +116,7 @@ function ConsolePage({target}: {target: Target}) {
   }
   return <section className="console-page" aria-busy={loading}>
     <PageHeader title={definition.title} description={target === 'druid' ? '查看数据源、SQL 与连接池运行情况。' : '查看并调试系统接口。'} />
-    <div className="post-toolbar"><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} /></div>
+    <ListToolbar ><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} /></ListToolbar>
     {loading && <p role="status">正在加载控制台，请稍候！</p>}
     {disabled && <p role="status">该控制台尚未启用，请联系管理员。</p>}
     {error && <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></>}
