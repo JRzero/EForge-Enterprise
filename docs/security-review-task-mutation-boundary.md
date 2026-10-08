@@ -83,8 +83,9 @@ Native affected-key restoration had passed; the failure did not prove that
 the attempted key survived. The fix rejects mismatched explicit groups while
 retaining SQL-authoritative current configuration and ID-only internal calls.
 The failed full run was terminal and cleaned up its owned application/databases;
-the enabled run was not started. Initial cloud run `37704369397` remains pending
-and cannot accept the later fix.
+the enabled run was not started. Initial cloud run `37704369397` subsequently
+failed both authenticated profiles on that same product compatibility assertion;
+verify and runtime-integration passed. It does not accept the later fix.
 
 A review also identified the inherited legacy handler's raw error-message
 envelope and operation audit. Five task write controller paths now convert
@@ -101,8 +102,18 @@ cases, one existing platform skip). Final native modes now include an explicit
 stale-group manual-dispatch rejection check. A new real HTTP strict-SQL fault
 verifies complete configuration rollback, safe response and failed audit,
 then successful status retry. Final native modes each pass 35 checks. Both
-complete runtime profiles are running and are not accepted yet. Canonical write APIs, invocation policy,
-generated client and full task controls remain unfinished.
+complete runtime profiles have now passed for the corrected published source
+`fb7c7b12de8e157942d5132e79c7eac134d23f82`. Cloud run `37705061672`
+completed all four jobs successfully. The direct log
+`server/eforge-boot/target/task-boundary-final-cloud-accepted.log` confirms both
+native modes (35 checks each), both authenticated configurations (62 real
+browsers each), actual task execution/replacement, SQL rollback, safe failure
+audit and recovery, all seven generated families and exact OpenAPI agreement.
+Local final profiles independently passed in
+`task-boundary-final-disabled-runtime.log` and
+`task-boundary-final-enabled-runtime.log`. No frontend source changed in this
+phase; no new web workflow is claimed. Canonical write APIs, invocation policy,
+generated client and full task controls remain a separate unfinished phase.
 
 The native scheduler intentionally remains in standby to inspect scheduling
 and committed admission deterministically. Actual target execution and

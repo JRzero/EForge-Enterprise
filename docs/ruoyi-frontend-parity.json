@@ -4179,5 +4179,16 @@
       "ruoyi-ui/src/components/PanThumb/index.vue"
     ],
     "fullGoalComplete": false
+  },
+  "taskMutationBoundary": {
+    "status": "exact-cloud-accepted-foundation-not-task-management",
+    "fullGoalComplete": false,
+    "backendDeclarations": 675,
+    "nativeChecksPerMode": 35,
+    "implementationSha": "fb7c7b12de8e157942d5132e79c7eac134d23f82",
+    "serverJobs": 4,
+    "review": "docs/security-review-task-mutation-boundary.md",
+    "realBrowsersPerProfile": 62,
+    "cloudServerRun": "37705061672"
   }
 }
