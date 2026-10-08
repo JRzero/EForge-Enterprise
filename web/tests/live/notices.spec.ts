@@ -41,10 +41,26 @@ test('real notice editor uploads PNG/JPG/SVG, retains rich text, reads, clears a
   const pixel = await editor.locator('img').last().evaluate(image => {const canvas = document.createElement('canvas'); canvas.width = 10; canvas.height = 10; const context = canvas.getContext('2d')!; context.drawImage(image as HTMLImageElement, 0, 0); return [...context.getImageData(5, 5, 1, 1).data];}); expect(pixel).toEqual([255, 0, 0, 255]);
   const urls = await editor.locator('img').evaluateAll(images => images.map(image => image.getAttribute('src')!)); expect(urls[0]).toMatch(/\/profile\/upload\/notices\/[0-9a-f-]+\.png$/); expect(urls[1]).toMatch(/\.png$/); expect(urls[2]).toMatch(/\.svg$/);
   const svg = await page.evaluate(async url => (await fetch(url)).text(), urls[2]!); expect(svg).toContain('linearGradient'); expect(svg).not.toMatch(/script|onload/);
-  await dialog.getByLabel('备注', {exact: true}).fill('待清空'); await dialog.getByRole('button', {name: '保存公告', exact: true}).click(); await expect(dialog).toHaveCount(0);
+  await dialog.getByLabel('备注', {exact: true}).fill('待清空');
+  const noticeCreated = page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/system/notices' && response.request().method() === 'POST');
+  await dialog.getByRole('button', {name: '保存公告', exact: true}).click();
+  const creation = await noticeCreated; expect(creation.status()).toBe(201);
+  const noticeId: string = (await creation.json()).id;
+  await expect(dialog).toHaveCount(0);
   await filter(page, title); await expect(page.getByRole('cell', {name: title, exact: true})).toBeVisible();
   await page.getByRole('button', {name: `预览 ${title}`, exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.locator('strong')).toHaveText('中文富文本'); await expect(dialog.locator('img')).toHaveCount(3); await page.keyboard.press('Escape');
-  await page.getByRole('button', {name: /^通知公告（/}).click(); await page.getByRole('region', {name: '顶部公告列表'}).getByRole('button', {name: `阅读 ${title}（未读）`, exact: true}).click(); await expect(page.getByRole('dialog').locator('strong')).toHaveText('中文富文本'); await page.keyboard.press('Escape');
+  await page.getByRole('button', {name: /^通知公告（/}).click();
+  // Detail rendering precedes the separate read transaction. Escape may close
+  // the preview while that write is pending; query readers only after its ack.
+  const [readResponse] = await Promise.all([
+    page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/system/notices/read' && response.request().method() === 'POST' && response.request().postDataJSON()?.ids?.includes(noticeId)),
+    (async () => {
+      await page.getByRole('region', {name: '顶部公告列表'}).getByRole('button', {name: `阅读 ${title}（未读）`, exact: true}).click();
+      await expect(page.getByRole('dialog').locator('strong')).toHaveText('中文富文本');
+      await page.keyboard.press('Escape');
+    })(),
+  ]);
+  expect(readResponse.status()).toBe(204);
   await page.getByRole('button', {name: `已读用户 ${title}`, exact: true}).click(); await expect(page.getByRole('dialog').getByRole('cell', {name: 'admin', exact: true})).toBeVisible(); await page.keyboard.press('Escape');
   await page.getByRole('checkbox', {name: `选择公告 ${title}`, exact: true}).check(); await page.getByRole('button', {name: '修改所选公告'}).click(); dialog = page.getByRole('dialog'); await dialog.getByRole('textbox', {name: '公告内容'}).fill(''); await dialog.getByLabel('备注', {exact: true}).fill(''); await dialog.getByLabel('公告类型', {exact: true}).selectOption('1'); await dialog.getByRole('radio', {name: '关闭', exact: true}).check(); await dialog.getByRole('button', {name: '保存公告'}).click(); await expect(dialog).toHaveCount(0);
   await page.getByRole('button', {name: `修改 ${title}`, exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.getByLabel('备注', {exact: true})).toHaveValue(''); await expect(dialog.getByRole('textbox', {name: '公告内容'})).toHaveText(''); await page.keyboard.press('Escape');
