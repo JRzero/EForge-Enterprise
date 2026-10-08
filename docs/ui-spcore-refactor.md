@@ -1,5 +1,12 @@
 # spcore visual alignment
 
+Current acceptance: complete for the requested product UI scope on
+`codex/spcore-ui-refactor`. Final product source is
+`53a13389b34d5a18d5ce4dbf67f190b25643d123`; web run `37784488537` and
+all four jobs of server run `37784488380` are terminal success. Later notes below
+preserve the intermediate failures and repairs; their pending entries describe
+historical checkpoints, not the current state. Form builder remains deferred.
+
 Reference: user-selected chat `01a11683-7247-7cc3-9555-ca7dea1a9b4a`, project
 `D:/Projects/spcore/spcore.nebula.mgt`, original AMIS preview and Element Plus
 shell. This is a visual adaptation using the pinned EForge components, not an
@@ -115,7 +122,7 @@ messages appear in normal flow below the input without an attached color block.
 | Rich editor, Cron and profile/avatar controls | Actual local dialogs and existing formatting/upload/keyboard tests | Reviewed |
 | Login/registration/lock and alternate dashboard views | Desktop/390px appearance captures, focus/error geometry and original authentication/dashboard regressions | Reviewed |
 | Generated business CRUD/tree/subtable page instances | Seven installed page categories; actual desktop/phone lists and CRUD/tree/sub editor upper/lower screenshots, real HTTP/SQL regression | Reviewed |
-| Password security reminder and 403/404/lazy failure states | Retained password-tab flow, themed dialog actions, desktop/390px captures and viewport bounds | Reviewed; final regression acceptance pending |
+| Password security reminder and 403/404/lazy failure states | Retained password-tab flow, themed dialog actions, desktop/390px captures and viewport bounds | Reviewed and accepted |
 
 2026-10-08 expanded evidence: `ui-component-real-audit.log` passed 44 actual
 local checks. After final password layout and label adjustments, the six relevant
@@ -261,3 +268,31 @@ cases passed after lint/typecheck, including small counters, multiple resizes,
 adjacent hover while focused and pointer selection after blur
 (`ui-cache-focus-after.log`). Final exact cloud acceptance is required for both
 real configurations; the earlier default pass alone is insufficient.
+
+## Final acceptance — 2026-10-08
+
+Exact source `53a1338` passed `web-ci` `37784488537`: lint, typecheck,
+reproducible OpenAPI client, all 126 units, build and all 180 browser cases.
+Server `37784488380` completed all four jobs successfully: Maven verification,
+native generator/protection probes, baseline MySQL/Redis integration, enabled
+and default complete API/browser verification, and both live OpenAPI snapshots.
+Default and enabled configurations each passed all 64 real browser cases,
+including mobile denied routes, navigation sizes, user column controls and
+keyboard/hover cache tooltips. Generated CRUD/tree/sub modules compiled and ran
+through real SQL/HTTP and both original Boot JWT/Redis/audit browser deployments;
+native output-context probes passed 474 assertions in each MySQL case mode.
+
+Evidence: `ui-spcore-cloud-53a-web-accepted.log`,
+`ui-spcore-cloud-53a-default-accepted.log`,
+`ui-spcore-cloud-53a-enabled-accepted.log`,
+`ui-spcore-cloud-53a-verify-accepted.log`, and the terminal sequential watcher
+logs. Superseded 80fd15b/e34cd0b server runs and e34cd0b web run were intentionally
+cancelled once the final focus repair was pushed; their cancellation is not a
+test pass or a product failure. Earlier real failures remain recorded above.
+
+The requested menu, shell, page-layout and shared-component families have all
+been visually reviewed and accepted. Native third-party console documents keep
+their original UI inside the reviewed product frame. Form builder is excluded
+by the user's explicit deferral. No backend source, architecture baseline or
+pinned EForge package was changed. Local preview remains on port 5174; uniquely
+owned disposable verification containers have been cleaned up.
