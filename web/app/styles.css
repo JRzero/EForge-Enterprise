@@ -11,7 +11,7 @@ button, a, input {touch-action: manipulation;} :focus-visible {outline: 3px soli
 .login-story-copy > p:last-child {color: #b8cece; line-height: 1.8;} .login-story-footer {color: #9fbdbe; font-size: 12px;}
 .login-panel {display: grid; place-items: center; padding: 48px 30px; background: #fafcfc;} .login-card {width: min(100%, 360px);}
 .login-card h2 {font-size: 28px; margin: 0 0 12px; font-weight: 600;} .login-card form {display: grid; gap: 22px; margin-top: 34px;}
-.login-card form > button {width: 100%;} .login-help {margin-top: 28px; color: #77888d; font-size: 12px; line-height: 1.7;}
+.login-card form > button {width: 100%;} .login-help {margin-top: 28px; color: #637780; font-size: 12px; line-height: 1.7;}
 .form-error {color: #ae3644; font-size: 13px; margin: 0;} .captcha-row {display: grid; grid-template-columns: 1fr 112px; gap: 14px; align-items: end;}
 .captcha-image {padding: 0; border: 0; background: transparent; cursor: pointer; text-align: center;} .captcha-image img {width: 110px; height: 42px; border-radius: 6px; object-fit: contain;} .captcha-image span {display: block; font-size: 11px; color: #617980;}
 .ef-app-shell {min-height: 100dvh;} .ef-app-shell__sidebar {background: #0c3440; color: #eef8f4; border: 0; padding-top: 8px;}

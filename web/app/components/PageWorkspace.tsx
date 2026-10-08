@@ -5,9 +5,15 @@ import {routes} from '../routes';
 import {useApplicationControls, ApplicationControlsContext} from '../context';
 import {MenuIcon} from '../../features/menus/IconPicker';
 import {useLayout,useLayoutChanges} from './layout-preferences';
+import {Button} from '@eforge/ui';
+import {ResourceDialog} from './ResourceDialog';
+import {PageErrorBoundary} from './PageErrorBoundary';
 
 interface View {path:string;href:string;title:string;routeId:string;cached:boolean;affix:boolean;icon?:string;revision:number}
 type CloseMode='current'|'others'|'left'|'right'|'all';
+type PendingExit = {pages: View[]; action: '关闭' | '刷新' | '重新加载应用'; proceed: () => void};
+// The authenticated owner can keep its native listener outside the screen-lock Activity.
+export interface PageUnloadGuard {shouldBlock: () => boolean}
 function menu(items:NavigationItem[],path:string):NavigationItem|undefined {
   for(const item of items){if(!item.external && item.path===path)return item;const child=menu(item.children,path);if(child)return child;}
 }
@@ -32,8 +38,8 @@ function retain(views:View[],target:View,mode:CloseMode):View[] {
   return views.filter((item,position)=>item.affix || (mode==='current'?item.path!==target.path:mode==='others'?item.path===target.path:
     mode==='left'?position>=index:mode==='right'?position<=index:false));
 }
-export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: {
-  href:string;items:NavigationItem[];permissions:readonly string[];router:AppRouterAdapter;fallback:ReactNode;ownerId:string;
+export function PageWorkspace({href,items,permissions,router,fallback,ownerId,unloadGuard}: {
+  href:string;items:NavigationItem[];permissions:readonly string[];router:AppRouterAdapter;fallback:ReactNode;ownerId:string;unloadGuard?:PageUnloadGuard;
 }) {
   const layout=useLayout(),changeLayout=useLayoutChanges();
   const controls=useApplicationControls();
@@ -54,12 +60,36 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
   if(state.href!==href)setState({href,views:visit(state.views,active)});
   const views=state.href===href?state.views:visit(state.views,active);
   const [selected,setSelected]=useState<string|null>(null);
+  // These refs survive both individual page hiding and the outer screen-lock Activity.
+  const dirtyPages = useRef(new Set<string>());
+  const savingPages = useRef(new Set<string>());
+  const [, updateSaveGuards] = useState(0);
+  const confirmedReload = useRef(false);
+  const [pendingExit, setPendingExit] = useState<PendingExit | null>(null);
   const [fullscreen,setFullscreen]=useState(false);
   const [menuPoint,setMenuPoint]=useState<{x:number;y:number}|undefined>();
   const menuElement=useRef<HTMLDivElement>(null);
   const strip=useRef<HTMLDivElement>(null),workspace=useRef<HTMLDivElement>(null);
   const [scroll,setScroll]=useState({left:false,right:false});
   const target=views.find(item=>item.path===(selected ?? active?.path));
+  useEffect(() => {
+    const shouldBlock = () => !confirmedReload.current && (dirtyPages.current.size > 0 || savingPages.current.size > 0);
+    if (unloadGuard) {
+      unloadGuard.shouldBlock = shouldBlock;
+      // Activity cleans effects when locked. The owner-scoped guard must remain bound
+      // so hidden write acknowledgements still update the decision through these refs.
+      return;
+    }
+    function beforeUnload(event: BeforeUnloadEvent) {
+      if (!shouldBlock()) return;
+      event.preventDefault();
+      event.returnValue = '';
+    }
+    window.addEventListener('beforeunload', beforeUnload);
+    return () => window.removeEventListener('beforeunload', beforeUnload);
+  }, [unloadGuard]);
+  // Browser back/forward can navigate even while a native confirmation dialog is open.
+  useEffect(() => {setPendingExit(null);}, [href]);
   useEffect(()=>{
     try{if(persist)window.localStorage.setItem(storageKey,JSON.stringify({enabled:true,hrefs:state.views.filter(item=>!item.affix).map(item=>item.href)}));
     else window.localStorage.removeItem(storageKey);}catch{/* Private-mode/storage restrictions do not prevent navigation. */}
@@ -87,14 +117,45 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
     document.addEventListener('click',close);
     return ()=>document.removeEventListener('click',close);
   },[selected]);
+  function protect(pages: View[], action: PendingExit['action'], proceed: () => void) {
+    const changed = pages.filter(item => dirtyPages.current.has(item.path) || savingPages.current.has(item.path));
+    setSelected(null);
+    const complete = () => {
+      // Check the entire batch before removing any tag, including hidden Activities.
+      if (pages.some(item => savingPages.current.has(item.path))) return;
+      pages.forEach(item => {dirtyPages.current.delete(item.path); savingPages.current.delete(item.path);});
+      proceed();
+    };
+    if (changed.length) setPendingExit({pages: changed, action, proceed: complete});
+    else complete();
+  }
   function close(target:View,mode:CloseMode){
-    const remaining=retain(views,target,mode);setState({href,views:remaining});setSelected(null);
-    if(mode==='others')router.navigate(target.href);
-    else if(active && !remaining.some(item=>item.path===active.path))router.navigate(remaining.at(-1)?.href ?? '/dashboard');
+    const remaining=retain(views,target,mode);
+    protect(views.filter(item => !remaining.includes(item)), '关闭', () => {
+      setState({href,views:remaining});
+      if(mode==='others')router.navigate(target.href);
+      else if(active && !remaining.some(item=>item.path===active.path))router.navigate(remaining.at(-1)?.href ?? '/dashboard');
+    });
   }
   function refresh(target:View){
-    setState({href,views:views.map(item=>item.path===target.path?{...item,revision:item.revision+1}:item)});setSelected(null);
-    if(target.path!==active?.path)router.navigate(target.href);
+    protect([target], '刷新', () => {
+      setState({href,views:views.map(item=>item.path===target.path?{...item,revision:item.revision+1}:item)});
+      if(target.path!==active?.path)router.navigate(target.href);
+    });
+  }
+  function closePage(target: View, destination: string) {
+    const remaining = views.filter(item => item.affix || item.path !== target.path);
+    protect(views.filter(item => !remaining.includes(item)), '关闭', () => {
+      setState({href, views: remaining});
+      router.navigate(destination);
+    });
+  }
+  function reloadApplication() {
+    protect(views, '重新加载应用', () => {
+      // The application confirmation already covered every retained draft.
+      confirmedReload.current = true;
+      window.location.reload();
+    });
   }
   function keyboard(event:React.KeyboardEvent<HTMLAnchorElement>,index:number){
     const links=strip.current?.querySelectorAll<HTMLAnchorElement>('a');
@@ -102,6 +163,8 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
       event.key==='Home'?0:event.key==='End'?views.length-1:undefined;
     if(next!==undefined){event.preventDefault();links?.[next]?.focus();}
   }
+  const exitSaving = pendingExit?.pages.some(item=>savingPages.current.has(item.path)) ?? false;
+  const exitDirty = pendingExit?.pages.some(item=>dirtyPages.current.has(item.path)) ?? false;
   return <div ref={workspace} className="enterprise-workspace">
     <nav hidden={!layout.tagsView} aria-label="页面标签" className="page-tags">
       <button type="button" aria-label="滚动到首个标签" disabled={!scroll.left} onClick={()=>strip.current?.scrollTo({left:0,behavior:'smooth'})}>‹</button>
@@ -132,12 +195,38 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId}: 
       <button role="menuitem" onClick={()=>{setFullscreen(value=>!value);setSelected(null);}}>{fullscreen?'退出全屏':'全屏显示'}</button>
     </div>:null}
     {!active?fallback:null}
-    {views.filter(item=>item.cached || item.path===active?.path).map(item=>{
+    {views.filter(item=>item.cached || item.path===active?.path || dirtyPages.current.has(item.path) || savingPages.current.has(item.path)).map(item=>{
       const match=matchAppRoute(routes,item.path);if(!match || !canAccessRoute(match.route,permissions))return null;
       const Page=match.route.component;
       return <Activity key={item.path+':'+item.revision} mode={item.path===active?.path?'visible':'hidden'}>
-        <ApplicationControlsContext.Provider value={{...controls,href:item.path===active?.path?href:item.href,closePage:destination=>{setState({href,views:views.filter(prior=>prior.affix || prior.path!==item.path)});setSelected(null);router.navigate(destination);}}}><div data-page-path={item.path}><Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params}/></Suspense></div></ApplicationControlsContext.Provider>
+        <ApplicationControlsContext.Provider value={{...controls,href:item.path===active?.path?href:item.href,
+          closePage:destination=>closePage(item,destination),
+          setPageDirty:(dirty,pendingSave=false)=>{
+            if(dirty)dirtyPages.current.add(item.path);else dirtyPages.current.delete(item.path);
+            const changed=savingPages.current.has(item.path)!==pendingSave;
+            if(pendingSave)savingPages.current.add(item.path);else savingPages.current.delete(item.path);
+            if(changed)updateSaveGuards(version=>version+1);
+          }}}>
+          <div data-page-path={item.path}>
+            <PageErrorBoundary title={item.title} onRetry={()=>refresh(item)} onReload={reloadApplication}>
+              <Suspense fallback={<p role="status">正在加载页面…</p>}><Page params={match.params}/></Suspense>
+            </PageErrorBoundary>
+          </div>
+        </ApplicationControlsContext.Provider>
       </Activity>;
     })}
+    {pendingExit ? <ResourceDialog titleId="page-exit-title" alert busy={false} onCancel={()=>setPendingExit(null)}>
+      <h2 id="page-exit-title">{exitSaving ? '正在保存修改' : exitDirty ? '有未保存的修改' : '修改已保存'}</h2>
+      <p>{exitSaving
+        ? '请等待保存结果，再关闭或刷新页面。'
+        : exitDirty ? `${pendingExit.pages.map(item=>item.title).join('、')}中有未保存的修改，是否放弃并${pendingExit.action}？` : '保存已完成，可以继续操作。'}</p>
+      <div className="post-row-actions">
+        <Button label="继续编辑" onClick={()=>{const destination=pendingExit.pages[0]?.href;setPendingExit(null);if(destination)router.navigate(destination);}} />
+        <Button label={(exitDirty || exitSaving ? '放弃修改并' : '继续')+pendingExit.action} variant="secondary" isDisabled={exitSaving} onClick={()=>{
+          if(pendingExit.pages.some(item=>savingPages.current.has(item.path)))return;
+          const proceed=pendingExit.proceed;setPendingExit(null);proceed();
+        }} />
+      </div>
+    </ResourceDialog> : null}
   </div>;
 }

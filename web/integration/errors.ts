@@ -61,6 +61,7 @@ function messageFor(status: number, code: string): string {
   if (code === 'USER_IMPORT_TOO_LARGE') return '一次最多导入 1000 条数据，请拆分表格后重试。';
   if (code === 'USER_IMPORT_EMPTY') return '表格没有用户数据，请填写后重试。';
   if (code === 'USER_IMPORT_FAILED') return '该条用户数据未能保存，请检查后重试。';
+  if (code === 'USER_IMPORT_SESSION_REFRESH_FAILED') return '导入中成功的记录已保存，但在线会话更新失败。请先核对用户数据和在线会话状态，再决定是否重试。';
   if (code === 'USER_INITIAL_PASSWORD_INVALID') return '初始密码配置无效，请联系管理员。';
   if (code === 'ACCESS_DENIED') return '当前账号没有操作权限。';
   if (code === 'USER_NOT_FOUND') return '用户已不存在，请刷新后重试。';

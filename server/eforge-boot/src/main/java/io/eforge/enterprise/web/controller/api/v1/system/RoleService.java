@@ -49,7 +49,7 @@ public class RoleService
     }
     public List<RoleMenuOption> menuOptions()
     {
-        var available=availableMenus();var rows=selections.menus().stream().filter(row->available.contains(row.menuId())).toList();
+        var all=selections.menus();var available=availableMenus(all);var rows=all.stream().filter(row->available.contains(row.menuId())).toList();
         Map<Long,String> byId=new HashMap<>();rows.forEach(row->byId.put(row.menuId(),row.menuKey()));
         return rows.stream().map(row->new RoleMenuOption(row.menuKey(),byId.get(row.parentId()),row.label(),row.menuType(),row.orderNum(),row.status(),row.perms())).toList();
     }
@@ -132,14 +132,56 @@ public class RoleService
     private SysRole write(RoleWriteRequest request,SysRole existing)
     {
         Set<String> requested=new LinkedHashSet<>(request.menuKeys());if(requested.size()!=request.menuKeys().size()) throw invalid();
-        var all=selections.menus();Set<Long> available=availableMenus();Set<Long> previous=existing==null ? Set.of() : new HashSet<>(selections.menuIds(existing.getRoleId()));
+        var all=selections.menus();var grants=menuGrantScope(existing,all);
         Map<String,Long> byKey=new HashMap<>();all.forEach(row->byKey.put(row.menuKey(),row.menuId()));List<Long> menuIds=new ArrayList<>();
-        for(String key:requested) { Long menuId=byKey.get(key);if(menuId==null) throw new ApiFailure(404,"ROLE_MENU_NOT_FOUND","Menu does not exist.");if(!available.contains(menuId) && !previous.contains(menuId)) throw denied();menuIds.add(menuId); }
+        for(String key:requested) { Long menuId=byKey.get(key);grants.validate(menuId);menuIds.add(menuId); }
         SysRole role=new SysRole(existing==null ? null : existing.getRoleId());role.setRoleName(request.name());role.setRoleKey(request.key());role.setRoleSort(request.sort());role.setStatus(request.status());role.setRemark(Objects.toString(request.remark(),""));
         role.setMenuCheckStrictly(request.menuLinked());role.setDeptCheckStrictly(existing==null || existing.isDeptCheckStrictly());role.setDataScope(existing==null ? "1" : existing.getDataScope());role.setMenuIds(menuIds.toArray(Long[]::new));return role;
     }
+
+    /** Called inside the compatibility writer's shared root-lock transaction. */
+    public Long[] validateLegacyMenuGrants(Long[] menuIds,Long existingRoleId)
+    {
+        // Prior grants belong only to a persisted, scoped, mutable target. A create
+        // caller supplies null and cannot borrow another role's unavailable grants.
+        SysRole existing=existingRoleId==null ? null : require(identifier(existingRoleId.toString()),true);
+        return validateMenuGrants(menuIds,existing,selections.menus());
+    }
+
+    private Long[] validateMenuGrants(Long[] menuIds,SysRole existing,List<NavigationMenu> all)
+    {
+        if(menuIds==null || menuIds.length>2000
+                || Arrays.stream(menuIds).anyMatch(id->id==null || id<1)
+                || new HashSet<>(Arrays.asList(menuIds)).size()!=menuIds.length) throw invalid();
+        var grants=menuGrantScope(existing,all);
+        // Validate the entire set before an imported service can delete/reinsert links.
+        for(Long menuId:menuIds) grants.validate(menuId);
+        return menuIds.clone();
+    }
+
+    private MenuGrantScope menuGrantScope(SysRole existing,List<NavigationMenu> all)
+    {
+        Set<Long> known=new HashSet<>();all.forEach(row->known.add(row.menuId()));
+        Set<Long> available=availableMenus(all);
+        Set<Long> previous=existing==null ? Set.of() : new HashSet<>(selections.menuIds(existing.getRoleId()));
+        return new MenuGrantScope(known,available,previous);
+    }
+
+    private record MenuGrantScope(Set<Long> known,Set<Long> available,Set<Long> previous)
+    {
+        void validate(Long menuId)
+        {
+            if(menuId==null || !known.contains(menuId)) throw new ApiFailure(404,"ROLE_MENU_NOT_FOUND","Menu does not exist.");
+            if(!available.contains(menuId) && !previous.contains(menuId)) throw denied();
+        }
+    }
     private void preserveFlags(SysRole patch,SysRole existing) { patch.setMenuCheckStrictly(existing.isMenuCheckStrictly());patch.setDeptCheckStrictly(existing.isDeptCheckStrictly()); }
-    private Set<Long> availableMenus() { Set<Long> ids=new HashSet<>();menus.selectMenuList(new SysMenu(),SecurityUtils.getUserId()).forEach(menu->ids.add(menu.getMenuId()));return ids; }
+    private Set<Long> availableMenus(List<NavigationMenu> all)
+    {
+        Long userId=SecurityUtils.getUserId();
+        if(!SecurityUtils.isAdmin(userId)) return new HashSet<>(selections.grantableMenuIds(userId));
+        Set<Long> ids=new HashSet<>();all.forEach(menu->ids.add(menu.menuId()));return ids;
+    }
     private SysRole require(Long id,boolean mutable)
     {
         try { roles.checkRoleDataScope(id); } catch(ServiceException exception) { throw denied(); }

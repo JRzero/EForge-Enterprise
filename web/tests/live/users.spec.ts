@@ -49,7 +49,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   async function createDuplicate() {
     await page.getByRole('button', {name: '新增用户', exact: true}).click(); const form = page.getByRole('dialog');
     await form.getByLabel('登录账号', {exact: true}).fill(username); await form.getByLabel('用户昵称', {exact: true}).fill('重复用户'); await form.getByLabel('用户密码', {exact: true}).fill('Browser123');
-    await form.getByRole('button', {name: '保存用户', exact: true}).click(); await expect(form.getByRole('alert')).toContainText('登录账号已存在'); await page.keyboard.press('Escape'); await expect(form).toHaveCount(0);
+    await form.getByRole('button', {name: '保存用户', exact: true}).click(); await expect(form.getByRole('alert')).toContainText('登录账号已存在'); await page.keyboard.press('Escape'); await expect(form.getByText('有未保存的修改，是否放弃？')).toBeVisible(); await form.getByRole('button', {name: '放弃修改', exact: true}).click(); await expect(form).toHaveCount(0);
   }
   await page.getByLabel('选择用户 ' + username, {exact: true}).check(); await page.getByRole('button', {name: '修改所选用户', exact: true}).click(); dialog = page.getByRole('dialog');
   await expect(dialog.getByLabel('登录账号', {exact: true})).toBeDisabled(); await expect(dialog.getByLabel('用户密码', {exact: true})).toHaveCount(0);

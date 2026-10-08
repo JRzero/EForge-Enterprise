@@ -49,7 +49,16 @@ test('real department tree, CRUD, parent exclusion, reparenting, sort, filters a
   await page.getByRole('dialog').getByLabel('部门名称', {exact: true}).fill(prefix);
   await page.getByRole('button', {name: '保存部门', exact: true}).click();
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('同名部门');
-  await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  const discard = page.getByRole('alertdialog', {name: '有未保存的修改', exact: true});
+  await expect(discard).toBeVisible();
+  await discard.getByRole('button', {name: '继续编辑', exact: true}).click();
+  await expect(page.getByRole('dialog').getByLabel('部门名称', {exact: true})).toHaveValue(prefix);
+  await expect(page.getByRole('dialog').getByLabel('上级部门', {exact: true})).toHaveValue('100');
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('同名部门');
+  await page.keyboard.press('Escape');
+  await discard.getByRole('button', {name: '放弃修改', exact: true}).click();
+  await expect(discard).toHaveCount(0); await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', {name: `新增子部门 ${prefix}`, exact: true}).click();
   await expect(page.getByRole('dialog').getByLabel('上级部门', {exact: true})).toHaveValue(parent.id);
   const child = await create(page, `${prefix}-子`);

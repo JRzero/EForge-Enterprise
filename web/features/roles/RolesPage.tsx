@@ -3,7 +3,7 @@ import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
-import {useCallback, useEffect, useMemo, useState, type FormEvent} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
 import {PageHeader, PermissionGate} from '@eforge/patterns';
 import {Button, Checkbox, Input} from '@eforge/ui';
@@ -30,6 +30,11 @@ export function RolesPage() {
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<{detail: RoleEditorResponse | null; menus: RoleMenuOption[]} | null>(null);
   const [scope, setScope] = useState<{role: RoleResponse; snapshot: RoleScopeResponse} | null>(null), [action, setAction] = useState<Action | null>(null);
+  const detailRequest = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (detailRequest.current?.signal.aborted) {detailRequest.current = null; setBusy(false);}
+    return () => detailRequest.current?.abort();
+  }, []);
   const read=useRetainedRead();
   useEffect(() => {
     const complete=read([api, filters, page, pageSize, version]);if(!complete)return;
@@ -41,16 +46,20 @@ export function RolesPage() {
   function refresh(message = '') { setFeedback(message); setSelection({}); setVersion(previous => previous + 1); }
   async function saved(message: string) { refresh(message); await snapshot.refresh(); }
   const openEditor = useCallback(async (id?: string) => {
+    detailRequest.current?.abort(); const controller = new AbortController(); detailRequest.current = controller;
     setBusy(true); setActionError(''); setFeedback('');
     try {
-      const [menus, detail] = await Promise.all([api.getRoleMenuOptions(), id ? api.getRole(id) : Promise.resolve(null)]);
-      grantForest(menus); setEditor({detail, menus});
-    } catch (cause) { setActionError(errorMessage(cause)); } finally { setBusy(false); }
+      const [menus, detail] = await Promise.all([api.getRoleMenuOptions(controller.signal), id ? api.getRole(id, controller.signal) : Promise.resolve(null)]);
+      if (!controller.signal.aborted) {grantForest(menus); setEditor({detail, menus});}
+    } catch (cause) { if (!controller.signal.aborted) setActionError(errorMessage(cause)); }
+    finally { if (!controller.signal.aborted) {detailRequest.current = null; setBusy(false);} }
   }, [api]);
   const openScope = useCallback(async (role: RoleResponse) => {
+    detailRequest.current?.abort(); const controller = new AbortController(); detailRequest.current = controller;
     setBusy(true); setActionError('');
-    try { const snapshot = await api.getRoleDataScope(role.id); grantForest(snapshot.departments.map(node => ({key: node.id, parentKey: node.parentId, label: node.name}))); setScope({role, snapshot}); }
-    catch (cause) { setActionError(errorMessage(cause)); } finally { setBusy(false); }
+    try { const snapshot = await api.getRoleDataScope(role.id, controller.signal); if (!controller.signal.aborted) {grantForest(snapshot.departments.map(node => ({key: node.id, parentKey: node.parentId, label: node.name}))); setScope({role, snapshot});} }
+    catch (cause) { if (!controller.signal.aborted) setActionError(errorMessage(cause)); }
+    finally { if (!controller.signal.aborted) {detailRequest.current = null; setBusy(false);} }
   }, [api]);
   const selectedIds = Object.keys(selection).filter(id => selection[id] && id !== '1');
   const columns = useMemo<ColumnDef<RoleResponse>[]>(() => [

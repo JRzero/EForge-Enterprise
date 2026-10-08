@@ -1,6 +1,7 @@
 package io.eforge.enterprise.common.core.domain.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -70,6 +71,28 @@ public class LoginUser implements UserDetails
      * 用户信息
      */
     private SysUser user;
+
+    /**
+     * Original Redis bytes for an optimistic session update. This is request-local
+     * metadata, never a credential, API property or part of the persisted value.
+     */
+    @JsonIgnore
+    @JSONField(serialize = false, deserialize = false)
+    private transient byte[] cacheSnapshot;
+
+    @JsonIgnore
+    @JSONField(serialize = false, deserialize = false)
+    public byte[] cacheSnapshot()
+    {
+        return cacheSnapshot == null ? null : cacheSnapshot.clone();
+    }
+
+    @JsonIgnore
+    @JSONField(serialize = false, deserialize = false)
+    public void rememberCacheSnapshot(byte[] snapshot)
+    {
+        cacheSnapshot = snapshot == null ? null : snapshot.clone();
+    }
 
     public LoginUser()
     {

@@ -64,3 +64,51 @@ test('top notices remain available without management grants and only confirm pe
   await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0); failMark = false; await page.getByRole('button', {name: /^通知公告（/}).click(); panel = page.getByRole('region', {name: '顶部公告列表'}); await panel.getByRole('button', {name: '全部已读', exact: true}).click(); await expect(page.getByRole('button', {name: '通知公告（0 条未读）'})).toBeVisible(); await expect(panel.getByRole('button', {name: `阅读 ${row.title}（已读）`, exact: true})).toBeVisible();
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.keyboard.press('Escape'); await expect(panel).toHaveCount(0); await page.goto('/notice'); await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
 });
+
+test('closing a loaded top notice preserves its pending read before acknowledged reader history', async ({page}) => {
+  let read = false, marks = 0;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => {release = resolve;});
+  const readerSnapshots: boolean[] = [];
+  await page.route('**/api/v1/system/notices?*', route => route.fulfill({json: list}));
+  await page.route(`**/api/v1/system/notices/${id}`, route => route.fulfill({json: row}));
+  await page.route('**/api/v1/system/notices/feed', route => route.fulfill({json: {items: [{id, title: row.title, type: '2', read}], unreadCount: read ? 0 : 1}}));
+  await page.route('**/api/v1/system/notices/read', async route => {
+    marks++;
+    await gate;
+    read = true;
+    await route.fulfill({status: 204});
+  });
+  await page.route(`**/api/v1/system/notices/${id}/readers?*`, route => {
+    readerSnapshots.push(read);
+    return route.fulfill({json: {items: read ? [{userId: '2', username: 'reader', displayName: '读者'}] : [], total: read ? 1 : 0, page: 1, pageSize: 10}});
+  });
+  await login(page, ['system:notice:list']);
+  await page.getByRole('button', {name: '通知公告（1 条未读）', exact: true}).click();
+  const requested = page.waitForRequest(request => new URL(request.url()).pathname === '/api/v1/system/notices/read' && request.method() === 'POST' && request.postDataJSON()?.ids?.includes(id));
+  const acknowledged = page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/system/notices/read' && response.request().method() === 'POST' && response.request().postDataJSON()?.ids?.includes(id)).catch(error => ({error}));
+  await page.getByRole('region', {name: '顶部公告列表'}).getByRole('button', {name: `阅读 ${row.title}（未读）`, exact: true}).click();
+  const request = await requested;
+  try {
+    await expect(page.getByRole('dialog').getByRole('heading', {name: '安全内容'})).toBeVisible();
+    expect(request.postDataJSON()).toEqual({ids: [id]});
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    // Loading the content and closing its dialog do not acknowledge the write.
+    await expect(page.getByRole('button', {name: '通知公告（1 条未读）', exact: true})).toBeVisible();
+    expect(read).toBe(false);
+    expect(request.failure()).toBeNull();
+    expect(marks).toBe(1);
+    expect(readerSnapshots).toEqual([]);
+  } finally {release();}
+  const response = await acknowledged;
+  if ('error' in response) throw response.error;
+  expect(response.status()).toBe(204);
+  expect(request.failure()).toBeNull();
+  await expect(page.getByRole('button', {name: '通知公告（0 条未读）', exact: true})).toBeVisible();
+  await page.getByRole('button', {name: `已读用户 ${row.title}`, exact: true}).click();
+  await expect(page.getByRole('dialog').getByRole('cell', {name: 'reader', exact: true})).toBeVisible();
+  expect(readerSnapshots.length).toBeGreaterThan(0);
+  expect(readerSnapshots.every(persisted => persisted)).toBe(true);
+  expect(marks).toBe(1);
+});

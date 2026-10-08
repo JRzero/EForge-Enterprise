@@ -64,7 +64,7 @@ class RoleControllerTest
         when(roles.insertRole(any())).thenAnswer(call->{SysRole role=call.getArgument(0);role.setRoleId(9007199254740993L);return 1;});
         when(roles.updateRole(any())).thenReturn(1);when(roles.updateRoleStatus(any())).thenReturn(1);when(roles.authDataScope(any())).thenReturn(1);
         when(selections.menus()).thenReturn(List.of(new NavigationMenu(1L,0L,"system",null,"System",1,"M","0","0","","1","system","system"),new NavigationMenu(2L,1L,"restricted",null,"Restricted",2,"F","0","0","secret:action","1","","")));
-        SysMenu option=new SysMenu();option.setMenuId(1L);when(menus.selectMenuList(any(SysMenu.class),anyLong())).thenReturn(List.of(option));
+        when(selections.grantableMenuIds(anyLong())).thenReturn(List.of(1L));
         when(selections.menuIds(anyLong())).thenReturn(List.of(1L));when(menus.selectMenuListByRoleId(anyLong())).thenReturn(List.of(1L));
         when(selections.userIds(anyLong())).thenReturn(List.of(2L));when(selections.departmentIds(anyLong())).thenReturn(List.of(103L));when(departments.selectDeptListByRoleId(anyLong())).thenReturn(List.of(103L));
         SysDept department=new SysDept();department.setDeptId(103L);department.setParentId(100L);department.setDeptName("Engineering");department.setOrderNum(1);department.setStatus("0");when(departments.selectDeptList(any())).thenReturn(List.of(department));
@@ -76,7 +76,8 @@ class RoleControllerTest
     {
         mvc.perform(get(PATH)).andExpect(status().isOk()).andExpect(jsonPath("$.items[0].id").value("2")).andExpect(jsonPath("$.items[0].params").doesNotExist());
         mvc.perform(get(PATH+"/2")).andExpect(status().isOk()).andExpect(jsonPath("$.menuKeys[0]").value("system"));
-        mvc.perform(get(PATH+"/menus")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].key").value("system")).andExpect(jsonPath("$[0].component").doesNotExist());
+        mvc.perform(get(PATH+"/menus")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].key").value("system")).andExpect(jsonPath("$[0].component").doesNotExist());
+        verify(selections,never()).grantableMenuIds(anyLong());
         mvc.perform(get(PATH+"/2/data-scope")).andExpect(status().isOk()).andExpect(jsonPath("$.departmentIds[0]").value("103"));
     }
     @Test void createReturnsExactStringIdentityAndLocationWithSanitizedDefaults() throws Exception
@@ -107,10 +108,25 @@ class RoleControllerTest
     }
     @Test void menuKeysCannotNewlyGrantUnavailableMenusButRetainExistingAssignments() throws Exception
     {
+        SysUser operator=new SysUser(9L);operator.setUserName("operator");
+        when(tokens.getLoginUser(any())).thenReturn(new LoginUser(9L,103L,operator,Set.of("system:role:add","system:role:edit")));
         String requested=BODY.replace("system","restricted");mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(requested)).andExpect(status().isForbidden());verify(roles,never()).insertRole(any());
         when(selections.menuIds(2L)).thenReturn(List.of(2L));mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(requested)).andExpect(status().isNoContent());
         mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(BODY.replace("system","missing"))).andExpect(status().isNotFound());
         mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content(BODY.replace("[\"system\"]","[\"system\",\"system\"]"))).andExpect(status().isBadRequest());
+    }
+    @Test void menuOptionsUseTheSameEffectiveRoleSourceAsWrites() throws Exception
+    {
+        SysUser operator=new SysUser(9L);operator.setUserName("operator");
+        when(tokens.getLoginUser(any())).thenReturn(new LoginUser(9L,103L,operator,Set.of("system:role:query")));
+        SysMenu first=new SysMenu();first.setMenuId(1L);SysMenu stale=new SysMenu();stale.setMenuId(2L);
+        when(menus.selectMenuList(any(SysMenu.class),eq(9L))).thenReturn(List.of(first,stale));
+
+        mvc.perform(get(PATH+"/menus")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].key").value("system"));
+
+        verify(selections).grantableMenuIds(9L);
+        verify(menus,never()).selectMenuList(any(SysMenu.class),anyLong());
     }
     @Test void contactlessDuplicateFailureNeverRefreshesSessionsOrLeaksSql() throws Exception
     {

@@ -13,7 +13,8 @@ import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {errorMessage} from '../../integration/errors';
 import {RichTextEditor} from './RichTextEditor';
 import {sanitizeNoticeHtml} from './rich-text';
-import {NoticePreview, NoticeReaders} from './NoticeDialogs';
+import {NoticeReaders} from './NoticeDialogs';
+import {NoticePreview} from './NoticePreview';
 
 const emptyForm: NoticeRequest = {title: '', type: '', content: '', status: '0', remark: ''};
 const emptyFilters = {title: '', author: '', type: ''};

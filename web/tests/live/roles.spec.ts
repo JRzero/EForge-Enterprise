@@ -23,6 +23,18 @@ async function saveRole(page: Page) {
   await page.getByRole('button', {name: '保存角色', exact: true}).click(); const actual = await response; expect(actual.status()).toBe(201);
   const role: {id: string; name: string} = await actual.json(); await expect(page.getByRole('dialog')).toHaveCount(0); await expect(page.getByRole('cell', {name: role.name, exact: true})).toBeVisible(); return role;
 }
+async function discardRoleDraft(page: Page, name: string, key: string) {
+  await page.keyboard.press('Escape');
+  const discard = page.getByRole('alertdialog', {name: '有未保存的修改', exact: true});
+  await expect(discard).toBeVisible();
+  await discard.getByRole('button', {name: '继续编辑', exact: true}).click();
+  const editor = page.getByRole('dialog', {name: '新增角色', exact: true});
+  await expect(editor.getByLabel('角色名称', {exact: true})).toHaveValue(name);
+  await expect(editor.getByLabel('权限字符', {exact: true})).toHaveValue(key);
+  await page.keyboard.press('Escape');
+  await discard.getByRole('button', {name: '放弃修改', exact: true}).click();
+  await expect(discard).toHaveCount(0); await expect(editor).toHaveCount(0);
+}
 test('real roles CRUD, linked/independent grants, all scopes, status, dates, columns and XLSX', async ({page}, info) => {
   test.setTimeout(90000); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message)); await login(page);
   await expect(page.getByLabel('选择角色 超级管理员', {exact: true})).toBeDisabled(); await expect(page.getByRole('button', {name: '修改角色 超级管理员', exact: true})).toHaveCount(0);
@@ -72,8 +84,8 @@ test('real roles CRUD, linked/independent grants, all scopes, status, dates, col
     const download = page.waitForEvent('download'); await page.getByRole('button', {name: '导出角色', exact: true}).click(); const file = await download; expect(file.suggestedFilename()).toBe('角色数据.xlsx'); const xml = workbookXml(await readFile((await file.path())!)); expect(xml).toContain(key); expect(xml).toContain('停用');
     await page.getByText('显示列', {exact: true}).click(); await page.locator('.post-columns').getByLabel('权限字符', {exact: true}).uncheck(); await expect(page.getByRole('columnheader', {name: '权限字符', exact: true})).toHaveCount(0); await page.locator('.post-columns').getByLabel('权限字符', {exact: true}).check();
     await page.getByRole('button', {name: '隐藏筛选', exact: true}).click(); await expect(page.getByLabel('角色名称筛选', {exact: true})).toBeHidden(); await page.getByRole('button', {name: '显示筛选', exact: true}).click();
-    await page.getByRole('button', {name: '重置', exact: true}).click(); dialog = await createRole(page, name, `${key}-other`); await dialog.getByRole('button', {name: '保存角色', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('角色名称已存在'); await page.keyboard.press('Escape');
-    dialog = await createRole(page, `${name}-other`, key); await dialog.getByRole('button', {name: '保存角色', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('角色权限字符已存在'); await page.keyboard.press('Escape');
+    await page.getByRole('button', {name: '重置', exact: true}).click(); dialog = await createRole(page, name, `${key}-other`); await dialog.getByRole('button', {name: '保存角色', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('角色名称已存在'); await discardRoleDraft(page, name, `${key}-other`);
+    dialog = await createRole(page, `${name}-other`, key); await dialog.getByRole('button', {name: '保存角色', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('角色权限字符已存在'); await discardRoleDraft(page, `${name}-other`, key);
     await page.getByLabel('开始日期', {exact: true}).fill('2099-01-01'); await page.getByLabel('结束日期', {exact: true}).fill('2000-01-01'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期'); await page.getByRole('button', {name: '重置', exact: true}).click();
     await page.reload(); await expect(page.getByRole('button', {name: `启用角色 ${name}`, exact: true})).toBeVisible();
     await page.screenshot({path: info.outputPath('roles.png'), fullPage: true});

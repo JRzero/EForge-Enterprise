@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
-import {navigationBreadcrumbs,navigationSearchPool,searchNavigation} from '../../app/components/navigation-model';
+import {navigationBreadcrumbs} from '../../app/components/navigation-model';
+import {navigationSearchPool,searchNavigation} from '../../app/components/navigation-search';
 import {projectNavigation} from '../../integration/navigation';
 const routes=[{id:'dashboard',path:'/dashboard',title:'工作台'},
   {id:'roles',path:'/system/roles',title:'角色管理',access:{permission:'role:list'}},

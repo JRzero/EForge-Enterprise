@@ -10,6 +10,7 @@ import {useApi} from '../../app/context';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
+import {captureDraft, useDiscardChanges, usePageDraft} from '../../app/useDraftProtection';
 import {errorMessage} from '../../integration/errors';
 
 const emptyForm: ConfigurationRequest = {name: '', key: '', value: '', builtin: true, remark: ''};
@@ -23,9 +24,15 @@ export function ConfigurationsPage() {
   const [data, setData] = useState<PageResponseConfigurationResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [feedback, setFeedback] = useState(''), [actionError, setActionError] = useState(''), [busy, setBusy] = useState(false);
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
-  const [editor, setEditor] = useState<{id?: string; form: ConfigurationRequest} | null>(null), [deleting, setDeleting] = useState<string[] | null>(null);
+  const [editor, setEditor] = useState<{id?: string; form: ConfigurationRequest; initial: string} | null>(null), [deleting, setDeleting] = useState<string[] | null>(null);
+  const editorDirty = !!editor && editor.initial !== JSON.stringify(editor.form);
+  const pageDraft = usePageDraft(editorDirty), discard = useDiscardChanges(editorDirty, busy);
+  function closeEditor() {pageDraft.setDirty(false); setEditor(null); setActionError('');}
   const detailRequest = useRef<AbortController | null>(null);
-  useEffect(() => () => detailRequest.current?.abort(), []);
+  useEffect(() => {
+    if (detailRequest.current?.signal.aborted) {detailRequest.current = null; setBusy(false);}
+    return () => detailRequest.current?.abort();
+  }, []);
   const query = useMemo(() => ({name: filters.name, key: filters.key, builtin: filters.builtin ? filters.builtin === 'Y' : undefined, $from: filters.from || undefined, to: filters.to || undefined}), [filters]);
   const read=useRetainedRead();
   useEffect(() => {
@@ -42,9 +49,9 @@ export function ConfigurationsPage() {
   const edit = useCallback(async (id: string) => {
     detailRequest.current?.abort(); const controller = new AbortController(); detailRequest.current = controller;
     setBusy(true); setActionError(''); setFeedback('');
-    try {const row = await api.getConfiguration(id, controller.signal); if (!controller.signal.aborted) setEditor({id, form: {name: row.name, key: row.key, value: row.value, builtin: row.builtin, remark: row.remark ?? ''}});}
+    try {const row = await api.getConfiguration(id, controller.signal); if (!controller.signal.aborted) setEditor({id, ...captureDraft({name: row.name, key: row.key, value: row.value, builtin: row.builtin, remark: row.remark ?? ''})});}
     catch (cause) {if (!controller.signal.aborted) setActionError(errorMessage(cause));}
-    finally {if (!controller.signal.aborted) setBusy(false);}
+    finally {if (!controller.signal.aborted) {detailRequest.current = null; setBusy(false);}}
   }, [api]);
   const columns = useMemo<ColumnDef<ConfigurationResponse>[]>(() => [
     {accessorKey: 'id', header: '参数主键'},
@@ -66,9 +73,9 @@ export function ConfigurationsPage() {
     event.preventDefault(); if (!editor || busy) return;
     const form = editor.form;
     if (!form.name.trim() || form.name.length > 100 || !form.key.trim() || form.key.length > 100 || !form.value.trim() || form.value.length > 500 || (form.remark?.length ?? 0) > 500) {setActionError('请填写参数名称、键名和键值，并检查长度。'); return;}
-    setBusy(true); setActionError('');
-    try {if (editor.id) await api.updateConfiguration(editor.id, form); else await api.createConfiguration(form); setEditor(null); refresh(editor.id ? '参数已修改。' : '参数已新增。');}
-    catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
+    setBusy(true); setActionError(''); const finishSave = pageDraft.beginSave();
+    try {if (editor.id) await api.updateConfiguration(editor.id, form); else await api.createConfiguration(form); closeEditor(); refresh(editor.id ? '参数已修改。' : '参数已新增。');}
+    catch (cause) {setActionError(errorMessage(cause));} finally {finishSave(); setBusy(false);}
   }
   async function remove() {
     if (!deleting || busy) return; setBusy(true); setActionError('');
@@ -97,7 +104,7 @@ export function ConfigurationsPage() {
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} />
     </form>
     <div className="post-toolbar">
-      <PermissionGate permission="system:config:add"><Button label="新增参数" isDisabled={busy} onClick={() => {setActionError(''); setFeedback(''); setEditor({form: {...emptyForm}});}} /></PermissionGate>
+      <PermissionGate permission="system:config:add"><Button label="新增参数" isDisabled={busy} onClick={() => {setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm}));}} /></PermissionGate>
       <PermissionGate permission="system:config:edit"><Button label="修改所选参数" variant="secondary" isDisabled={busy || selectedIds.length !== 1} onClick={() => {void edit(selectedIds[0]!);}} /></PermissionGate>
       <PermissionGate permission="system:config:remove"><Button label="删除所选参数" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => {setActionError(''); setDeleting(selectedIds);}} /><Button label="刷新参数缓存" variant="secondary" isDisabled={busy} onClick={() => {void refreshCache();}} /></PermissionGate>
       <PermissionGate permission="system:config:export"><Button label="导出参数" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>
@@ -110,17 +117,18 @@ export function ConfigurationsPage() {
     <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无参数" pagination={false} sortable={false} selectable showColumnVisibility={false}
       rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择参数 ${row.name}`} /></div>
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
-    {editor ? <ResourceDialog titleId="configuration-editor-title" busy={busy} onCancel={() => {setEditor(null); setActionError('');}}><h2 id="configuration-editor-title">{editor.id ? '修改参数' : '新增参数'}</h2>
+    {editor ? <ResourceDialog titleId="configuration-editor-title" busy={busy} onCancel={() => discard.confirm(closeEditor)}><h2 id="configuration-editor-title">{editor.id ? '修改参数' : '新增参数'}</h2>
       <form onSubmit={event => {void save(event);}}>
         <Input label="参数名称" value={editor.form.name} aria-required="true" isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
         <Input label="参数键名" value={editor.form.key} aria-required="true" isDisabled={busy} onChange={key => setEditor({...editor, form: {...editor.form, key}})} />
         <label>参数键值<textarea aria-label="参数键值" aria-required="true" maxLength={500} value={editor.form.value} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, value: event.target.value}})} /></label>
         <label>系统内置<select aria-label="系统内置" value={editor.form.builtin ? 'Y' : 'N'} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, builtin: event.target.value === 'Y'}})}><DictionaryOptions options={dictionary.options} current={editor.form.builtin ? 'Y' : 'N'} /></select></label>
         <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
-        {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存参数'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setEditor(null); setActionError('');}} /></div>
+        {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存参数'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(closeEditor)} /></div>
       </form></ResourceDialog> : null}
     {deleting ? <ResourceDialog titleId="configuration-delete-title" alert busy={busy} onCancel={() => {setDeleting(null); setActionError('');}}><h2 id="configuration-delete-title">确认删除参数</h2><p>将删除所选的 {deleting.length} 个参数。系统内置参数不能删除。</p>
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setDeleting(null); setActionError('');}} /></div>
     </ResourceDialog> : null}
+    {discard.dialog}
   </section>;
 }

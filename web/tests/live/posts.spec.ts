@@ -63,7 +63,11 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   await page.getByRole('dialog').getByLabel('岗位名称', {exact: true}).fill(`${name}-重复`);
   await page.getByRole('button', {name: '保存岗位', exact: true}).click();
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('编码已存在');
-  await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  const discard = page.getByRole('alertdialog', {name: '有未保存的修改', exact: true}); await expect(discard).toBeVisible();
+  await expect(page.getByRole('dialog').getByLabel('岗位编码', {exact: true})).toHaveValue(code);
+  await expect(page.getByRole('dialog').getByLabel('岗位名称', {exact: true})).toHaveValue(`${name}-重复`);
+  await discard.getByRole('button', {name: '放弃修改', exact: true}).click(); await expect(discard).toHaveCount(0); await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await page.getByLabel('岗位编码筛选', {exact: true}).fill(code);
   await page.getByRole('button', {name: '查询', exact: true}).click();

@@ -22,14 +22,16 @@ class UserImportServiceTest
 {
     ISysUserService users; ISysDeptService departments; ISysConfigService configuration;
     SysUserMapper mapper; DepartmentMutationMapper mutations; PlatformTransactionManager transactions;
+    RoleSessionRefresher sessions;
     UserImportService importer; ValidatorFactory validators;
     @BeforeEach void prepare()
     {
         users = mock(ISysUserService.class); departments = mock(ISysDeptService.class); configuration = mock(ISysConfigService.class);
         mapper = mock(SysUserMapper.class); mutations = mock(DepartmentMutationMapper.class); transactions = mock(PlatformTransactionManager.class);
+        sessions = mock(RoleSessionRefresher.class);
         validators = Validation.buildDefaultValidatorFactory();
         when(transactions.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
-        importer = new UserImportService(users, departments, configuration, mapper, mutations, validators.getValidator(), transactions);
+        importer = new UserImportService(users, departments, configuration, mapper, mutations, validators.getValidator(), transactions, sessions);
         SysUser admin = new SysUser(1L); admin.setUserName("admin");
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(new LoginUser(1L, 103L, admin, Set.of("*:*:*")), null, List.of()));
         when(mutations.lockRoot()).thenReturn(100L);

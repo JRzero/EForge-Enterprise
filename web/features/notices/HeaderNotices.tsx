@@ -3,7 +3,7 @@ import {Button} from '@eforge/ui';
 import type {NoticeFeed} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
-import {NoticePreview} from './NoticeDialogs';
+import {NoticePreview} from './NoticePreview';
 
 export function HeaderNotices({version}: {version: number}) {
   const api = useApi(), root = useRef<HTMLDivElement>(null), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);

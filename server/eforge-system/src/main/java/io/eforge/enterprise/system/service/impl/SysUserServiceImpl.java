@@ -339,7 +339,17 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public int updateUserProfile(SysUser user)
     {
-        return userMapper.updateUser(user);
+        // Compatibility callers may pass a complete cached account. Only profile
+        // fields may be written, so a stale request cannot restore old authority.
+        SysUser profile = new SysUser(user.getUserId());
+        // The inherited mapper uses zero to leave department_id unchanged.
+        profile.setDeptId(0L);
+        profile.setNickName(user.getNickName());
+        profile.setEmail(user.getEmail());
+        profile.setPhonenumber(user.getPhonenumber());
+        profile.setSex(user.getSex());
+        profile.setUpdateBy(user.getUpdateBy());
+        return userMapper.updateUser(profile);
     }
 
     /**
