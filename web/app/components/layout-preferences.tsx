@@ -1,6 +1,6 @@
 import {createContext,useContext,useState,type Dispatch,type SetStateAction} from 'react';
 export type LayoutPreferences={navMode:'left'|'mixed'|'top';sideTheme:'dark'|'light';theme:string;density:'default'|'medium'|'small'|'mini';tagsView:boolean;tagsViewPersist?:boolean;tagsIcon:boolean;fixedHeader:boolean;sidebarLogo:boolean;dynamicTitle:boolean;footerVisible:boolean;footerContent:string};
-export const layoutDefaults:LayoutPreferences={navMode:'left',sideTheme:'dark',theme:'#315c4d',density:'default',tagsView:true,tagsIcon:false,fixedHeader:true,sidebarLogo:true,dynamicTitle:false,footerVisible:false,footerContent:'Copyright © 2026 EForge Enterprise'};
+export const layoutDefaults:LayoutPreferences={navMode:'left',sideTheme:'dark',theme:'#2563eb',density:'default',tagsView:true,tagsIcon:false,fixedHeader:true,sidebarLogo:true,dynamicTitle:false,footerVisible:false,footerContent:'Copyright © 2026 EForge Enterprise'};
 const key='eforge.enterprise.layout.v1';
 export function readLayoutPreferences():LayoutPreferences {
   try {

@@ -67,7 +67,7 @@ function RoleUsersWorkspace({roleId}: {roleId: string}) {
     } catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
   return <section className="posts-page role-users-page"><PageHeader title="用户授权" description={`角色编号：${roleId}`} eyebrow="角色管理" />
-    <div className="post-toolbar"><PermissionGate permission="system:role:edit"><Button label="添加用户" isDisabled={busy || !valid || roleId === '1'} onClick={() => { setError(''); setPicker(true); }} /></PermissionGate><Button label="关闭授权页" variant="secondary" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/role')} /></div>
+    <div className="post-toolbar"><PermissionGate permission="system:role:edit"><Button label="添加用户" variant="primary" isDisabled={busy || !valid || roleId === '1'} onClick={() => { setError(''); setPicker(true); }} /></PermissionGate><Button label="关闭授权页" variant="secondary" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/role')} /></div>
     {!valid ? <p role="alert">角色编号无效，请返回角色列表。</p> : <RoleUserList key={roleId} roleId={roleId} assigned version={version} busy={busy} onAction={ids => { setError(''); setCancelling(ids); }} />}
     {feedback ? <p role="status">{feedback}</p> : null}{error && !picker && !cancelling ? <p role="alert">{error}</p> : null}
     {snapshot.error ? <div role="alert"><p>用户授权操作已保存，权限信息刷新失败：{snapshot.error}</p><Button label="重试权限刷新" isDisabled={snapshot.busy} onClick={() => { void snapshot.refresh(); }} /></div> : null}

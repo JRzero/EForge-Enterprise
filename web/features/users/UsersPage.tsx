@@ -185,7 +185,7 @@ export function UsersPage() {
         <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} />
       </form>
       <div className="post-toolbar">
-        <PermissionGate permission="system:user:add"><Button label="新增用户" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
+        <PermissionGate permission="system:user:add"><Button label="新增用户" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
         <PermissionGate permission="system:user:edit"><Button label="修改所选用户" variant="secondary" isDisabled={busy || selectedIds.length !== 1 || selectedIds[0] === '1'} onClick={() => { void openEditor(selectedIds[0]); }} /></PermissionGate>
         <PermissionGate permission="system:user:remove"><Button label="删除所选用户" variant="secondary" isDisabled={busy || selectedIds.length === 0} onClick={() => { setActionError(''); setAction({kind: 'delete', ids: selectedIds}); }} /></PermissionGate>
         <PermissionGate permission="system:user:export"><Button label="导出用户" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>

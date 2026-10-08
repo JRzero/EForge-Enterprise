@@ -1,0 +1,149 @@
+/* Product-owned visual theme, inspired by spcore's AMIS tables and Element Plus
+   shell. EForge remains the component dependency; no upstream source is copied. */
+:root,
+.enterprise-layout,
+.login-layout {
+  --ui-primary: var(--ef-color-accent, #2563eb);
+  --ui-primary-soft: color-mix(in srgb, var(--ui-primary) 8%, white);
+  --ui-text: #303841;
+  --ui-muted: #667180;
+  --ui-border: #e3e8ed;
+  --ui-canvas: #f5f7f9;
+  --ui-sidebar: #304156;
+  --ui-control-font: 14px;
+  --color-text-primary: var(--ui-text);
+  --color-text-secondary: var(--ui-muted);
+  --color-background-body: var(--ui-canvas);
+  --color-background-surface: #fff;
+  --color-border: var(--ui-border);
+  --color-accent: #2563eb;
+  --color-on-accent: #fff;
+  --color-accent-muted: #eaf1ff;
+  --radius-inner: 3px;
+  --radius-element: 4px;
+  --radius-container: 4px;
+  --font-family-body: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family-body);
+  color: var(--ui-text);
+}
+.enterprise-layout { --color-accent: var(--ef-color-accent); }
+body { background: var(--ui-canvas); }
+.enterprise-layout { font-size: 14px; line-height: 1.5; }
+.enterprise-layout :focus-visible, .login-layout :focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 3px; }
+.enterprise-layout :is(input, select, textarea) { accent-color: var(--ui-primary); }
+/* The EForge input container owns its border and focus state. Painting an
+   additional outline on its inner input creates the inset blue box. */
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input) {
+  min-height: 36px;
+  height: auto;
+  padding: 5px 12px;
+  gap: 8px;
+  border: 1px solid #d4dbe3;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+:is(.enterprise-layout, .login-layout) [data-pressable-container] > input {
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  font-size: var(--ui-control-font);
+  line-height: 24px;
+  color: var(--ui-text);
+}
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input):hover { border-color: #aab5c2; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input:focus) { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input[aria-invalid=true]) { border-color: #dc3545; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input[aria-invalid=true]:focus) { box-shadow: 0 0 0 1px #dc3545; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input:disabled, > input[aria-disabled=true]) { background: #f5f7fa; border-color: #e3e8ed; color: #8994a2; cursor: not-allowed; }
+:is(.enterprise-layout, .login-layout) input::placeholder { color: #8994a2; opacity: 1; }
+.enterprise-layout :is(select, textarea) { min-height: 36px; line-height: 1.5; }
+:is(.enterprise-layout, .login-layout) input:is([type=checkbox], [type=radio]) { width: 15px; height: 15px; margin: 0; flex-shrink: 0; vertical-align: middle; }
+.login-card label:has(> input[type=checkbox]) { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ui-muted); }
+.enterprise-layout[data-density=small] [data-pressable-container]:has(> input), .enterprise-layout[data-density=mini] [data-pressable-container]:has(> input) { min-height: 30px; padding-block: 2px; }
+.enterprise-layout[data-density=small] [data-pressable-container] > input, .enterprise-layout[data-density=mini] [data-pressable-container] > input { padding: 0; min-height: 24px; }
+.enterprise-layout[data-density=small] { --ui-control-font: 13px; }
+.enterprise-layout[data-density=mini] { --ui-control-font: 12px; }
+.posts-page label:not(:has(input[type=checkbox], input[type=radio])) { align-items: stretch; text-align: left; }
+.enterprise-layout :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]) { border-radius: 4px; }
+.pagination-navigation input { min-height: 34px; padding: 4px 8px; border: 1px solid #d4dbe3; }
+.ef-app-shell__sidebar { padding-top: 0; border-right: 1px solid var(--ui-border); }
+.ef-app-shell__brand { min-height: 72px; padding: 16px 20px; }
+.enterprise-brand { gap: 10px; letter-spacing: 0; font-size: 15px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 4px; background: var(--ui-primary); color: white; font-size: 23px; }
+.brand-subtitle { font-size: 10px; letter-spacing: .1em; }
+.ef-app-shell__nav { padding: 8px; }
+.enterprise-navigation a, .navigation-disclosure { min-height: 42px; padding: 10px 12px; border-radius: 4px; margin-bottom: 2px; }
+.enterprise-navigation a[aria-current=page] { color: #fff; background: var(--ui-primary); }
+.enterprise-layout[data-side-theme=light] .enterprise-navigation a[aria-current=page] { color: var(--ui-primary); background: var(--ui-primary-soft); }
+.enterprise-layout[data-side-theme=light] .navigation-popup { border: 1px solid var(--ui-border); }
+.navigation-group { padding: 14px 12px 6px; font-size: 12px; letter-spacing: 0; }
+.ef-app-shell__header { min-height: 64px; padding: 12px 20px; backdrop-filter: none; }
+.enterprise-header { width: 100%; gap: 12px; }
+.enterprise-header > div { gap: 10px; flex-wrap: wrap; }
+.enterprise-header a { margin-inline: 0; text-decoration: none; }
+.sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 6px; }
+.enterprise-breadcrumbs { margin-bottom: 12px; font-size: 13px; }
+.page-tags { padding-bottom: 12px; margin-bottom: 18px; border-bottom: 1px solid var(--ui-border); }
+.page-tag a { font-size: 13px; padding: 5px 10px; }
+.page-tag a[aria-current=page] { color: var(--ui-primary); }
+.ef-page-header h1, .dashboard .ef-page-header h1 { font-size: 22px; font-weight: 600; line-height: 1.4; }
+.ef-page-header p { font-size: 13px; margin-top: 5px; }
+.posts-page, .dashboard, .profile-page { max-width: 1600px; min-width: 0; }
+.post-filters { gap: 16px; padding: 18px 20px; box-shadow: none; }
+.post-filters label { gap: 6px; }
+.post-toolbar { gap: 8px; }
+.post-table { border-radius: 4px; }
+.post-table .ef-data-table { border: 0; border-radius: 0; }
+.ef-data-table th, .server-table th, .generator-page .post-dialog th { background: #f6f8fa; color: #515d6b; font-weight: 600; }
+.ef-data-table th, .ef-data-table td { padding: 11px 14px; border-bottom-color: #edf0f3; }
+.ef-data-table tbody tr:hover { background: #f5f8ff; }
+.ef-data-table__toolbar { background: #fff; }
+.post-pagination { padding-block: 16px; gap: 8px; color: var(--ui-muted); }
+.pagination-navigation [aria-current=page] { background: var(--ui-primary); color: #fff; outline: none; }
+.enterprise-layout button[data-variant], .login-layout button[data-variant] { border-radius: 4px; box-shadow: none; font-weight: 400; min-height: 34px; }
+.enterprise-layout button[data-variant=primary], .login-layout button[data-variant=primary] { background: var(--ui-primary); color: white; border: 1px solid var(--ui-primary); }
+.enterprise-layout button[data-variant=secondary], .login-layout button[data-variant=secondary] { background: white; color: var(--ui-text); border: 1px solid #d4dbe3; }
+.enterprise-layout button[data-variant=secondary]:hover:not(:disabled) { color: var(--ui-primary); border-color: var(--ui-primary); background: var(--ui-primary-soft); }
+.post-filters button[type=submit][data-variant], .login-card button[type=submit][data-variant], .post-dialog button[type=submit][data-variant] { background: var(--ui-primary); color: white; border-color: var(--ui-primary); }
+.post-table .post-row-actions button[data-variant=ghost] { color: var(--ui-primary); padding-inline: 6px; min-height: 30px; }
+.enterprise-layout button:disabled { cursor: not-allowed; }
+.posts-page select, .posts-page textarea, .post-dialog input[type=number], .navigation-search input { border-color: #d4dbe3; border-radius: 4px; }
+.post-dialog { color: var(--ui-text); box-shadow: 0 16px 48px #172b4d33; }
+.post-dialog h2 { font-size: 18px; font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid var(--ui-border); }
+.post-dialog form { gap: 18px; }
+.post-dialog form > .post-row-actions:last-child { justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--ui-border); }
+.post-dialog::backdrop { background: #172b4d66; }
+.server-card, .workspace-note { background: #fff; border-color: var(--ui-border); border-radius: 4px; }
+.server-card h2 { font-size: 16px; border-bottom: 1px solid var(--ui-border); padding-bottom: 12px; }
+.welcome-panel { margin: 20px 0; padding: 24px; background: #fff; border: 1px solid var(--ui-border); border-left: 3px solid var(--ui-primary); }
+.welcome-panel h2 { font-size: 23px; }
+.welcome-emblem { color: var(--ui-primary-soft); font-size: 72px; transform: none; }
+.summary-card { padding: 20px; }
+.demo-dashboard,.dashboard-view-switch { --accent-soft: var(--ui-primary-soft); --text: var(--ui-text); --border: var(--ui-border); }
+.demo-dashboard-metrics button, .demo-chart-card, .dashboard-view-switch button, .demo-chart-legends button { border-radius: 4px; }
+.login-story { background: linear-gradient(150deg, #253b5b, #1c2d45); }
+.login-panel { background: #f8fafc; }
+.login-card h2 { font-size: 26px; }
+.login-card form { gap: 20px; }
+.login-layout { --ef-color-accent: #2563eb; }
+@media (max-width: 991px) {
+  .ef-app-shell__header { padding: 10px 16px; }
+  .ef-app-shell__content { padding: 16px; }
+  .enterprise-header > div { justify-content: flex-start; }
+}
+@media (max-width: 600px) {
+  .ef-app-shell__content { padding: 12px; }
+  .post-filters { padding: 16px; gap: 12px; }
+  .post-filters input, .post-filters select { max-width: 100%; }
+  .enterprise-layout button[data-variant] { min-height: 40px; }
+  .post-table .post-row-actions button[data-variant] { min-height: 36px; }
+  .post-dialog { max-width: calc(100vw - 24px); padding: 20px; }
+  .ef-page-header { gap: 12px; flex-wrap: wrap; }
+  .ef-page-header h1 { font-size: 20px; }
+}

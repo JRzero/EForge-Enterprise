@@ -104,7 +104,7 @@ export function ConfigurationsPage() {
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} />
     </form>
     <div className="post-toolbar">
-      <PermissionGate permission="system:config:add"><Button label="新增参数" isDisabled={busy} onClick={() => {setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm}));}} /></PermissionGate>
+      <PermissionGate permission="system:config:add"><Button label="新增参数" variant="primary" isDisabled={busy} onClick={() => {setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm}));}} /></PermissionGate>
       <PermissionGate permission="system:config:edit"><Button label="修改所选参数" variant="secondary" isDisabled={busy || selectedIds.length !== 1} onClick={() => {void edit(selectedIds[0]!);}} /></PermissionGate>
       <PermissionGate permission="system:config:remove"><Button label="删除所选参数" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => {setActionError(''); setDeleting(selectedIds);}} /><Button label="刷新参数缓存" variant="secondary" isDisabled={busy} onClick={() => {void refreshCache();}} /></PermissionGate>
       <PermissionGate permission="system:config:export"><Button label="导出参数" variant="secondary" isDisabled={busy} onClick={() => {void exportFile();}} /></PermissionGate>

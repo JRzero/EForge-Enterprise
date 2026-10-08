@@ -1,0 +1,44 @@
+import {test, expect} from './fixtures';
+
+test('reference theme keeps lists and dialogs operable at desktop and mobile widths', async ({page}, testInfo) => {
+  await page.route('**/captchaImage', route => route.fulfill({json: {code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login', route => route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap', route => route.fulfill({json:{
+    user:{id:'2',username:'designer',displayName:'界面验收'},roles:[],permissions:['system:post:list','system:post:add','system:post:edit','system:post:export'],
+    navigation:[{key:'system',type:'GROUP',label:'系统管理',order:0,children:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}]
+  }}));
+  await page.route('**/api/v1/system/posts?*', route => route.fulfill({json:{items:[
+    {id:'1',code:'ceo',name:'董事长',sort:1,status:'0'},
+    {id:'2',code:'project',name:'项目经理',sort:2,status:'0'},
+    {id:'3',code:'developer',name:'研发工程师',sort:3,status:'0'}
+  ],total:3,page:1,pageSize:10}}));
+  await page.setViewportSize({width:1440,height:1000});
+  await page.goto('/post');
+  await page.getByLabel('账号',{exact:true}).fill('designer');
+  const username=page.getByLabel('账号',{exact:true});
+  await username.focus();
+  expect(await username.evaluate(element=>getComputedStyle(element).outlineStyle)).toBe('none');
+  expect(await username.evaluate(element=>getComputedStyle(element.parentElement!).paddingLeft)).toBe('12px');
+  await page.screenshot({path:testInfo.outputPath('input-focus.png'),fullPage:true});
+  await page.getByLabel('密码',{exact:true}).fill('fixture');
+  await page.getByRole('button',{name:'登录',exact:true}).click();
+  await expect(page.getByRole('cell',{name:'研发工程师',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'查询',exact:true})).toBeVisible();
+  await page.screenshot({path:testInfo.outputPath('desktop.png'),fullPage:true});
+  await page.getByRole('button',{name:'新增岗位',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.screenshot({path:testInfo.outputPath('dialog.png'),fullPage:true});
+  await page.getByRole('button',{name:'取消',exact:true}).click();
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.getByRole('button',{name:'打开菜单',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await page.screenshot({path:testInfo.outputPath('mobile.png'),fullPage:true});
+  await page.getByRole('button',{name:'新增岗位',exact:true}).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  const box=await dialog.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x+box!.width).toBeLessThanOrEqual(391);
+  await page.getByRole('button',{name:'取消',exact:true}).click();
+});

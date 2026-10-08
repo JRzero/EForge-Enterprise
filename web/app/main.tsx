@@ -9,6 +9,7 @@ import '@eforge/data/styles.css';
 import {Application} from './Application';
 import {browserSessionStorage, createSessionRuntime} from '../integration/session';
 import './styles.css';
+import './enterprise-theme.css';
 const runtime = createSessionRuntime(browserSessionStorage());
 const router = createBrowserRouterAdapter();
 void runtime.restore();

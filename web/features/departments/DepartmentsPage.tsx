@@ -122,7 +122,7 @@ export function DepartmentsPage() {
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => discardSorts(() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); })} />
     </form>
     <div className="post-toolbar">
-      <PermissionGate permission="system:dept:add"><Button label="新增部门" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
+      <PermissionGate permission="system:dept:add"><Button label="新增部门" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:dept:edit"><Button label="保存部门排序" variant="secondary" isDisabled={busy || !rows.some(row => sorts[row.id] !== undefined && sorts[row.id] !== row.sort)} onClick={() => { void saveSort(); }} /></PermissionGate>
       <Button label={collapsed.size ? '展开全部' : '折叠全部'} variant="secondary" onClick={() => setCollapsed(collapsed.size ? new Set() : new Set(rows.map(row => row.id)))} />
       <Button label="刷新列表" variant="ghost" isDisabled={loading || busy} onClick={() => discardSorts(() => refresh())} />

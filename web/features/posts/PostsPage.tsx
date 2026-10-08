@@ -122,7 +122,7 @@ export function PostsPage() {
       <Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} />
     </form>
     <div className="post-toolbar">
-      <PermissionGate permission="system:post:add"><Button label="新增岗位" isDisabled={busy} onClick={() => { setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm})); }} /></PermissionGate>
+      <PermissionGate permission="system:post:add"><Button label="新增岗位" variant="primary" isDisabled={busy} onClick={() => { setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm})); }} /></PermissionGate>
       <PermissionGate permission="system:post:remove"><Button label="删除所选岗位" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => { setActionError(''); setDeleting(selectedIds); }} /></PermissionGate>
       <PermissionGate permission="system:post:export"><Button label="导出岗位" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} />
