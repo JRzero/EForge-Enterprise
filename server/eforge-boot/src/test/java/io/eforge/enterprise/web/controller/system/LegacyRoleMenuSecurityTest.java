@@ -107,11 +107,9 @@ class LegacyRoleMenuSecurityTest
             return List.of(menu(10, 0, "0"), menu(11, 10, "0"), menu(20, 0, "1"),
                     menu(21, 20, "1"), menu(30, 0, "1"));
         });
-        when(menus.selectMenuList(any(SysMenu.class), eq(9L))).thenAnswer(call -> {
+        when(selections.grantableMenuIds(9L)).thenAnswer(call -> {
             active(); transactions.events.add("available");
-            SysMenu first = new SysMenu(); first.setMenuId(10L);
-            SysMenu second = new SysMenu(); second.setMenuId(11L);
-            return List.of(first, second);
+            return List.of(10L, 11L);
         });
         when(selections.menuIds(anyLong())).thenAnswer(call -> {
             active(); transactions.events.add("previous"); return stored.getOrDefault(call.getArgument(0), List.of());
@@ -140,8 +138,13 @@ class LegacyRoleMenuSecurityTest
 
     private void actor(Set<String> permissions)
     {
-        SysUser actor = new SysUser(9L); actor.setUserName("operator");
-        when(tokens.getLoginUser(any())).thenReturn(new LoginUser(9L, 103L, actor, permissions));
+        actor(9L, permissions);
+    }
+
+    private void actor(long id, Set<String> permissions)
+    {
+        SysUser actor = new SysUser(id); actor.setUserName("operator");
+        when(tokens.getLoginUser(any())).thenReturn(new LoginUser(id, 103L, actor, permissions));
     }
 
     private static SysRole row(long id)
@@ -204,6 +207,44 @@ class LegacyRoleMenuSecurityTest
     {
         return Stream.of("legacy", "canonical").flatMap(boundary ->
                 Stream.of("create", "edit").map(operation -> Arguments.of(boundary, operation)));
+    }
+
+    @ParameterizedTest @MethodSource("broaderDisplayGrants")
+    void displayMenusOutsideTheEffectiveRoleSourceCannotSupplyNewGrants(String boundary, String operation, long menuId) throws Exception
+    {
+        // The legacy display query can expose inactive-role links. Only the dedicated
+        // effective-role query supplies grant authority; its SQL is tested separately.
+        List<SysMenu> displayed = Stream.of(10L, 11L, 21L, 30L).map(id -> {
+            SysMenu menu = new SysMenu(); menu.setMenuId(id); return menu;
+        }).toList();
+        when(menus.selectMenuList(any(SysMenu.class), eq(9L))).thenReturn(displayed);
+
+        expectFailure(write(boundary, operation, 10L, menuId), boundary, 403);
+
+        verify(selections).grantableMenuIds(9L);
+        verify(menus, never()).selectMenuList(any(SysMenu.class), anyLong());
+        noWrites(); verifyNoInteractions(sessions);
+        assertEquals(List.of(10L, 20L), stored.get(2L));
+        assertTrue(transactions.events.contains("rollback"));
+    }
+
+    static Stream<Arguments> broaderDisplayGrants()
+    {
+        return Stream.of("legacy", "canonical").flatMap(boundary ->
+                Stream.of("create", "edit").flatMap(operation ->
+                        Stream.of(21L, 30L).map(menuId -> Arguments.of(boundary, operation, menuId))));
+    }
+
+    @ParameterizedTest @MethodSource("writeEntrances")
+    void administratorRetainsTheAllKnownMenusBypass(String boundary, String operation) throws Exception
+    {
+        actor(1L, Set.of("*:*:*"));
+
+        expectSuccess(write(boundary, operation, 10L, 21L, 30L), boundary, operation);
+
+        assertEquals(List.of(10L, 21L, 30L), stored.get("create".equals(operation) ? 40L : 2L));
+        verify(selections, never()).grantableMenuIds(anyLong());
+        verify(menus, never()).selectMenuList(any(SysMenu.class), anyLong());
     }
 
     @ParameterizedTest @ValueSource(strings = {"legacy", "canonical"})

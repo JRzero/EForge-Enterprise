@@ -28,6 +28,15 @@ numeric menu IDs. A requested menu must exist and either belong to the
 operator's current available menu set or already belong to the real target role.
 The canonical path retains its existing per-item error ordering.
 
+For a non-administrator, the available set comes from a dedicated
+[RoleSelectionMapper](../server/eforge-system/src/main/java/io/eforge/enterprise/system/mapper/RoleSelectionMapper.java)
+query over the operator's currently enabled, non-deleted source roles. The
+general menu display query is not an authorization source: it also lists menus
+attached to disabled or deleted roles. Such a role cannot supply a new grant,
+while the same menu remains grantable if another active role supplies it.
+Administrator menu access and menu status/visibility management keep their
+existing behavior; this check filters source roles, not display metadata.
+
 [SysRoleController](../server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/system/SysRoleController.java)
 checks the complete set before writing the role or deleting/replacing links:
 
@@ -131,9 +140,12 @@ all legacy error responses have been sanitized.
 
 ## Verification
 
-- `LegacyRoleMenuSecurityTest`: 35 cases covering real controller binding,
+- `LegacyRoleMenuSecurityTest`: 47 cases covering real controller binding,
   method permissions, target ordering, menu-set validation, retained grants,
-  generated create identity, rollback and after-commit callback ordering.
+  generated create identity, rollback and after-commit callback ordering, the
+  dedicated grant source and administrator behavior across all four writes.
+- `RoleControllerTest`: the canonical menu options use the same grant source as
+  writes, and administrator options retain all known menus.
 - `UserImportSessionTest`: 8 cases using Spring's actual
   `DataSourceTransactionManager` with controlled JDBC collaborators to verify
   commit, rollback, suspension, independent-row publication and cache failures.
@@ -146,8 +158,10 @@ all legacy error responses have been sanitized.
   committed-data warning is visible, and no automatic retry occurs.
 - `verify-identity-lifecycle-integration.ps1`: the existing disposable auth
   harness now exercises real MySQL, Redis and HTTP for the menu policy and both
-  imports. The restricted operator does not hold the target role. SQL snapshots
-  verify denied writes leave metadata/associations unchanged. Import fixtures
+  imports. The restricted operator does not hold the target role. Separate
+  disabled/deleted source roles verify that inactive authority cannot leak into
+  menu options or new canonical/legacy grants. SQL snapshots verify denied
+  writes leave metadata/associations unchanged. Import fixtures
   test success/failure/success rows, immediate old-token rejection, retained
   session profile updates, re-enablement without token resurrection, and
   preservation of department/role/post/password state.
@@ -157,9 +171,11 @@ Their subsequent `/getInfo` nickname assertion reads the cached user rather than
 mistaking a fresh database profile read for a session update. Fixture output
 does not print credentials, token values, password fingerprints or Redis contents.
 
-Local validation on 2026-10-08 completed Maven verification with real Redis
-enabled: **790 tests, zero failures/errors, one Windows-only junction case
-skipped on Linux**. This includes all 6 real Redis and 10 data-scope parity cases.
+Local validation on 2026-10-08 ran all backend tests with real Redis enabled:
+**803 retained tests, zero failures/errors, one Windows-only junction case skipped on
+Linux**. This includes all 6 real Redis and 10 data-scope parity cases. Maven
+package verification also completed successfully with tests skipped after that
+full test run.
 Frontend lint, typecheck, generated-client reproducibility, 117 unit tests and
 build passed. The 2 relevant browser cases passed. Four runtime workbooks
 containing 10 rows were generated and read back locally; the full PowerShell,

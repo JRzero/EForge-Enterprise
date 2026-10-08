@@ -3,6 +3,7 @@
 $identityUserIds = [System.Collections.Generic.List[string]]::new()
 $identityRoleIds = [System.Collections.Generic.List[string]]::new()
 $identityLogins = [System.Collections.Generic.List[object]]::new()
+$identityDeletedSourceRole = $null
 
 function Identity-Sql([string]$statement) {
     return Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -N -B -uroot eforge_enterprise -e $statement
@@ -87,6 +88,16 @@ try {
     $identityRoleIds.Add($identityTargetRole.id)
     $identityOperator = Identity-CreateUser 'imo' $identityOperatorRole.id
     $identityMember = Identity-CreateUser 'imm' $identityTargetRole.id
+    $identityDisabledSourceRole = Create-Role 'id-off' @('system-post-query','system-post-export')
+    $identityRoleIds.Add($identityDisabledSourceRole.id)
+    $identityDeletedSourceRole = Create-Role 'id-gone' @('system-user-remove')
+    $identityRoleIds.Add($identityDeletedSourceRole.id)
+    Assert-Check ((Request "/api/v1/system/users/$($identityOperator.id)/roles" 'PUT' (@{roleIds=@($identityOperatorRole.id,$identityDisabledSourceRole.id,$identityDeletedSourceRole.id)} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Assigning owned source-role fixtures failed.'
+    # Preserve stale role/user/menu links deliberately, before login. A display
+    # query can still find these menus, but inactive sources cannot authorize grants.
+    Identity-Sql "UPDATE sys_role SET status='1',data_scope='3' WHERE role_id=$($identityDisabledSourceRole.id); UPDATE sys_role SET del_flag='2',data_scope='3' WHERE role_id=$($identityDeletedSourceRole.id);" | Out-Null
+    $identitySources = Identity-Sql "SELECT COUNT(*) FROM sys_user_role WHERE user_id=$($identityOperator.id); SELECT COUNT(*) FROM sys_user_role ur JOIN sys_role r ON r.role_id=ur.role_id WHERE ur.user_id=$($identityOperator.id) AND (r.status='1' OR r.del_flag='2');"
+    Assert-Check (($identitySources -join ',') -eq '3,2') 'The source-role fixture must retain both inactive associations.'
     $identityOperatorLogin = Identity-Login $identityOperator
     $identityMenuIds = @{}
     foreach ($identityLine in @(Identity-Sql "SELECT menu_key,menu_id FROM sys_menu WHERE menu_key IN ('system-post-query','system-post-export','system-user-remove');")) {
@@ -98,8 +109,21 @@ try {
     $identityRetainedMenu = $identityMenuIds['system-post-export']
     $identityForbiddenMenu = $identityMenuIds['system-user-remove']
     $identityOperatorMenus = (Request '/api/v1/system/roles/menus' 'GET' '' $identityOperatorLogin.Headers).Content | ConvertFrom-Json
-    Assert-Check ($identityOperatorMenus.key -contains 'system-post-query' -and $identityOperatorMenus.key -notcontains 'system-post-export' -and $identityOperatorMenus.key -notcontains 'system-user-remove') 'The restricted operator unexpectedly owns a forbidden target grant.'
+    Assert-Check (@($identityOperatorMenus | Where-Object key -eq 'system-post-query').Count -eq 1 -and $identityOperatorMenus.key -notcontains 'system-post-export' -and $identityOperatorMenus.key -notcontains 'system-user-remove') 'Inactive source roles leaked into grant options or hid a menu also granted by an active source.'
     Identity-LegacyResult (Request "/system/role/$($identityTargetRole.id)" 'GET' '' $identityOperatorLogin.Headers) 200 'The target role must be inside the restricted operator data scope.'
+
+    foreach ($identityInactiveKey in @('system-post-export','system-user-remove')) {
+        $identityDeniedCanonical = Role-Body "Inactive grant $runId" "id-inactive-$runId" @('system-post-query',$identityInactiveKey)
+        Assert-Problem (Request '/api/v1/system/roles' 'POST' ($identityDeniedCanonical | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'ACCESS_DENIED'
+        Assert-Check ((Identity-Sql "SELECT COUNT(*) FROM sys_role WHERE role_key='id-inactive-$runId';") -eq '0') 'Canonical creation acquired a new grant from an inactive source role.'
+    }
+    $identityActiveCanonical = Role-Body "Active grant $runId" "id-active-$runId" @('system-post-query')
+    $identityActiveCreated = Request '/api/v1/system/roles' 'POST' ($identityActiveCanonical | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers
+    Assert-Check ($identityActiveCreated.StatusCode -eq 201) 'Canonical creation rejected a menu that still has an active source.'
+    $identityActiveRole = $identityActiveCreated.Content | ConvertFrom-Json
+    $identityRoleIds.Add($identityActiveRole.id)
+    $identityActiveEditor = (Request "/api/v1/system/roles/$($identityActiveRole.id)" 'GET' '' $authorized).Content | ConvertFrom-Json
+    Assert-Check ($identityActiveEditor.menuKeys.Count -eq 1 -and $identityActiveEditor.menuKeys[0] -eq 'system-post-query') 'Canonical creation failed to persist its allowed active grant.'
 
     $identityLegacyCreate = @{roleName="Identity create $runId";roleKey="id-create-$runId";roleSort=7;status='0';dataScope='1';menuCheckStrictly=$true;deptCheckStrictly=$true;menuIds=@($identityAllowedMenu,$identityForbiddenMenu)}
     Identity-LegacyResult (Request '/system/role' 'POST' ($identityLegacyCreate | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'Legacy role creation accepted a new grant the operator does not own.'
@@ -117,6 +141,18 @@ try {
     $identityRoleIds.Add($identityCreatedPage.items[0].id)
     $identityCreatedRole = (Request "/api/v1/system/roles/$($identityCreatedPage.items[0].id)" 'GET' '' $authorized).Content | ConvertFrom-Json
     Assert-Check ($identityCreatedRole.menuKeys.Count -eq 1 -and $identityCreatedRole.menuKeys[0] -eq 'system-post-query') 'Allowed legacy creation stored an incorrect grant set.'
+    Assert-Check ((Role-Users $identityCreatedRole.role.id @($identityMember.id)).StatusCode -eq 204) 'Making the narrow target editable within the operator department failed.'
+    $identityNarrowBefore = Identity-RoleSnapshot $identityCreatedRole.role.id
+    foreach ($identityInactiveKey in @('system-post-export','system-user-remove')) {
+        $identityDeniedCanonical = Role-Body $identityCreatedRole.role.name $identityCreatedRole.role.key @('system-post-query',$identityInactiveKey)
+        Assert-Problem (Request "/api/v1/system/roles/$($identityCreatedRole.role.id)" 'PUT' ($identityDeniedCanonical | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'ACCESS_DENIED'
+        Assert-Check ((Identity-RoleSnapshot $identityCreatedRole.role.id) -ceq $identityNarrowBefore) 'Canonical editing acquired a new grant from an inactive source role.'
+        $identityDeniedLegacy = @{roleId=$identityCreatedRole.role.id;roleName=$identityCreatedRole.role.name;roleKey=$identityCreatedRole.role.key;roleSort=9;status='0';menuCheckStrictly=$true;deptCheckStrictly=$true;menuIds=@($identityAllowedMenu,$identityMenuIds[$identityInactiveKey])}
+        Identity-LegacyResult (Request '/system/role' 'PUT' ($identityDeniedLegacy | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'Legacy editing acquired a new grant from an inactive source role.'
+        Assert-Check ((Identity-RoleSnapshot $identityCreatedRole.role.id) -ceq $identityNarrowBefore) 'Inactive-source rejection partially changed the legacy target.'
+    }
+    $identityActiveEdit = Role-Body $identityCreatedRole.role.name $identityCreatedRole.role.key @('system-post-query')
+    Assert-Check ((Request "/api/v1/system/roles/$($identityCreatedRole.role.id)" 'PUT' ($identityActiveEdit | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers).StatusCode -eq 204) 'Canonical editing rejected an existing active grant.'
 
     $identityLegacyEdit = @{roleId=$identityTargetRole.id;roleName="Denied edit $runId";roleKey=$identityTargetRole.key;roleSort=8;status='0';dataScope='1';menuCheckStrictly=$true;deptCheckStrictly=$true;menuIds=@($identityAllowedMenu,$identityRetainedMenu,$identityForbiddenMenu)}
     Identity-LegacyResult (Request '/system/role' 'PUT' ($identityLegacyEdit | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'Legacy role editing accepted a new out-of-range grant.'
@@ -133,7 +169,7 @@ try {
     $identityLegacyEdit.menuIds = @($identityAllowedMenu,$identityRetainedMenu)
     Identity-LegacyResult (Request '/system/role' 'PUT' ($identityLegacyEdit | ConvertTo-Json -Depth 5 -Compress) $identityOperatorLogin.Headers) 403 'A revoked grant remained available through the previous-grant exception.'
     Assert-Check ((Identity-RoleSnapshot $identityTargetRole.id) -ceq $identityTargetBefore) 'Denied grant restoration changed the role.'
-    Write-Output 'Legacy role menu boundary: limited operator, denied create/edit without SQL changes, valid grants, retained broader grants and rejected regrant after removal passed.'
+    Write-Output 'Role menu boundary: inactive source roles excluded, canonical/legacy new grants rejected without SQL changes, active grants accepted, existing broader grants retained and regrant after removal rejected.'
 
     $identityImportRole = Create-Role 'id-import' @('system','system-users','system-user-query')
     $identityRoleIds.Add($identityImportRole.id)
@@ -189,6 +225,7 @@ try {
 }
 finally {
     foreach ($identityLogin in $identityLogins) { Request '/logout' 'POST' '' $identityLogin.Headers | Out-Null }
+    if ($identityDeletedSourceRole) { Identity-Sql "UPDATE sys_role SET del_flag='0' WHERE role_id=$($identityDeletedSourceRole.id) AND role_key='$($identityDeletedSourceRole.key)';" | Out-Null }
     if ($identityUserIds.Count) { Assert-Check ((Request '/api/v1/system/users' 'DELETE' (@{ids=@($identityUserIds.ToArray())} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Owned identity user cleanup failed.' }
     if ($identityRoleIds.Count) { Assert-Check ((Request '/api/v1/system/roles' 'DELETE' (@{ids=@($identityRoleIds.ToArray())} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Owned identity role cleanup failed.' }
 }

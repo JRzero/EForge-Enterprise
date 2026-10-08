@@ -49,7 +49,7 @@ public class RoleService
     }
     public List<RoleMenuOption> menuOptions()
     {
-        var available=availableMenus();var rows=selections.menus().stream().filter(row->available.contains(row.menuId())).toList();
+        var all=selections.menus();var available=availableMenus(all);var rows=all.stream().filter(row->available.contains(row.menuId())).toList();
         Map<Long,String> byId=new HashMap<>();rows.forEach(row->byId.put(row.menuId(),row.menuKey()));
         return rows.stream().map(row->new RoleMenuOption(row.menuKey(),byId.get(row.parentId()),row.label(),row.menuType(),row.orderNum(),row.status(),row.perms())).toList();
     }
@@ -162,7 +162,7 @@ public class RoleService
     private MenuGrantScope menuGrantScope(SysRole existing,List<NavigationMenu> all)
     {
         Set<Long> known=new HashSet<>();all.forEach(row->known.add(row.menuId()));
-        Set<Long> available=availableMenus();
+        Set<Long> available=availableMenus(all);
         Set<Long> previous=existing==null ? Set.of() : new HashSet<>(selections.menuIds(existing.getRoleId()));
         return new MenuGrantScope(known,available,previous);
     }
@@ -176,7 +176,12 @@ public class RoleService
         }
     }
     private void preserveFlags(SysRole patch,SysRole existing) { patch.setMenuCheckStrictly(existing.isMenuCheckStrictly());patch.setDeptCheckStrictly(existing.isDeptCheckStrictly()); }
-    private Set<Long> availableMenus() { Set<Long> ids=new HashSet<>();menus.selectMenuList(new SysMenu(),SecurityUtils.getUserId()).forEach(menu->ids.add(menu.getMenuId()));return ids; }
+    private Set<Long> availableMenus(List<NavigationMenu> all)
+    {
+        Long userId=SecurityUtils.getUserId();
+        if(!SecurityUtils.isAdmin(userId)) return new HashSet<>(selections.grantableMenuIds(userId));
+        Set<Long> ids=new HashSet<>();all.forEach(menu->ids.add(menu.menuId()));return ids;
+    }
     private SysRole require(Long id,boolean mutable)
     {
         try { roles.checkRoleDataScope(id); } catch(ServiceException exception) { throw denied(); }
