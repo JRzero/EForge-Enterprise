@@ -12,8 +12,12 @@ test('shared component details retain focus, mixed grants, file ordering and ima
   expect(await page.locator('[data-grant-key="system"]').evaluate((input:HTMLInputElement)=>input.indeterminate)).toBe(true);
   await page.locator('.menu-icon-picker summary').click();
   await page.getByText('显示列',{exact:true}).click();
+  const columns=page.locator('.column-visibility-menu'),popover=columns.locator('.post-columns');
+  expect((await popover.boundingBox())!.x).toBe((await columns.boundingBox())!.x);
   await page.screenshot({path:info.outputPath('expanded-desktop.png'),fullPage:true});
   await page.setViewportSize({width:390,height:844});
+  expect((await popover.boundingBox())!.x).toBeGreaterThanOrEqual(0);
+  expect((await popover.boundingBox())!.x+(await popover.boundingBox())!.width).toBeLessThanOrEqual(390);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:info.outputPath('expanded-mobile.png'),fullPage:true});
   await page.getByRole('button',{name:'拖动文件 2 排序',exact:true}).focus();await page.keyboard.press('ArrowUp');

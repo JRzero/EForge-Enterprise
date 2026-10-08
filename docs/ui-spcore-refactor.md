@@ -241,3 +241,11 @@ enabled-config and final cloud acceptance remain pending. The preceding full
 180-browser/client-reproduction run is retained, together with 19/20 real
 affected cases before the formatter-only repair; its sole cache failure is
 recorded above rather than presented as a complete pass.
+
+Standalone column-menu capture review identified a missing positioning parent:
+the same component looked correct in toolbars but floated against the viewport
+in the gallery. It now owns a positioning class, aligns to its trigger when
+standalone and retains right alignment in business toolbars. Desktop anchor and
+390px bounds assertions, shared-component interactions and user column controls
+passed 2/2 after lint/typecheck (`ui-popover-final.log`); the new phone capture
+was visually reviewed. This does not alter visibility state or permission logic.

@@ -27,7 +27,7 @@ export function ColumnVisibilityMenu({labels, visibility, onChange, title = '显
     };
   }, []);
   useEffect(() => { if (master.current) master.current.indeterminate = some && !all; }, [all, some]);
-  return <details ref={menu} className={className}><summary>{title}</summary><div className="post-columns">
+  return <details ref={menu} className={['column-visibility-menu',className].filter(Boolean).join(' ')}><summary>{title}</summary><div className="post-columns">
     <label><input ref={master} type="checkbox" checked={all} disabled={!entries.length}
       onChange={event => { const checked = event.target.checked; onChange(current => ({...current, ...Object.fromEntries(entries.map(([key]) => [key, checked]))})); }} />列展示</label>
     {entries.map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false}
