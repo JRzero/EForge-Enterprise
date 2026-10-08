@@ -1,5 +1,5 @@
 import {Buffer} from 'node:buffer';
-import {writeFileSync,readFileSync} from 'node:fs';
+import {writeFileSync,readFileSync,mkdirSync} from 'node:fs';
 import {join, basename} from 'node:path';
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
@@ -332,6 +332,17 @@ async function verifyStringKey(page, noRoleUser) {
 }
 export async function verifyBrowser(root, owned, backend, noRoleUser) {
   assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(backend), 'Owned backend URL required.');
+  const appearanceDirectory = process.env.EFORGE_UI_AUDIT === '1' ? join(root,'test-results','generated-appearance') : null;
+  if(appearanceDirectory) mkdirSync(appearanceDirectory,{recursive:true});
+  async function captureAppearance(page,category,state) {
+    if(!appearanceDirectory) return;
+    await page.setViewportSize({width:1440,height:1000});
+    await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit phone width');
+    await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-mobile.png'),fullPage:true});
+    await page.setViewportSize({width:1440,height:1000});
+  }
   for (const category of ['crud', 'tree', 'sub', 'auto', 'autotree', 'autosub', 'stringkey']) {
     writeFileSync(join(owned, category, 'index.html'), '<div id="root"></div><script type="module" src="./probe.tsx"></script>');
     writeFileSync(join(owned, category, 'probe.tsx'), [
@@ -341,7 +352,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "import {createMemoryStorage} from '@eforge/core';",
       "import {EForgeProvider} from '@eforge/ui';",
       "import {PermissionProvider} from '@eforge/patterns';",
-      "import '@eforge/tokens/styles.css'; import '@eforge/ui/styles.css'; import '@eforge/patterns/styles.css'; import '@eforge/data/styles.css'; import '../../../app/styles.css';",
+      "import '@eforge/tokens/styles.css'; import '@eforge/ui/styles.css'; import '@eforge/patterns/styles.css'; import '@eforge/data/styles.css'; import '../../../app/styles.css'; import '../../../app/enterprise-theme.css'; import '../../../app/workspace-layout.css';",
       "import {ApiContext, BootstrapContext} from '../../../app/context';",
       "import {createSessionRuntime} from '../../../integration/session';",
       "import {toEForgePermissions} from '../../../integration/permissions';",
@@ -382,6 +393,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await installedLink.click();
         assert((await page.evaluate(() => window.probeHref())).startsWith('/business/fixture/'));
         await expect(page.getByRole('button', {name:'新增', exact:true})).toBeVisible();
+        await captureAppearance(page,category,'list');
         if (category.startsWith('auto')) {await verifyAutomaticKey(page, noRoleUser, category);assert.deepEqual(errors, []);continue;}
         if (category === 'stringkey') {await verifyStringKey(page,noRoleUser);assert.deepEqual(errors, []);continue;}
         await page.getByRole('link',{name:'个人中心',exact:true}).click(); await expect(page.getByRole('heading',{name:'个人中心',exact:true})).toBeVisible(); await installedLink.click();
@@ -417,6 +429,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await expect(dialog.locator('label').filter({hasText:/^filePaths/})).toContainText('移除文件');
           await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
         }
+        await captureAppearance(page,category,'editor');
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog.getByRole('alert')).toContainText('requiredStatuses');
         const requiredChecks=dialog.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox');
