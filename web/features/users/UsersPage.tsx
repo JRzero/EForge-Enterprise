@@ -202,7 +202,7 @@ export function UsersPage() {
       {discardEditor ? <div role="alert"><p>有未保存的修改，是否放弃？</p>
         <Button label="继续编辑" isDisabled={busy} onClick={()=>setDiscardEditor(false)} />
         <Button label="放弃修改" variant="secondary" isDisabled={busy} onClick={close} />
-      </div> : null}<form noValidate onSubmit={event => { void save(event); }}>
+      </div> : null}<form className="user-editor-form" noValidate onSubmit={event => { void save(event); }}>
       <Input label="登录账号" value={editor.form.username} isDisabled={busy || !!editor.id} aria-required="true" onChange={username => setEditor({...editor, form: {...editor.form, username}})} />
       <Input label="用户昵称" value={editor.form.displayName} isDisabled={busy} aria-required="true" onChange={displayName => setEditor({...editor, form: {...editor.form, displayName}})} />
       {!editor.id ? <PasswordField label="用户密码" autoComplete="new-password" value={editor.password} isDisabled={busy} aria-required="true" onChange={password => setEditor({...editor, password})} /> : null}

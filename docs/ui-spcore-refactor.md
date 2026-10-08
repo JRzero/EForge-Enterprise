@@ -74,10 +74,9 @@ panels are additionally captured with explicit browser fixtures. That check
 asserts zero writes and covers desktop/phone widths. Screenshots distinguish
 fixture evidence from actual local-backend evidence.
 
-This is still a staged visual review. Expanded icon choices, grant trees,
-payload/detail dialogs, upload/image-preview states and generated business-page
-component states need a separate appearance review. Passing the functional
-browser suite alone does not mark every component's appearance accepted.
+This is still a staged visual review. Passing the functional browser suite alone
+does not mark every component's appearance accepted. The component detail review
+below extends the first pass; remaining families are recorded explicitly.
 
 Follow-up validation on 2026-10-08: final lint/typecheck and production build
 passed; the full browser suite passed 174 checks after the desktop generator grid
@@ -87,3 +86,47 @@ read-only audit passed 39 checks (`ui-layout-visual-final.log`); a subsequent Cr
 capture additionally waited for actual execution-time preview and passed
 (`ui-layout-cron-accepted.log`). Generator panel screenshots from the final
 browser suite were reviewed independently from the actual-backend screenshots.
+
+## Expanded component review
+
+Desktop editors now place field labels beside their controls. User editing uses
+two columns at 992px and above, with the note and action row spanning both;
+phones retain vertical fields. Native checkbox/radio labels remain inline.
+The reference's icon picker uses three compact columns and a 200px scroll area;
+the local picker follows those proportions and retains all icons and keyboard
+selection. Grant rows use compact tree spacing and a separate toolbar border.
+Log metadata and JSON panes use restrained separators and a monospace scroll
+area. Upload entries have thin 4px borders; image-preview controls retain the
+dark viewing canvas with a readable white title. Field error/warning/success
+messages appear in normal flow below the input without an attached color block.
+
+| Component family | Evidence reviewed | Current state |
+| --- | --- | --- |
+| Menus, breadcrumb, compact header, tags and three navigation modes | Actual local desktop screenshots and navigation regressions | Reviewed |
+| System lists, filters, trees, tables, paging and standard dialogs | Actual local 23-page/12-dialog audit | Reviewed |
+| Input inset/focus, disabled/error fields and button variants | Actual shared-component gallery, visible-message geometry assertion | Reviewed |
+| Icon picker and column visibility popover | Expanded actual menu editor plus gallery desktop/phone | Reviewed |
+| Menu and department grant trees, including mixed selection | Actual role dialogs; gallery mixed state and existing keyboard/payload tests | Reviewed |
+| Log metadata, formatted JSON and copy controls | Actual expanded log dialog plus existing copy/permissions tests | Reviewed |
+| Files and image preview | Real shared components in browser-only gallery; ordering, focus restoration, title contrast and phone screenshot | Reviewed in fixture |
+| Generator editor basic/fields/output tabs | Populated browser fixtures and local empty-state page | Reviewed in fixture |
+| Rich editor, Cron and profile/avatar controls | Actual local dialogs and existing formatting/upload/keyboard tests | Reviewed |
+| Login/registration/lock and alternate dashboard views | Existing functional regressions; new proportions not fully compared to reference yet | Pending appearance review |
+| Generated business CRUD/tree/subtable page instances | Shared controls adapted; installed/generated page instances not yet visually inspected | Pending appearance review |
+
+2026-10-08 expanded evidence: `ui-component-real-audit.log` passed 44 actual
+local checks. After final password layout and label adjustments, the six relevant
+expanded/user-editor checks passed again (`ui-component-real-final.log`).
+The full mocked suite passed 175 (`ui-component-detail-final.log`), with 125 unit
+tests, lint/typecheck, build and generated-client reproducibility. Final image
+title, native label and field-message adjustments passed all 23 existing affected
+checks, then the shared appearance check passed separately after distinguishing
+the visible status from its intentionally duplicated screen-reader live-region
+text. Its final screenshots are under `web/test-results/appearance-final`.
+
+An earlier 21-check attempt was interrupted while the gallery's style imports
+were being added: traces show Vite reconnecting during the run and disappearing
+dialogs. The frozen-source full run subsequently passed. The last status test's
+strict-locator failure was a fixture selector problem; both visible and live
+region text matched, and the production announcement behavior was retained.
+No backend source, authorization, sessions, business rows or DDL changed.

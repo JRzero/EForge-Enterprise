@@ -10,6 +10,25 @@ test.beforeEach(async({page})=>{
   },process.env.EFORGE_VISUAL_TOKEN!);
 });
 
+for(const [path,button,name] of [
+  ['/menu','新增菜单','icon-picker'],['/role','新增角色','grant-tree'],
+  ['/role',/^数据权限 /,'department-grants'],['/operlog',/^详细日志 /,'log-detail'],
+  ['/post','导航搜索','navigation-search']
+] as const)test(`read-only expanded audit ${name}`,async({page},info)=>{
+  await page.goto(path);await expect(page.locator('.enterprise-header')).toBeVisible();
+  await page.getByRole('button',{name:button,exact:typeof button==='string'}).first().click();
+  const dialog=page.getByRole('dialog').last();await expect(dialog).toBeVisible();
+  await expect(dialog.getByText(/正在加载|Loading data/)).toHaveCount(0,{timeout:30_000});
+  if(name==='icon-picker')await dialog.locator('.menu-icon-picker summary').click();
+  if(name==='grant-tree')await dialog.getByRole('button',{name:'展开全部菜单',exact:true}).click();
+  if(name==='department-grants')await dialog.getByLabel('权限范围',{exact:true}).selectOption('2');
+  if(name==='navigation-search')await dialog.getByRole('combobox').fill('管理');
+  await page.screenshot({path:info.outputPath('desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  const box=await dialog.boundingBox();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(391);
+  await page.screenshot({path:info.outputPath('mobile.png'),fullPage:true});
+});
+
 for (const mode of ['左侧菜单','混合菜单','顶部菜单'] as const) test(`read-only shell audit ${mode}`,async({page},info)=>{
   await page.goto('/post');
   await expect(page.locator('.enterprise-header')).toBeVisible();
