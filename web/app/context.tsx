@@ -1,4 +1,5 @@
 import {createContext, useContext} from 'react';
+import type {NavigationItem} from '../integration/navigation';
 import type {BootstrapResponse} from '../generated/api';
 import type {ApplicationApi} from '../integration/api';
 export const ApiContext = createContext<ApplicationApi | null>(null);
@@ -21,3 +22,6 @@ export function useApplicationControls() {
 }
 export const NoticeRefreshContext = createContext<() => void>(() => {});
 export function useNoticeRefresh() {return useContext(NoticeRefreshContext);}
+
+export const NavigationContext = createContext<NavigationItem[]>([]);
+export function useNavigation() { return useContext(NavigationContext); }

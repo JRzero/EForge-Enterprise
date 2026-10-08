@@ -39,3 +39,8 @@ export function projectNavigation(nodes: NavigationNode[], routes: readonly AppR
   }
   return visit(nodes, 0);
 }
+
+/** Count only links that survived route/permission/URL projection, not folder headings. */
+export function countNavigationEntries(items: readonly NavigationItem[]): number {
+  return items.reduce((count, item) => count + (item.href ? 1 : 0) + countNavigationEntries(item.children), 0);
+}
