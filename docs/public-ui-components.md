@@ -95,5 +95,11 @@ locally against the captured Boot contract (`ui-public-generator-import-fix.log`
 `ui-public-generator-static-check.log`). The isolated static checker needed
 compatibility-module bridges matching the host feature layout; missing bridges
 were a checker fixture error and were corrected without changing product paths.
-Exact repaired cloud generated React browser acceptance remains pending.
+On `fe9d548`, all seven generated variants also passed cloud compilation/lint.
+The subsequent production build failed because the newly declared HTML inputs
+were relative to the launcher working directory. Vite inputs now resolve from
+the config's file URL. The actual programmatic Vite build launched from the
+repository root passed for both entries (`ui-public-root-build.log`). This is
+a corrected build configuration defect; no assertion or browser behavior was
+weakened. Exact repaired cloud generated React browser acceptance remains pending.
 Form builder remains deferred by the user.
