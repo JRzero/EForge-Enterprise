@@ -3,6 +3,15 @@ import {expect, it} from 'vitest';
 import type {PieSeriesOption, GaugeSeriesOption} from 'echarts/charts';
 import type {CacheStatistics} from '../../generated/api';
 import {cacheChartOptions, commandTooltip, commandTotal, commandShare} from '../../features/cache-monitor/chart-options';
+it('explicit keyboard selection survives a neighboring segment replay and releases back to pointer selection', () => {
+  const data: CacheStatistics = {info:{},keyCount:'0',commands:[{name:'selected',calls:'2'},{name:'neighbor',calls:'1'}]};
+  let selected: number | null = 0;
+  const options = cacheChartOptions(data, () => selected);
+  const tooltip = options.commands.tooltip as {formatter: (value:{dataIndex:number}) => HTMLElement};
+  expect(tooltip.formatter({dataIndex:1}).textContent).toBe('命令 selected：2 次（66.66%）');
+  selected = null;
+  expect(tooltip.formatter({dataIndex:1}).textContent).toBe('命令 neighbor：1 次（33.33%）');
+});
 it('rose shapes preserve proportions without losing displayed counters beyond the JS integer range', () => {
   const data: CacheStatistics = {info: {usedMemory: '2G', usedMemoryBytes: '2147483648'}, keyCount: '9007199254740993', commands: [{name: 'get', calls: '9007199254740993'}, {name: 'set', calls: '9007199254740993'}]};
   const before = structuredClone(data), options = cacheChartOptions(data), pie = (options.commands.series as PieSeriesOption[])[0]!;

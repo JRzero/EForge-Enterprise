@@ -24,7 +24,7 @@ async function signIn(page: Page) {
   await page.goto('/dashboard'); await page.getByLabel('账号', {exact: true}).fill('admin');
   await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click();
 }
-test('login, grouped navigation, refresh, 404 and confirmed logout', async ({page}) => {
+test('login, grouped navigation, refresh, 404 and confirmed logout', async ({page},info) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   const state = await setup(page); await signIn(page);
   await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
@@ -35,6 +35,8 @@ test('login, grouped navigation, refresh, 404 and confirmed logout', async ({pag
   expect(state.bootCalls).toBe(2);
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!))).toEqual({accessToken: 'fixture-token'});
   await page.goto('/missing'); await expect(page.getByRole('heading', {name: '页面不存在'})).toBeVisible();
+  await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:info.outputPath('not-found-desktop.png')});
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('not-found-mobile.png')});await page.setViewportSize({width:1440,height:1000});
   await page.getByRole('button', {name: '返回工作台'}).click();
   await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
   await page.getByRole('button', {name: '退出登录'}).click();
@@ -42,11 +44,12 @@ test('login, grouped navigation, refresh, 404 and confirmed logout', async ({pag
   expect(await page.evaluate(() => sessionStorage.getItem('eforge.enterprise.session.v1'))).toBeNull();
   expect(errors).toEqual([]);
 });
-test('revoked permissions show 403, while expiry removes the session', async ({page}) => {
+test('revoked permissions show 403, while expiry removes the session', async ({page},info) => {
   const state = await setup(page); await signIn(page);
   await expect(page.getByRole('heading', {name: '你好，管理员'})).toBeVisible();
   state.permissions = []; await page.reload();
   await expect(page.getByRole('heading', {name: '暂无访问权限'})).toBeVisible();
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('denied-mobile.png')});
   await expect(page.getByRole('link', {name: '工作台', exact: true})).toHaveCount(0);
   state.expires = true; await page.reload();
   await expect(page.getByRole('heading', {name: '登录工作空间'})).toBeVisible();

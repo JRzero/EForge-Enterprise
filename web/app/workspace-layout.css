@@ -99,6 +99,11 @@
 .post-dialog :is(input[type=checkbox], input[type=radio]) { accent-color: var(--ui-primary); }
 .post-dialog .post-dialog-actions, .post-dialog form > .post-row-actions:last-child { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 16px; border-top: 1px solid var(--ui-border); }
 .post-dialog-actions > button { width: auto; flex: 0 0 auto; }
+.post-dialog > .state-actions { justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--ui-border); }
+.state-page h1 { font-size: 22px; color: #606266; }
+.state-page .eyebrow { color: #909399; }
+.state-page .state-actions { justify-content: center; flex-wrap: wrap; }
+.state-page button[data-variant] { border-radius: 4px; min-height: 32px; font-size: 14px; }
 .generator-page .post-dialog [role=tabpanel]:not([hidden]):not(.post-table) { display: grid; gap: 16px; }
 .rich-text-editor { min-width: 0; }
 .rich-text-editor .ql-toolbar { border-radius: 4px 4px 0 0; padding: 8px; background: #fafafa; }
@@ -220,6 +225,7 @@
   .notice-popover { right: 12px; }
 }
 @media (max-width:600px) {
+  .enterprise-header-left .enterprise-header-title { display: none; }
   .enterprise-header-left .enterprise-breadcrumbs { display: none; }
   .enterprise-header > .enterprise-header-left { flex: 0 0 auto; }
   .enterprise-header > .enterprise-header-actions { flex: 1 1 auto; justify-content: flex-end; }

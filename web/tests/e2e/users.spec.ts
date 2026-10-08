@@ -19,5 +19,9 @@ test('read-only user permissions, scoped department roots, failure retry and mob
   for (const name of ['用户编号', '登录账号', '用户昵称', '部门', '手机号码', '状态', '创建时间']) await expect(page.getByRole('columnheader', {name, exact: true})).toHaveCount(0);
   await expect(allColumns).not.toBeChecked({indeterminate: true});
   await allColumns.check(); await expect(page.getByRole('cell', {name: '9007199254740993', exact: true})).toBeVisible();
+  await allColumns.press('Escape');
+  await expect(page.locator('.post-toolbar summary')).toBeFocused(); await expect(allColumns).toBeHidden();
+  await page.getByText('显示列', {exact:true}).click(); await expect(allColumns).toBeVisible();
+  await page.getByRole('heading',{name:'用户管理',exact:true}).click(); await expect(allColumns).toBeHidden();
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

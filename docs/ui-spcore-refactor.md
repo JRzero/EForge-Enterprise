@@ -10,11 +10,13 @@ AMIS/Vue migration or an upstream dependency change.
 - Blue primary actions, neutral gray canvas, white panels, thin separators and
   4px control corners. Semantic success/warning/error colors remain distinct.
 - Input containers own borders and focus indication. Their inner inputs have no
-  independent outline or border. Default height is 36px, horizontal padding 12px;
-  small and mini preferences retain their 13px/12px type sizes.
+  independent outline or border. Workspace minimum heights are 32px/30px/28px
+  for default/small/mini; account fields are 40px. Horizontal input padding is
+  12px; small and mini preferences retain their 13px/12px type sizes.
 - Error and disabled fields keep distinct states. Native select, number,
   pagination and checkbox controls retain native keyboard behavior.
-- Form labels align left. Submit actions and explicit add actions have primary
+- Desktop editor labels align right beside controls; phone labels stack above
+  them. Filter labels remain above controls. Submit and explicit add actions have primary
   styling; other actions do not become primary based on their DOM position.
 - Shared list, table, pagination, dialog, profile, dashboard and monitoring
   surfaces use the same product-owned theme. Tables scroll within their container
@@ -54,7 +56,7 @@ configuration on desktop. Phone layouts retain a single column and local table
 scrolling. EForge public components remain the pinned dependencies.
 
 `workspace-layout.css` owns these proportions. Application controls use a 32px
-default, 30px small and 28px mini minimum; the login retains its 36px minimum.
+default, 30px small and 28px mini minimum; login was subsequently set to 40px.
 Both retain the 12px horizontal input inset and a single container focus border.
 Job and generator dialog footers now group their actions; rich-text toolbar,
 editor borders and text inset use the shared palette. Account display-name
@@ -113,6 +115,7 @@ messages appear in normal flow below the input without an attached color block.
 | Rich editor, Cron and profile/avatar controls | Actual local dialogs and existing formatting/upload/keyboard tests | Reviewed |
 | Login/registration/lock and alternate dashboard views | Desktop/390px appearance captures, focus/error geometry and original authentication/dashboard regressions | Reviewed |
 | Generated business CRUD/tree/subtable page instances | Seven installed page categories; actual desktop/phone lists and CRUD/tree/sub editor upper/lower screenshots, real HTTP/SQL regression | Reviewed |
+| Password security reminder and 403/404/lazy failure states | Retained password-tab flow, themed dialog actions, desktop/390px captures and viewport bounds | Reviewed; final regression acceptance pending |
 
 2026-10-08 expanded evidence: `ui-component-real-audit.log` passed 44 actual
 local checks. After final password layout and label adjustments, the six relevant
@@ -203,5 +206,38 @@ successfully. The final opt-in capture wait and evidence commit
 and server `37779845337`; both remain in progress. Its local focused runtime
 (`ui-generated-final-runtime.log`) is terminal success and all 26 final captures
 are preserved. The dedicated worktree is confirmed archived. Final cloud
-acceptance is the only outstanding verification; no UI family in the table
-remains unreviewed.
+acceptance was pending at that checkpoint; it was not a success claim.
+
+Final audit follow-up: `3858f84` web run `37779845297` succeeded and server
+run `37779845337` completed with verify/runtime success but both auth/browser
+configurations failed. The failures were inspected, not retried as infrastructure:
+the live navigation test still expected the old 64/240px sidebars, mobile denied
+routes retained a long fallback header title, an open column menu intercepted
+user-row actions, and a tiny Redis rose segment's keyboard tooltip was replaced
+by the adjacent segment on coordinate replay. Local affected real-browser
+verification reproduced the cache failure while the other repaired cases passed.
+
+The fallback title now follows the same mobile hiding rule as breadcrumbs.
+Column menus close on outside pointer action or Escape and restore summary
+focus on Escape. Password reminder actions now inherit the actual shell theme
+and use explicit primary/secondary public EForge buttons; the reminder remains
+inside the retained Activity tree. Keyboard/list chart selection disables automatic
+coordinate tooltip replay until blur/mouse leave and binds the safe tooltip
+formatter to the selected command index. Trigger suppression alone still failed
+the real test; it is not counted as a successful repair. Pointer chart interaction
+is restored afterward. Sidebar assertions now validate the intended 54/200px
+reference dimensions. Precise cache counters and permission assertions remain.
+The 19 affected mocked browser cases and 41 account/retention cases passed before
+the cache change; final full frontend, both real configurations and a new exact
+cloud submission are pending at this entry. The full frontend then passed 180
+browser cases and 125 units before the final formatter binding. The new binding
+regression executed with 1 failure/3 passes beforehand (a separate sandbox
+startup failure executed no tests and is not counted). Form builder remains deferred.
+
+Final formatter binding: lint/typecheck/build passed, all 126 unit tests passed
+and all 13 affected cache browser checks passed (`ui-cache-final-check.log`,
+`ui-cache-final-e2e.log`). Default-config real cache browsers passed 7/7;
+enabled-config and final cloud acceptance remain pending. The preceding full
+180-browser/client-reproduction run is retained, together with 19/20 real
+affected cases before the formatter-only repair; its sole cache failure is
+recorded above rather than presented as a complete pass.

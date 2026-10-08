@@ -39,7 +39,7 @@ test('work entry count includes nested actionable entries after permission and r
   await expect(page.locator('.summary-card').filter({has: page.getByText('工作入口', {exact: true})}).locator('strong')).toHaveText('3');
 });
 
-test('a failed lazy page keeps shell navigation usable and a manual application reload recovers', async ({page}) => {
+test('a failed lazy page keeps shell navigation usable and a manual application reload recovers', async ({page},info) => {
   await fixtures(page);
   let failedLoads = 0;
   const moduleUrl = '**/features/users/UsersPage.tsx*';
@@ -48,6 +48,9 @@ test('a failed lazy page keeps shell navigation usable and a manual application 
   await openUsersPageExpectingFailure();
   const failed = page.getByRole('alert').filter({hasText: '用户管理暂时无法打开'});
   await expect(failed).toBeVisible();
+  await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:info.outputPath('failure-desktop.png')});
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:info.outputPath('failure-mobile.png')});await page.setViewportSize({width:1440,height:1000});
   await page.locator('.ef-app-shell__nav').getByRole('link', {name: '工作台', exact: true}).click();
   await expect(page.getByRole('heading', {name: '你好，编辑账号'})).toBeVisible();
   await page.getByRole('link', {name: '页面标签：用户管理', exact: true}).click();

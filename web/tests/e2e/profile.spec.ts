@@ -38,7 +38,7 @@ test('header avatar uses safe profile images, recovers broken images and retains
   avatarUrl='/profile/avatar/missing.png';await page.reload();await expect(link.locator('img')).toHaveCount(0);await expect(link.locator('.header-account-avatar-fallback')).toHaveText('😀');
   avatarUrl='https://example.com/tracking.png';await page.reload();await expect(link.locator('.header-account-avatar-fallback')).toHaveText('😀');expect(requests.some(url=>url.includes('example.com/tracking'))).toBe(false);await expect(link).toHaveAttribute('href','/user/profile');
 });
-for(const initial of [true,false])test(`password reminder ${initial?'initial priority':'expiry'} supports cancel and enters the retained password tab`,async({page})=>{
+for(const initial of [true,false])test(`password reminder ${initial?'initial priority':'expiry'} supports cancel and enters the retained password tab`,async({page},info)=>{
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
   const user={id:'7',username:'ordinary',displayName:'普通用户'};
@@ -46,6 +46,12 @@ for(const initial of [true,false])test(`password reminder ${initial?'initial pri
   await page.route('**/api/v1/me',route=>route.fulfill({json:{...user,sex:'2',roleNames:'',postNames:'',phone:'13900000008',email:'ordinary@example.com'}}));
   await page.goto('/user/profile');await page.getByLabel('账号',{exact:true}).fill('ordinary');await page.getByLabel('密码',{exact:true}).fill('Password123');await page.getByRole('button',{name:'登录',exact:true}).click();
   const reminder=page.getByRole('alertdialog',{name:'安全提示'});await expect(reminder).toContainText(initial?'您的密码还是初始密码，请修改密码！':'您的密码已过期，请尽快修改密码！');
+  if(initial){
+    await page.setViewportSize({width:1440,height:1000});await reminder.getByRole('button',{name:'确定',exact:true}).focus();
+    await page.screenshot({path:info.outputPath('reminder-desktop.png')});
+    await page.setViewportSize({width:390,height:844});const box=await reminder.boundingBox();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(390);
+    await page.screenshot({path:info.outputPath('reminder-mobile.png')});await page.setViewportSize({width:1440,height:1000});
+  }
   if(initial)await expect(reminder).not.toContainText('已过期');await reminder.getByRole('button',{name:'取消',exact:true}).click();await expect(reminder).toHaveCount(0);await expect(page.getByRole('tab',{name:'基本资料'})).toHaveAttribute('aria-selected','true');await page.getByLabel('用户昵称',{exact:true}).fill('取消后草稿');await page.getByRole('link',{name:'个人中心',exact:true}).click();await expect(page.getByLabel('用户昵称',{exact:true})).toHaveValue('取消后草稿');
   await page.reload();await expect(reminder).toBeVisible();await reminder.getByRole('button',{name:'确定',exact:true}).click();await expect(reminder).toHaveCount(0);await expect(page).toHaveURL(/\/user\/profile\?password=1$/);await expect(page.getByRole('tab',{name:'修改密码'})).toHaveAttribute('aria-selected','true');await expect(page.getByLabel('旧密码',{exact:true})).toBeVisible();
   await page.getByRole('tab',{name:'基本资料'}).click();await page.getByLabel('用户昵称',{exact:true}).fill('保留页面草稿');await page.getByRole('tab',{name:'修改密码'}).click();await page.getByRole('tab',{name:'基本资料'}).click();await expect(page.getByLabel('用户昵称',{exact:true})).toHaveValue('保留页面草稿');

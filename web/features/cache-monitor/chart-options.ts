@@ -11,14 +11,14 @@ export function commandTooltip(data: CacheStatistics, index: number) {
   const element = document.createElement('div'); element.className = 'cache-chart-tooltip'; element.setAttribute('role', 'tooltip');
   element.textContent = command ? `命令 ${command.name}：${command.calls} 次（${commandShare(command.calls, total)}%）` : '暂无命令统计'; return element;
 }
-export function cacheChartOptions(data: CacheStatistics): {commands: CacheChartOption; memory: CacheChartOption} {
+export function cacheChartOptions(data: CacheStatistics, selectedCommand?: () => number | null): {commands: CacheChartOption; memory: CacheChartOption} {
   const total = commandTotal(data), bytes = integer(data.info.usedMemoryBytes);
   const memoryMiB = Number(bytes / 1048576n) + Number(bytes % 1048576n) / 1048576;
   const memoryMax = Math.max(1000, Math.ceil(memoryMiB / 1000) * 1000);
   return {
     commands: {animationDuration: 1000, tooltip: {trigger: 'item', confine: true, transitionDuration: 0, extraCssText: 'max-width: calc(100% - 24px); white-space: normal; overflow-wrap: anywhere;', formatter: params => {
       const item = Array.isArray(params) ? params[0] : params;
-      return commandTooltip(data, item?.dataIndex ?? -1);
+      return commandTooltip(data, selectedCommand?.() ?? item?.dataIndex ?? -1);
     }}, series: [{name: '命令', type: 'pie', roseType: 'radius', stillShowZeroSum: false, radius: [15, 95], center: ['50%', '38%'],
       // Shapes use bounded proportions; the labels/tooltip retain the exact decimal counters.
       data: data.commands.map(command => ({name: command.name, value: total === 0n ? 0 : Number(integer(command.calls) * 1000000000n / total)}))}]},
