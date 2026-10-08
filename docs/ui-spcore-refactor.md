@@ -21,9 +21,20 @@ Local evidence: lint/typecheck/client reproduction, 126 unit tests and build
 passed. The complete browser suite passed 183 cases before the final filter-width
 override; all 9 affected login/registration/log cases then passed on the final
 override. The added checks compare actual desktop/mobile outer bounds, adjacent
-filter spacing, loaded image assets and keyboard CAPTCHA refresh. Real integration
-and exact-commit cloud acceptance are pending; earlier acceptance below belongs
-to the preceding phase.
+filter spacing, loaded image assets and keyboard CAPTCHA refresh. Final source
+`4f7aae5cdbb9a56ae2ce14afe0f391bba270f20b` passed web cloud run `37788537909`,
+including all 183 browser and 126 unit tests. Independent local disposable
+MySQL/Redis integration passed all 64 real browsers and the complete API suite
+(`ui-list-logo-live.log`); runtime OpenAPI equals the committed document after
+JSON whitespace normalization. Test containers exited and user preview remained
+available at port 5174. Server cloud run `37788537947` completed all four jobs
+successfully on the same exact source: Maven verification, native/runtime and
+generated-module checks, plus default/enabled integration with 64 real browsers
+each and the complete API/OpenAPI suites. Direct terminal evidence is retained in
+`ui-list-logo-cloud-web-accepted.log` and `ui-list-logo-cloud-server-accepted.log`.
+The server watch process ended with a transport error; the authoritative run and
+individual jobs are terminal success and their logs were downloaded separately.
+This follow-up is accepted; earlier acceptance below belongs to the preceding phase.
 
 ## Preceding phase acceptance
 
