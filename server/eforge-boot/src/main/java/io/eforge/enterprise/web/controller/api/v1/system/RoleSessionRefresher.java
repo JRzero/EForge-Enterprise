@@ -1,8 +1,6 @@
 package io.eforge.enterprise.web.controller.api.v1.system;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -22,17 +20,16 @@ import io.eforge.enterprise.system.service.ISysUserService;
 public class RoleSessionRefresher
 {
     private final RedisCache cache;
-    private final RedisTemplate<Object,Object> redis;
     private final ISysUserService users;
     private final NavigationMapper navigation;
     private final SysPermissionService permissions;
     private final TokenService tokens;
     private final DepartmentMutationMapper mutations;
     private final TransactionTemplate transaction;
-    public RoleSessionRefresher(RedisCache cache, RedisTemplate<Object,Object> redis, ISysUserService users,
+    public RoleSessionRefresher(RedisCache cache, ISysUserService users,
             NavigationMapper navigation, SysPermissionService permissions, TokenService tokens,
             DepartmentMutationMapper mutations, PlatformTransactionManager manager)
-    { this.cache=cache;this.redis=redis;this.users=users;this.navigation=navigation;this.permissions=permissions;this.tokens=tokens;this.mutations=mutations;transaction=new TransactionTemplate(manager);transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); }
+    { this.cache=cache;this.users=users;this.navigation=navigation;this.permissions=permissions;this.tokens=tokens;this.mutations=mutations;transaction=new TransactionTemplate(manager);transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); }
     public void refresh(Set<Long> userIds)
     {
         if (userIds.isEmpty()) return;
@@ -42,15 +39,30 @@ public class RoleSessionRefresher
             Collection<String> keys=cache.keys(CacheConstants.LOGIN_TOKEN_KEY+"*"); if(keys==null) return;
             for(String key:keys)
             {
-                LoginUser session=cache.getCacheObject(key); if(session==null || !userIds.contains(session.getUserId())) continue;
-                var user=users.selectUserById(session.getUserId());
-                if(user==null || !"0".equals(user.getStatus()) || !"0".equals(user.getDelFlag())) { tokens.delLoginUser(session.getToken());continue; }
-                user.setRoles(navigation.selectActiveRoles(user.getUserId()));
-                session.setUser(user);session.setDeptId(user.getDeptId());
-                session.setPermissions(user.isAdmin() || !user.getRoles().isEmpty() ? permissions.getMenuPermission(user) : Set.of());
-                Long ttl=redis.getExpire(key,TimeUnit.SECONDS);
-                if(ttl!=null && ttl>0) redis.opsForValue().setIfPresent(key,session,ttl,TimeUnit.SECONDS);
+                if (!key.startsWith(CacheConstants.LOGIN_TOKEN_KEY)) continue;
+                refreshToken(key.substring(CacheConstants.LOGIN_TOKEN_KEY.length()), userIds);
             }
         });
     }
+
+    private void refreshToken(String token, Set<Long> userIds)
+    {
+        for (int attempt = 0; attempt < 4; attempt++)
+        {
+            LoginUser session = tokens.getLoginUserByToken(token);
+            if (session == null || !userIds.contains(session.getUserId())) return;
+            var user = users.selectUserById(session.getUserId());
+            if (user == null || !"0".equals(user.getStatus()) || !"0".equals(user.getDelFlag()))
+            { tokens.delLoginUser(token); return; }
+            user.setRoles(navigation.selectActiveRoles(user.getUserId()));
+            session.setUser(user);
+            session.setDeptId(user.getDeptId());
+            session.setPermissions(user.isAdmin() || !user.getRoles().isEmpty()
+                    ? permissions.getMenuPermission(user) : Set.of());
+            if (tokens.updateLoginUser(session)) return;
+        }
+        // Sustained contention must fail closed rather than leave stale grants alive.
+        tokens.delLoginUser(token);
+    }
+
 }
