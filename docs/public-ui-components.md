@@ -164,3 +164,18 @@ risk. No preview process, database or Redis container was changed. Activating
 the new generator resource in that existing backend requires an explicitly
 approved backend refresh; this does not invalidate the accepted source and
 isolated/cloud deployment evidence above.
+
+### Search-field layout correction (2026-10-09)
+
+`ListFilters` now recursively expands React fragments before assigning layout
+cells. Conditional dictionary type/date fields previously occupied one cell;
+they now wrap independently like ordinary fields. Keys retain their fragment
+ancestry. The search-scoped label alignment also overrides the older page-wide
+stretch rule so date/status label text is vertically centered.
+
+The dictionary browser regression reproduced the original 63 px vertical
+misalignment before the fix. It now verifies control and label alignment,
+wrapping/spacing and viewport bounds at 1920, 1280 and 390 px, plus reset.
+All 15 related dictionary/log/component/front-template browser tests pass.
+The frontend unit suite (126 tests) and generated-client reproducibility pass.
+This change is confined to frontend layout; no backend service was restarted.

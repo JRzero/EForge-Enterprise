@@ -4,6 +4,46 @@ import type {DictionaryEntryResponse} from '../../generated/api';
 const id = '9007199254740993';
 const type = {id, name: '测试字典', code: 'test_dict', status: '0', remark: ''};
 const values = [{value: '0', label: '正常', style: 'SUCCESS', defaultEntry: true}, {value: '1', label: '停用', style: 'DANGER', defaultEntry: false}];
+
+test('dictionary search fields align independently across desktop wrapping and mobile', async ({page}, info) => {
+  await page.route('**/api/v1/system/dictionaries?*', route => route.fulfill({json: {items: [type], total: 1, page: 1, pageSize: 10}}));
+  await authenticate(page, ['system:dict:list']);
+  const filters = page.locator('.list-filters');
+  for (const width of [1920, 1280, 390]) {
+    await page.setViewportSize({width, height: 1000});
+    await expect(filters).toBeVisible();
+    const boxes = await filters.locator('input, select').evaluateAll(nodes => nodes.map(node => {
+      const box = (node.closest('[data-pressable-container]') ?? node).getBoundingClientRect();
+      return {x: box.x, y: box.y, right: box.right, bottom: box.bottom};
+    }));
+    const labelOffsets = await filters.locator('label').evaluateAll(labels => labels.map(label => {
+      const control = label instanceof HTMLLabelElement ? label.control : null;
+      if (!control) return 0;
+      const text = Array.from(label.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
+      if (!text) return 0;
+      const range = document.createRange(); range.selectNodeContents(text);
+      const a = range.getBoundingClientRect(), b = (control.closest('[data-pressable-container]') ?? control).getBoundingClientRect();
+      return {text: text.textContent, offset: Math.abs(a.y + a.height / 2 - b.y - b.height / 2)};
+    }));
+    for (const item of labelOffsets) if (item) expect(item.offset, JSON.stringify(item)).toBeLessThanOrEqual(3);
+    expect(boxes).toHaveLength(5);
+    for (const box of boxes) {expect(box.x).toBeGreaterThanOrEqual(0); expect(box.right).toBeLessThanOrEqual(width);}
+    if (width === 1920) expect(Math.max(...boxes.map(box => box.y)) - Math.min(...boxes.map(box => box.y))).toBeLessThanOrEqual(2);
+    if (width === 390) {
+      expect(Math.max(...boxes.map(box => box.x)) - Math.min(...boxes.map(box => box.x))).toBeLessThanOrEqual(2);
+      for (let index = 1; index < boxes.length; index++) expect(boxes[index]!.y - boxes[index - 1]!.bottom).toBeGreaterThanOrEqual(8);
+    }
+    for (let index = 1; index < boxes.length; index++) {
+      const previous = boxes[index - 1]!, current = boxes[index]!;
+      if (Math.abs(previous.y - current.y) <= 2) expect(current.x - previous.right).toBeGreaterThanOrEqual(8);
+      else expect(current.y - previous.bottom).toBeGreaterThanOrEqual(8);
+    }
+    await filters.screenshot({path: info.outputPath(`dictionary-search-${width}.png`)});
+  }
+  await page.getByLabel('字典类型筛选').fill('test_dict');
+  await page.getByRole('button', {name: '重置', exact: true}).click();
+  await expect(page.getByLabel('字典类型筛选')).toHaveValue('');
+});
 async function authenticate(page: Page, permissions: string[], path = '/dict') {
   await page.route('**/captchaImage', route => route.fulfill({json: {code: 200, captchaEnabled: false}}));
   await page.route('**/api/v1/auth/login', route => route.fulfill({json: {accessToken: 'fixture-token', tokenType: 'Bearer'}}));

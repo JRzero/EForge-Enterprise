@@ -1,4 +1,4 @@
-import {Children, type ComponentPropsWithoutRef, type ReactNode} from 'react';
+import {Children, Fragment, isValidElement, type ComponentPropsWithoutRef, type ReactNode} from 'react';
 import {PageHeader} from '../../ui/patterns';
 
 /** Product list layout matching the spcore object-model lists. */
@@ -9,9 +9,21 @@ export function ListPage({title, description, eyebrow, className = '', children}
     <div className="list-page-body">{children}</div></section>;
 }
 
+// React.Children flattens arrays, but treats a Fragment as a single child.
+// Expand only fragments so conditional fields each get their own layout cell.
+function filterFields(children: ReactNode, parentKey = ''): ReactNode[] {
+  return Children.toArray(children).flatMap((field, index) => {
+    const key = `${parentKey}/${isValidElement(field) ? field.key ?? index : index}`;
+    if (isValidElement<{children?: ReactNode}>(field) && field.type === Fragment) {
+      return filterFields(field.props.children, key);
+    }
+    return [<div className="list-filter-field" key={key}>{field}</div>];
+  });
+}
+
 export function ListFilters({children, actions, className = '', ...props}: ComponentPropsWithoutRef<'form'> & {actions?: ReactNode}) {
   return <form {...props} className={`post-filters list-filters ${className}`}>
-    {Children.toArray(children).map((field, index) => <div className="list-filter-field" key={index}>{field}</div>)}
+    {filterFields(children)}
     {actions && <div className="list-filter-actions">{actions}</div>}
   </form>;
 }

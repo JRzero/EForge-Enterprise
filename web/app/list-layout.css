@@ -14,6 +14,8 @@
 .list-filter-field > div:has([data-pressable-container]) > label { flex-shrink: 0; margin: 0; }
 .list-filter-field [data-pressable-container] { width: 160px; min-width: 0; }
 .list-filter-field > label { display: flex; flex-direction: row; align-items: center; gap: 8px; margin: 0; white-space: nowrap; font-size: 13px; color: #606266; }
+/* Override the older page-wide form-label stretch rule within search fields. */
+.post-filters.list-filters .list-filter-field > label { align-items: center; }
 .list-filter-field > label > :is(input,select) { width: 150px; min-width: 0; }
 .list-filter-field > label > input[type=date] { width: 160px; }
 .list-filter-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
