@@ -5,6 +5,34 @@ const id = '9007199254740993';
 const type = {id, name: '测试字典', code: 'test_dict', status: '0', remark: ''};
 const values = [{value: '0', label: '正常', style: 'SUCCESS', defaultEntry: true}, {value: '1', label: '停用', style: 'DANGER', defaultEntry: false}];
 
+test('table pagination labels stay centered with their controls on desktop and mobile', async ({page}, info) => {
+  await page.route('**/api/v1/system/dictionaries?*', route => {
+    const query = new URL(route.request().url()).searchParams;
+    return route.fulfill({json: {items: [type], total: 45, page: Number(query.get('page')), pageSize: Number(query.get('pageSize'))}});
+  });
+  await authenticate(page, ['system:dict:list']);
+  const pagination = page.locator('.post-pagination');
+  for (const width of [1920, 1280, 390]) {
+    await page.setViewportSize({width, height: 1000});
+    await expect(pagination).toBeVisible();
+    for (const name of ['每页条数', '跳至页码']) {
+      const metrics = await pagination.getByLabel(name, {exact: true}).evaluate(control => {
+        const label = control.closest('label')!;
+        const text = label.querySelector('span')!.getBoundingClientRect(), box = control.getBoundingClientRect();
+        return {offset: Math.abs(text.y + text.height / 2 - box.y - box.height / 2), gap: box.x - text.right, right: box.right};
+      });
+      expect(metrics.offset).toBeLessThanOrEqual(2);
+      expect(metrics.gap).toBeGreaterThanOrEqual(8);
+      expect(metrics.right).toBeLessThanOrEqual(width);
+    }
+    await pagination.screenshot({path: info.outputPath(`pagination-${width}.png`)});
+  }
+  await pagination.getByLabel('每页条数', {exact: true}).selectOption('20');
+  await pagination.getByLabel('跳至页码', {exact: true}).fill('2');
+  await pagination.getByRole('button', {name: '跳转', exact: true}).click();
+  await expect(pagination.getByText('共 45 条，第 2 页', {exact: true})).toBeVisible();
+});
+
 test('dictionary search fields align independently across desktop wrapping and mobile', async ({page}, info) => {
   await page.route('**/api/v1/system/dictionaries?*', route => route.fulfill({json: {items: [type], total: 1, page: 1, pageSize: 10}}));
   await authenticate(page, ['system:dict:list']);

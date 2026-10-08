@@ -26,7 +26,7 @@ export function PaginationNavigation({page, pageSize, total, disabled, onChange}
     {numbers.map(value => <Button key={value} label={`第 ${value} 页`} size="sm" variant="ghost" aria-current={value === page ? 'page' : undefined} isDisabled={disabled} onClick={() => select(value)} />)}
     {end < last ? <>{end < last - 1 ? <span aria-hidden="true">…</span> : null}<Button label={`第 ${last} 页`} size="sm" variant="ghost" aria-current={page === last ? 'page' : undefined} isDisabled={disabled} onClick={() => select(last)} /></> : null}
     <form key={page} onSubmit={event => {event.preventDefault(); const form = event.currentTarget; if (form.reportValidity()) select(Number(new FormData(form).get('page')));}}>
-      <label>跳至页码<NativeInput aria-label="跳至页码" name="page" type="number" min={1} max={last} step={1} required defaultValue={page} disabled={disabled} /></label>
+      <label className="pagination-field"><span>跳至页码</span><NativeInput aria-label="跳至页码" name="page" type="number" min={1} max={last} step={1} required defaultValue={page} disabled={disabled} /></label>
       <Button label="跳转" size="sm" variant="ghost" type="submit" isDisabled={disabled} />
     </form>
   </nav>;

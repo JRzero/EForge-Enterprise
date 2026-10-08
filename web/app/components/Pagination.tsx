@@ -30,7 +30,7 @@ export function Pagination({page, pageSize, total, loading, busy = false, onPage
     onPage(value); scroll();
   }
   return <div ref={root} className="post-pagination"><span>共 {total ?? 0} {unit}，第 {page} 页</span>
-    <label>{sizeLabel}<Select aria-label={sizeLabel} value={pageSize} disabled={busy} onChange={event => {
+    <label className="pagination-field"><span>{sizeLabel}</span><Select aria-label={sizeLabel} value={pageSize} disabled={busy} onChange={event => {
       const size = Number(event.target.value); if (busy || size === pageSize) return; onSize(size); onPage(1); scroll();
     }}>{[...new Set([10, 20, 30, 50, 100, pageSize])].sort((a, b) => a - b).map(size => <option key={size} value={size}>{size}</option>)}</Select></label>
     <Button label={previousLabel} variant="secondary" isDisabled={busy || loading || page <= 1} onClick={() => move(page - 1)} />

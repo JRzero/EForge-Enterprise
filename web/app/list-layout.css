@@ -21,6 +21,10 @@
 .list-filter-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .list-toolbar { margin: 0 0 16px; gap: 8px; }
 .list-page-body table { border-left: 0; border-right: 0; }
+.pagination-field, .posts-page label.pagination-field { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; margin: 0; white-space: nowrap; }
+.posts-page .post-pagination label.pagination-field { align-items: center; }
+.pagination-field > span { flex-shrink: 0; }
+.pagination-field > :is(input,select) { margin: 0; }
 .brand-mark.eforge-logo { display: block; object-fit: contain; background: transparent; border-radius: 0; flex-shrink: 0; }
 .auth-brand .eforge-logo { width: 34px; height: 34px; }
 .login-card .captcha-row { grid-template-columns: minmax(0,1fr) 110px; align-items: end; gap: 12px; }

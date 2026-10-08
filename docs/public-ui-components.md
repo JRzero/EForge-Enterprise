@@ -179,3 +179,11 @@ wrapping/spacing and viewport bounds at 1920, 1280 and 390 px, plus reset.
 All 15 related dictionary/log/component/front-template browser tests pass.
 The frontend unit suite (126 tests) and generated-client reproducibility pass.
 This change is confined to frontend layout; no backend service was restarted.
+
+The shared pagination size/jump labels now use an explicit `pagination-field`
+layout with separate text spans. Its alignment overrides the legacy form-label
+stretch rule on list pages and also works outside the administrative shell.
+Browser checks at 1920/1280/390 px verify text/control centers, spacing and
+bounds, then change page size and submit a page jump. All 15 related dictionary,
+log and standalone-template tests pass; screenshots are under the ignored
+`web/test-results/pagination-layout` directory.
