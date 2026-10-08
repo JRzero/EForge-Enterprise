@@ -3,6 +3,10 @@ import type {NavigationNode} from '../generated/api';
 import {toEForgePermissions} from './permissions';
 import {menuQueryHref} from './menu-query';
 export interface NavigationItem {key: string; label: string; href?: string; external?: boolean; icon?: string; path?: string; cached?: boolean; queryError?: boolean; children: NavigationItem[]}
+/** Count actionable entries after permission, route and URL projection. Groups have no href. */
+export function countNavigationEntries(items: readonly NavigationItem[]): number {
+  return items.reduce((total, item) => total + (item.href ? 1 : 0) + countNavigationEntries(item.children), 0);
+}
 export function projectNavigation(nodes: NavigationNode[], routes: readonly AppRouteRecord[], permissions: readonly string[],
   diagnostic: (message: string) => void = message => console.warn(message)): NavigationItem[] {
   const registry = new Map(routes.map(route => [route.id, route]));

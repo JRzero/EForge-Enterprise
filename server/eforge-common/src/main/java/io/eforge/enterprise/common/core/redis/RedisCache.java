@@ -1,5 +1,6 @@
 package io.eforge.enterprise.common.core.redis;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.connection.ReturnType;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +28,122 @@ public class RedisCache
 {
     @Autowired
     public RedisTemplate redisTemplate;
+
+    private static final byte[] READ_EXPIRING_SNAPSHOT = """
+            local value = redis.call('GET', KEYS[1])
+            if not value then return {} end
+            local ttl = redis.call('PTTL', KEYS[1])
+            if ttl <= 0 then return {} end
+            return {value, tostring(ttl)}
+            """.getBytes(StandardCharsets.UTF_8);
+
+    private static final byte[] CREATE_EXPIRING_VALUE = """
+            if redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2], 'NX') then
+                return 1
+            end
+            return 0
+            """.getBytes(StandardCharsets.UTF_8);
+
+    private static final byte[] COMPARE_AND_SET_EXPIRING_VALUE = """
+            local current = redis.call('GET', KEYS[1])
+            if not current or current ~= ARGV[1] then return 0 end
+            local ttl = redis.call('PTTL', KEYS[1])
+            if ttl <= 0 then return 0 end
+            redis.call('SET', KEYS[1], ARGV[2], 'PX', ttl)
+            return 1
+            """.getBytes(StandardCharsets.UTF_8);
+
+    private static final byte[] RENEW_EXPIRING_VALUE = """
+            local ttl = redis.call('PTTL', KEYS[1])
+            if ttl <= 0 then return ttl end
+            if ttl <= tonumber(ARGV[2]) then
+                redis.call('PEXPIRE', KEYS[1], ARGV[1])
+                return tonumber(ARGV[1])
+            end
+            return ttl
+            """.getBytes(StandardCharsets.UTF_8);
+
+    /** Exact stored bytes and remaining TTL, read in one Redis operation. */
+    public record CacheSnapshot<T>(T value, byte[] bytes, long ttlMillis)
+    {
+        public CacheSnapshot
+        {
+            bytes = bytes.clone();
+        }
+
+        @Override
+        public byte[] bytes()
+        {
+            return bytes.clone();
+        }
+    }
+
+    public <T> CacheSnapshot<T> getExpiringCacheSnapshot(final String key)
+    {
+        List<Object> result = (List<Object>) redisTemplate.execute((RedisCallback<List<Object>>) connection ->
+                connection.scriptingCommands().eval(READ_EXPIRING_SNAPSHOT, ReturnType.MULTI, 1, serializeKey(key)));
+        // Drivers may represent an empty/nil MULTI result differently. A
+        // missing session is ordinary absence, not a deserialization failure.
+        if (result == null || result.size() < 2 || result.get(0) == null || result.get(1) == null)
+        {
+            return null;
+        }
+        byte[] bytes = (byte[]) result.get(0);
+        long ttl = Long.parseLong(new String((byte[]) result.get(1), StandardCharsets.UTF_8));
+        T value = (T) redisTemplate.getValueSerializer().deserialize(bytes);
+        return new CacheSnapshot<>(value, bytes, ttl);
+    }
+
+    /** Use the configured serializer; optimistic updates must compare the original bytes. */
+    public byte[] serializeCacheObject(final Object value)
+    {
+        return ((RedisSerializer) redisTemplate.getValueSerializer()).serialize(value);
+    }
+
+    /** Only login/session creation may insert a previously absent key. */
+    public boolean createExpiringCacheObject(final String key, final byte[] value, final long ttlMillis)
+    {
+        if (ttlMillis <= 0)
+        {
+            throw new IllegalArgumentException("A positive cache TTL is required");
+        }
+        Long result = (Long) redisTemplate.execute((RedisCallback<Long>) connection ->
+                connection.scriptingCommands().eval(CREATE_EXPIRING_VALUE, ReturnType.INTEGER, 1,
+                        serializeKey(key), value, numberBytes(ttlMillis)));
+        return Long.valueOf(1).equals(result);
+    }
+
+    /** Replace only the exact observed value, preserving the TTL atomically at write time. */
+    public boolean compareAndSetExpiringCacheObject(final String key, final byte[] expected, final byte[] value)
+    {
+        if (expected == null)
+        {
+            return false;
+        }
+        Long result = (Long) redisTemplate.execute((RedisCallback<Long>) connection ->
+                connection.scriptingCommands().eval(COMPARE_AND_SET_EXPIRING_VALUE, ReturnType.INTEGER, 1,
+                        serializeKey(key), expected, value));
+        return Long.valueOf(1).equals(result);
+    }
+
+    /** Extend only an existing TTL. No caller-provided object or authorization is written. */
+    public long renewExpiringCacheObject(final String key, final long ttlMillis, final long thresholdMillis)
+    {
+        Long result = (Long) redisTemplate.execute((RedisCallback<Long>) connection ->
+                connection.scriptingCommands().eval(RENEW_EXPIRING_VALUE, ReturnType.INTEGER, 1,
+                        serializeKey(key), numberBytes(ttlMillis), numberBytes(thresholdMillis)));
+        return result == null ? -2 : result;
+    }
+
+    private byte[] serializeKey(String key)
+    {
+        return ((RedisSerializer) redisTemplate.getKeySerializer()).serialize(key);
+    }
+
+    private static byte[] numberBytes(long value)
+    {
+        return Long.toString(value).getBytes(StandardCharsets.UTF_8);
+    }
 
     /**
      * 缓存基本的对象，Integer、String、实体类等

@@ -3,7 +3,6 @@ package io.eforge.enterprise.framework.web.service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,9 +70,7 @@ public class TokenService
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                String userKey = getTokenKey(uuid);
-                LoginUser user = redisCache.getCacheObject(userKey);
-                return user;
+                return getLoginUserByToken(uuid);
             }
             catch (Exception e)
             {
@@ -84,14 +81,56 @@ public class TokenService
     }
 
     /**
-     * 设置用户身份信息
+     * Read the persisted snapshot and TTL together. The original bytes are kept
+     * only on this request object, so later profile/bootstrap writes can detect
+     * authorization changes made after the request started.
+     */
+    public LoginUser getLoginUserByToken(String token)
+    {
+        if (StringUtils.isEmpty(token))
+        {
+            return null;
+        }
+        RedisCache.CacheSnapshot<LoginUser> snapshot = redisCache.getExpiringCacheSnapshot(getTokenKey(token));
+        if (snapshot == null || snapshot.value() == null || !token.equals(snapshot.value().getToken()))
+        {
+            return null;
+        }
+        LoginUser loginUser = snapshot.value();
+        loginUser.rememberCacheSnapshot(snapshot.bytes());
+        // Redis TTL is authoritative; TTL-only renewal never rewrites the JSON.
+        loginUser.setExpireTime(System.currentTimeMillis() + snapshot.ttlMillis());
+        return loginUser;
+    }
+
+    /**
+     * Compatibility entry point for updating an existing request snapshot.
+     * A stale, expired or logged-out session is deliberately never recreated.
      */
     public void setLoginUser(LoginUser loginUser)
     {
-        if (StringUtils.isNotNull(loginUser) && StringUtils.isNotEmpty(loginUser.getToken()))
+        updateLoginUser(loginUser);
+    }
+
+    /**
+     * Conditionally persist content without extending its remaining lifetime.
+     * Callers that require authoritative permission propagation must reread and
+     * recompute after a conflict; ordinary stale request updates are discarded.
+     */
+    public boolean updateLoginUser(LoginUser loginUser)
+    {
+        if (loginUser == null || StringUtils.isEmpty(loginUser.getToken()) || loginUser.cacheSnapshot() == null)
         {
-            refreshToken(loginUser);
+            return false;
         }
+        byte[] value = redisCache.serializeCacheObject(loginUser);
+        boolean updated = redisCache.compareAndSetExpiringCacheObject(getTokenKey(loginUser.getToken()),
+                loginUser.cacheSnapshot(), value);
+        if (updated)
+        {
+            loginUser.rememberCacheSnapshot(value);
+        }
+        return updated;
     }
 
     /**
@@ -117,12 +156,20 @@ public class TokenService
         String token = IdUtils.fastUUID();
         loginUser.setToken(token);
         setUserAgent(loginUser);
-        refreshToken(loginUser);
+        loginUser.setLoginTime(System.currentTimeMillis());
+        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, token);
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
-        return createToken(claims);
+        String jwt = createToken(claims);
+        byte[] value = redisCache.serializeCacheObject(loginUser);
+        if (!redisCache.createExpiringCacheObject(getTokenKey(token), value, expireTime * MILLIS_MINUTE))
+        {
+            throw new IllegalStateException("Could not create a unique login session");
+        }
+        loginUser.rememberCacheSnapshot(value);
+        return jwt;
     }
 
     /**
@@ -133,11 +180,11 @@ public class TokenService
      */
     public void verifyToken(LoginUser loginUser)
     {
-        long expireTime = loginUser.getExpireTime();
+        Long expiresAt = loginUser.getExpireTime();
         long currentTime = System.currentTimeMillis();
-        if (expireTime - currentTime <= MILLIS_MINUTE_TWENTY)
+        if (expiresAt == null || expiresAt - currentTime <= MILLIS_MINUTE_TWENTY)
         {
-            refreshToken(loginUser);
+            renewLifetime(loginUser, MILLIS_MINUTE_TWENTY);
         }
     }
 
@@ -148,11 +195,22 @@ public class TokenService
      */
     public void refreshToken(LoginUser loginUser)
     {
-        loginUser.setLoginTime(System.currentTimeMillis());
-        loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
-        // 根据uuid将loginUser缓存
-        String userKey = getTokenKey(loginUser.getToken());
-        redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
+        // Kept for upstream callers. Content changes use setLoginUser instead.
+        renewLifetime(loginUser, Long.MAX_VALUE);
+    }
+
+    private void renewLifetime(LoginUser loginUser, long thresholdMillis)
+    {
+        if (loginUser == null || StringUtils.isEmpty(loginUser.getToken()))
+        {
+            return;
+        }
+        long ttl = redisCache.renewExpiringCacheObject(getTokenKey(loginUser.getToken()),
+                expireTime * MILLIS_MINUTE, thresholdMillis);
+        if (ttl > 0)
+        {
+            loginUser.setExpireTime(System.currentTimeMillis() + ttl);
+        }
     }
 
     /**
@@ -232,7 +290,9 @@ public class TokenService
     }
 
     /**
-     * 角色权限变更后，刷新所有持有该角色的在线用户权限
+     * Compatibility fallback for external callers of the imported API.
+     * Canonical and legacy controllers use the committed authoritative refresher.
+     * A caller without that DB snapshot can safely revoke, never publish cached roles.
      *
      * @param roleId            变更的角色ID
      * @param permissionService 权限服务
@@ -248,7 +308,7 @@ public class TokenService
         }
         for (String key : keys)
         {
-            LoginUser loginUser = redisCache.getCacheObject(key);
+            LoginUser loginUser = getLoginUserByToken(key.substring(CacheConstants.LOGIN_TOKEN_KEY.length()));
             if (loginUser == null || loginUser.getUser() == null || loginUser.getUser().isAdmin())
             {
                 // 管理员拥有所有权限，跳过
@@ -261,10 +321,8 @@ public class TokenService
             {
                 continue;
             }
-            // 刷新权限缓存
-            loginUser.setPermissions(permissionService.getMenuPermission(loginUser.getUser()));
-            refreshToken(loginUser);
-            log.info("角色[{}]权限变更，已刷新在线用户[{}]的权限缓存", roleId, loginUser.getUsername());
+            delLoginUser(loginUser.getToken());
+            log.info("角色[{}]权限变更，已撤销在线用户[{}]的旧权限会话", roleId, loginUser.getUsername());
         }
     }
 }

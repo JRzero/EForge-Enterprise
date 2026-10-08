@@ -1,9 +1,13 @@
 package io.eforge.enterprise.web.controller.system;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +25,18 @@ import io.eforge.enterprise.common.core.domain.entity.SysRole;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.page.TableDataInfo;
 import io.eforge.enterprise.common.enums.BusinessType;
+import io.eforge.enterprise.common.exception.ApiFailure;
+import io.eforge.enterprise.common.exception.ServiceException;
 import io.eforge.enterprise.common.utils.poi.ExcelUtil;
-import io.eforge.enterprise.framework.web.service.SysPermissionService;
-import io.eforge.enterprise.framework.web.service.TokenService;
 import io.eforge.enterprise.system.domain.SysUserRole;
 import io.eforge.enterprise.system.service.ISysDeptService;
 import io.eforge.enterprise.system.service.ISysRoleService;
 import io.eforge.enterprise.system.service.ISysUserService;
+import io.eforge.enterprise.system.mapper.DepartmentMutationMapper;
+import io.eforge.enterprise.system.mapper.RoleSelectionMapper;
+import io.eforge.enterprise.web.controller.api.v1.system.RoleService;
+import io.eforge.enterprise.web.controller.api.v1.system.RoleSessionRefresher;
+import io.eforge.enterprise.web.controller.api.v1.system.RoleContracts.RoleUsersRequest;
 
 /**
  * 角色信息
@@ -42,16 +51,22 @@ public class SysRoleController extends BaseController
     private ISysRoleService roleService;
 
     @Autowired
-    private TokenService tokenService;
+    private RoleSessionRefresher sessions;
 
     @Autowired
-    private SysPermissionService permissionService;
+    private RoleSelectionMapper selections;
+
+    @Autowired
+    private DepartmentMutationMapper mutations;
 
     @Autowired
     private ISysUserService userService;
 
     @Autowired
     private ISysDeptService deptService;
+
+    @Autowired
+    private RoleService roleAssignments;
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
@@ -110,8 +125,10 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @Transactional
     public AjaxResult edit(@Validated @RequestBody SysRole role)
     {
+        lockIdentityMutations();
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
         if (!roleService.checkRoleNameUnique(role))
@@ -127,7 +144,7 @@ public class SysRoleController extends BaseController
         if (roleService.updateRole(role) > 0)
         {
             // 刷新所有持有该角色的在线用户权限
-            tokenService.refreshPermissionByRoleId(role.getRoleId(), permissionService);
+            sessions.refreshAfterCommit(Set.copyOf(selections.userIds(role.getRoleId())));
             return success();
         }
         return error("修改角色'" + role.getRoleName() + "'失败，请联系管理员");
@@ -139,11 +156,15 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/dataScope")
+    @Transactional
     public AjaxResult dataScope(@RequestBody SysRole role)
     {
+        lockIdentityMutations();
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
-        return toAjax(roleService.authDataScope(role));
+        int rows = roleService.authDataScope(role);
+        if (rows > 0) sessions.refreshAfterCommit(Set.copyOf(selections.userIds(role.getRoleId())));
+        return toAjax(rows);
     }
 
     /**
@@ -152,12 +173,16 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
+    @Transactional
     public AjaxResult changeStatus(@RequestBody SysRole role)
     {
+        lockIdentityMutations();
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
         role.setUpdateBy(getUsername());
-        return toAjax(roleService.updateRoleStatus(role));
+        int rows = roleService.updateRoleStatus(role);
+        if (rows > 0) sessions.refreshAfterCommit(Set.copyOf(selections.userIds(role.getRoleId())));
+        return toAjax(rows);
     }
 
     /**
@@ -166,9 +191,15 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:remove')")
     @Log(title = "角色管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{roleIds}")
+    @Transactional
     public AjaxResult remove(@PathVariable Long[] roleIds)
     {
-        return toAjax(roleService.deleteRoleByIds(roleIds));
+        lockIdentityMutations();
+        Set<Long> affected = new HashSet<>();
+        for (Long roleId : roleIds) affected.addAll(selections.userIds(roleId));
+        int rows = roleService.deleteRoleByIds(roleIds);
+        if (rows > 0) sessions.refreshAfterCommit(affected);
+        return toAjax(rows);
     }
 
     /**
@@ -213,7 +244,8 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/cancel")
     public AjaxResult cancelAuthUser(@RequestBody SysUserRole userRole)
     {
-        return toAjax(roleService.deleteAuthUser(userRole));
+        if (userRole == null) return AjaxResult.error(400, "用户和角色编号无效");
+        return changeAssignedUsers(userRole.getRoleId(), new Long[] { userRole.getUserId() }, false);
     }
 
     /**
@@ -224,7 +256,7 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/cancelAll")
     public AjaxResult cancelAuthUserAll(Long roleId, Long[] userIds)
     {
-        return toAjax(roleService.deleteAuthUsers(roleId, userIds));
+        return changeAssignedUsers(roleId, userIds, false);
     }
 
     /**
@@ -235,8 +267,30 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/selectAll")
     public AjaxResult selectAuthUserAll(Long roleId, Long[] userIds)
     {
-        roleService.checkRoleDataScope(roleId);
-        return toAjax(roleService.insertAuthUsers(roleId, userIds));
+        return changeAssignedUsers(roleId, userIds, true);
+    }
+
+    /** Keep all compatibility allocation writes behind the canonical object/transaction boundary. */
+    private AjaxResult changeAssignedUsers(Long roleId, Long[] userIds, boolean assign)
+    {
+        if (roleId == null || roleId < 1 || userIds == null || userIds.length == 0 || userIds.length > 100
+                || Arrays.stream(userIds).anyMatch(id -> id == null || id < 1))
+            return AjaxResult.error(400, "用户和角色编号无效");
+        try
+        {
+            roleAssignments.users(roleId.toString(), new RoleUsersRequest(Arrays.stream(userIds).map(Object::toString).toList()), assign);
+            return success();
+        }
+        catch (ApiFailure failure)
+        {
+            // Preserve the legacy envelope while retaining the canonical safe error status.
+            return AjaxResult.error(failure.status(), failure.getMessage());
+        }
+    }
+
+    private void lockIdentityMutations()
+    {
+        if (mutations.lockRoot() == null) throw new ServiceException("根部门不存在", 409);
     }
 
     /**

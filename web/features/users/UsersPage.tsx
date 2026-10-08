@@ -8,7 +8,7 @@ import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState}
 import {PageHeader, PermissionGate} from '@eforge/patterns';
 import {Button, Checkbox, Input} from '@eforge/ui';
 import type {DepartmentResponse, PageResponseUserResponse, UserResponse, UserWriteRequest, UserOptionsResponseRead, UserOption, UserImportResponse} from '../../generated/api';
-import {useApi, useBootstrap} from '../../app/context';
+import {useApi, useApplicationControls, useBootstrap} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {PasswordField} from '../../app/components/PasswordField';
 import {ApiError, errorMessage} from '../../integration/errors';
@@ -17,7 +17,7 @@ import {departmentTree, searchedDepartmentTree} from '../departments/tree';
 const emptyFilters = {username: '', phone: '', status: '', beginDate: '', endDate: '', departmentId: undefined as string | undefined};
 const emptyUser: UserWriteRequest = {username: '', displayName: '', email: '', phone: '', sex: '2', status: '0', remark: '', roleIds: [], postIds: []};
 const columnLabels = {id: '用户编号', username: '登录账号', displayName: '用户昵称', departmentName: '部门', phone: '手机号码', status: '状态', createdAt: '创建时间'};
-type Editor = {id?: string; form: UserWriteRequest; password: string; options: UserOptionsResponseRead};
+type Editor = {id?: string; form: UserWriteRequest; password: string; initial: string; options: UserOptionsResponseRead};
 type Action = {kind: 'delete'; ids: string[]} | {kind: 'status'; user: UserResponse} | {kind: 'password'; user: UserResponse; password: string} | {kind: 'roles'; user: UserResponse; ids: string[]; options: UserOption[]};
 
 function Choices({label, options, selected, disabled, onChange}: {label: string; options: UserOption[]; selected: string[]; disabled: boolean; onChange: (ids: string[]) => void}) {
@@ -32,7 +32,7 @@ function Choices({label, options, selected, disabled, onChange}: {label: string;
 
 export function UsersPage() {
   const statusDictionary = useDictionary('sys_normal_disable'), sexDictionary = useDictionary('sys_user_sex');
-  const api = useApi(); const bootstrap = useBootstrap();
+  const api = useApi(); const bootstrap = useBootstrap(); const {setPageDirty} = useApplicationControls();
   const [draft, setDraft] = useState(emptyFilters); const [filters, setFilters] = useState(emptyFilters);
   const [showFilters, setShowFilters] = useState(true); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10);
   const [version, setVersion] = useState(0); const [data, setData] = useState<PageResponseUserResponse | null>(null);
@@ -42,8 +42,14 @@ export function UsersPage() {
   const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [feedback, setFeedback] = useState('');
   const [selection, setSelection] = useState<RowSelectionState>({}); const [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<Editor | null>(null); const [action, setAction] = useState<Action | null>(null);
+  const [discardEditor, setDiscardEditor] = useState(false);
   const [busy, setBusy] = useState(false); const [actionError, setActionError] = useState(''); const [parentSearch, setParentSearch] = useState('');
   const [importing, setImporting] = useState<{file: File | null; updateExisting: boolean; result: UserImportResponse | null} | null>(null);
+  const editorDirty = !!editor && editor.initial !== JSON.stringify([editor.form, editor.password]);
+  useEffect(() => {
+    setPageDirty?.(editorDirty);
+    // Do not clear on Activity cleanup: a hidden cached editor still owns its draft.
+  }, [editorDirty, setPageDirty]);
 
   const read=useRetainedRead();
   useEffect(() => {
@@ -69,7 +75,9 @@ export function UsersPage() {
         departmentId: detail.user.departmentId, email: detail.user.email ?? '', phone: detail.user.phone ?? '',
         sex: detail.user.sex || '2', status: detail.user.status, remark: detail.user.remark ?? '', roleIds: detail.roleIds, postIds: detail.postIds}
         : {...emptyUser, departmentId: filters.departmentId, roleIds: [], postIds: []};
-      setEditor({id, form, password: id ? '' : options.initialPassword, options});
+      const password = id ? '' : options.initialPassword;
+      setDiscardEditor(false);
+      setEditor({id, form, password, initial: JSON.stringify([form, password]), options});
     } catch (cause) { setActionError(errorMessage(cause)); }
     finally { setBusy(false); }
   }, [api, filters.departmentId]);
@@ -102,7 +110,12 @@ export function UsersPage() {
     </div>}
   ], [busy, data, loading, selection, openEditor, openRoles, statusDictionary.options]);
   function refresh(message = '') { setFeedback(message); setSelection({}); setVersion(value => value + 1); }
-  function close() { setEditor(null); setAction(null); setImporting(null); setActionError(''); }
+  function close() { setEditor(null); setDiscardEditor(false); setAction(null); setImporting(null); setActionError(''); }
+  function cancelEditor() {
+    if (busy) return;
+    if (editorDirty) setDiscardEditor(true);
+    else close();
+  }
   function validPassword(password: string) { return password.length >= 5 && password.length <= 20 && !/[<>"'|\\]/.test(password); }
   async function save(event: FormEvent) {
     event.preventDefault(); if (!editor || busy) return;
@@ -186,7 +199,11 @@ export function UsersPage() {
       <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无用户" pagination={false} sortable={false} showColumnVisibility={false} rowSelection={selection} columnVisibility={visibility} getRowId={row => row.id} /></div>
       <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     </div></div>
-    {editor ? <ResourceDialog titleId="user-editor-title" busy={busy} onCancel={close}><h2 id="user-editor-title">{editor.id ? '修改用户' : '新增用户'}</h2><form noValidate onSubmit={event => { void save(event); }}>
+    {editor ? <ResourceDialog titleId="user-editor-title" busy={busy} onCancel={cancelEditor}><h2 id="user-editor-title">{editor.id ? '修改用户' : '新增用户'}</h2>
+      {discardEditor ? <div role="alert"><p>有未保存的修改，是否放弃？</p>
+        <Button label="继续编辑" isDisabled={busy} onClick={()=>setDiscardEditor(false)} />
+        <Button label="放弃修改" variant="secondary" isDisabled={busy} onClick={close} />
+      </div> : null}<form noValidate onSubmit={event => { void save(event); }}>
       <Input label="登录账号" value={editor.form.username} isDisabled={busy || !!editor.id} aria-required="true" onChange={username => setEditor({...editor, form: {...editor.form, username}})} />
       <Input label="用户昵称" value={editor.form.displayName} isDisabled={busy} aria-required="true" onChange={displayName => setEditor({...editor, form: {...editor.form, displayName}})} />
       {!editor.id ? <PasswordField label="用户密码" autoComplete="new-password" value={editor.password} isDisabled={busy} aria-required="true" onChange={password => setEditor({...editor, password})} /> : null}
@@ -196,7 +213,7 @@ export function UsersPage() {
       <label>用户性别<select aria-label="用户性别" value={editor.form.sex} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sex: event.target.value}})}><DictionaryOptions options={sexDictionary.options} current={editor.form.sex} /></select></label>
       <label>用户状态<select aria-label="用户状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
       <Choices label="岗位" options={editor.options.posts} selected={editor.form.postIds} disabled={busy} onChange={postIds => setEditor({...editor, form: {...editor.form, postIds}})} /><Choices label="角色" options={editor.options.roles} selected={editor.form.roleIds} disabled={busy} onChange={roleIds => setEditor({...editor, form: {...editor.form, roleIds}})} />
-      <label>备注<textarea aria-label="备注" maxLength={500} value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="保存用户" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={close} /></div>
+      <label>备注<textarea aria-label="备注" maxLength={500} value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>{actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="保存用户" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={cancelEditor} /></div>
     </form></ResourceDialog> : null}
     {action ? <ResourceDialog titleId="user-action-title" alert={action.kind === 'delete' || action.kind === 'status'} busy={busy} onCancel={close}><h2 id="user-action-title">{action.kind === 'delete' ? '确认删除用户' : action.kind === 'status' ? `确认${action.user.status === '0' ? '停用' : '启用'}用户` : action.kind === 'password' ? '重置用户密码' : '分配用户角色'}</h2>
       {action.kind === 'delete' ? <p>将删除所选的 {action.ids.length} 个用户。超级管理员和当前登录用户不能删除。</p> : <p>登录账号：{action.user.username}</p>}
