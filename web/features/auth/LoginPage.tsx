@@ -1,5 +1,7 @@
+import {NativeButton, NativeInput} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {useEffect, useRef, useState, type FormEvent} from 'react';
-import {Button, Input} from '@eforge/ui';
+import {Button, Input} from '../../ui/controls';
 import type {SessionRuntime} from '../../integration/session';
 import type {CaptchaChallenge} from '../../integration/legacy-auth';
 import {errorMessage} from '../../integration/errors';
@@ -70,23 +72,23 @@ export function LoginPage({runtime, onRegister}: {runtime: SessionRuntime; onReg
   }
   return <AuthenticationLayout>
       <p className="eyebrow">欢迎回来</p><h2>登录工作空间</h2><p className="muted">使用你的企业账号继续。</p>
-      <form onSubmit={event => { void submit(event); }}>
+      <PageForm onSubmit={event => { void submit(event); }}>
         <Input label="账号" htmlName="username" autoComplete="username" value={username} onChange={value=>{credentialEdited.current=true;setUsername(value);}}
           aria-required="true" isDisabled={busy} />
         <Input label="密码" htmlName="password" type="password" autoComplete="current-password" value={password}
           onChange={value=>{credentialEdited.current=true;setPassword(value);}} aria-required="true" isDisabled={busy} />
         {challenge?.enabled ? <div className="captcha-row">
           <Input label="验证码" htmlName="code" value={code} onChange={setCode} aria-required="true" isDisabled={busy} />
-          <button type="button" className="captcha-image" title="点击更换验证码" onClick={refreshCaptcha} disabled={busy} aria-label="更换验证码">
+          <NativeButton type="button" className="captcha-image" title="点击更换验证码" onClick={refreshCaptcha} disabled={busy} aria-label="更换验证码">
             <img src={challenge.image} alt="登录验证码" /><span>换一张</span>
-          </button></div> : null}
-        <label className="login-remember"><input type="checkbox" checked={remember} disabled={busy || !rememberReady} onChange={event=>changeRemember(event.target.checked)} />在此浏览器记住密码（30天）</label>
+          </NativeButton></div> : null}
+        <label className="login-remember"><NativeInput type="checkbox" checked={remember} disabled={busy || !rememberReady} onChange={event=>changeRemember(event.target.checked)} />在此浏览器记住密码（30天）</label>
         {rememberFeedback ? <p role="status">{rememberFeedback}</p> : null}
         {rememberError ? <p role="alert" className="form-error">{rememberError}</p> : null}
         {captchaError ? <div role="alert"><p>{captchaError}</p><Button label="重新获取验证码" onClick={refreshCaptcha} variant="ghost" /></div> : null}
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <Button label={busy ? '正在登录…' : captchaLoading ? '准备中…' : '登录'} type="submit"
           isDisabled={busy || captchaLoading || !challenge || !rememberReady} />
-      </form>{registrationEnabled && onRegister ? <a href="/register" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onRegister();}}}>注册账号</a> : null}<p className="login-help">账号遇到问题？请联系企业管理员。</p>
+      </PageForm>{registrationEnabled && onRegister ? <a href="/register" onClick={event=>{if(busy){event.preventDefault();return;}if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){event.preventDefault();onRegister();}}}>注册账号</a> : null}<p className="login-help">账号遇到问题？请联系企业管理员。</p>
   </AuthenticationLayout>;
 }

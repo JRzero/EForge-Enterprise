@@ -1,5 +1,6 @@
+import {NativeInput} from '../../ui/native';
 import {useEffect, useRef, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
@@ -50,7 +51,7 @@ export function AvatarDialog({avatarUrl, onCancel, onSaved}: {avatarUrl?: string
   return <ResourceDialog titleId="avatar-title" busy={busy} onCancel={onCancel}>
     <h2 id="avatar-title">修改头像</h2><p>选择图片后可拖动、缩放和旋转，预览将保存为 200 × 200 像素。</p>
     {error ? <p role="alert">{error}</p> : null}{loading ? <p role="status">正在读取图片…</p> : null}
-    <label className="avatar-file">选择头像图片<input type="file" accept=".png,.jpg,.jpeg,.gif,.bmp" disabled={busy} onChange={event => choose(event.target.files?.[0])} /></label>
+    <label className="avatar-file">选择头像图片<NativeInput type="file" accept=".png,.jpg,.jpeg,.gif,.bmp" disabled={busy} onChange={event => choose(event.target.files?.[0])} /></label>
     <div className="avatar-crops"><canvas ref={canvas} aria-label="头像裁剪区域" role="img"
       onPointerDown={event => { if (!image || busy) return; event.currentTarget.setPointerCapture(event.pointerId); drag.current = {x: event.clientX, y: event.clientY, startX: crop.x, startY: crop.y}; }}
       onPointerMove={event => {
@@ -63,9 +64,9 @@ export function AvatarDialog({avatarUrl, onCancel, onSaved}: {avatarUrl?: string
       }} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }} />
       <div><p>头像预览</p><canvas ref={preview} aria-label="头像预览" role="img" className="avatar-round" /></div></div>
     <fieldset disabled={busy || !image} className="avatar-settings"><legend>裁剪设置</legend>
-      <label>缩放<input type="range" min="1" max="3" step="0.1" value={crop.zoom} onChange={event => setCrop({...crop,zoom:Number(event.target.value)})} /></label>
-      <label>水平位置<input type="range" min="-100" max="100" value={crop.x} onChange={event => setCrop({...crop,x:Number(event.target.value)})} /></label>
-      <label>垂直位置<input type="range" min="-100" max="100" value={crop.y} onChange={event => setCrop({...crop,y:Number(event.target.value)})} /></label>
+      <label>缩放<NativeInput type="range" min="1" max="3" step="0.1" value={crop.zoom} onChange={event => setCrop({...crop,zoom:Number(event.target.value)})} /></label>
+      <label>水平位置<NativeInput type="range" min="-100" max="100" value={crop.x} onChange={event => setCrop({...crop,x:Number(event.target.value)})} /></label>
+      <label>垂直位置<NativeInput type="range" min="-100" max="100" value={crop.y} onChange={event => setCrop({...crop,y:Number(event.target.value)})} /></label>
       <div className="post-row-actions"><Button label="向左旋转" onClick={() => setCrop({...crop,rotation:crop.rotation-90})} />
         <Button label="向右旋转" onClick={() => setCrop({...crop,rotation:crop.rotation+90})} /><Button label="重置裁剪" onClick={() => setCrop(initialCrop)} /></div>
     </fieldset><div className="post-row-actions"><Button label={busy ? '正在保存头像…' : '保存头像'} isDisabled={busy || !image || loading} onClick={() => { void save(); }} />

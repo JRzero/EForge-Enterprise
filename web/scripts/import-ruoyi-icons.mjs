@@ -36,5 +36,5 @@ const icons = paths.map(path => {
 writeFileSync(resolve(directory, 'LICENSE'), git('show', `${commit}:LICENSE`));
 mkdirSync(resolve(root, 'features/menus'), {recursive: true});
 writeFileSync(resolve(root, 'features/menus/icons.json'), JSON.stringify({repository: 'https://github.com/yangzongzhuan/RuoYi-Vue', commit, release: 'v3.9.2', normalization: 'Strip XML/external DTD and unused font stylesheet declarations; add a numeric viewBox when missing; repair the duplicate closing path tag in button.svg; preserve original glyph paths.', icons}, null, 2) + '\n');
-writeFileSync(resolve(root, 'features/menus/icon-names.json'), JSON.stringify(icons.map(icon => icon.name)) + '\n');
+writeFileSync(resolve(root, 'ui/icon-names.json'), JSON.stringify(icons.map(icon => icon.name)) + '\n');
 console.log(`Imported ${icons.length} pinned MIT RuoYi SVG icons.`);

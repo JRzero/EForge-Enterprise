@@ -1,3 +1,4 @@
+import {NativeButton} from '../../ui/native';
 import {useRef, type ReactNode} from 'react';
 
 export function UploadEntries({paths, disabled, onChange, children}: {
@@ -13,7 +14,7 @@ export function UploadEntries({paths, disabled, onChange, children}: {
   }
   return <div ref={list} className="generated-upload-list">{paths.map((path, index) =>
     <div className="generated-upload-entry" key={`${index}-${path}`} data-upload-index={index}>
-      <button type="button" className="generated-upload-handle" disabled={disabled}
+      <NativeButton type="button" className="generated-upload-handle" disabled={disabled}
         aria-label={`拖动文件 ${index + 1} 排序`} title="拖动排序，或使用方向键调整顺序"
         onKeyDown={event => {
           if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
@@ -40,7 +41,7 @@ export function UploadEntries({paths, disabled, onChange, children}: {
           if (active?.pointer === event.pointerId) move(active.from, active.to);
         }}
         onPointerCancel={() => {drag.current = null;}}
-        onLostPointerCapture={() => {drag.current = null;}}>↕</button>
+        onLostPointerCapture={() => {drag.current = null;}}>↕</NativeButton>
       {children(path, index)}
     </div>)}</div>;
 }

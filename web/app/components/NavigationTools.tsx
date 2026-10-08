@@ -1,5 +1,5 @@
 import {useEffect, useId, useRef, useState, type MouseEvent} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {AppRouterAdapter, AppRouteRecord, RouteMatch} from '@eforge/app';
 import type {NavigationItem} from '../../integration/navigation';
 import {ResourceDialog} from './ResourceDialog';

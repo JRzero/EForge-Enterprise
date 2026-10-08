@@ -1,3 +1,4 @@
+import {NativeButton} from '../../ui/native';
 import {useEffect, useId, useLayoutEffect, useRef, type ReactNode} from 'react';
 import {useDialogGeometry} from './useDialogGeometry';
 
@@ -28,8 +29,8 @@ export function ResourceDialog({titleId, alert = false, busy, onCancel, children
       if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) onCancel();
     }}><span ref={caption} id={captionId} hidden/>{children}{adjustable?<>
       <span id={`${captionId}-geometry-help`} className="dialog-geometry-help">拖动标题或调整手柄。聚焦手柄后使用方向键，Shift 加速，Home 恢复默认位置和大小。</span>
-      <button type="button" className="dialog-move-handle" data-dialog-geometry="move" aria-label="移动弹窗" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↔</button>
-      <button type="button" className="dialog-width-handle" data-dialog-geometry="width" aria-label="调整弹窗宽度" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↔</button>
-      <button type="button" className="dialog-size-handle" data-dialog-geometry="size" aria-label="调整弹窗大小" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↘</button>
+      <NativeButton type="button" className="dialog-move-handle" data-dialog-geometry="move" aria-label="移动弹窗" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↔</NativeButton>
+      <NativeButton type="button" className="dialog-width-handle" data-dialog-geometry="width" aria-label="调整弹窗宽度" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↔</NativeButton>
+      <NativeButton type="button" className="dialog-size-handle" data-dialog-geometry="size" aria-label="调整弹窗大小" aria-describedby={`${captionId}-geometry-help`} disabled={busy}>↘</NativeButton>
     </>:null}</dialog>;
 }

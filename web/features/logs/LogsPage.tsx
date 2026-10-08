@@ -1,11 +1,12 @@
+import {Select, NativeInput} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {LoginLogResponse, OperationLogResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -96,9 +97,9 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
     <DictionaryNotice dictionary={statuses} />{types && <DictionaryNotice dictionary={types} />}
     {showFilters && <ListFilters actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
-      {operation && <label>操作类型<select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></select></label>}
-      <label>{operation ? '操作状态' : '登录状态'}<select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></select></label>
-      <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
+      {operation && <label>操作类型<Select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></Select></label>}
+      <label>{operation ? '操作状态' : '登录状态'}<Select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>
+      <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
       </ListFilters>}
     <ListToolbar ><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}

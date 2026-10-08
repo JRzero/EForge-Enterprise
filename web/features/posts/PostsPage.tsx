@@ -1,3 +1,5 @@
+import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
@@ -5,9 +7,9 @@ import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {PostRequest, PostResponse, PageResponsePostResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
@@ -119,7 +121,7 @@ export function PostsPage() {
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} /></>} onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
       <Input label="岗位编码筛选" value={draft.code} onChange={code => setDraft({...draft, code})} />
       <Input label="岗位名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
+      <label>状态筛选<Select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
 
     </ListFilters>
     <ListToolbar >
@@ -137,15 +139,15 @@ export function PostsPage() {
       selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择岗位 ${row.name}`} /></div>
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <PostDialog titleId="post-editor-title" busy={busy} onCancel={() => discard.confirm(closeEditor)}><h2 id="post-editor-title">{editor.id ? '修改岗位' : '新增岗位'}</h2>
-      <form onSubmit={event => { void save(event); }}>
+      <PageForm onSubmit={event => { void save(event); }}>
         <Input label="岗位编码" value={editor.form.code} aria-required="true" isDisabled={busy} onChange={code => setEditor({...editor, form: {...editor.form, code}})} />
         <Input label="岗位名称" value={editor.form.name} aria-required="true" isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
-        <label>显示顺序<input type="number" min={0} max={2147483647} step={1} value={editor.form.sort} required disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sort: Number(event.target.value)}})} /></label>
-        <label>岗位状态<select aria-label="岗位状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
-        <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
+        <label>显示顺序<NativeInput type="number" min={0} max={2147483647} step={1} value={editor.form.sort} required disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sort: Number(event.target.value)}})} /></label>
+        <label>岗位状态<Select aria-label="岗位状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></Select></label>
+        <label>备注<TextareaControl aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
         {actionError ? <p role="alert">{actionError}</p> : null}
         <div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存岗位'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(closeEditor)} /></div>
-      </form></PostDialog> : null}
+      </PageForm></PostDialog> : null}
     {deleting ? <PostDialog titleId="post-delete-title" alert busy={busy} onCancel={() => { setDeleting(null); setActionError(''); }}><h2 id="post-delete-title">确认删除岗位</h2><p>将删除所选的 {deleting.length} 个岗位。已分配给用户的岗位无法删除。</p>
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => { void remove(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setDeleting(null); setActionError(''); }} /></div>
     </PostDialog> : null}

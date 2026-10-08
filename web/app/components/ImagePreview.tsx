@@ -1,5 +1,6 @@
+import {NativeButton} from '../../ui/native';
 import {useEffect, useId, useMemo, useRef, useState, type CSSProperties} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 
 function imageScale(current:number,delta:number) {return delta<0 && current<=.2 ? current : Number((current+delta).toFixed(3));}
 
@@ -13,9 +14,9 @@ export function ImagePreview({src, label, width=80, height=80}: {
   const [open,setOpen]=useState(false),[failed,setFailed]=useState('');
   const first=urls[0];
   if (!first) return <span className="image-preview-empty">暂无图片</span>;
-  return <><button type="button" className="image-preview-thumbnail" aria-label={`预览图片 ${label}`} style={{width,height}} onClick={()=>setOpen(true)}>
+  return <><NativeButton type="button" className="image-preview-thumbnail" aria-label={`预览图片 ${label}`} style={{width,height}} onClick={()=>setOpen(true)}>
     {failed===first?<span>图片加载失败</span>:<img src={first} alt={label} referrerPolicy="no-referrer" onError={()=>setFailed(first)}/>}
-  </button>{open?<ImageViewer key={src} urls={urls} label={label} onClose={()=>setOpen(false)}/>:null}</>;
+  </NativeButton>{open?<ImageViewer key={src} urls={urls} label={label} onClose={()=>setOpen(false)}/>:null}</>;
 }
 
 function ImageViewer({urls,label,onClose}: {urls:string[];label:string;onClose:()=>void}) {

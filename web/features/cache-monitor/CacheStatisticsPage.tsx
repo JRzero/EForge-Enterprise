@@ -1,7 +1,7 @@
 import {ListToolbar} from '../../app/components/ListPage';
 import {lazy, Suspense, useEffect, useState} from 'react';
-import {PageHeader} from '@eforge/patterns';
-import {Button} from '@eforge/ui';
+import {PageHeader} from '../../ui/patterns';
+import {Button} from '../../ui/controls';
 import type {CacheStatistics} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';

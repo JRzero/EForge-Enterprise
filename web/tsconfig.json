@@ -6,5 +6,5 @@
     "resolveJsonModule": true, "esModuleInterop": true,
     "skipLibCheck": false, "types": ["vite/client", "node"]
   },
-  "include": ["app", "features", "integration", "generated", "tests", "*.ts"]
+  "include": ["app", "features", "integration", "generated", "tests", "ui", "templates", "*.ts"]
 }

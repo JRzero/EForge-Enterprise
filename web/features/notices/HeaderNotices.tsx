@@ -1,5 +1,6 @@
+import {NativeButton} from '../../ui/native';
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {NoticeFeed} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
@@ -51,7 +52,7 @@ export function HeaderNotices({version}: {version: number}) {
     {!!data?.unreadCount && <span className="header-notice-badge" aria-hidden="true">{data.unreadCount > 99 ? '99+' : data.unreadCount}</span>}
     {visible && <section id="header-notice-list" className="notice-popover" style={mobileTop===undefined?undefined:{top:mobileTop,maxHeight:Math.max(80,window.innerHeight-mobileTop-12),overflow:'auto'}} aria-label="顶部公告列表" onMouseEnter={enter} onMouseLeave={leave}>
       <div className="notice-feed-toolbar"><h2>通知公告</h2><Button label="全部已读" variant="ghost" size="sm" isDisabled={loading || busy || !data?.unreadCount || !!error} onClick={() => {void mark(data?.items.filter(item => !item.read).map(item => item.id) ?? []);}} /></div>
-      {loading ? <p role="status">正在加载公告…</p> : error ? <><p role="alert">{error}</p><Button label="重试公告" onClick={() => setReload(value => value + 1)} /></> : !data?.items.length ? <p>暂无公告</p> : <ul>{data.items.map(item => <li key={item.id} className={item.read ? 'notice-is-read' : ''}><button type="button" disabled={busy} aria-label={`阅读 ${item.title}（${item.read ? '已读' : '未读'}）`} onClick={() => {setActionError(''); setVisible(false); setPreview(item.id);}}><span>{item.type === '1' ? '通知' : '公告'}</span><strong>{item.title}</strong><time>{item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN') : '—'}</time></button></li>)}</ul>}
+      {loading ? <p role="status">正在加载公告…</p> : error ? <><p role="alert">{error}</p><Button label="重试公告" onClick={() => setReload(value => value + 1)} /></> : !data?.items.length ? <p>暂无公告</p> : <ul>{data.items.map(item => <li key={item.id} className={item.read ? 'notice-is-read' : ''}><NativeButton type="button" disabled={busy} aria-label={`阅读 ${item.title}（${item.read ? '已读' : '未读'}）`} onClick={() => {setActionError(''); setVisible(false); setPreview(item.id);}}><span>{item.type === '1' ? '通知' : '公告'}</span><strong>{item.title}</strong><time>{item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN') : '—'}</time></NativeButton></li>)}</ul>}
       {actionError && <p role="alert">已读状态未保存：{actionError}<Button label="重试全部已读" variant="ghost" onClick={() => {void mark(data?.items.filter(item => !item.read).map(item => item.id) ?? []);}} /></p>}
       <Button label="刷新公告" variant="ghost" size="sm" isDisabled={loading || busy} onClick={() => {setActionError(''); setReload(value => value + 1);}} />
     </section>}

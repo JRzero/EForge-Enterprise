@@ -1,8 +1,8 @@
 import {ListFilters} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {useEffect, useMemo, useState} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState} from '@eforge/data';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState} from '../../ui/data';
+import {Button, Input} from '../../ui/controls';
 import type {DatabaseTable, PageResponseDatabaseTable} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';

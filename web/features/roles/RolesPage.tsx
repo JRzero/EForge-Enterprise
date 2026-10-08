@@ -1,3 +1,4 @@
+import {Select, NativeInput} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
@@ -5,9 +6,9 @@ import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Checkbox, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Checkbox, Input} from '../../ui/controls';
 import type {PageResponseRoleResponse, RoleResponse, RoleEditorResponse, RoleMenuOption, RoleScopeResponse} from '../../generated/api';
 import {useApi, useApplicationControls} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -97,8 +98,8 @@ export function RolesPage() {
   }
   return <ListPage className="posts-page roles-page" title="角色管理" description="管理角色、菜单权限、数据范围与用户授权。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh(); }} /></>} onSubmit={query}><Input label="角色名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <Input label="权限字符筛选" value={draft.key} onChange={key => setDraft({...draft, key})} /><label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
-      <label>开始日期<input type="date" aria-label="开始日期" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<input type="date" aria-label="结束日期" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
+      <Input label="权限字符筛选" value={draft.key} onChange={key => setDraft({...draft, key})} /><label>状态筛选<Select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+      <label>开始日期<NativeInput type="date" aria-label="开始日期" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<NativeInput type="date" aria-label="结束日期" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
 
     </ListFilters><ListToolbar ><PermissionGate permission="system:role:add"><Button label="新增角色" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:role:edit"><Button label="修改所选角色" variant="secondary" isDisabled={busy || selectedIds.length !== 1} onClick={() => { void openEditor(selectedIds[0]); }} /></PermissionGate>

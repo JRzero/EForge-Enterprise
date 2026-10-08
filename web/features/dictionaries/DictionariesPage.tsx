@@ -1,12 +1,13 @@
+import {NativeButton, Select, NativeInput} from '../../ui/native';
 import {ListToolbar, ListFilters, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import {useApi, useApplicationControls} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
@@ -63,7 +64,7 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
   }, [api, entryMode]);
   const columns = useMemo<ColumnDef<Row>[]>(() => [
     {id: 'id', header: entryMode ? '字典编码' : '字典编号', cell: ({row}) => row.original.id},
-    {id: 'name', header: entryMode ? '字典标签' : '字典名称', cell: ({row}) => 'name' in row.original ? <button className="dictionary-link" onClick={() => controls.navigate(`/dict/data/${row.original.id}`)}>{row.original.name}</button> : <DictionaryTag options={[row.original]} value={[row.original.value]} />},
+    {id: 'name', header: entryMode ? '字典标签' : '字典名称', cell: ({row}) => 'name' in row.original ? <NativeButton className="dictionary-link" onClick={() => controls.navigate(`/dict/data/${row.original.id}`)}>{row.original.name}</NativeButton> : <DictionaryTag options={[row.original]} value={[row.original.value]} />},
     ...(entryMode ? [
       {id: 'value', header: '字典键值', cell: ({row}) => 'value' in row.original ? row.original.value : ''},
       {id: 'sort', header: '字典排序', cell: ({row}) => 'sort' in row.original ? row.original.sort : ''},
@@ -103,10 +104,10 @@ function DictionaryWorkspace({dictionaryId}: {dictionaryId?: string}) {
   function query(event: FormEvent) {event.preventDefault(); if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;} setActionError(''); setFilters({...draft}); setPage(1); setVersion(value => value + 1);}
   const labels: Record<string, string> = entryMode ? {id: '字典编码', name: '字典标签', value: '字典键值', sort: '字典排序', default: '默认项', status: '状态', remark: '备注', createdAt: '创建时间'} : {id: '字典编号', name: '字典名称', code: '字典类型', status: '状态', remark: '备注', createdAt: '创建时间'};
   return <ListPage className="posts-page dictionaries-page" title={entryMode ? '字典数据' : '字典管理'} description={entryMode ? `${selectedType?.name ?? '字典'} · ${selectedType?.code ?? ''}` : '维护字典类型、数据和显示标签。'} eyebrow="系统管理">
-    {entryMode ? <ListToolbar ><label>选择字典<select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</select></label><Button label="关闭字典数据" variant="secondary" onClick={() => (controls.closePage ?? controls.navigate)('/dict')} /></ListToolbar> : null}
+    {entryMode ? <ListToolbar ><label>选择字典<Select aria-label="选择字典" value={dictionaryId} disabled={busy || metadataLoading} onChange={event => controls.navigate(`/dict/data/${event.target.value}`)}>{!selectedType ? <option value={dictionaryId}>当前字典</option> : null}{types.map(type => <option key={type.id} value={type.id}>{type.name}（{type.code}）</option>)}</Select></label><Button label="关闭字典数据" variant="secondary" onClick={() => (controls.closePage ?? controls.navigate)('/dict')} /></ListToolbar> : null}
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setDraft(initialFilters); setFilters(initialFilters); setPage(1); refresh();}} /></>} onSubmit={query}><Input label={entryMode ? '字典标签筛选' : '字典名称筛选'} value={draft.name} onChange={name => setDraft({...draft, name})} />
-      {!entryMode ? <><Input label="字典类型筛选" value={draft.code} onChange={code => setDraft({...draft, code})} /><label>开始日期<input type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label></> : null}
-      <label>状态筛选<select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option>{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</select></label>
+      {!entryMode ? <><Input label="字典类型筛选" value={draft.code} onChange={code => setDraft({...draft, code})} /><label>开始日期<NativeInput type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<NativeInput type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label></> : null}
+      <label>状态筛选<Select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option>{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</Select></label>
       </ListFilters>
     <ListToolbar ><PermissionGate permission="system:dict:add"><Button label={entryMode ? '新增字典数据' : '新增字典类型'} isDisabled={busy || metadataLoading || !!metadataError || entryMode && !selectedType} onClick={add} /></PermissionGate>
       <PermissionGate permission="system:dict:edit"><Button label="修改所选字典" variant="secondary" isDisabled={busy || metadataLoading || !!metadataError || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>

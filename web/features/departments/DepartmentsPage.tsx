@@ -1,10 +1,12 @@
+import {NativeButton, NativeInput, Select} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {DepartmentRequest, DepartmentResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -70,11 +72,11 @@ export function DepartmentsPage() {
   }, [discardSorts, loadEditor]);
   const columns = useMemo<ColumnDef<TreeRow>[]>(() => [
     {id: 'name', header: '部门名称', cell: ({row}) => <div className="department-name" style={{paddingInlineStart: row.original.depth * 20}}>
-      {row.original.hasChildren ? <button type="button" aria-expanded={!collapsed.has(row.original.department.id)} aria-label={`${collapsed.has(row.original.department.id) ? '展开' : '折叠'} ${row.original.department.name}`}
-        onClick={() => setCollapsed(value => { const next = new Set(value); if (next.has(row.original.department.id)) next.delete(row.original.department.id); else next.add(row.original.department.id); return next; })}>{collapsed.has(row.original.department.id) ? '▸' : '▾'}</button> : <span className="department-leaf" />}
+      {row.original.hasChildren ? <NativeButton type="button" aria-expanded={!collapsed.has(row.original.department.id)} aria-label={`${collapsed.has(row.original.department.id) ? '展开' : '折叠'} ${row.original.department.name}`}
+        onClick={() => setCollapsed(value => { const next = new Set(value); if (next.has(row.original.department.id)) next.delete(row.original.department.id); else next.add(row.original.department.id); return next; })}>{collapsed.has(row.original.department.id) ? '▸' : '▾'}</NativeButton> : <span className="department-leaf" />}
       <span>{row.original.department.name}</span></div>},
     {id: 'sort', header: '显示顺序', cell: ({row}) => <PermissionGate permission="system:dept:edit" fallback={<span>{row.original.department.sort}</span>}>
-      <input type="number" min={0} max={2147483647} step={1} className="department-sort" aria-label={`排序 ${row.original.department.name}`} disabled={busy}
+      <NativeInput type="number" min={0} max={2147483647} step={1} className="department-sort" aria-label={`排序 ${row.original.department.name}`} disabled={busy}
         value={sorts[row.original.department.id] ?? row.original.department.sort} onChange={event => setSorts(value => ({...value, [row.original.department.id]: Number(event.target.value)}))} /></PermissionGate>},
     {id: 'status', header: '状态', cell: ({row}) => <DictionaryTag options={statusDictionary.options} value={row.original.department.status} />},
     {id: 'createdAt', header: '创建时间', cell: ({row}) => row.original.department.createdAt ? new Date(row.original.department.createdAt).toLocaleString('zh-CN') : '—'},
@@ -119,7 +121,7 @@ export function DepartmentsPage() {
     <DictionaryNotice dictionary={statusDictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => discardSorts(() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); })} /></>} onSubmit={event => { event.preventDefault(); discardSorts(() => {setFilters({...draft}); setVersion(value => value + 1);}); }}>
       <Input label="部门名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>部门状态筛选<select aria-label="部门状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
+      <label>部门状态筛选<Select aria-label="部门状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
 
     </ListFilters>
     <ListToolbar >
@@ -134,22 +136,22 @@ export function DepartmentsPage() {
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
     <div className="post-table"><DataTable data={tree} columns={columns} loading={loading} emptyText="暂无部门" pagination={false} sortable={false} showColumnVisibility={false} getRowId={row => row.department.id} /></div>
     {editor ? <ResourceDialog titleId="department-editor-title" busy={busy} onCancel={() => discard.confirm(closeEditor)}>
-      <h2 id="department-editor-title">{editor.id ? '修改部门' : '新增部门'}</h2><form noValidate onSubmit={event => { void save(event); }}>
+      <h2 id="department-editor-title">{editor.id ? '修改部门' : '新增部门'}</h2><PageForm noValidate onSubmit={event => { void save(event); }}>
         {editor.form.parentId !== '0' ? <><Input label="查找上级部门" value={editor.search} isDisabled={busy} onChange={search => setEditor({...editor, search})} />
-          <label>上级部门<select aria-label="上级部门" value={editor.form.parentId} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, parentId: event.target.value}})}>
+          <label>上级部门<Select aria-label="上级部门" value={editor.form.parentId} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, parentId: event.target.value}})}>
           <option value="">请选择上级部门</option>
           {editor.form.parentId && !options.some(row => row.department.id === editor.form.parentId) ? <option value={editor.form.parentId}>当前上级部门</option> : null}
           {options.filter(row => row.path.toLocaleLowerCase().includes(editor.search.trim().toLocaleLowerCase()) || row.department.id === editor.form.parentId)
             .map(row => <option key={row.department.id} value={row.department.id}>{row.path}</option>)}
-        </select></label></> : null}
+        </Select></label></> : null}
         <Input label="部门名称" aria-required="true" value={editor.form.name} isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
-        <label>部门显示顺序<input type="number" min={0} max={2147483647} step={1} required value={editor.form.sort} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sort: Number(event.target.value)}})} /></label>
+        <label>部门显示顺序<NativeInput type="number" min={0} max={2147483647} step={1} required value={editor.form.sort} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sort: Number(event.target.value)}})} /></label>
         <Input label="负责人" value={editor.form.leader ?? ''} isDisabled={busy} onChange={leader => setEditor({...editor, form: {...editor.form, leader}})} />
         <Input label="联系电话" value={editor.form.phone ?? ''} isDisabled={busy} onChange={phone => setEditor({...editor, form: {...editor.form, phone}})} />
         <Input label="邮箱" type="email" value={editor.form.email ?? ''} isDisabled={busy} onChange={email => setEditor({...editor, form: {...editor.form, email}})} />
-        <label>部门状态<select aria-label="部门状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></select></label>
+        <label>部门状态<Select aria-label="部门状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></Select></label>
         {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="保存部门" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(closeEditor)} /></div>
-      </form></ResourceDialog> : null}
+      </PageForm></ResourceDialog> : null}
     {deleting ? <ResourceDialog titleId="department-delete-title" alert busy={busy} onCancel={() => { setDeleting(null); setActionError(''); }}><h2 id="department-delete-title">确认删除部门</h2>
       <p>将删除“{deleting.name}”。存在下级部门或用户时无法删除。</p>{actionError ? <p role="alert">{actionError}</p> : null}
       <div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => { void remove(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setDeleting(null); setActionError(''); }} /></div>

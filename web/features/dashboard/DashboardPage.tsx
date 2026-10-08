@@ -1,5 +1,6 @@
+import {NativeButton} from '../../ui/native';
 import {useState,lazy,Suspense} from 'react';
-import {DashboardPage as EForgeDashboard, PageHeader} from '@eforge/patterns';
+import {DashboardPage as EForgeDashboard, PageHeader} from '../../ui/patterns';
 import {useBootstrap, useNavigation} from '../../app/context';
 import {countNavigationEntries} from '../../integration/navigation';
 const DemoDashboard=lazy(()=>import('./DemoDashboard').then(module=>({default:module.DemoDashboard})));
@@ -9,7 +10,7 @@ export function DashboardPage() {
   const [demo,setDemo]=useState(false);
   return <section className="dashboard">
     <PageHeader title={`你好，${user.displayName}`} description="查看当前工作空间，开始今天的工作。" eyebrow="工作台" />
-    <div className="dashboard-view-switch" role="group" aria-label="工作台视图"><button type="button" aria-pressed={!demo} onClick={()=>setDemo(false)}>工作台</button><button type="button" aria-pressed={demo} onClick={()=>setDemo(true)}>图表演示</button></div>
+    <div className="dashboard-view-switch" role="group" aria-label="工作台视图"><NativeButton type="button" aria-pressed={!demo} onClick={()=>setDemo(false)}>工作台</NativeButton><NativeButton type="button" aria-pressed={demo} onClick={()=>setDemo(true)}>图表演示</NativeButton></div>
     {demo ? <Suspense fallback={<p role="status">正在加载图表…</p>}><DemoDashboard/></Suspense> : <>
     <div className="welcome-panel"><div><p className="eyebrow">准备就绪</p><h2>专注当下，有序前行。</h2>
       <p>你的账号已连接到企业工作空间。</p></div><span className="welcome-emblem" aria-hidden="true">E</span></div>

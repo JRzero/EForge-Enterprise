@@ -1,9 +1,9 @@
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {useEffect, useMemo, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {OnlineSessionResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';

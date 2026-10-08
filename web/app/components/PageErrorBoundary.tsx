@@ -1,5 +1,5 @@
 import {Component, type ReactNode} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 
 interface Props {
   title: string;

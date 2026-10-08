@@ -1,11 +1,13 @@
+import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {NoticeRequest, NoticeResponse, PageResponseNoticeResponse} from '../../generated/api';
 import {useApi, useNoticeRefresh} from '../../app/context';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -85,7 +87,7 @@ export function NoticesPage() {
 
     <DictionaryNotice dictionary={types} /><DictionaryNotice dictionary={statuses} />
     {showFilters && <ListFilters actions={<><Button label="查询" type="submit" /><Button label="重置" variant="ghost" onClick={() => {setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1);}} /></>} onSubmit={apply}><Input label="公告标题筛选" value={draft.title} onChange={title => setDraft({...draft, title})} /><Input label="操作人员筛选" value={draft.author} onChange={author => setDraft({...draft, author})} />
-      <label>公告类型筛选<select aria-label="公告类型筛选" value={draft.type} onChange={event => setDraft({...draft, type: event.target.value})}><option value="">全部</option><DictionaryOptions options={types.options} current={draft.type} /></select></label></ListFilters>}
+      <label>公告类型筛选<Select aria-label="公告类型筛选" value={draft.type} onChange={event => setDraft({...draft, type: event.target.value})}><option value="">全部</option><DictionaryOptions options={types.options} current={draft.type} /></Select></label></ListFilters>}
     <ListToolbar >
       <PermissionGate permission="system:notice:add"><Button label="新增公告" variant="primary" isDisabled={busy || types.loading || statuses.loading || !!types.error || !!statuses.error} onClick={() => {setActionError(''); setEditor({form: {...emptyForm}});}} /></PermissionGate>
       <PermissionGate permission="system:notice:edit"><Button label="修改所选公告" variant="secondary" isDisabled={busy || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>
@@ -97,13 +99,13 @@ export function NoticesPage() {
     {error ? <><p role="alert">{error}</p><Button label="重试列表" onClick={() => refresh()} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} emptyText="暂无公告" pagination={false} sortable={false} selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择公告 ${row.title}`} /></div>}
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor && <ResourceDialog titleId="notice-editor-title" busy={busy} onCancel={() => setEditor(null)}><h2 id="notice-editor-title">{editor.id ? '修改公告' : '新增公告'}</h2>
-      <form onSubmit={event => {void save(event);}}><Input label="公告标题" value={editor.form.title} onChange={title => setEditor({...editor, form: {...editor.form, title}})} isDisabled={busy} />
-        <label>公告类型<select aria-label="公告类型" value={editor.form.type} disabled={busy || types.loading || !!types.error} onChange={event => setEditor({...editor, form: {...editor.form, type: event.target.value}})}><option value="">请选择公告类型</option><DictionaryOptions options={types.options} current={editor.form.type} /></select></label>
-        <fieldset disabled={busy || statuses.loading || !!statuses.error}><legend>公告状态</legend>{statuses.options.map(option => <label key={option.value}><input type="radio" name="notice-status" value={option.value} checked={editor.form.status === option.value} onChange={() => setEditor({...editor, form: {...editor.form, status: option.value}})} />{option.label}</label>)}</fieldset>
+      <PageForm onSubmit={event => {void save(event);}}><Input label="公告标题" value={editor.form.title} onChange={title => setEditor({...editor, form: {...editor.form, title}})} isDisabled={busy} />
+        <label>公告类型<Select aria-label="公告类型" value={editor.form.type} disabled={busy || types.loading || !!types.error} onChange={event => setEditor({...editor, form: {...editor.form, type: event.target.value}})}><option value="">请选择公告类型</option><DictionaryOptions options={types.options} current={editor.form.type} /></Select></label>
+        <fieldset disabled={busy || statuses.loading || !!statuses.error}><legend>公告状态</legend>{statuses.options.map(option => <label key={option.value}><NativeInput type="radio" name="notice-status" value={option.value} checked={editor.form.status === option.value} onChange={() => setEditor({...editor, form: {...editor.form, status: option.value}})} />{option.label}</label>)}</fieldset>
         <RichTextEditor value={editor.form.content ?? ''} onChange={content => setEditor(current => current ? {...current, form: {...current.form, content}} : null)} uploadImage={async (file, signal) => (await api.uploadNoticeImage(file, signal)).imageUrl} disabled={busy} onBusyChange={imageBusyChanged} />
-        <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
+        <label>备注<TextareaControl aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
         {actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label={imageBusy ? '图片上传中…' : '保存公告'} type="submit" isDisabled={busy || imageBusy || types.loading || statuses.loading || !!types.error || !!statuses.error} /><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setEditor(null)} /></div>
-      </form></ResourceDialog>}
+      </PageForm></ResourceDialog>}
     {deleting && <ResourceDialog titleId="notice-delete-title" alert busy={busy} onCancel={() => setDeleting(null)}><h2 id="notice-delete-title">删除公告</h2><p>确认删除所选 {deleting.length} 个公告？已读记录也将删除。</p>{actionError && <p role="alert">{actionError}</p>}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setDeleting(null)} /></div></ResourceDialog>}
     {preview && <NoticePreview id={preview} onClose={() => setPreview(null)} />}{readers && <NoticeReaders id={readers} onClose={() => setReaders(null)} />}
   </ListPage>;

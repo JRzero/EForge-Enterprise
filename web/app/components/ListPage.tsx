@@ -1,5 +1,5 @@
 import {Children, type ComponentPropsWithoutRef, type ReactNode} from 'react';
-import {PageHeader} from '@eforge/patterns';
+import {PageHeader} from '../../ui/patterns';
 
 /** Product list layout matching the spcore object-model lists. */
 export function ListPage({title, description, eyebrow, className = '', children}: {

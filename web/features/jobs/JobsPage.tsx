@@ -1,12 +1,13 @@
+import {Select, NativeInput} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import type {AppRoutePageProps} from '@eforge/app';
-import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import {useApi, useApplicationControls} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -108,10 +109,10 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     <DictionaryNotice dictionary={groups} /><DictionaryNotice dictionary={statuses} />
     {contextError ? <><p role="alert">{contextError}</p><Button label="重试任务信息" onClick={() => setContextVersion(value => value + 1)} /></> : !ready ? <p role="status">正在加载任务信息…</p> : <>
     <ListFilters actions={<><Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={reset} /></>} hidden={!showSearch} onSubmit={search}><Input label="任务名称" value={draft.name} onChange={name => setDraft({...draft, name})} isDisabled={busy} />
-      <label>任务组名<select aria-label="任务组名" value={draft.group} disabled={busy} onChange={event => setDraft({...draft, group: event.target.value})}><option value="">全部组名</option><DictionaryOptions options={groups.options} current={draft.group} /></select></label>
+      <label>任务组名<Select aria-label="任务组名" value={draft.group} disabled={busy} onChange={event => setDraft({...draft, group: event.target.value})}><option value="">全部组名</option><DictionaryOptions options={groups.options} current={draft.group} /></Select></label>
       <Input label="调用目标" value={draft.target} onChange={target => setDraft({...draft, target})} isDisabled={busy} />
-      <label>{logs ? '执行状态' : '任务状态'}<select aria-label={logs ? '执行状态' : '任务状态'} value={draft.status} disabled={busy} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></select></label>
-      {logs && <><label>开始日期<input type="date" aria-label="开始日期" value={draft.from} disabled={busy} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<input type="date" aria-label="结束日期" value={draft.to} disabled={busy} onChange={event => setDraft({...draft, to: event.target.value})} /></label></>}
+      <label>{logs ? '执行状态' : '任务状态'}<Select aria-label={logs ? '执行状态' : '任务状态'} value={draft.status} disabled={busy} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>
+      {logs && <><label>开始日期<NativeInput type="date" aria-label="开始日期" value={draft.from} disabled={busy} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<NativeInput type="date" aria-label="结束日期" value={draft.to} disabled={busy} onChange={event => setDraft({...draft, to: event.target.value})} /></label></>}
       </ListFilters>
     <ListToolbar >{logs ? <PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy || !selected.length} onClick={() => {setActionError(''); setConfirmation({clear: false, ids: selected});}} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => {setActionError(''); setConfirmation({clear: true, ids: []});}} /></PermissionGate> : <><PermissionGate permission="monitor:job:add"><Button label="新增任务" variant="primary" isDisabled={busy} onClick={()=>setEditor({id:null})}/></PermissionGate><PermissionGate permission="monitor:job:edit"><Button label="修改" isDisabled={busy||selected.length!==1} onClick={()=>setEditor({id:selected[0]!})}/></PermissionGate><PermissionGate permission="monitor:job:remove"><Button label="删除" isDisabled={busy||!selected.length} onClick={()=>{setActionError('');setTaskConfirmation({kind:'delete',ids:[...selected]});}}/></PermissionGate><Button label="全部调度日志" variant="secondary" onClick={() => controls.navigate('/job/log/0')} /></>}
       <PermissionGate permission="monitor:job:export"><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>

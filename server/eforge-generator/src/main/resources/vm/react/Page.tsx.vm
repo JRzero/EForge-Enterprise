@@ -1,7 +1,9 @@
+import {NativeInput, NativeButton, Select, TextareaControl, Table} from '../../../ui/native';
+import {ListPage, ListFilters, ListToolbar, PageForm} from '../../../ui/pages';
 import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PageHeader, PermissionGate} from '@eforge/patterns';
-import {Button} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../../ui/data';
+import {PermissionGate} from '../../../ui/patterns';
+import {Button} from '../../../ui/controls';
 import {useApi} from '../../../app/context';
 import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
@@ -118,16 +120,16 @@ function DictDisplay({field, value}: {field: Field; value: unknown}) {
 function DictControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
   const dictionary = useDictionary(field.dict ?? ''), current = dictionaryCurrent(field, value, dictionary.options), group = useId();
   return <><DictionaryNotice dictionary={dictionary} />
-    {field.html === 'radio' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="radio" name={group} checked={current === option.value} required={field.required} onChange={() => onChange(valueFor(field, option.value))} />{option.label}</label>)}</fieldset>
-    : field.html === 'checkbox' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><input type="checkbox" checked={current.split(',').includes(option.value)} onChange={event => {const selected = new Set(current.split(',').filter(Boolean)); if (event.target.checked) selected.add(option.value); else selected.delete(option.value); onChange([...selected].join(','));}} />{option.label}</label>)}</fieldset>
-    : <select value={current} disabled={disabled || dictionary.loading} required={field.required} onChange={event => onChange(valueFor(field, event.target.value))}><option value="">请选择</option><DictionaryOptions options={dictionary.options} current={current} /></select>}
+    {field.html === 'radio' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><NativeInput type="radio" name={group} checked={current === option.value} required={field.required} onChange={() => onChange(valueFor(field, option.value))} />{option.label}</label>)}</fieldset>
+    : field.html === 'checkbox' ? <fieldset disabled={disabled || dictionary.loading}>{dictionary.options.map(option => <label key={option.value}><NativeInput type="checkbox" checked={current.split(',').includes(option.value)} onChange={event => {const selected = new Set(current.split(',').filter(Boolean)); if (event.target.checked) selected.add(option.value); else selected.delete(option.value); onChange([...selected].join(','));}} />{option.label}</label>)}</fieldset>
+    : <Select value={current} disabled={disabled || dictionary.loading} required={field.required} onChange={event => onChange(valueFor(field, event.target.value))}><option value="">请选择</option><DictionaryOptions options={dictionary.options} current={current} /></Select>}
   </>;
 }
 function QueryDictionaryControl({field, value, disabled, onChange}: {field: Field; value: string; disabled: boolean; onChange: (value: string) => void}) {
   const dictionary = useDictionary(field.dict ?? '');
-  return <><DictionaryNotice dictionary={dictionary} /><select aria-label={field.label ?? field.key} value={value} disabled={disabled || dictionary.loading} onChange={event => onChange(event.target.value)}>
+  return <><DictionaryNotice dictionary={dictionary} /><Select aria-label={field.label ?? field.key} value={value} disabled={disabled || dictionary.loading} onChange={event => onChange(event.target.value)}>
     <option value="">请选择</option><DictionaryOptions options={dictionary.options} current={value} />
-  </select></>;
+  </Select></>;
 }
 function FieldControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
   const changeUploads = useContext(UploadContext);
@@ -136,7 +138,7 @@ function FieldControl({field, value, disabled, onChange}: {field: Field; value: 
   if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange}} />;
   if (field.html === 'editor') return <RichTextEditor value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
   if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
-    <input type="file" multiple hidden={field.html === 'imageUpload' && text(value).split(',').filter(Boolean).length >= 5} disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
+    <NativeInput type="file" multiple hidden={field.html === 'imageUpload' && text(value).split(',').filter(Boolean).length >= 5} disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
       const files = [...(event.target.files ?? [])]; event.target.value = ''; setError('');
       if (files.length + text(value).split(',').filter(Boolean).length > 5) {setError('最多上传五个文件。'); return;}
       pending.current?.abort(); const controller = new AbortController(); pending.current = controller; setUploading(true); changeUploads(1);
@@ -151,8 +153,8 @@ function FieldControl({field, value, disabled, onChange}: {field: Field; value: 
     <p>最多上传五个文件，每个小于 5 MB。格式：{field.html === 'imageUpload' ? 'JPG/JPEG/PNG/GIF/WEBP' : 'DOC/DOCX/XLS/XLSX/PPT/PPTX/TXT/PDF'}</p>
     <UploadEntries paths={text(value).split(',').filter(Boolean)} disabled={disabled || uploading} onChange={paths => onChange(paths.join(','))}>{(path, index) => <>{field.html === 'imageUpload' ? <ImagePreview src={path} label={(field.label ?? field.key) + ' 文件 ' + (index + 1)} width={148} height={148} /> : <ResourceFileLinks src={path} />}<span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(Boolean).filter((_item, ordinal) => ordinal !== index).join(','))} /></>}</UploadEntries>
   </div>;
-  if (field.html === 'textarea') return <textarea value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
-  return <input value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}
+  if (field.html === 'textarea') return <TextareaControl value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
+  return <NativeInput value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}
     type={field.type === 'Date' ? 'datetime-local' : 'text'} step={field.type === 'Date' ? '.001' : undefined}
     inputMode={field.type === 'Long' || field.type === 'BigDecimal' ? 'decimal' : undefined}
     onChange={event => {try {onChange(valueFor(field, event.target.value));} catch {onChange(event.target.value);}}} />;
@@ -284,23 +286,22 @@ export function GeneratedPage() {
       const link = document.createElement('a'); link.href = url; link.download = 'export.xlsx'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }
-  return <section className="generated-business-page"><PageHeader title={title} />
-    {showFilters ? <form onSubmit={event => {event.preventDefault(); setPage(1); setFilters({...draft});}}>
+  return <ListPage className="generated-business-page" title={title}>
+    {showFilters ? <ListFilters actions={<><Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={() => {setDraft({}); setFilters({}); setPage(1);}} /></>} onSubmit={event => {event.preventDefault(); setPage(1); setFilters({...draft});}}>
       {fields.filter(field => field.query).flatMap(field => (field.between ? ['q_begin_', 'q_end_'] : ['q_']).map(prefix => {
         const wire = prefix + field.key;
         return <label key={wire}>{field.label}{prefix === 'q_begin_' ? '起' : prefix === 'q_end_' ? '止' : ''}
           {!field.between && field.dict && ['select', 'radio'].includes(field.html ?? '') ?
             <QueryDictionaryControl field={field} value={text(fieldValue(draft, wire))} disabled={busy} onChange={value => setDraft(current => ({...current, [wire]: value}))} /> :
-          <input value={text(fieldValue(draft, wire))} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} />}</label>;
+          <NativeInput value={text(fieldValue(draft, wire))} disabled={busy} type={field.type === 'Date' ? 'date' : 'text'} onChange={event => setDraft(value => ({...value, [wire]: event.target.value}))} />}</label>;
       }))}
-      <Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={() => {setDraft({}); setFilters({}); setPage(1);}} />
-    </form> : null}
-    <div><PermissionGate permission={permission + ':add'}><Button label="新增" isDisabled={busy} onClick={() => {setActionError(''); setEditor({form: initial(), viewing: false});}} /></PermissionGate>
+    </ListFilters> : null}
+    <ListToolbar><PermissionGate permission={permission + ':add'}><Button label="新增" isDisabled={busy} onClick={() => {setActionError(''); setEditor({form: initial(), viewing: false});}} /></PermissionGate>
       <PermissionGate permission={permission + ':edit'}><Button label="修改选中" isDisabled={busy || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>
       <PermissionGate permission={permission + ':remove'}><Button label="删除选中" isDisabled={busy || !selected.length} onClick={() => setDeleting(selected)} /></PermissionGate>
       <PermissionGate permission={permission + ':export'}><Button label="导出" isDisabled={busy} onClick={() => {void exportRows();}} /></PermissionGate>
       <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowFilters(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={busy} onClick={() => refresh()} />
-    </div>{feedback ? <p role="status">{feedback}</p> : null}{actionError ? <p role="alert">{actionError}</p> : null}
+    </ListToolbar>{feedback ? <p role="status">{feedback}</p> : null}{actionError ? <p role="alert">{actionError}</p> : null}
     {error ? <div role="alert">{error}<Button label="重试" onClick={() => refresh()} /></div> : null}
 #if($table.tree)
     <Button label="展开全部" variant="ghost" onClick={() => setExpanded(new Set(rows.map(row => text(row[treeCode]))))} />
@@ -319,34 +320,34 @@ export function GeneratedPage() {
     <Pagination page={page} pageSize={size} total={error ? undefined : total} loading={loading} busy={busy} onPage={setPage} onSize={setSize} />
 #end
     {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
-      <form onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
+      <PageForm onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
         {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <label key={field.key}>{field.label}
           {editor.viewing ? <FieldDisplay field={field} value={fieldValue(editor.model, field.key)} /> :
 #if($table.tree)
-          field.key === treeParent ? <select value={text(fieldValue(editor.form, field.key)) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
-            <option value="0">根节点</option>{parentOptions.map(row => <option key={text(row[pk])} value={text(row[treeCode])}>{text(row[treeName])}</option>)}</select> :
+          field.key === treeParent ? <Select value={text(fieldValue(editor.form, field.key)) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
+            <option value="0">根节点</option>{parentOptions.map(row => <option key={text(row[pk])} value={text(row[treeCode])}>{text(row[treeName])}</option>)}</Select> :
 #end
           <FieldControl field={field} value={fieldValue(editor.form, field.key)} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
         </label>)}
 #if($table.sub)
         <section aria-label="子表明细" tabIndex={0}><h3>子表明细</h3>
           {!editor.viewing ? <Button label="新增子表行" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: [...current.form[childKey], {}]}}))} /> : null}
-          <table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
+          <Table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
             <tbody>{(editor.form[childKey] ?? []).map((row, index) => <tr key={index}>
               {childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <td key={field.key}><label>{field.label}
                 {editor.viewing ? <FieldDisplay field={field} value={fieldValue(row, field.key)} /> : <FieldControl field={field} value={fieldValue(row, field.key)} disabled={operationBusy || !(editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit || field.pk && !field.auto)} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].map((item, ordinal) => ordinal === index ? {...item, [field.key]: value} : item)}}))} />}
               </label></td>)}
               {!editor.viewing ? <td><Button label="删除子表行" variant="ghost" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].filter((_, ordinal) => ordinal !== index)}}))} /></td> : null}
             </tr>)}</tbody>
-          </table>
+          </Table>
         </section>
 #end
         {actionError ? <p role="alert">{actionError}</p> : null}
         {!editor.viewing ? <Button label="保存" type="submit" isDisabled={busy} /> : null}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setEditor(null)} />
-      </form>
+      </PageForm>
     </ResourceDialog></UploadContext.Provider> : null}
     {deleting ? <ResourceDialog titleId="generated-delete-title" alert busy={busy} onCancel={() => setDeleting(null)}><h2 id="generated-delete-title">确认删除所选记录？</h2>
       {actionError ? <p role="alert">{actionError}</p> : null}<Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setDeleting(null)} />
     </ResourceDialog> : null}
-  </section>;
+  </ListPage>;
 }

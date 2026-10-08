@@ -1,5 +1,5 @@
 import {useId,useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {BootstrapResponse} from '../../generated/api';
 import {useApplicationControls} from '../context';
 import {ResourceDialog} from './ResourceDialog';

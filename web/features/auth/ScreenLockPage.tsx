@@ -1,5 +1,6 @@
+import {PageForm} from '../../ui/FormPage';
 import {useEffect,useRef,useState,type FormEvent} from 'react';
-import {Button,Input} from '@eforge/ui';
+import {Button,Input} from '../../ui/controls';
 import type {UserSummary} from '../../generated/api';
 import {AccountAvatar} from '../../app/components/AccountAvatar';
 import {errorMessage} from '../../integration/errors';
@@ -31,5 +32,5 @@ export function ScreenLockPage({user,unlock,logout,logoutBusy,logoutError}:{user
     try{await unlock(password);}catch(cause){if(owner===operation.current){setPassword('');setError(errorMessage(cause));setShake(true);if(shakeTimer.current)clearTimeout(shakeTimer.current);shakeTimer.current=setTimeout(()=>setShake(false),600);}}
     finally{if(owner===operation.current){setBusy(false);submitting.current=false;}}
   }
-  return <main className="screen-lock-page"><LockBackground/><section className={`screen-lock-card${shake?' screen-lock-shake':''}`} aria-label="锁定屏幕"><time className="screen-lock-time" dateTime={now.toISOString()}>{now.toLocaleTimeString('zh-CN',{hour12:false})}</time><p>{now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</p><AccountAvatar key={user.id+user.avatarUrl} user={user}/><h1>{user.displayName}</h1><p>屏幕已锁定，请输入当前账号的密码继续。</p><form ref={form} onSubmit={event=>void submit(event)}><Input label="解锁密码" type="password" autoComplete="current-password" hasAutoFocus value={password} onChange={value=>setPassword(value)} isDisabled={busy || logoutBusy}/>{error || logoutError?<p role="alert">{error || logoutError}</p>:null}<Button label={busy?'正在解锁…':'解锁'} type="submit" isDisabled={busy || logoutBusy || !password}/></form><Button label={logoutBusy?'正在退出…':'退出重新登录'} variant="ghost" isDisabled={busy || logoutBusy} onClick={()=>void logout()}/></section></main>;
+  return <main className="screen-lock-page"><LockBackground/><section className={`screen-lock-card${shake?' screen-lock-shake':''}`} aria-label="锁定屏幕"><time className="screen-lock-time" dateTime={now.toISOString()}>{now.toLocaleTimeString('zh-CN',{hour12:false})}</time><p>{now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</p><AccountAvatar key={user.id+user.avatarUrl} user={user}/><h1>{user.displayName}</h1><p>屏幕已锁定，请输入当前账号的密码继续。</p><PageForm ref={form} onSubmit={event=>void submit(event)}><Input label="解锁密码" type="password" autoComplete="current-password" hasAutoFocus value={password} onChange={value=>setPassword(value)} isDisabled={busy || logoutBusy}/>{error || logoutError?<p role="alert">{error || logoutError}</p>:null}<Button label={busy?'正在解锁…':'解锁'} type="submit" isDisabled={busy || logoutBusy || !password}/></PageForm><Button label={logoutBusy?'正在退出…':'退出重新登录'} variant="ghost" isDisabled={busy || logoutBusy} onClick={()=>void logout()}/></section></main>;
 }

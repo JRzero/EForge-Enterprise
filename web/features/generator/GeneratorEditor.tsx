@@ -1,6 +1,8 @@
+import {NativeButton, Select, TextareaControl, Table, NativeInput} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {ListToolbar} from '../../app/components/ListPage';
 import {useEffect, useRef, useState, type FormEvent} from 'react';
-import {Button, Input} from '@eforge/ui';
+import {Button, Input} from '../../ui/controls';
 import type {GeneratorConfigurationUpdate, GeneratorFieldUpdate, TableDetail, DictionaryTypeOption, MenuChoice} from '../../generated/api';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useApi} from '../../app/context';
@@ -35,10 +37,10 @@ function draftOf(detail:TableDetail):Draft {
       editable:field.editable ?? false,listed:field.listed ?? false,queryable:field.queryable ?? false,
       queryType:field.queryType ?? 'EQ',controlType:field.controlType ?? 'input',dictionaryType:field.dictionaryType ?? '',order:field.order ?? 0}))};
 }
-function Select({label,value,values,onChange,disabled}:{label:string;value:string;values:readonly string[];onChange:(value:string)=>void;disabled:boolean}) {
-  return <label>{label}<select aria-label={label} value={value} disabled={disabled} onChange={event=>onChange(event.target.value)}>
+function ChoiceSelect({label,value,values,onChange,disabled}:{label:string;value:string;values:readonly string[];onChange:(value:string)=>void;disabled:boolean}) {
+  return <label>{label}<Select aria-label={label} value={value} disabled={disabled} onChange={event=>onChange(event.target.value)}>
     {!values.includes(value)?<option value={value}>{value || '请选择'}</option>:null}
-    {values.map(choice=><option key={choice} value={choice}>{optionLabels[choice] ?? choice}</option>)}</select></label>;
+    {values.map(choice=><option key={choice} value={choice}>{optionLabels[choice] ?? choice}</option>)}</Select></label>;
 }
 export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;onCancel:()=>void;onSaved:()=>void}) {
   const api=useApi(),[form,setForm]=useState(()=>draftOf(detail)),[tab,setTab]=useState('basic');
@@ -88,55 +90,55 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
     <h2 id="generator-editor-title">编辑生成配置</h2>
     {discard?<div role="alert"><p>有未保存的修改，是否放弃？</p><Button label="继续编辑" onClick={()=>setDiscard(false)}/><Button label="放弃修改" variant="secondary" onClick={onCancel}/></div>:null}
     <ListToolbar  role="tablist" aria-label="生成配置">
-      {([['basic','基本信息'],['fields','字段信息'],['output','生成信息']] as const).map(([id,label])=><button type="button" role="tab" id={'generator-tab-'+id} aria-controls={'generator-panel-'+id} tabIndex={tab===id?0:-1} onKeyDown={event=>{const tabs=['basic','fields','output'];let position=tabs.indexOf(id);if(event.key==='ArrowRight')position=(position+1)%3;else if(event.key==='ArrowLeft')position=(position+2)%3;else if(event.key==='Home')position=0;else if(event.key==='End')position=2;else return;event.preventDefault();setTab(tabs[position]!);(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role=tab]')[position])?.focus();}} aria-selected={tab===id} key={id} disabled={busy} onClick={()=>setTab(id)}>{label}</button>)}
+      {([['basic','基本信息'],['fields','字段信息'],['output','生成信息']] as const).map(([id,label])=><NativeButton type="button" role="tab" id={'generator-tab-'+id} aria-controls={'generator-panel-'+id} tabIndex={tab===id?0:-1} onKeyDown={event=>{const tabs=['basic','fields','output'];let position=tabs.indexOf(id);if(event.key==='ArrowRight')position=(position+1)%3;else if(event.key==='ArrowLeft')position=(position+2)%3;else if(event.key==='Home')position=0;else if(event.key==='End')position=2;else return;event.preventDefault();setTab(tabs[position]!);(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role=tab]')[position])?.focus();}} aria-selected={tab===id} key={id} disabled={busy} onClick={()=>setTab(id)}>{label}</NativeButton>)}
     </ListToolbar>
-    <form onSubmit={event=>{void save(event);}}>
+    <PageForm onSubmit={event=>{void save(event);}}>
       <div hidden={tab!=='basic'} role="tabpanel" id="generator-panel-basic" aria-labelledby="generator-tab-basic">
-        <label>备注<textarea aria-label="备注" value={form.remark ?? ''} disabled={busy} onChange={event=>change({...form,remark:event.target.value})}/></label>
+        <label>备注<TextareaControl aria-label="备注" value={form.remark ?? ''} disabled={busy} onChange={event=>change({...form,remark:event.target.value})}/></label>
         {Object.entries(basicLabels).map(([key,label])=><Input key={key} label={label} value={form[key as keyof typeof basicLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
       </div>
       <div hidden={tab!=='fields'} role="tabpanel" id="generator-panel-fields" aria-labelledby="generator-tab-fields" className="post-table">
         {dictionaryError?<div role="alert">字典选项：{dictionaryError}<Button label="重试字典选项" isDisabled={busy||optionLoading} onClick={()=>setOptionVersion(value=>value+1)}/></div>:null}
-        <table><thead><tr><th>数据库字段</th><th>字段描述</th><th>Java类型</th><th>Java属性</th><th>配置</th><th>查询</th><th>控件</th><th>字典</th><th>排序</th></tr></thead><tbody>
+        <Table><thead><tr><th>数据库字段</th><th>字段描述</th><th>Java类型</th><th>Java属性</th><th>配置</th><th>查询</th><th>控件</th><th>字典</th><th>排序</th></tr></thead><tbody>
           {form.columns.map((field,index)=>{
             const physical=detail.columns.find(column=>column.id===field.id);
             return <tr key={field.id} onDragOver={event=>{if(dragging.current&&!busy)event.preventDefault();}} onDrop={event=>{event.preventDefault();drop(field.id);}}><td>{physical?.name}<br/>{physical?.databaseType}{physical?.primaryKey?' · 主键':''}{physical?.autoIncrement?' · 自增':''}</td>
               <td><Input label={'字段描述 '+physical?.name} value={field.comment ?? ''} isDisabled={busy} onChange={comment=>fieldChange(index,{comment})}/></td>
-              <td><Select label={'Java类型 '+physical?.name} value={field.javaType} values={javaTypes} disabled={busy} onChange={javaType=>fieldChange(index,{javaType})}/></td>
+              <td><ChoiceSelect label={'Java类型 '+physical?.name} value={field.javaType} values={javaTypes} disabled={busy} onChange={javaType=>fieldChange(index,{javaType})}/></td>
               <td><Input label={'Java属性 '+physical?.name} value={field.javaField} isDisabled={busy} onChange={javaField=>fieldChange(index,{javaField})}/></td>
-              <td>{([['required','必填'],['insertable','插入'],['editable','编辑'],['listed','列表'],['queryable','查询']] as const).map(([key,label])=><label key={key}><input type="checkbox" disabled={busy} aria-label={label+' '+physical?.name} checked={field[key]} onChange={event=>fieldChange(index,{[key]:event.target.checked})}/>{label}</label>)}</td>
-              <td><Select label={'查询方式 '+physical?.name} value={field.queryType} values={queries} disabled={busy} onChange={queryType=>fieldChange(index,{queryType})}/></td>
-              <td><Select label={'显示控件 '+physical?.name} value={field.controlType} values={controls} disabled={busy} onChange={controlType=>fieldChange(index,{controlType})}/></td>
-              <td><label>字典类型<select aria-label={'字典类型 '+physical?.name} value={field.dictionaryType ?? ''} disabled={busy||optionLoading} onChange={event=>fieldChange(index,{dictionaryType:event.target.value})}>
+              <td>{([['required','必填'],['insertable','插入'],['editable','编辑'],['listed','列表'],['queryable','查询']] as const).map(([key,label])=><label key={key}><NativeInput type="checkbox" disabled={busy} aria-label={label+' '+physical?.name} checked={field[key]} onChange={event=>fieldChange(index,{[key]:event.target.checked})}/>{label}</label>)}</td>
+              <td><ChoiceSelect label={'查询方式 '+physical?.name} value={field.queryType} values={queries} disabled={busy} onChange={queryType=>fieldChange(index,{queryType})}/></td>
+              <td><ChoiceSelect label={'显示控件 '+physical?.name} value={field.controlType} values={controls} disabled={busy} onChange={controlType=>fieldChange(index,{controlType})}/></td>
+              <td><label>字典类型<Select aria-label={'字典类型 '+physical?.name} value={field.dictionaryType ?? ''} disabled={busy||optionLoading} onChange={event=>fieldChange(index,{dictionaryType:event.target.value})}>
                 <option value="">无字典</option>{field.dictionaryType&&!dictionaries.some(item=>item.code===field.dictionaryType)?<option value={field.dictionaryType}>{field.dictionaryType}（当前配置）</option>:null}
-                {dictionaries.map(item=><option key={item.id} value={item.code}>{item.name} · {item.code}{item.status==='1'?'（停用）':''}</option>)}</select></label></td>
-              <td><button type="button" draggable={!busy} disabled={busy} aria-label={'拖动排序 '+physical?.name} onDragStart={event=>{dragging.current=field.id;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',field.id);}} onDragEnd={()=>{dragging.current=null;}}>拖动排序</button><input type="number" aria-label={'排序 '+physical?.name} min={0} max={1000000} required value={field.order} disabled={busy} onChange={event=>fieldChange(index,{order:Number(event.target.value)})}/>
+                {dictionaries.map(item=><option key={item.id} value={item.code}>{item.name} · {item.code}{item.status==='1'?'（停用）':''}</option>)}</Select></label></td>
+              <td><NativeButton type="button" draggable={!busy} disabled={busy} aria-label={'拖动排序 '+physical?.name} onDragStart={event=>{dragging.current=field.id;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',field.id);}} onDragEnd={()=>{dragging.current=null;}}>拖动排序</NativeButton><NativeInput type="number" aria-label={'排序 '+physical?.name} min={0} max={1000000} required value={field.order} disabled={busy} onChange={event=>fieldChange(index,{order:Number(event.target.value)})}/>
                 <Button label={'上移 '+physical?.name} isDisabled={busy||index===0} onClick={()=>move(index,-1)}/><Button label={'下移 '+physical?.name} isDisabled={busy||index===form.columns.length-1} onClick={()=>move(index,1)}/></td>
             </tr>;
           })}
-        </tbody></table>
+        </tbody></Table>
       </div>
       <div hidden={tab!=='output'} role="tabpanel" id="generator-panel-output" aria-labelledby="generator-tab-output">
-        <Select label="生成模板" value={form.category} values={['crud','tree','sub']} disabled={busy} onChange={value=>change({...form,category:selected(value,['crud','tree','sub'] as const),subTableName:value==='sub'?form.subTableName:'',subTableForeignKey:value==='sub'?form.subTableForeignKey:''})}/>
-        <Select label="前端类型" value={form.webType} values={webTypes} disabled={busy} onChange={webType=>change({...form,webType})}/>
+        <ChoiceSelect label="生成模板" value={form.category} values={['crud','tree','sub']} disabled={busy} onChange={value=>change({...form,category:selected(value,['crud','tree','sub'] as const),subTableName:value==='sub'?form.subTableName:'',subTableForeignKey:value==='sub'?form.subTableForeignKey:''})}/>
+        <ChoiceSelect label="前端类型" value={form.webType} values={webTypes} disabled={busy} onChange={webType=>change({...form,webType})}/>
         {Object.entries(outputLabels).map(([key,label])=><Input key={key} label={label} value={form[key as keyof typeof outputLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
         <Button label="恢复默认生成路径" isDisabled={busy} onClick={()=>change({...form,outputPath:'/'})}/>
-        <label>表单列数<select aria-label="表单列数" value={form.formColumns} disabled={busy} onChange={event=>change({...form,formColumns:Number(event.target.value)})}>{[1,2,3].map(value=><option key={value}>{value}</option>)}</select></label>
-        <Select label="生成方式" value={form.outputType} values={['0','1']} disabled={busy} onChange={outputType=>change({...form,outputType})}/>
+        <label>表单列数<Select aria-label="表单列数" value={form.formColumns} disabled={busy} onChange={event=>change({...form,formColumns:Number(event.target.value)})}>{[1,2,3].map(value=><option key={value}>{value}</option>)}</Select></label>
+        <ChoiceSelect label="生成方式" value={form.outputType} values={['0','1']} disabled={busy} onChange={outputType=>change({...form,outputType})}/>
         <Input label="查找上级菜单" value={menuSearch} isDisabled={busy} onChange={setMenuSearch}/>
-        <label>上级菜单<select aria-label="上级菜单" value={form.options.parentMenuId ?? '0'} disabled={busy||optionLoading} onChange={event=>change({...form,options:{...form.options,parentMenuId:event.target.value}})}>
+        <label>上级菜单<Select aria-label="上级菜单" value={form.options.parentMenuId ?? '0'} disabled={busy||optionLoading} onChange={event=>change({...form,options:{...form.options,parentMenuId:event.target.value}})}>
           <option value="0">主目录</option>{form.options.parentMenuId&&form.options.parentMenuId!=='0'&&!menuOptions.some(menu=>menu.id===form.options.parentMenuId)?<option value={form.options.parentMenuId}>{detail.configuration.options.parentMenuName ?? form.options.parentMenuId}（当前配置）</option>:null}
-          {menuOptions.map(menu=><option key={menu.id} value={menu.id} disabled={!['M','C'].includes(menu.kind)}>{menu.label}{menu.kind==='F'?'（功能节点）':''}</option>)}</select></label>
+          {menuOptions.map(menu=><option key={menu.id} value={menu.id} disabled={!['M','C'].includes(menu.kind)}>{menu.label}{menu.kind==='F'?'（功能节点）':''}</option>)}</Select></label>
         {menuError?<div role="alert">菜单选项：{menuError}<Button label="重试菜单选项" isDisabled={busy||optionLoading} onClick={()=>setOptionVersion(value=>value+1)}/></div>:null}
-        <label><input type="checkbox" disabled={busy} checked={form.options.generateDetail} onChange={event=>change({...form,options:{...form.options,generateDetail:event.target.checked}})}/>生成详情页面</label>
-        {form.category==='tree'?(['treeCode','treeParentCode','treeName'] as const).map((key,index)=><Select key={key} label={['树编码字段','树父编码字段','树名称字段'][index]!} value={form.options[key] ?? ''} values={['',...detail.columns.map(field=>field.name ?? '')]} disabled={busy} onChange={value=>change({...form,options:{...form.options,[key]:value}})}/>):null}
+        <label><NativeInput type="checkbox" disabled={busy} checked={form.options.generateDetail} onChange={event=>change({...form,options:{...form.options,generateDetail:event.target.checked}})}/>生成详情页面</label>
+        {form.category==='tree'?(['treeCode','treeParentCode','treeName'] as const).map((key,index)=><ChoiceSelect key={key} label={['树编码字段','树父编码字段','树名称字段'][index]!} value={form.options[key] ?? ''} values={['',...detail.columns.map(field=>field.name ?? '')]} disabled={busy} onChange={value=>change({...form,options:{...form.options,[key]:value}})}/>):null}
         {form.category==='sub'?<>
-          <Select label="关联子表" value={form.subTableName ?? ''} values={['',...detail.tables.filter(table=>table.id!==detail.table.id).map(table=>table.name ?? '')]} disabled={busy} onChange={subTableName=>change({...form,subTableName,subTableForeignKey:''})}/>
-          <Select label="子表外键" value={form.subTableForeignKey ?? ''} values={['',...(detail.tables.find(table=>table.name===form.subTableName)?.columns.map(field=>field.name ?? '') ?? [])]} disabled={busy} onChange={subTableForeignKey=>change({...form,subTableForeignKey})}/>
+          <ChoiceSelect label="关联子表" value={form.subTableName ?? ''} values={['',...detail.tables.filter(table=>table.id!==detail.table.id).map(table=>table.name ?? '')]} disabled={busy} onChange={subTableName=>change({...form,subTableName,subTableForeignKey:''})}/>
+          <ChoiceSelect label="子表外键" value={form.subTableForeignKey ?? ''} values={['',...(detail.tables.find(table=>table.name===form.subTableName)?.columns.map(field=>field.name ?? '') ?? [])]} disabled={busy} onChange={subTableForeignKey=>change({...form,subTableForeignKey})}/>
         </>:null}
       </div>
       {error?<p role="alert">{error}</p>:null}
       <div className="post-dialog-actions"><Button label={busy?'正在保存…':'保存配置'} type="submit" isDisabled={busy}/><Button label="取消" variant="secondary" isDisabled={busy} onClick={cancel}/></div>
-    </form>
+    </PageForm>
   </ResourceDialog>;
 }

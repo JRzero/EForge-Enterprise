@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useId, useRef, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../ui/controls';
 import {useApplicationControls} from './context';
 import {ResourceDialog} from './components/ResourceDialog';
 

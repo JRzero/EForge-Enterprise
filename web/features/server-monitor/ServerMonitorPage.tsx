@@ -1,8 +1,9 @@
+import {Table} from '../../ui/native';
 import {ListToolbar} from '../../app/components/ListPage';
 import {useEffect, useState, type ReactNode} from 'react';
-import {DataTable, type ColumnDef} from '@eforge/data';
-import {PageHeader} from '@eforge/patterns';
-import {Button} from '@eforge/ui';
+import {DataTable, type ColumnDef} from '../../ui/data';
+import {PageHeader} from '../../ui/patterns';
+import {Button} from '../../ui/controls';
 import type {DiskMetrics, ServerMonitorResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
@@ -46,12 +47,12 @@ export function ServerMonitorPage() {
           ['等待率', number(data.cpu.waitPercent, '%')]
         ]} /></section>
         <section className="server-card" aria-labelledby="server-memory-title"><h2 id="server-memory-title">内存</h2>
-          <div className="server-table"><table><caption>物理内存与 JVM 内存</caption><thead><tr><th scope="col">属性</th><th scope="col">物理内存 (GiB)</th><th scope="col">JVM (MiB)</th></tr></thead><tbody>
+          <div className="server-table"><Table><caption>物理内存与 JVM 内存</caption><thead><tr><th scope="col">属性</th><th scope="col">物理内存 (GiB)</th><th scope="col">JVM (MiB)</th></tr></thead><tbody>
             <tr><th scope="row">总内存</th><td>{number(data.memory.totalGiB)}</td><td>{number(data.jvm.totalMiB)}</td></tr>
             <tr><th scope="row">已用内存</th><td>{number(data.memory.usedGiB)}</td><td>{number(data.jvm.usedMiB)}</td></tr>
             <tr><th scope="row">剩余内存</th><td>{number(data.memory.freeGiB)}</td><td>{number(data.jvm.freeMiB)}</td></tr>
             <tr><th scope="row">使用率</th><td className={(data.memory.usagePercent ?? 0) > 80 ? 'server-high-usage' : undefined}>{number(data.memory.usagePercent, '%')}</td><td className={(data.jvm.usagePercent ?? 0) > 80 ? 'server-high-usage' : undefined}>{number(data.jvm.usagePercent, '%')}</td></tr>
-          </tbody></table></div>
+          </tbody></Table></div>
           {(data.memory.usagePercent ?? 0) > 80 && <p role="status" className="server-high-usage">物理内存使用率超过 80%，请关注资源占用。</p>}
           {(data.jvm.usagePercent ?? 0) > 80 && <p role="status" className="server-high-usage">JVM 内存使用率超过 80%，请关注资源占用。</p>}
         </section>

@@ -1,8 +1,10 @@
+import {NativeButton, NativeInput} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useDictionary, DictionaryNotice} from '../../app/useDictionary';
 import {useEffect, useState, type FormEvent} from 'react';
-import {PageHeader} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {FormPage} from '../../ui/FormPage';
+import {Button, Input} from '../../ui/controls';
 import type {ProfileResponse, UpdateProfileRequest} from '../../generated/api';
 import {useApi, useApplicationControls} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
@@ -54,30 +56,30 @@ export function ProfilePage() {
     try { await api.changeMyPassword({oldPassword:passwords.oldPassword,newPassword:passwords.newPassword}); setPasswords({oldPassword:'',newPassword:'',confirmPassword:''}); setShowPasswords(false); setRevealedPasswords({oldPassword:false,newPassword:false,confirmPassword:false}); setFeedback('密码已修改，请使用新密码登录。'); }
     catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
-  return <section className="profile-page"><PageHeader title="个人中心" description="维护个人资料、登录密码和头像。" /><DictionaryNotice dictionary={sexDictionary} />
+  return <FormPage title="个人中心" description="维护个人资料、登录密码和头像。"><div className="profile-page"><DictionaryNotice dictionary={sexDictionary} />
     {loadError ? <div><p role="alert">{loadError}</p><Button label="重试加载个人资料" onClick={() => setVersion(value => value+1)} /></div> : !profile ? <p role="status">正在加载个人资料…</p> :
     <div className="profile-layout"><aside className="profile-summary"><h2>个人信息</h2>
-      <button className="profile-avatar" onClick={() => setAvatar(true)} aria-label="修改头像" disabled={busy}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="当前头像" /> : <span aria-hidden="true">{profile.displayName.slice(0,1)}</span>}</button>
+      <NativeButton className="profile-avatar" onClick={() => setAvatar(true)} aria-label="修改头像" disabled={busy}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="当前头像" /> : <span aria-hidden="true">{profile.displayName.slice(0,1)}</span>}</NativeButton>
       <dl>{[['登录账号',profile.username],['用户昵称',profile.displayName],['手机号码',profile.phone],['邮箱',profile.email],['所属部门',profile.departmentName],['所属角色',profile.roleNames],['所属岗位',profile.postNames],['创建日期',profile.createdAt ? new Date(profile.createdAt).toLocaleString('zh-CN') : '']].map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value || '暂无'}</dd></div>)}</dl>
     </aside><div className="profile-editor"><div role="tablist" aria-label="个人中心设置" onKeyDown={event => {
       if (busy || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
       event.preventDefault(); const next = event.key==='Home' ? 'profile' : event.key==='End' ? 'password' : tab==='profile' ? 'password' : 'profile';
       setTab(next); setError(''); setFeedback(''); event.currentTarget.querySelector<HTMLButtonElement>(`#${next}-tab`)?.focus();
-    }}><button role="tab" id="profile-tab" aria-controls="profile-panel" aria-selected={tab==='profile'} tabIndex={tab==='profile' ? 0 : -1} disabled={busy} onClick={() => { setTab('profile');setError('');setFeedback(''); }}>基本资料</button>
-      <button role="tab" id="password-tab" aria-controls="password-panel" aria-selected={tab==='password'} tabIndex={tab==='password' ? 0 : -1} disabled={busy} onClick={() => { setTab('password');setError('');setFeedback(''); }}>修改密码</button></div>
+    }}><NativeButton role="tab" id="profile-tab" aria-controls="profile-panel" aria-selected={tab==='profile'} tabIndex={tab==='profile' ? 0 : -1} disabled={busy} onClick={() => { setTab('profile');setError('');setFeedback(''); }}>基本资料</NativeButton>
+      <NativeButton role="tab" id="password-tab" aria-controls="password-panel" aria-selected={tab==='password'} tabIndex={tab==='password' ? 0 : -1} disabled={busy} onClick={() => { setTab('password');setError('');setFeedback(''); }}>修改密码</NativeButton></div>
       {error ? <p role="alert">{error}</p> : null}{feedback ? <p role="status">{feedback}</p> : null}
-      {tab==='profile' ? <form role="tabpanel" id="profile-panel" aria-labelledby="profile-tab" onSubmit={event => { void saveProfile(event); }} noValidate>
+      {tab==='profile' ? <PageForm role="tabpanel" id="profile-panel" aria-labelledby="profile-tab" onSubmit={event => { void saveProfile(event); }} noValidate>
         <Input label="用户昵称" value={form.displayName} onChange={value => setForm({...form,displayName:value})} isDisabled={busy} />
         <Input label="手机号码" value={form.phone} onChange={value => setForm({...form,phone:value})} isDisabled={busy} />
         <Input label="邮箱" type="email" value={form.email} onChange={value => setForm({...form,email:value})} isDisabled={busy} />
-        <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><input type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
+        <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><NativeInput type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
         <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
-      </form> : <form role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
+      </PageForm> : <PageForm role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
         {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <PasswordField key={key} label={['旧密码','新密码','确认新密码'][index]!} autoComplete={key==='oldPassword'?'current-password':'new-password'} visible={showPasswords || revealedPasswords[key]} onToggle={()=>togglePassword(key)} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}
-        <label className="profile-show-password"><input type="checkbox" checked={allPasswordsShown} aria-checked={somePasswordsShown && !allPasswordsShown ? 'mixed' : allPasswordsShown} disabled={busy} onChange={event => {setShowPasswords(event.target.checked);setRevealedPasswords({oldPassword:false,newPassword:false,confirmPassword:false});}} />显示密码</label>
+        <label className="profile-show-password"><NativeInput type="checkbox" checked={allPasswordsShown} aria-checked={somePasswordsShown && !allPasswordsShown ? 'mixed' : allPasswordsShown} disabled={busy} onChange={event => {setShowPasswords(event.target.checked);setRevealedPasswords({oldPassword:false,newPassword:false,confirmPassword:false});}} />显示密码</label>
         <div className="post-row-actions"><Button label={busy ? '正在修改密码…' : '保存密码'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
-      </form>}
+      </PageForm>}
     </div></div>}
     {avatar && profile ? <AvatarDialog avatarUrl={profile.avatarUrl} onCancel={() => setAvatar(false)} onSaved={async () => { const result = await api.getMyProfile();setProfile(result);setAvatar(false);setFeedback('头像已保存。'); try { await controls.refresh(); } catch { setError('头像已保存，账号信息刷新失败，请刷新页面重试。'); } }} /> : null}
-  </section>;
+  </div></FormPage>;
 }

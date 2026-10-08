@@ -1,10 +1,11 @@
+import {NativeButton, NativeInput, Select} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {MenuResponse, MenuRouteOption} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -46,10 +47,10 @@ export function MenusPage() {
   }, [api]);
   const columns = useMemo<ColumnDef<TreeRow>[]>(() => [
     {id: 'name', header: '菜单名称', cell: ({row}) => <div className="department-name" style={{paddingInlineStart: row.original.depth * 20}}>
-      {row.original.hasChildren ? <button type="button" aria-expanded={!collapsed.has(row.original.menu.id)} aria-label={`${collapsed.has(row.original.menu.id) ? '展开' : '折叠'}菜单 ${row.original.menu.name}`} onClick={() => setCollapsed(value => { const next = new Set(value); if (next.has(row.original.menu.id)) next.delete(row.original.menu.id); else next.add(row.original.menu.id); return next; })}>{collapsed.has(row.original.menu.id) ? '▸' : '▾'}</button> : <span className="department-leaf" />}
+      {row.original.hasChildren ? <NativeButton type="button" aria-expanded={!collapsed.has(row.original.menu.id)} aria-label={`${collapsed.has(row.original.menu.id) ? '展开' : '折叠'}菜单 ${row.original.menu.name}`} onClick={() => setCollapsed(value => { const next = new Set(value); if (next.has(row.original.menu.id)) next.delete(row.original.menu.id); else next.add(row.original.menu.id); return next; })}>{collapsed.has(row.original.menu.id) ? '▸' : '▾'}</NativeButton> : <span className="department-leaf" />}
       <span>{row.original.menu.name}</span></div>},
     {id: 'icon', header: '图标', cell: ({row}) => <MenuIcon name={row.original.menu.icon} />},
-    {id: 'sort', header: '显示顺序', cell: ({row}) => <PermissionGate permission="system:menu:edit" fallback={<span>{row.original.menu.sort}</span>}><input type="number" min={0} max={9999} step={1} className="department-sort" aria-label={`排序菜单 ${row.original.menu.name}`} disabled={busy} value={sorts[row.original.menu.id] ?? row.original.menu.sort} onChange={event => setSorts(value => ({...value, [row.original.menu.id]: Number(event.target.value)}))} /></PermissionGate>},
+    {id: 'sort', header: '显示顺序', cell: ({row}) => <PermissionGate permission="system:menu:edit" fallback={<span>{row.original.menu.sort}</span>}><NativeInput type="number" min={0} max={9999} step={1} className="department-sort" aria-label={`排序菜单 ${row.original.menu.name}`} disabled={busy} value={sorts[row.original.menu.id] ?? row.original.menu.sort} onChange={event => setSorts(value => ({...value, [row.original.menu.id]: Number(event.target.value)}))} /></PermissionGate>},
     {id: 'permission', header: '权限标识', cell: ({row}) => row.original.menu.permission || '—'},
     {id: 'type', header: '类型', cell: ({row}) => menuTypeLabels[row.original.menu.type]},
     {id: 'status', header: '状态', cell: ({row}) => <DictionaryTag options={statusDictionary.options} value={row.original.menu.status} />},
@@ -77,8 +78,8 @@ export function MenusPage() {
   function query(event: FormEvent) { event.preventDefault(); setFilters({...draft}); setVersion(value => value + 1); }
   return <ListPage className="posts-page menus-page" title="菜单管理" description="维护目录、页面、外链和按钮权限。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={visibilityDictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></>} onSubmit={query}><Input label="菜单名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>菜单状态筛选<select aria-label="菜单状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></select></label>
-      <label>显示状态筛选<select aria-label="显示状态筛选" value={draft.visible} onChange={event => setDraft({...draft, visible: event.target.value})}><option value="">全部</option><DictionaryOptions options={visibilityOptions} current={draft.visible} /></select></label>
+      <label>菜单状态筛选<Select aria-label="菜单状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+      <label>显示状态筛选<Select aria-label="显示状态筛选" value={draft.visible} onChange={event => setDraft({...draft, visible: event.target.value})}><option value="">全部</option><DictionaryOptions options={visibilityOptions} current={draft.visible} /></Select></label>
       </ListFilters>
     <ListToolbar ><PermissionGate permission="system:menu:add"><Button label="新增菜单" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:menu:edit"><Button label="保存菜单排序" variant="secondary" isDisabled={busy || !rows.some(row => sorts[row.id] !== undefined && sorts[row.id] !== row.sort)} onClick={() => { void saveSort(); }} /></PermissionGate>

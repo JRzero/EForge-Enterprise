@@ -3,20 +3,20 @@
 :root,
 .enterprise-layout,
 .login-layout {
-  --ui-primary: var(--ef-color-accent, #2563eb);
+  --ui-primary: var(--ef-color-accent, #2468f2);
   --ui-primary-soft: color-mix(in srgb, var(--ui-primary) 8%, white);
   --ui-text: #303841;
   --ui-muted: #667180;
-  --ui-border: #e3e8ed;
+  --ui-border: #e8e9eb;
   --ui-canvas: #f5f7f9;
   --ui-sidebar: #304156;
   --ui-control-font: 14px;
-  --color-text-primary: var(--ui-text);
+  --color-text-primary: #151b26;
   --color-text-secondary: var(--ui-muted);
   --color-background-body: var(--ui-canvas);
   --color-background-surface: #fff;
   --color-border: var(--ui-border);
-  --color-accent: #2563eb;
+  --color-accent: #2468f2;
   --color-on-accent: #fff;
   --color-accent-muted: #eaf1ff;
   --radius-inner: 3px;
@@ -38,7 +38,7 @@ body { background: var(--ui-canvas); }
   height: auto;
   padding: 5px 12px;
   gap: 8px;
-  border: 1px solid #d4dbe3;
+  border: 1px solid #e8e9eb;
   border-radius: 4px;
   background: #fff;
   box-shadow: none;
@@ -71,7 +71,7 @@ body { background: var(--ui-canvas); }
 .enterprise-layout[data-density=mini] { --ui-control-font: 12px; }
 .posts-page label:not(:has(input[type=checkbox], input[type=radio])) { align-items: stretch; text-align: left; }
 .enterprise-layout :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]) { border-radius: 4px; }
-.pagination-navigation input { min-height: 34px; padding: 4px 8px; border: 1px solid #d4dbe3; }
+.pagination-navigation input { min-height: 34px; padding: 4px 8px; border: 1px solid #e8e9eb; }
 .ef-app-shell__sidebar { padding-top: 0; border-right: 1px solid var(--ui-border); }
 .ef-app-shell__brand { min-height: 72px; padding: 16px 20px; }
 .enterprise-brand { gap: 10px; letter-spacing: 0; font-size: 15px; }
@@ -108,12 +108,12 @@ body { background: var(--ui-canvas); }
 .pagination-navigation [aria-current=page] { background: var(--ui-primary); color: #fff; outline: none; }
 .enterprise-layout button[data-variant], .login-layout button[data-variant] { border-radius: 4px; box-shadow: none; font-weight: 400; min-height: 34px; }
 .enterprise-layout button[data-variant=primary], .login-layout button[data-variant=primary] { background: var(--ui-primary); color: white; border: 1px solid var(--ui-primary); }
-.enterprise-layout button[data-variant=secondary], .login-layout button[data-variant=secondary] { background: white; color: var(--ui-text); border: 1px solid #d4dbe3; }
+.enterprise-layout button[data-variant=secondary], .login-layout button[data-variant=secondary] { background: white; color: var(--ui-text); border: 1px solid #e8e9eb; }
 .enterprise-layout button[data-variant=secondary]:hover:not(:disabled) { color: var(--ui-primary); border-color: var(--ui-primary); background: var(--ui-primary-soft); }
 .post-filters button[type=submit][data-variant], .login-card button[type=submit][data-variant], .post-dialog button[type=submit][data-variant] { background: var(--ui-primary); color: white; border-color: var(--ui-primary); }
 .post-table .post-row-actions button[data-variant=ghost] { color: var(--ui-primary); padding-inline: 6px; min-height: 30px; }
 .enterprise-layout button:disabled { cursor: not-allowed; }
-.posts-page select, .posts-page textarea, .post-dialog input[type=number], .navigation-search input { border-color: #d4dbe3; border-radius: 4px; }
+.posts-page select, .posts-page textarea, .post-dialog input[type=number], .navigation-search input { border-color: #e8e9eb; border-radius: 4px; }
 .post-dialog { color: var(--ui-text); box-shadow: 0 16px 48px #172b4d33; }
 .post-dialog h2 { font-size: 18px; font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid var(--ui-border); }
 .post-dialog form { gap: 18px; }
@@ -131,7 +131,7 @@ body { background: var(--ui-canvas); }
 .login-panel { background: #f8fafc; }
 .login-card h2 { font-size: 26px; }
 .login-card form { gap: 20px; }
-.login-layout { --ef-color-accent: #2563eb; }
+.login-layout { --ef-color-accent: #2468f2; }
 @media (max-width: 991px) {
   .ef-app-shell__header { padding: 10px 16px; }
   .ef-app-shell__content { padding: 16px; }

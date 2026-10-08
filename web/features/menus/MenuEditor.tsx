@@ -1,7 +1,9 @@
+import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {DictionaryOptions} from '../../app/useDictionary';
 import type {DictionaryValueOption} from '../../generated/api';
 import {useMemo, useState, type FormEvent} from 'react';
-import {Button, Input} from '@eforge/ui';
+import {Button, Input} from '../../ui/controls';
 import type {MenuResponse, MenuRouteOption, MenuWriteRequest} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -35,25 +37,25 @@ export function MenuEditor({visibilityOptions, statusOptions, detail, parentId, 
     try { if (detail) await api.updateMenu(detail.id, request); else await api.createMenu(request); onClose(); await onSaved(); }
     catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); }
   }
-  return <ResourceDialog titleId="menu-editor-title" busy={busy} onCancel={onClose}><h2 id="menu-editor-title">{detail ? '修改菜单' : '新增菜单'}</h2><form noValidate onSubmit={event => { void save(event); }}>
+  return <ResourceDialog titleId="menu-editor-title" busy={busy} onCancel={onClose}><h2 id="menu-editor-title">{detail ? '修改菜单' : '新增菜单'}</h2><PageForm noValidate onSubmit={event => { void save(event); }}>
     <Input label="查找上级菜单" value={search} isDisabled={busy} onChange={setSearch} />
-    <label>上级菜单<select aria-label="上级菜单" value={form.parentId} disabled={busy} onChange={event => setForm({...form, parentId: event.target.value})}><option value="0">顶级菜单</option>
+    <label>上级菜单<Select aria-label="上级菜单" value={form.parentId} disabled={busy} onChange={event => setForm({...form, parentId: event.target.value})}><option value="0">顶级菜单</option>
       {form.parentId !== '0' && !parents.some(row => row.menu.id === form.parentId) ? <option value={form.parentId}>当前上级菜单</option> : null}
-      {filtered.map(row => <option key={row.menu.id} value={row.menu.id}>{row.path}</option>)}</select></label>
-    <label>菜单类型<select aria-label="菜单类型" value={form.type} disabled={busy} onChange={event => changeType(event.target.value as MenuWriteRequest['type'])}>{Object.entries(menuTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      {filtered.map(row => <option key={row.menu.id} value={row.menu.id}>{row.path}</option>)}</Select></label>
+    <label>菜单类型<Select aria-label="菜单类型" value={form.type} disabled={busy} onChange={event => changeType(event.target.value as MenuWriteRequest['type'])}>{Object.entries(menuTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
     <Input label="菜单名称" value={form.name} aria-required="true" isDisabled={busy} onChange={name => setForm({...form, name})} />
     <Input label="稳定标识" value={form.key} aria-required="true" isDisabled={busy || !!detail?.key} onChange={key => setForm({...form, key, groupPath: form.groupPath === form.key ? key : form.groupPath})} />
-    <label>显示顺序<input type="number" min={0} max={9999} disabled={busy} value={form.sort} onChange={event => setForm({...form, sort: Number(event.target.value)})} /></label>
+    <label>显示顺序<NativeInput type="number" min={0} max={9999} disabled={busy} value={form.sort} onChange={event => setForm({...form, sort: Number(event.target.value)})} /></label>
     {form.type === 'GROUP' ? <Input label="目录地址" value={form.groupPath ?? ''} isDisabled={busy} onChange={groupPath => setForm({...form, groupPath})} /> : null}
-    {form.type === 'ROUTE' ? <><label>关联页面<select aria-label="关联页面" value={form.routeId ?? ''} disabled={busy} onChange={event => { const route = routes.find(route => route.id === event.target.value); setForm({...form, routeId: event.target.value, permission: route?.permission ?? ''}); }}><option value="">{detail?.type === 'ROUTE' && !detail.routeId ? '保留尚未接入的页面' : '请选择页面'}</option>{routes.map(route => <option key={route.id} value={route.id}>{options.find(menu => menu.routeId === route.id)?.name ?? route.path}（{route.path}）</option>)}</select></label>
+    {form.type === 'ROUTE' ? <><label>关联页面<Select aria-label="关联页面" value={form.routeId ?? ''} disabled={busy} onChange={event => { const route = routes.find(route => route.id === event.target.value); setForm({...form, routeId: event.target.value, permission: route?.permission ?? ''}); }}><option value="">{detail?.type === 'ROUTE' && !detail.routeId ? '保留尚未接入的页面' : '请选择页面'}</option>{routes.map(route => <option key={route.id} value={route.id}>{options.find(menu => menu.routeId === route.id)?.name ?? route.path}（{route.path}）</option>)}</Select></label>
       <Input label="路由参数" value={form.queryText ?? ''} isDisabled={busy} onChange={queryText => setForm({...form, queryText})} />
-      <label>是否缓存<select aria-label="是否缓存" disabled={busy} value={form.cached ? 'yes' : 'no'} onChange={event => setForm({...form, cached: event.target.value === 'yes'})}><option value="yes">缓存</option><option value="no">不缓存</option></select></label></> : null}
+      <label>是否缓存<Select aria-label="是否缓存" disabled={busy} value={form.cached ? 'yes' : 'no'} onChange={event => setForm({...form, cached: event.target.value === 'yes'})}><option value="yes">缓存</option><option value="no">不缓存</option></Select></label></> : null}
     {form.type === 'EXTERNAL' ? <Input label="外链地址" value={form.externalUrl ?? ''} isDisabled={busy} onChange={externalUrl => setForm({...form, externalUrl})} /> : null}
     <Input label="权限标识" value={form.permission ?? ''} isDisabled={busy || form.type === 'ROUTE' && !!form.routeId} onChange={permission => setForm({...form, permission})} />
     {form.type !== 'FUNCTION' ? <><IconPicker value={form.icon ?? ''} disabled={busy} onChange={icon => setForm({...form, icon})} />
-      <label>显示状态<select aria-label="显示状态" disabled={busy} value={form.visible ? 'show' : 'hide'} onChange={event => setForm({...form, visible: event.target.value === 'show'})}><DictionaryOptions options={visibilityOptions} current={form.visible ? 'show' : 'hide'} /></select></label></> : null}
-    <label>菜单状态<select aria-label="菜单状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><DictionaryOptions options={statusOptions} current={form.status} /></select></label>
-    <label>备注<textarea aria-label="备注" maxLength={500} disabled={busy} value={form.remark ?? ''} onChange={event => setForm({...form, remark: event.target.value})} /></label>
+      <label>显示状态<Select aria-label="显示状态" disabled={busy} value={form.visible ? 'show' : 'hide'} onChange={event => setForm({...form, visible: event.target.value === 'show'})}><DictionaryOptions options={visibilityOptions} current={form.visible ? 'show' : 'hide'} /></Select></label></> : null}
+    <label>菜单状态<Select aria-label="菜单状态" disabled={busy} value={form.status} onChange={event => setForm({...form, status: event.target.value})}><DictionaryOptions options={statusOptions} current={form.status} /></Select></label>
+    <label>备注<TextareaControl aria-label="备注" maxLength={500} disabled={busy} value={form.remark ?? ''} onChange={event => setForm({...form, remark: event.target.value})} /></label>
     {error ? <p role="alert">{error}</p> : null}<div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存菜单'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={onClose} /></div>
-  </form></ResourceDialog>;
+  </PageForm></ResourceDialog>;
 }

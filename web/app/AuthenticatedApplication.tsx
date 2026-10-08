@@ -1,7 +1,7 @@
 import {BrandMark} from './components/BrandMark';
 import {Activity, useRef, useCallback, useEffect, useMemo, useState} from 'react';
-import {PermissionProvider} from '@eforge/patterns';
-import {Button} from '@eforge/ui';
+import {PermissionProvider} from '../ui/patterns';
+import {Button} from '../ui/controls';
 import {getRouteAncestry, matchAppRoute, canAccessRoute, type AppRouterAdapter} from '@eforge/app';
 import {ScreenLockPage} from '../features/auth/ScreenLockPage';
 import {readScreenLock,saveScreenLock,lockBelongsTo,safeLockReturn,type ScreenLock} from '../features/auth/screen-lock';

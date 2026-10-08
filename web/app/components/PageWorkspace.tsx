@@ -1,3 +1,5 @@
+import {TagMenu} from '../../ui/TagMenu';
+import {TagNavigation} from '../../ui/TagNavigation';
 import {Activity, Suspense, useEffect, useRef, useState, type ReactNode} from 'react';
 import {canAccessRoute, getRouteAncestry, matchAppRoute, type AppRouterAdapter} from '@eforge/app';
 import type {NavigationItem} from '../../integration/navigation';
@@ -5,7 +7,7 @@ import {routes} from '../routes';
 import {useApplicationControls, ApplicationControlsContext} from '../context';
 import {MenuIcon} from '../../features/menus/IconPicker';
 import {useLayout,useLayoutChanges} from './layout-preferences';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import {ResourceDialog} from './ResourceDialog';
 import {PageErrorBoundary} from './PageErrorBoundary';
 
@@ -157,43 +159,30 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId,un
       window.location.reload();
     });
   }
-  function keyboard(event:React.KeyboardEvent<HTMLAnchorElement>,index:number){
-    const links=strip.current?.querySelectorAll<HTMLAnchorElement>('a');
-    const next=event.key==='ArrowRight'?(index+1)%views.length:event.key==='ArrowLeft'?(index+views.length-1)%views.length:
-      event.key==='Home'?0:event.key==='End'?views.length-1:undefined;
-    if(next!==undefined){event.preventDefault();links?.[next]?.focus();}
-  }
   const exitSaving = pendingExit?.pages.some(item=>savingPages.current.has(item.path)) ?? false;
   const exitDirty = pendingExit?.pages.some(item=>dirtyPages.current.has(item.path)) ?? false;
   return <div ref={workspace} className="enterprise-workspace">
-    <nav hidden={!layout.tagsView} aria-label="页面标签" className="page-tags">
-      <button type="button" aria-label="滚动到首个标签" disabled={!scroll.left} onClick={()=>strip.current?.scrollTo({left:0,behavior:'smooth'})}>‹</button>
-      <div ref={strip} className="page-tags-strip">{views.map((item,index)=><span key={item.path} className="page-tag">
-        <a href={item.href} aria-label={"页面标签："+item.title} aria-current={active?.path===item.path?'page':undefined} onKeyDown={event=>keyboard(event,index)}
-          onClick={event=>{if(!event.button&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){event.preventDefault();router.navigate(item.href);setSelected(null);}}}
-          onAuxClick={event=>{if(event.button===1){event.preventDefault();if(!item.affix)close(item,'current');}}}
-          onContextMenu={event=>{event.preventDefault();setMenuPoint({x:Math.max(8,Math.min(event.clientX,window.innerWidth-170)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-300))});setSelected(item.path);}}>
-          {layout.tagsIcon ? <MenuIcon name={item.icon}/> : null}{item.title}{item.affix?<span aria-label="固定标签">●</span>:null}
-        </a>{!item.affix?<button type="button" aria-label={'关闭标签 '+item.title} onClick={()=>close(item,'current')}>×</button>:null}
-      </span>)}</div>
-      <button type="button" aria-label="滚动到末个标签" disabled={!scroll.right} onClick={()=>strip.current?.scrollTo({left:strip.current.scrollWidth,behavior:'smooth'})}>›</button>
-      <button type="button" aria-label="标签操作" aria-expanded={!!selected} onClick={event=>{event.stopPropagation();setMenuPoint(undefined);setSelected(selected?null:active?.path ?? views[0]?.path ?? null);}}>⌄</button>
-      <button type="button" aria-label="刷新当前页面" disabled={!active} onClick={()=>{const current=views.find(item=>item.path===active?.path);if(current)refresh(current);}}>刷新</button>
-      <label className="page-tags-persist"><input type="checkbox" checked={persist} onChange={event=>{setPersist(event.target.checked);changeLayout?.(current=>({...current,tagsViewPersist:event.target.checked}));}}/>记住标签</label>
-    </nav>
-    {selected && target?<div ref={menuElement} role="menu" aria-label="标签操作菜单" className="page-tag-menu" style={menuPoint?{position:"fixed",left:menuPoint.x,top:menuPoint.y,right:"auto"}:undefined} onKeyDown={event=>{if(event.key==='Escape'){setSelected(null);strip.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]')?.focus();}if(event.key==='ArrowDown'||event.key==='ArrowUp'){
-        event.preventDefault();const buttons=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
-        const index=buttons.indexOf(document.activeElement as HTMLButtonElement),step=event.key==='ArrowDown'?1:-1;
-        buttons[(index+step+buttons.length)%buttons.length]?.focus();
-      }}}>
-      <button role="menuitem" onClick={()=>refresh(target)}>刷新页面</button>
-      {!target.affix?<button role="menuitem" onClick={()=>close(target,'current')}>关闭当前</button>:null}
-      <button role="menuitem" onClick={()=>close(target,'others')}>关闭其他</button>
-      <button role="menuitem" disabled={!views.slice(0,views.indexOf(target)).some(item=>!item.affix)} onClick={()=>close(target,'left')}>关闭左侧</button>
-      <button role="menuitem" disabled={!views.slice(views.indexOf(target)+1).some(item=>!item.affix)} onClick={()=>close(target,'right')}>关闭右侧</button>
-      <button role="menuitem" onClick={()=>close(target,'all')}>全部关闭</button>
-      <button role="menuitem" onClick={()=>{setFullscreen(value=>!value);setSelected(null);}}>{fullscreen?'退出全屏':'全屏显示'}</button>
-    </div>:null}
+    <TagNavigation hidden={!layout.tagsView} items={views} activePath={active?.path} showIcons={layout.tagsIcon}
+      stripRef={strip} scroll={scroll} expanded={!!selected} persist={persist} canRefresh={!!active}
+      renderIcon={name=><MenuIcon name={name}/>}
+      onNavigate={item=>{router.navigate(item.href);setSelected(null);}}
+      onClose={item=>{const target=views.find(view=>view.path===item.path);if(target)close(target,'current');}}
+      onContextMenu={(item,event)=>{setMenuPoint({x:Math.max(8,Math.min(event.clientX,window.innerWidth-170)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-300))});setSelected(item.path);}}
+      onActions={event=>{event.stopPropagation();setMenuPoint(undefined);setSelected(selected?null:active?.path ?? views[0]?.path ?? null);}}
+      onRefresh={()=>{const current=views.find(item=>item.path===active?.path);if(current)refresh(current);}}
+      onPersist={value=>{setPersist(value);changeLayout?.(current=>({...current,tagsViewPersist:value}));}}/>
+
+    {selected && target?<TagMenu menuRef={menuElement} point={menuPoint}
+      onDismiss={()=>{setSelected(null);strip.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]')?.focus();}}
+      actions={[
+        {id:'refresh',label:'刷新页面',onSelect:()=>refresh(target)},
+        ...(!target.affix?[{id:'current',label:'关闭当前',onSelect:()=>close(target,'current')}]:[]),
+        {id:'others',label:'关闭其他',onSelect:()=>close(target,'others')},
+        {id:'left',label:'关闭左侧',disabled:!views.slice(0,views.indexOf(target)).some(item=>!item.affix),onSelect:()=>close(target,'left')},
+        {id:'right',label:'关闭右侧',disabled:!views.slice(views.indexOf(target)+1).some(item=>!item.affix),onSelect:()=>close(target,'right')},
+        {id:'all',label:'全部关闭',onSelect:()=>close(target,'all')},
+        {id:'fullscreen',label:fullscreen?'退出全屏':'全屏显示',onSelect:()=>{setFullscreen(value=>!value);setSelected(null);}}
+      ]}/>:null}
     {!active?fallback:null}
     {views.filter(item=>item.cached || item.path===active?.path || dirtyPages.current.has(item.path) || savingPages.current.has(item.path)).map(item=>{
       const match=matchAppRoute(routes,item.path);if(!match || !canAccessRoute(match.route,permissions))return null;

@@ -1,11 +1,12 @@
+import {NativeInput, Select, TextareaControl} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {TableSummary, TableDetail, PageResponseTableSummary, PreviewResponse, Creation, CustomOutputResult} from '../../generated/api';
 import {useApi, useBootstrap} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -82,8 +83,8 @@ export function GeneratorPage() {
 
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit"/><Button label="重置" variant="secondary" onClick={()=>{setDraft(emptyFilters);setFilters(emptyFilters);setPage(1);refresh();}}/></>} onSubmit={event=>{event.preventDefault();if(draft.from&&draft.to&&draft.from>draft.to){setActionError('开始日期不能晚于结束日期。');return;}setPage(1);setFilters({...draft});refresh();}}>
       <Input label="表名称筛选" value={draft.name} onChange={name=>setDraft({...draft,name})}/><Input label="表描述筛选" value={draft.comment} onChange={comment=>setDraft({...draft,comment})}/>
-      <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/></label>
-      <label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/></label>
+      <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/></label>
+      <label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/></label>
 
     </ListFilters>
     <ListToolbar >
@@ -93,7 +94,7 @@ export function GeneratorPage() {
       <PermissionGate permission="tool:gen:remove"><Button label="删除所选" isDisabled={busy||!ids.length} onClick={()=>{setActionError('');setConfirmation({kind:'delete',ids,name:ids.length+' 张表'});}}/></PermissionGate>
       <PermissionGate permission="tool:gen:code"><Button label="下载所选" isDisabled={busy||!ids.length} onClick={()=>exportRows(ids)}/></PermissionGate>
       <Button label="刷新列表" isDisabled={loading} onClick={()=>refresh()}/><Button label={showFilters?'隐藏筛选':'显示筛选'} onClick={()=>setShowFilters(value=>!value)}/>
-      <label>排序字段<select aria-label="排序字段" value={sort} onChange={event=>{setSort(event.target.value as typeof sort);setPage(1);}}>{(['name','comment','createdAt','updatedAt'] as const).map(value=><option key={value} value={value}>{labels[value]}</option>)}</select></label>
+      <label>排序字段<Select aria-label="排序字段" value={sort} onChange={event=>{setSort(event.target.value as typeof sort);setPage(1);}}>{(['name','comment','createdAt','updatedAt'] as const).map(value=><option key={value} value={value}>{labels[value]}</option>)}</Select></label>
       <Button label={direction==='asc'?'升序':'降序'} onClick={()=>{setDirection(value=>value==='asc'?'desc':'asc');setPage(1);}}/>
       <ColumnVisibilityMenu labels={labels} visibility={visibility} onChange={setVisibility} />
     </ListToolbar>
@@ -111,12 +112,12 @@ export function GeneratorPage() {
       {actionError?<p role="alert">{actionError}</p>:null}<Button label={busy?'正在处理…':'确认操作'} isDisabled={busy} onClick={()=>{void confirmed();}}/><Button label="取消" isDisabled={busy} onClick={()=>{setConfirmation(null);setActionError('');}}/>
     </ResourceDialog>:null}
     {customResult&&!confirmation?<div aria-label="自定义输出结果"><ul>{customResult.files?.map((file,index)=><li key={index}>{file.path}：{stateLabels[file.state ?? ''] ?? '结果未确认'}</li>)}</ul></div>:null}
-    {preview?<ResourceDialog titleId="generator-preview-title" busy={false} onCancel={()=>setPreview(null)}><h2 id="generator-preview-title">代码预览</h2><select aria-label="预览文件" value={previewIndex} onChange={event=>{setPreviewIndex(Number(event.target.value));setActionError('');}}>{preview.files?.map((file,index)=><option key={file.path} value={index}>{file.path}</option>)}</select>
+    {preview?<ResourceDialog titleId="generator-preview-title" busy={false} onCancel={()=>setPreview(null)}><h2 id="generator-preview-title">代码预览</h2><Select aria-label="预览文件" value={previewIndex} onChange={event=>{setPreviewIndex(Number(event.target.value));setActionError('');}}>{preview.files?.map((file,index)=><option key={file.path} value={index}>{file.path}</option>)}</Select>
       <GeneratorCodePreview source={preview.files?.[previewIndex]?.content ?? ''}/>{actionError?<p role="alert">{actionError}</p>:null}
       <div className="post-dialog-actions"><Button label="复制代码" variant="secondary" onClick={()=>{void navigator.clipboard.writeText(preview.files?.[previewIndex]?.content ?? '').then(()=>setFeedback('代码已复制。')).catch(()=>setActionError('复制未完成，可在代码区选择文本复制。'));}}/><Button label="关闭预览" variant="secondary" onClick={()=>setPreview(null)}/></div>
     </ResourceDialog>:null}
-    {creating?<ResourceDialog titleId="generator-create-title" busy={busy} onCancel={()=>setCreating(false)}><h2 id="generator-create-title">创建数据库表</h2><label>建表 SQL<textarea aria-label="建表 SQL" value={sql} disabled={busy} onChange={event=>{setSql(event.target.value);setCreation(null);setActionError('');}}/></label>
-      <label>初始前端类型<select aria-label="初始前端类型" value={template} disabled={busy} onChange={event=>{setTemplate(event.target.value);setCreation(null);setActionError('');}}>{['eforge-react','element-ui','element-plus','element-plus-typescript'].map(value=><option key={value}>{value}</option>)}</select></label>
+    {creating?<ResourceDialog titleId="generator-create-title" busy={busy} onCancel={()=>setCreating(false)}><h2 id="generator-create-title">创建数据库表</h2><label>建表 SQL<TextareaControl aria-label="建表 SQL" value={sql} disabled={busy} onChange={event=>{setSql(event.target.value);setCreation(null);setActionError('');}}/></label>
+      <label>初始前端类型<Select aria-label="初始前端类型" value={template} disabled={busy} onChange={event=>{setTemplate(event.target.value);setCreation(null);setActionError('');}}>{['eforge-react','element-ui','element-plus','element-plus-typescript'].map(value=><option key={value}>{value}</option>)}</Select></label>
       {creationResult}{actionError?<p role="alert">{actionError}</p>:null}<div className="post-dialog-actions"><Button label={busy?'正在建表…':'执行建表'} variant="primary" isDisabled={busy} onClick={()=>{void create();}}/><Button label="关闭" variant="secondary" isDisabled={busy} onClick={()=>setCreating(false)}/></div>
     </ResourceDialog>:null}
   </ListPage>;

@@ -1,5 +1,6 @@
+import {NativeButton, TextareaControl, NativeInput, Select} from '../../ui/native';
 import {useEffect, useState, type KeyboardEvent} from 'react';
-import {Button, Input} from '@eforge/ui';
+import {Button, Input} from '../../ui/controls';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useApi} from '../../app/context';
 import type {CronPreviewResponse} from '../../generated/api';
@@ -39,8 +40,8 @@ export function CronEditor({value, onConfirm, onCancel}: {value: string; onConfi
   }
   const valid = !loading && !localError && preview?.expression === normalized;
   return <ResourceDialog titleId="cron-editor-title" busy={false} onCancel={onCancel}><div className="cron-editor"><h2 id="cron-editor-title">Cron表达式编辑</h2><p>确认后返回表达式，不修改任务计划。</p>
-    <label>Cron表达式<textarea aria-label="Cron表达式" maxLength={255} value={expression} onChange={event => editText(event.target.value)} /></label><Button label="回填字段" variant="ghost" onClick={fill} />
-    <div role="tablist" aria-label="Cron字段">{cronFields.map((field, index) => <button key={field.label} type="button" role="tab" id={`cron-tab-${index}`} aria-controls="cron-field-panel" aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={event => tabKey(event, index)}>{field.label}</button>)}</div>
+    <label>Cron表达式<TextareaControl aria-label="Cron表达式" maxLength={255} value={expression} onChange={event => editText(event.target.value)} /></label><Button label="回填字段" variant="ghost" onClick={fill} />
+    <div role="tablist" aria-label="Cron字段">{cronFields.map((field, index) => <NativeButton key={field.label} type="button" role="tab" id={`cron-tab-${index}`} aria-controls="cron-field-panel" aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={event => tabKey(event, index)}>{field.label}</NativeButton>)}</div>
     <section role="tabpanel" id="cron-field-panel" aria-labelledby={`cron-tab-${active}`}><CronFieldControls index={active} field={fields[active]!} onChange={editField} /></section>
     <dl className="cron-summary">{cronFields.map((field, index) => <div key={field.label}><dt>{field.label}</dt><dd>{fieldToken(fields[index]!, index)}</dd></div>)}</dl>
     {localError && <p role="alert">{localError}</p>}{error && !localError && <><p role="alert">{error}</p><Button label="重试预览" onClick={() => setVersion(value => value + 1)} /></>}
@@ -51,11 +52,11 @@ export function CronEditor({value, onConfirm, onCancel}: {value: string; onConfi
 function CronFieldControls({index, field, onChange}: {index: number; field: CronField; onChange: (next: CronField) => void}) {
   const {label, min, max} = cronFields[index]!, modes: CronMode[] = ['every', 'range', 'step', 'list'];
   if (index === 3) modes.push('none', 'nearest', 'last'); if (index === 5) modes.push('none', 'nth', 'weekdayLast'); if (index === 6) modes.unshift('omit'); modes.push('custom');
-  const numeric = (key: 'start' | 'end' | 'interval' | 'ordinal', caption: string, lower: number = min, upper: number = max) => <label>{caption}<input type="number" aria-label={`${label}${caption}`} min={lower} max={upper} value={Number.isNaN(field[key]) ? '' : field[key]} onChange={event => onChange({...field, [key]: event.target.value === '' ? NaN : Number(event.target.value)})} /></label>;
-  return <fieldset><legend>{label}字段</legend><label>模式<select aria-label={`${label}模式`} value={field.mode} onChange={event => onChange({...field, mode: event.target.value as CronMode})}>{modes.map(mode => <option key={mode} value={mode}>{modeLabels[mode]}</option>)}</select></label>
+  const numeric = (key: 'start' | 'end' | 'interval' | 'ordinal', caption: string, lower: number = min, upper: number = max) => <label>{caption}<NativeInput type="number" aria-label={`${label}${caption}`} min={lower} max={upper} value={Number.isNaN(field[key]) ? '' : field[key]} onChange={event => onChange({...field, [key]: event.target.value === '' ? NaN : Number(event.target.value)})} /></label>;
+  return <fieldset><legend>{label}字段</legend><label>模式<Select aria-label={`${label}模式`} value={field.mode} onChange={event => onChange({...field, mode: event.target.value as CronMode})}>{modes.map(mode => <option key={mode} value={mode}>{modeLabels[mode]}</option>)}</Select></label>
     {['range', 'step', 'nearest', 'weekdayLast', 'nth'].includes(field.mode) && numeric('start', field.mode === 'nearest' ? '日期' : field.mode === 'weekdayLast' || field.mode === 'nth' ? '星期' : '开始值')}
     {field.mode === 'range' && numeric('end', '结束值')}{field.mode === 'step' && numeric('interval', '间隔值', 1, max - min + 1)}{field.mode === 'nth' && numeric('ordinal', '序号', 1, 5)}
-    {field.mode === 'list' && <div className="cron-values" role="group" aria-label={`${label}指定值`}>{Array.from({length: max - min + 1}, (_, offset) => offset + min).map(value => <label key={value}><input type="checkbox" aria-label={`${label}取值 ${value}`} checked={field.values.includes(value)} onChange={event => onChange({...field, values: event.target.checked ? [...field.values, value] : field.values.filter(entry => entry !== value)})} />{index === 5 ? ['日', '一', '二', '三', '四', '五', '六'][value - 1] : value}</label>)}</div>}
+    {field.mode === 'list' && <div className="cron-values" role="group" aria-label={`${label}指定值`}>{Array.from({length: max - min + 1}, (_, offset) => offset + min).map(value => <label key={value}><NativeInput type="checkbox" aria-label={`${label}取值 ${value}`} checked={field.values.includes(value)} onChange={event => onChange({...field, values: event.target.checked ? [...field.values, value] : field.values.filter(entry => entry !== value)})} />{index === 5 ? ['日', '一', '二', '三', '四', '五', '六'][value - 1] : value}</label>)}</div>}
     {field.mode === 'custom' && <Input label={`${label}自定义字段`} value={field.raw} onChange={raw => onChange({...field, raw})} />}{index === 5 && <p>星期编号：1 为星期日，2 为星期一，7 为星期六。</p>}
   </fieldset>;
 }

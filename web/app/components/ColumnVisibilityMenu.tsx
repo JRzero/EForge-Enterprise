@@ -1,5 +1,6 @@
+import {NativeInput} from '../../ui/native';
 import {useEffect, useRef, type Dispatch, type SetStateAction} from 'react';
-import type {VisibilityState} from '@eforge/data';
+import type {VisibilityState} from '../../ui/data';
 
 export function ColumnVisibilityMenu({labels, visibility, onChange, title = '显示列', className}: {
   labels: Record<string, string>; visibility: VisibilityState;
@@ -28,9 +29,9 @@ export function ColumnVisibilityMenu({labels, visibility, onChange, title = '显
   }, []);
   useEffect(() => { if (master.current) master.current.indeterminate = some && !all; }, [all, some]);
   return <details ref={menu} className={['column-visibility-menu',className].filter(Boolean).join(' ')}><summary>{title}</summary><div className="post-columns">
-    <label><input ref={master} type="checkbox" checked={all} disabled={!entries.length}
+    <label><NativeInput ref={master} type="checkbox" checked={all} disabled={!entries.length}
       onChange={event => { const checked = event.target.checked; onChange(current => ({...current, ...Object.fromEntries(entries.map(([key]) => [key, checked]))})); }} />列展示</label>
-    {entries.map(([key, label]) => <label key={key}><input type="checkbox" checked={visibility[key] !== false}
+    {entries.map(([key, label]) => <label key={key}><NativeInput type="checkbox" checked={visibility[key] !== false}
       onChange={event => { const checked = event.target.checked; onChange(current => ({...current, [key]: checked})); }} />{label}</label>)}
   </div></details>;
 }

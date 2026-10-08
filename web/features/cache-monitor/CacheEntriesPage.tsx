@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {DataTable, type ColumnDef} from '@eforge/data';
-import {PageHeader} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef} from '../../ui/data';
+import {PageHeader} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {CacheName, CacheValue} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';

@@ -1,5 +1,5 @@
 import {useEffect, useSyncExternalStore} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../ui/controls';
 import type {AppRouterAdapter} from '@eforge/app';
 import {saveScreenLock} from '../features/auth/screen-lock';
 import type {SessionRuntime} from '../integration/session';

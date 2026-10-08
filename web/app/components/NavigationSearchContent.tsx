@@ -1,5 +1,6 @@
+import {NativeButton, NativeInput} from '../../ui/native';
 import {useState, type KeyboardEvent} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {AppRouterAdapter} from '@eforge/app';
 import type {NavigationItem} from '../../integration/navigation';
 import {MenuIcon} from '../../features/menus/IconPicker';
@@ -32,15 +33,15 @@ export function NavigationSearchContent({items,router,close,id}: {items: Navigat
     } else if (event.key==='Enter' && activeIndex>=0) {event.preventDefault(); choose(results[activeIndex]!);}
   }
   return <>
-      <label>菜单搜索<input autoFocus role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls={id+'-results'}
+      <label>菜单搜索<NativeInput autoFocus role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls={id+'-results'}
         aria-activedescendant={activeIndex>=0?id+'-'+activeIndex:undefined} placeholder="支持标题、URL模糊查询" value={query}
         onChange={event=>{setQuery(event.target.value);setActiveKey(null);}} onKeyDown={keyboard} /></label>
       <Button label="清除搜索" variant="ghost" size="sm" onClick={()=>{setQuery('');setActiveKey(null);}} />
       <p role="status">找到 {results.length} 个结果</p>
       <div role="listbox" aria-label="导航搜索结果" id={id+'-results'} className="navigation-search-results">{results.map((item,index)=><div
         id={id+'-'+index} key={item.key} role="option" aria-selected={activeKey===item.key} onMouseEnter={()=>setActiveKey(item.key)}>
-        <button type="button" aria-label={'打开 '+item.title.join(' / ')} onClick={()=>choose(item)}><MenuIcon name={item.icon} />
-          <span><span><Highlight text={item.title.join(' / ')} query={query} /></span><small><Highlight text={item.href} query={query} /></small></span>{item.external?<span aria-label="在新窗口打开">↗</span>:null}</button>
+        <NativeButton type="button" aria-label={'打开 '+item.title.join(' / ')} onClick={()=>choose(item)}><MenuIcon name={item.icon} />
+          <span><span><Highlight text={item.title.join(' / ')} query={query} /></span><small><Highlight text={item.href} query={query} /></small></span>{item.external?<span aria-label="在新窗口打开">↗</span>:null}</NativeButton>
       </div>)}</div>
       {!results.length?<p>未找到“{query}”相关菜单</p>:null}
       <p className="muted">↑ ↓ 切换 Enter 选择 Esc 关闭</p>

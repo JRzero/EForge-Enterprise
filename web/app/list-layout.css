@@ -23,7 +23,7 @@
 .auth-brand .eforge-logo { width: 34px; height: 34px; }
 .login-card .captcha-row { grid-template-columns: minmax(0,1fr) 110px; align-items: end; gap: 12px; }
 .login-card .captcha-image { position: relative; display: block; width: 110px; height: 40px; min-height: 40px; padding: 0; border-radius: 4px; }
-.login-card .captcha-image img { display: block; width: 100%; height: 40px; object-fit: contain; border: 1px solid #d4dbe3; border-radius: 4px; box-sizing: border-box; }
+.login-card .captcha-image img { display: block; width: 100%; height: 40px; object-fit: contain; border: 1px solid #e8e9eb; border-radius: 4px; box-sizing: border-box; }
 .login-card .captcha-image span { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .login-card .captcha-image:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 2px; }
 @media(max-width:600px) {

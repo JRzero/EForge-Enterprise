@@ -1,3 +1,4 @@
+import {NativeButton} from '../../ui/native';
 import {useEffect, useId, useRef, useState, type MouseEvent} from 'react';
 import type {AppRouterAdapter} from '@eforge/app';
 import type {NavigationItem} from '../../integration/navigation';
@@ -43,12 +44,12 @@ export function TopNavigation({items, pathname, href, activePaths, router, mixed
     }}>
       {item.href ? <a href={item.href} aria-current={active ? 'page' : undefined} onClick={event => follow(event,item)}
         {...(item.external ? {target:'_blank',rel:'noopener noreferrer'} : {})}><MenuIcon name={item.icon}/><span>{item.label}</span>{item.external ? <span aria-label="在新窗口打开">↗</span> : null}</a>
-        : <button type="button" data-active={active} aria-pressed={mixed ? active : undefined} aria-expanded={!mixed ? open : undefined}
+        : <NativeButton type="button" data-active={active} aria-pressed={mixed ? active : undefined} aria-expanded={!mixed ? open : undefined}
           aria-controls={!mixed ? id+'-'+item.key : undefined} onClick={event => {
             if (mixed) {onSelect(item.key);setPopup(null);setOverflowHref(null);} else setPopup(open && !event.detail ? null : {href,key:item.key});
-          }}><MenuIcon name={item.icon}/><span>{item.label}</span></button>}
-      {!mixed && item.href && item.children.length ? <button type="button" aria-label={item.label+'子菜单'} aria-expanded={open} aria-controls={id+'-'+item.key}
-        onClick={() => setPopup(open ? null : {href,key:item.key})}>▾</button> : null}
+          }}><MenuIcon name={item.icon}/><span>{item.label}</span></NativeButton>}
+      {!mixed && item.href && item.children.length ? <NativeButton type="button" aria-label={item.label+'子菜单'} aria-expanded={open} aria-controls={id+'-'+item.key}
+        onClick={() => setPopup(open ? null : {href,key:item.key})}>▾</NativeButton> : null}
       {!mixed && item.children.length ? <div hidden={!open} id={id+'-'+item.key} className="top-navigation-popup">
         <Navigation items={item.children} pathname={pathname} activePaths={activePaths} router={router}/>
       </div> : null}
@@ -62,7 +63,7 @@ export function TopNavigation({items, pathname, href, activePaths, router, mixed
   }} onKeyDown={event => {
     if (event.key === 'Escape' && more) {event.preventDefault();setPopup(null);setOverflowHref(null);root.current?.querySelector<HTMLButtonElement>('.top-navigation-more > button')?.focus();}
   }}><ul>{items.slice(0,visible).map(entry)}{extra.length ? <li className="top-navigation-more">
-    <button type="button" data-active={extra.some(item => mixed ? item.key===selected : navigationContains(item,pathname,activePaths))} aria-expanded={more} aria-controls={id+'-more'} onClick={() => {setPopup(null);setOverflowHref(more ? null : href);}}>更多菜单</button>
+    <NativeButton type="button" data-active={extra.some(item => mixed ? item.key===selected : navigationContains(item,pathname,activePaths))} aria-expanded={more} aria-controls={id+'-more'} onClick={() => {setPopup(null);setOverflowHref(more ? null : href);}}>更多菜单</NativeButton>
     <ul hidden={!more} id={id+'-more'} className="top-navigation-overflow">{extra.map(entry)}</ul>
   </li> : null}</ul></nav>;
 }

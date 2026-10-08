@@ -1,7 +1,7 @@
 import {ListToolbar} from '../../app/components/ListPage';
 import {useLayoutEffect, useRef, useState, type SyntheticEvent} from 'react';
-import {PageHeader} from '@eforge/patterns';
-import {Button} from '@eforge/ui';
+import {PageHeader} from '../../ui/patterns';
+import {Button} from '../../ui/controls';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
 

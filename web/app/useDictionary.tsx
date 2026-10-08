@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../ui/controls';
 import type {DictionaryValueOption} from '../generated/api';
 import {errorMessage} from '../integration/errors';
 import {useApi} from './context';

@@ -1,0 +1,10 @@
+/* Public design-system stylesheet, in the same order as the product cascade. */
+@import '@eforge/tokens/styles.css';
+@import '@eforge/ui/styles.css';
+@import '@eforge/patterns/styles.css';
+@import '@eforge/data/styles.css';
+@import '../app/styles.css';
+@import '../app/enterprise-theme.css';
+@import '../app/workspace-layout.css';
+@import '../app/list-layout.css';
+@import './styles.css';

@@ -1,11 +1,13 @@
+import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
-import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '@eforge/data';
-import {PermissionGate} from '@eforge/patterns';
-import {Button, Input} from '@eforge/ui';
+import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
+import {PermissionGate} from '../../ui/patterns';
+import {Button, Input} from '../../ui/controls';
 import type {ConfigurationRequest, ConfigurationResponse, PageResponseConfigurationResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -99,9 +101,9 @@ export function ConfigurationsPage() {
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
       <Input label="参数名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名筛选" value={draft.key} onChange={key => setDraft({...draft, key})} />
-      <label>系统内置筛选<select aria-label="系统内置筛选" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></select></label>
-      <label>开始日期<input aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label>
-      <label>结束日期<input aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
+      <label>系统内置筛选<Select aria-label="系统内置筛选" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>
+      <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label>
+      <label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
 
     </ListFilters>
     <ListToolbar >
@@ -119,14 +121,14 @@ export function ConfigurationsPage() {
       rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择参数 ${row.name}`} /></div>
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <ResourceDialog titleId="configuration-editor-title" busy={busy} onCancel={() => discard.confirm(closeEditor)}><h2 id="configuration-editor-title">{editor.id ? '修改参数' : '新增参数'}</h2>
-      <form onSubmit={event => {void save(event);}}>
+      <PageForm onSubmit={event => {void save(event);}}>
         <Input label="参数名称" value={editor.form.name} aria-required="true" isDisabled={busy} onChange={name => setEditor({...editor, form: {...editor.form, name}})} />
         <Input label="参数键名" value={editor.form.key} aria-required="true" isDisabled={busy} onChange={key => setEditor({...editor, form: {...editor.form, key}})} />
-        <label>参数键值<textarea aria-label="参数键值" aria-required="true" maxLength={500} value={editor.form.value} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, value: event.target.value}})} /></label>
-        <label>系统内置<select aria-label="系统内置" value={editor.form.builtin ? 'Y' : 'N'} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, builtin: event.target.value === 'Y'}})}><DictionaryOptions options={dictionary.options} current={editor.form.builtin ? 'Y' : 'N'} /></select></label>
-        <label>备注<textarea aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
+        <label>参数键值<TextareaControl aria-label="参数键值" aria-required="true" maxLength={500} value={editor.form.value} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, value: event.target.value}})} /></label>
+        <label>系统内置<Select aria-label="系统内置" value={editor.form.builtin ? 'Y' : 'N'} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, builtin: event.target.value === 'Y'}})}><DictionaryOptions options={dictionary.options} current={editor.form.builtin ? 'Y' : 'N'} /></Select></label>
+        <label>备注<TextareaControl aria-label="备注" value={editor.form.remark ?? ''} disabled={busy} maxLength={500} onChange={event => setEditor({...editor, form: {...editor.form, remark: event.target.value}})} /></label>
         {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存参数'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(closeEditor)} /></div>
-      </form></ResourceDialog> : null}
+      </PageForm></ResourceDialog> : null}
     {deleting ? <ResourceDialog titleId="configuration-delete-title" alert busy={busy} onCancel={() => {setDeleting(null); setActionError('');}}><h2 id="configuration-delete-title">确认删除参数</h2><p>将删除所选的 {deleting.length} 个参数。系统内置参数不能删除。</p>
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => {void remove();}} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => {setDeleting(null); setActionError('');}} /></div>
     </ResourceDialog> : null}

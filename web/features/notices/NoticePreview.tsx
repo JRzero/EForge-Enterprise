@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {NoticeResponse} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';

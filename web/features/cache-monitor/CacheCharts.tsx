@@ -1,9 +1,10 @@
+import {NativeButton} from '../../ui/native';
 import {useEffect, useRef, useState} from 'react';
 import * as echarts from 'echarts/core';
 import {PieChart, GaugeChart} from 'echarts/charts';
 import {TooltipComponent} from 'echarts/components';
 import {SVGRenderer} from 'echarts/renderers';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import type {CacheStatistics} from '../../generated/api';
 import {cacheChartOptions, commandShare, commandTotal} from './chart-options';
 echarts.use([PieChart, GaugeChart, TooltipComponent, SVGRenderer]);
@@ -57,7 +58,7 @@ export function CacheCharts({data}: {data: CacheStatistics}) {
   return <div className="server-monitor-grid cache-charts">
     <section className="server-card" aria-labelledby="cache-commands-title"><h2 id="cache-commands-title">命令统计</h2>
       <div ref={commands} className="cache-chart" role="img" aria-label="Redis 命令统计玫瑰图" />
-      {data.commands.length === 0 ? <p>暂无命令统计</p> : <ul className="cache-command-list">{data.commands.map((command, index) => <li key={command.name}><button type="button" onFocus={() => show(index)} onMouseEnter={event => {if (!event.currentTarget.closest('.cache-command-list')?.contains(document.activeElement)) show(index);}} onClick={() => show(index)} onMouseLeave={event => {if (!event.currentTarget.closest('.cache-command-list')?.contains(document.activeElement)) hide();}} onBlur={hide}>{command.name}：{command.calls} 次（{commandShare(command.calls, total)}%）</button></li>)}</ul>}
+      {data.commands.length === 0 ? <p>暂无命令统计</p> : <ul className="cache-command-list">{data.commands.map((command, index) => <li key={command.name}><NativeButton type="button" onFocus={() => show(index)} onMouseEnter={event => {if (!event.currentTarget.closest('.cache-command-list')?.contains(document.activeElement)) show(index);}} onClick={() => show(index)} onMouseLeave={event => {if (!event.currentTarget.closest('.cache-command-list')?.contains(document.activeElement)) hide();}} onBlur={hide}>{command.name}：{command.calls} 次（{commandShare(command.calls, total)}%）</NativeButton></li>)}</ul>}
     </section>
     <section className="server-card" aria-labelledby="cache-memory-title"><h2 id="cache-memory-title">内存信息</h2><div ref={memory} className="cache-chart" role="img" aria-label="Redis 内存消耗仪表图" /><p>使用内存：{data.info.usedMemory ?? '—'}；仪表刻度单位：MiB</p></section>
     {error && <div><p role="alert">图表暂时无法显示，请重试。</p><Button label="重试图表" onClick={() => setVersion(value => value + 1)} /></div>}

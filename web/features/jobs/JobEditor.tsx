@@ -1,5 +1,7 @@
+import {Select} from '../../ui/native';
+import {PageForm} from '../../ui/FormPage';
 import {useEffect, useRef, useState, type FormEvent} from 'react';
-import {Button, Input} from '@eforge/ui';
+import {Button, Input} from '../../ui/controls';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useDictionary, DictionaryNotice, DictionaryOptions} from '../../app/useDictionary';
@@ -27,19 +29,19 @@ export function JobEditor({id,onClose,onSaved}: {id: string | null;onClose:()=>v
   }
   return <><ResourceDialog titleId="job-editor-title" busy={busy||cron} onCancel={onClose}>
     <h2 id="job-editor-title">{id?'修改任务':'新增任务'}</h2><DictionaryNotice dictionary={groups}/><DictionaryNotice dictionary={statuses}/>
-    {loading?<p role="status">正在加载任务…</p>:readError?<><p role="alert">{readError}</p><Button label="重试任务表单" onClick={()=>setVersion(value=>value+1)}/></>:<form onSubmit={event=>{void save(event);}}>
+    {loading?<p role="status">正在加载任务…</p>:readError?<><p role="alert">{readError}</p><Button label="重试任务表单" onClick={()=>setVersion(value=>value+1)}/></>:<PageForm onSubmit={event=>{void save(event);}}>
       <Input label="任务名称" value={draft.name} onChange={name=>setDraft({...draft,name})} isDisabled={busy} isRequired/>
-      <label>任务组名<select aria-label="表单任务组名" value={draft.group} disabled={busy} onChange={event=>setDraft({...draft,group:event.target.value})}><DictionaryOptions options={groups.options} current={draft.group}/></select></label>
+      <label>任务组名<Select aria-label="表单任务组名" value={draft.group} disabled={busy} onChange={event=>setDraft({...draft,group:event.target.value})}><DictionaryOptions options={groups.options} current={draft.group}/></Select></label>
       <Input label="调用目标字符串" value={draft.invokeTarget} onChange={invokeTarget=>setDraft({...draft,invokeTarget})} isDisabled={busy} isRequired/>
       <p>支持 Bean 或完整类名的方法调用，参数可为字符串、布尔值、长整型（L）、浮点型（D）和整型。例如 ryTask.ryParams('内容')。</p>
       <Input label="表单Cron表达式" value={draft.cronExpression} onChange={cronExpression=>setDraft({...draft,cronExpression})} isDisabled={busy} isRequired/>
       <Button type="button" label="编辑表单Cron表达式" variant="ghost" isDisabled={busy} onClick={event=>{cronOpener.current=event.currentTarget;setCron(true);}}/>
-      <label>计划策略<select aria-label="计划策略" disabled={busy} value={draft.misfirePolicy} onChange={event=>setDraft({...draft,misfirePolicy:event.target.value as JobWriteRequest['misfirePolicy']})}><option value="0">默认</option><option value="1">立即触发执行</option><option value="2">触发一次执行</option><option value="3">不触发立即执行</option></select></label>
-      <label>并发执行<select aria-label="并发执行" disabled={busy} value={draft.concurrent?'0':'1'} onChange={event=>setDraft({...draft,concurrent:event.target.value==='0'})}><option value="0">允许</option><option value="1">禁止</option></select></label>
-      {id?<label>任务状态<select aria-label="表单任务状态" value={draft.status} disabled={busy} onChange={event=>setDraft({...draft,status:event.target.value as JobWriteRequest['status']})}><DictionaryOptions options={statuses.options} current={draft.status}/></select></label>:<p>新增任务默认暂停，保存后可在列表中启用。</p>}
+      <label>计划策略<Select aria-label="计划策略" disabled={busy} value={draft.misfirePolicy} onChange={event=>setDraft({...draft,misfirePolicy:event.target.value as JobWriteRequest['misfirePolicy']})}><option value="0">默认</option><option value="1">立即触发执行</option><option value="2">触发一次执行</option><option value="3">不触发立即执行</option></Select></label>
+      <label>并发执行<Select aria-label="并发执行" disabled={busy} value={draft.concurrent?'0':'1'} onChange={event=>setDraft({...draft,concurrent:event.target.value==='0'})}><option value="0">允许</option><option value="1">禁止</option></Select></label>
+      {id?<label>任务状态<Select aria-label="表单任务状态" value={draft.status} disabled={busy} onChange={event=>setDraft({...draft,status:event.target.value as JobWriteRequest['status']})}><DictionaryOptions options={statuses.options} current={draft.status}/></Select></label>:<p>新增任务默认暂停，保存后可在列表中启用。</p>}
       <Input label="备注" value={draft.remark??''} onChange={remark=>setDraft({...draft,remark})} isDisabled={busy}/>
       {error&&<p role="alert">{error}</p>}<div className="post-dialog-actions"><Button label="取消" type="button" variant="secondary" isDisabled={busy} onClick={onClose}/><Button label="保存任务" type="submit" variant="primary" isDisabled={busy}/></div>
-    </form>}
+    </PageForm>}
     {(loading||readError)&&<Button label="取消" isDisabled={busy} onClick={onClose}/>}</ResourceDialog>
     {cron&&<CronEditor value={draft.cronExpression} onCancel={()=>setCron(false)} onConfirm={expression=>{setDraft({...draft,cronExpression:expression});setCron(false);}}/>}
   </>;

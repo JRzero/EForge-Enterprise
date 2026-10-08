@@ -1,3 +1,4 @@
+import {NativeButton} from '../ui/native';
 import {useEffect, useId, useRef, useState, type MouseEvent} from 'react';
 import type {AppRouterAdapter} from '@eforge/app';
 import type {NavigationItem} from '../integration/navigation';
@@ -44,12 +45,12 @@ export function Navigation({items, pathname, router, activePaths = [], collapsed
         aria-current={!item.external && pathname === (item.path ?? item.href) ? 'page' : undefined}
         {...(item.external ? {target: '_blank', rel: 'noopener noreferrer'} : {onClick: (event: MouseEvent<HTMLAnchorElement>) => navigate(event, item.href!)})}>
         <MenuIcon name={item.icon} /><span>{item.label}</span>{item.external ? <span aria-label="在新窗口打开">↗</span> : null}</a>
-        : item.children.length ? <button type="button" className="navigation-disclosure" aria-label={collapsed ? item.label : undefined} title={collapsed ? item.label : undefined}
+        : item.children.length ? <NativeButton type="button" className="navigation-disclosure" aria-label={collapsed ? item.label : undefined} title={collapsed ? item.label : undefined}
           aria-expanded={expanded} aria-controls={childrenId} onClick={event => choose(expanded ? null : item.key, event.currentTarget)}>
-          <MenuIcon name={item.icon} /><span>{item.label}</span><span aria-hidden="true">{expanded ? '▾' : '▸'}</span></button>
+          <MenuIcon name={item.icon} /><span>{item.label}</span><span aria-hidden="true">{expanded ? '▾' : '▸'}</span></NativeButton>
         : <span className="navigation-group" title={collapsed ? item.label : undefined}>{item.label}{item.queryError ? <small role="status">菜单参数配置有误，请联系管理员</small> : null}</span>}
-      {item.href && item.children.length ? <button type="button" className="navigation-disclosure" aria-label={`${item.label}子菜单`} aria-expanded={expanded} aria-controls={childrenId}
-        onClick={event => choose(expanded ? null : item.key, event.currentTarget)}><span>子菜单</span><span aria-hidden="true">{expanded ? '▾' : '▸'}</span></button> : null}
+      {item.href && item.children.length ? <NativeButton type="button" className="navigation-disclosure" aria-label={`${item.label}子菜单`} aria-expanded={expanded} aria-controls={childrenId}
+        onClick={event => choose(expanded ? null : item.key, event.currentTarget)}><span>子菜单</span><span aria-hidden="true">{expanded ? '▾' : '▸'}</span></NativeButton> : null}
       {item.children.length ? <div id={childrenId} hidden={!expanded} className={collapsed ? 'navigation-popup' : undefined} style={collapsed ? {top: selection.top, maxHeight: Math.max(0, window.innerHeight - selection.top - 8)} : undefined}>
         <Navigation items={item.children} pathname={pathname} router={router} activePaths={activePaths} /></div> : null}
     </li>;

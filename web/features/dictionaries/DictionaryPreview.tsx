@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button} from '@eforge/ui';
+import {Button} from '../../ui/controls';
 import {useApi} from '../../app/context';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {DictionaryTag} from '../../app/components/DictionaryTag';
