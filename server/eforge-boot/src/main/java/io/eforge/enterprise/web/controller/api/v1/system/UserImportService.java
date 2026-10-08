@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import io.eforge.enterprise.common.core.domain.entity.*;
 import io.eforge.enterprise.common.exception.ApiFailure;
@@ -25,25 +26,32 @@ public class UserImportService
     private final SysUserMapper mapper;
     private final DepartmentMutationMapper mutations;
     private final Validator validator;
+    private final RoleSessionRefresher sessions;
     private final TransactionTemplate transaction;
     public UserImportService(ISysUserService users, ISysDeptService departments, ISysConfigService configuration,
-            SysUserMapper mapper, DepartmentMutationMapper mutations, Validator validator, PlatformTransactionManager transactionManager)
+            SysUserMapper mapper, DepartmentMutationMapper mutations, Validator validator,
+            PlatformTransactionManager transactionManager, RoleSessionRefresher sessions)
     {
         this.users = users; this.departments = departments; this.configuration = configuration;
         this.mapper = mapper; this.mutations = mutations; this.validator = validator;
+        this.sessions = sessions;
         this.transaction = new TransactionTemplate(transactionManager);
+        this.transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
     public UserImportController.UserImportResponse importUsers(List<SysUser> rows, boolean updateExisting)
     {
         List<UserImportController.UserImportRow> results = new ArrayList<>(); int created = 0, updated = 0;
+        Set<Long> committedUpdates = new LinkedHashSet<>();
         for (int index = 0; index < rows.size(); index++)
         {
-            SysUser source = rows.get(index); String username = source.getUserName();
+            SysUser source = rows.get(index); String username = source == null ? null : source.getUserName();
             String outcome; String code = null;
             try
             {
-                outcome = transaction.execute(status -> write(source, updateExisting));
+                WriteResult committed = transaction.execute(status -> write(source, updateExisting));
+                outcome = committed.outcome();
                 if ("CREATED".equals(outcome)) created++; else updated++;
+                if (committed.updatedUserId() != null) committedUpdates.add(committed.updatedUserId());
             }
             catch (ApiFailure exception) { outcome = "FAILED"; code = exception.code(); }
             catch (AccessDeniedException | ServiceException exception) { outcome = "FAILED"; code = "ACCESS_DENIED"; }
@@ -52,11 +60,28 @@ public class UserImportService
             results.add(new UserImportController.UserImportRow(index + 1,
                     username == null ? "" : username.substring(0, Math.min(32, username.length())), outcome, code));
         }
+        if (!committedUpdates.isEmpty())
+        {
+            // Every recorded row has already committed independently. Publish once,
+            // even when other rows failed, and do not defer to an unrelated outer transaction.
+            try { sessions.refresh(Set.copyOf(committedUpdates)); }
+            catch (RuntimeException exception)
+            {
+                // A cache failure cannot turn committed SQL updates into FAILED rows.
+                ApiFailure failure = new ApiFailure(503, "USER_IMPORT_SESSION_REFRESH_FAILED",
+                        "Successful import rows have been saved, but existing sessions could not be synchronized. The import has not been rolled back.");
+                failure.initCause(exception);
+                throw failure;
+            }
+        }
         return new UserImportController.UserImportResponse(rows.size(), created, updated, rows.size() - created - updated, List.copyOf(results));
     }
-    private String write(SysUser source, boolean updateExisting)
+    private record WriteResult(String outcome, Long updatedUserId) {}
+
+    private WriteResult write(SysUser source, boolean updateExisting)
     {
         if (mutations.lockRoot() == null) throw failure(409, "DEPARTMENT_ROOT_MISSING");
+        if (source == null) throw failure(400, "VALIDATION_ERROR");
         // Construct a new entity: import columns cannot supply service-owned fields.
         SysUser user = new SysUser(); user.setUserName(source.getUserName()); user.setNickName(source.getNickName());
         user.setDeptId(source.getDeptId()); user.setEmail(source.getEmail() == null ? "" : source.getEmail());
@@ -99,13 +124,13 @@ public class UserImportService
                 throw failure(409, "USER_INITIAL_PASSWORD_INVALID");
             user.setPassword(SecurityUtils.encryptPassword(password)); user.setCreateBy(SecurityUtils.getUsername());
             if (mapper.insertUser(user) != 1) throw failure(409, "USER_IMPORT_FAILED");
-            return "CREATED";
+            return new WriteResult("CREATED", null);
         }
         // Original import updates retain department, roles, posts, password, avatar
         // and remark. Only the dedicated administrative editor reassigns them.
         user.setDeptId(existing.getDeptId()); user.setUpdateBy(SecurityUtils.getUsername());
         if (mapper.updateUser(user) != 1) throw failure(404, "USER_NOT_FOUND");
-        return "UPDATED";
+        return new WriteResult("UPDATED", user.getUserId());
     }
     private static ApiFailure failure(int status, String code) { return new ApiFailure(status, code, "The import row could not be applied."); }
 }

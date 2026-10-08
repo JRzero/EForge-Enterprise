@@ -174,23 +174,21 @@ run also enabled all six real Redis concurrency tests; see the linked session
 review for the baseline/fixed comparison. The disposable MySQL schema, HTTP,
 OpenAPI and browser integration gates remain separately reported by CI.
 
-## Remaining identity boundaries
+## Follow-up and remaining identity boundaries
 
 The reviewed entrances are a bounded migration step. In particular:
 
-- Legacy role creation/editing still accepts numeric `menuIds` without the
-  canonical `RoleService.write` check that newly granted menus belong to the
-  operator's available menu set. The new session refresh on role editing does
-  not add that missing grant check. This remains a separate authorization gap
-  requiring use-case consolidation or equivalent server-side validation.
-- User-import disablement and authorization lifecycle refresh have not been
-  included in this round, for either canonical or legacy import. Canonical
-  [UserImportService](../server/eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/UserImportService.java)
-  already has a per-row transaction and root lock, but its status update does
-  not schedule the affected session refresh. The legacy overwrite path also
-  lacks that callback. Their ordinary mapper updates now cannot change a
-  password; this does not establish immediate session revocation after an
-  imported account is disabled.
+- The subsequent [menu/import review](security-review-role-menus-import-v3.md)
+  closes the deferred menu-grant gap in legacy role creation/editing. Both
+  entrances now share the canonical available/previous menu policy before
+  writing; a supplied create identity cannot borrow another role's grants.
+- The same follow-up closes session publication for both canonical and legacy
+  HTTP imports. They share independent per-row transactions and one refresh of
+  committed update IDs, including partially successful batches. Cache failure
+  is reported separately from committed SQL results. The original lower-level
+  `ISysUserService.importUser` method remains for source compatibility but is
+  no longer called by a production HTTP entrance and does not acquire those
+  lifecycle guarantees.
 - Other legacy DTO validation, self-service account-state checks and read routes
   have not been made equivalent to the canonical facade in this change.
 

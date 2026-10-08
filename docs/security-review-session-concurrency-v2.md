@@ -60,6 +60,11 @@ change. Canonical and legacy profile/bootstrap writers continue using the public
 `setLoginUser` method, inheriting the same compare-and-set protection.
 
 Controllers use the committed `RoleSessionRefresher` for role/user mutations.
+The subsequent [menu/import review](security-review-role-menus-import-v3.md)
+adds both HTTP import entrances: they collect successfully committed existing
+user IDs and invoke one authoritative refresh after all rows are processed.
+Later row failures do not suppress those updates; publication failure is
+reported without claiming that committed SQL was rolled back.
 The old `refreshPermissionByRoleId` method remains callable for source
 compatibility, but conservatively revokes matching sessions. It no longer derives
 new authority from an old cached role list. Applications requiring seamless

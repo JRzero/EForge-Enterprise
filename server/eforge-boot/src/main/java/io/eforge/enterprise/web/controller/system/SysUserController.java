@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.core.controller.BaseController;
 import io.eforge.enterprise.common.core.domain.AjaxResult;
@@ -29,6 +30,7 @@ import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.page.TableDataInfo;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.common.exception.ServiceException;
+import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.common.utils.SecurityUtils;
 import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.common.utils.poi.ExcelUtil;
@@ -38,6 +40,8 @@ import io.eforge.enterprise.system.service.ISysRoleService;
 import io.eforge.enterprise.system.service.ISysUserService;
 import io.eforge.enterprise.system.mapper.DepartmentMutationMapper;
 import io.eforge.enterprise.web.controller.api.v1.system.RoleSessionRefresher;
+import io.eforge.enterprise.web.controller.api.v1.system.UserImportService;
+import io.eforge.enterprise.web.controller.api.v1.system.UserImportController.UserImportResponse;
 
 /**
  * 用户信息
@@ -65,6 +69,9 @@ public class SysUserController extends BaseController
 
     @Autowired
     private RoleSessionRefresher sessions;
+
+    @Autowired
+    private UserImportService userImporter;
 
     /**
      * 获取用户列表
@@ -95,9 +102,54 @@ public class SysUserController extends BaseController
     {
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
         List<SysUser> userList = util.importExcel(file.getInputStream());
-        String operName = getUsername();
-        String message = userService.importUser(userList, updateSupport, operName);
+        if (userList == null || userList.isEmpty())
+        {
+            throw new ServiceException("导入用户数据不能为空！");
+        }
+        UserImportResponse result;
+        try
+        {
+            // Both HTTP contracts share committed-row accounting and session propagation.
+            result = userImporter.importUsers(userList, updateSupport);
+        }
+        catch (ApiFailure failure)
+        {
+            if ("USER_IMPORT_SESSION_REFRESH_FAILED".equals(failure.code()))
+            {
+                ServiceException unavailable = new ServiceException("成功条目已保存，但登录会话同步失败；已提交的数据未回滚，请联系管理员处理。", 503);
+                unavailable.initCause(failure);
+                throw unavailable;
+            }
+            throw failure;
+        }
+        String message = importMessage(result);
+        if (result.failed() > 0)
+        {
+            throw new ServiceException(message);
+        }
         return success(message);
+    }
+
+    private static String importMessage(UserImportResponse result)
+    {
+        StringBuilder message = new StringBuilder("导入完成：新增 ").append(result.created())
+                .append(" 条，更新 ").append(result.updated()).append(" 条，失败 ").append(result.failed()).append(" 条。");
+        if (result.failed() > 0)
+        {
+            message.append("成功条目已保存，请核对失败条目后重试。");
+        }
+        for (var row : result.rows())
+        {
+            message.append("<br/>").append(row.row()).append("、账号 ").append(HtmlUtils.htmlEscape(row.username()));
+            switch (row.outcome())
+            {
+                case "CREATED" -> message.append(" 导入成功");
+                case "UPDATED" -> message.append(" 更新成功");
+                default -> message.append(" 导入失败（").append(HtmlUtils.htmlEscape(
+                        row.code() == null ? "USER_IMPORT_FAILED" : row.code())).append("）");
+            }
+        }
+        return message.toString();
     }
 
     @PostMapping("/importTemplate")

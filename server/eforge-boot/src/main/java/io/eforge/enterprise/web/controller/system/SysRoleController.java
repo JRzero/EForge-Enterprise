@@ -104,8 +104,13 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:add')")
     @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @PostMapping
+    @Transactional
     public AjaxResult add(@Validated @RequestBody SysRole role)
     {
+        lockIdentityMutations();
+        // Create never accepts another role's identity or existing grant allowance.
+        role.setRoleId(null);
+        role.setMenuIds(validateMenuGrants(role.getMenuIds(), null));
         if (!roleService.checkRoleNameUnique(role))
         {
             return error("新增角色'" + role.getRoleName() + "'失败，角色名称已存在");
@@ -129,8 +134,8 @@ public class SysRoleController extends BaseController
     public AjaxResult edit(@Validated @RequestBody SysRole role)
     {
         lockIdentityMutations();
-        roleService.checkRoleAllowed(role);
-        roleService.checkRoleDataScope(role.getRoleId());
+        if (role.getRoleId() == null || role.getRoleId() < 1) throw new ServiceException("角色编号无效", 400);
+        role.setMenuIds(validateMenuGrants(role.getMenuIds(), role.getRoleId()));
         if (!roleService.checkRoleNameUnique(role))
         {
             return error("修改角色'" + role.getRoleName() + "'失败，角色名称已存在");
@@ -291,6 +296,19 @@ public class SysRoleController extends BaseController
     private void lockIdentityMutations()
     {
         if (mutations.lockRoot() == null) throw new ServiceException("根部门不存在", 409);
+    }
+
+    private Long[] validateMenuGrants(Long[] menuIds, Long roleId)
+    {
+        try
+        {
+            return roleAssignments.validateLegacyMenuGrants(menuIds, roleId);
+        }
+        catch (ApiFailure failure)
+        {
+            // Preserve the legacy response envelope without swallowing transaction failure.
+            throw new ServiceException(failure.getMessage(), failure.status());
+        }
     }
 
     /**

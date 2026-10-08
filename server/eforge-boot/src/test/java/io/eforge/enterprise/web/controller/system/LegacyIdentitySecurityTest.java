@@ -46,6 +46,7 @@ import io.eforge.enterprise.web.controller.api.v1.system.RoleController;
 import io.eforge.enterprise.web.controller.api.v1.system.RoleService;
 import io.eforge.enterprise.web.controller.api.v1.system.RoleSessionRefresher;
 import io.eforge.enterprise.web.controller.api.v1.system.UserController;
+import io.eforge.enterprise.web.controller.api.v1.system.UserImportService;
 import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.AdditionalMatchers.aryEq;
@@ -73,6 +74,7 @@ class LegacyIdentitySecurityTest
     @MockitoBean DepartmentMutationMapper mutations;
     @MockitoBean RoleSelectionMapper selections;
     @MockitoBean RoleSessionRefresher sessions;
+    @MockitoBean UserImportService userImporter;
     @MockitoBean PlatformTransactionManager transactions;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
