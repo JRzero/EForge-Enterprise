@@ -41,11 +41,16 @@ test('tiny rose segments keep the selected keyboard command through chart resize
   await page.route('**/api/v1/monitor/cache', route => route.fulfill({json:value})); await login(page, '/cache');
   await page.getByRole('img',{name:'Redis 命令统计玫瑰图'}).locator('svg').waitFor();
   await page.getByRole('button',{name:/^small：/}).focus(); await page.keyboard.press('Enter');
+  await page.getByRole('button',{name:/^adjacent：/}).hover();
+  await expect(page.locator('.cache-chart-tooltip')).toHaveText('命令 small：2 次（0.19%）');
   for (const width of [390,1100,360,800]) {
     await page.setViewportSize({width,height:844});
     await expect.poll(() => page.getByRole('img',{name:'Redis 命令统计玫瑰图'}).evaluate(element => Math.round(element.querySelector('svg')!.getBoundingClientRect().width) === element.clientWidth)).toBe(true);
     await expect(page.locator('.cache-chart-tooltip')).toHaveText('命令 small：2 次（0.19%）');
   }
+  await page.getByRole('button',{name:'刷新',exact:true}).focus();
+  await page.getByRole('button',{name:/^adjacent：/}).hover();
+  await expect(page.locator('.cache-chart-tooltip')).toHaveText('命令 adjacent：1 次（0.09%）');
 });
 
 test('stats loading ends on fault, keyboard retry succeeds, backend denial clears diagnostic fields', async ({page}) => {

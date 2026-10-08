@@ -249,3 +249,15 @@ standalone and retains right alignment in business toolbars. Desktop anchor and
 390px bounds assertions, shared-component interactions and user column controls
 passed 2/2 after lint/typecheck (`ui-popover-final.log`); the new phone capture
 was visually reviewed. This does not alter visibility state or permission logic.
+
+Further actual verification: default configuration completed the entire API
+script plus 7/7 cache browsers (`ui-cache-final-default.log`), but enabled
+configuration failed 1/7 with the adjacent command tooltip. This remains a
+recorded failure. An explicit keyboard-focus/adjacent-hover test reproduced the
+override before the next repair (`ui-cache-focus-before.log`). List focus now
+takes precedence over hover on another list entry; clicking another command
+still transfers focus, and blur restores mouse selection. All 13 cache browser
+cases passed after lint/typecheck, including small counters, multiple resizes,
+adjacent hover while focused and pointer selection after blur
+(`ui-cache-focus-after.log`). Final exact cloud acceptance is required for both
+real configurations; the earlier default pass alone is insufficient.
