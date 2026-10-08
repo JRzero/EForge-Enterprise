@@ -1,5 +1,6 @@
 package io.eforge.enterprise.web.controller.system;
 
+import java.util.Arrays;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import io.eforge.enterprise.common.core.domain.entity.SysRole;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.page.TableDataInfo;
 import io.eforge.enterprise.common.enums.BusinessType;
+import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.common.utils.poi.ExcelUtil;
 import io.eforge.enterprise.framework.web.service.SysPermissionService;
 import io.eforge.enterprise.framework.web.service.TokenService;
@@ -28,6 +30,8 @@ import io.eforge.enterprise.system.domain.SysUserRole;
 import io.eforge.enterprise.system.service.ISysDeptService;
 import io.eforge.enterprise.system.service.ISysRoleService;
 import io.eforge.enterprise.system.service.ISysUserService;
+import io.eforge.enterprise.web.controller.api.v1.system.RoleContracts.RoleUsersRequest;
+import io.eforge.enterprise.web.controller.api.v1.system.RoleService;
 
 /**
  * 角色信息
@@ -40,6 +44,9 @@ public class SysRoleController extends BaseController
 {
     @Autowired
     private ISysRoleService roleService;
+
+    @Autowired
+    private RoleService roleAssignments;
 
     @Autowired
     private TokenService tokenService;
@@ -213,7 +220,8 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/cancel")
     public AjaxResult cancelAuthUser(@RequestBody SysUserRole userRole)
     {
-        return toAjax(roleService.deleteAuthUser(userRole));
+        if (userRole == null) throw invalidAssignment();
+        return changeAssignments(userRole.getRoleId(), new Long[] { userRole.getUserId() }, false);
     }
 
     /**
@@ -224,7 +232,7 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/cancelAll")
     public AjaxResult cancelAuthUserAll(Long roleId, Long[] userIds)
     {
-        return toAjax(roleService.deleteAuthUsers(roleId, userIds));
+        return changeAssignments(roleId, userIds, false);
     }
 
     /**
@@ -235,8 +243,26 @@ public class SysRoleController extends BaseController
     @PutMapping("/authUser/selectAll")
     public AjaxResult selectAuthUserAll(Long roleId, Long[] userIds)
     {
-        roleService.checkRoleDataScope(roleId);
-        return toAjax(roleService.insertAuthUsers(roleId, userIds));
+        return changeAssignments(roleId, userIds, true);
+    }
+
+    private AjaxResult changeAssignments(Long roleId, Long[] userIds, boolean assign)
+    {
+        // Legacy query parameters do not run validation on canonical request records.
+        if (roleId == null || roleId < 1 || userIds == null || userIds.length < 1 || userIds.length > 100
+                || Arrays.stream(userIds).anyMatch(id -> id == null || id < 1))
+        {
+            throw invalidAssignment();
+        }
+        // Reuse the same object guards, full-batch preflight, transaction and session refresh.
+        roleAssignments.users(roleId.toString(),
+                new RoleUsersRequest(Arrays.stream(userIds).map(String::valueOf).toList()), assign);
+        return success();
+    }
+
+    private static ApiFailure invalidAssignment()
+    {
+        return new ApiFailure(400, "VALIDATION_ERROR", "The role assignment request is invalid.");
     }
 
     /**
