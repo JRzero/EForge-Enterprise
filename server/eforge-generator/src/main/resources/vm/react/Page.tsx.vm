@@ -1,4 +1,7 @@
-import {NativeInput, NativeButton, Select, TextareaControl, Table} from '../../../ui/native';
+import {NativeInput, Select, TextareaControl} from '../../../ui/native';
+#if($table.sub)
+import {Table} from '../../../ui/native';
+#end
 import {ListPage, ListFilters, ListToolbar, PageForm} from '../../../ui/pages';
 import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../../ui/data';

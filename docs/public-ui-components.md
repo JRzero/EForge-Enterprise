@@ -84,5 +84,16 @@ Logs: `ui-public-components-maven.log`, `ui-public-components-browser.log`,
 `ui-public-generator-native-0.log` and `ui-public-generator-native-1.log`.
 The earlier mock browser failure exposed actual chart resize overflow; the
 shared container now constrains its width, and the original assertion passes.
-Exact cloud real integration/generated React browser acceptance remains pending.
+Source `a368d81` passed web `37797518603` (126 units, 184 browsers and build).
+Server `37797518592` passed runtime integration and both complete framework
+configurations, but its generated React verification failed ESLint: unused
+NativeButton on every variant and Table on non-sub variants. This is a product
+template defect, not an infrastructure failure. Removed the unused import and
+made Table conditional on the subtable template. The four template tests and
+all seven actual generated page/static-route variants then compiled and linted
+locally against the captured Boot contract (`ui-public-generator-import-fix.log`,
+`ui-public-generator-static-check.log`). The isolated static checker needed
+compatibility-module bridges matching the host feature layout; missing bridges
+were a checker fixture error and were corrected without changing product paths.
+Exact repaired cloud generated React browser acceptance remains pending.
 Form builder remains deferred by the user.
