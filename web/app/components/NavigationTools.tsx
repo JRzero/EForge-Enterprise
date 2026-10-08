@@ -5,6 +5,7 @@ import type {NavigationItem} from '../../integration/navigation';
 import {ResourceDialog} from './ResourceDialog';
 import {navigationBreadcrumbs} from './navigation-model';
 import {DeferredFeature} from './DeferredFeature';
+import {UiIcon} from './UiIcon';
 const loadSearch = () => import('./NavigationSearchContent').then(module => ({default: module.NavigationSearchContent}));
 export function NavigationBreadcrumbs({items,routes,match,router}: {
   items: NavigationItem[]; routes: readonly AppRouteRecord[]; match: RouteMatch; router: AppRouterAdapter;
@@ -26,7 +27,7 @@ export function NavigationSearch({items,router}: {items: NavigationItem[]; route
     priorOpen.current = open;
   },[open]);
   function close() {setOpen(false);}
-  return <><span ref={trigger}><Button label="导航搜索" variant="ghost" size="sm" onClick={()=>setOpen(true)} /></span>
+  return <><span ref={trigger} className="header-search-trigger"><Button label="导航搜索" icon={<UiIcon name="search" />} isIconOnly variant="ghost" size="sm" onClick={()=>setOpen(true)} /></span>
     {open?<ResourceDialog closeOnBackdrop titleId={id+'-title'} busy={false} onCancel={close}>
       <div className="navigation-search"><h2 id={id+'-title'}>导航搜索</h2>
         <DeferredFeature load={loadSearch} componentProps={{items,router,close,id}}

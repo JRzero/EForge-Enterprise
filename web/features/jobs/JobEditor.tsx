@@ -38,7 +38,7 @@ export function JobEditor({id,onClose,onSaved}: {id: string | null;onClose:()=>v
       <label>并发执行<select aria-label="并发执行" disabled={busy} value={draft.concurrent?'0':'1'} onChange={event=>setDraft({...draft,concurrent:event.target.value==='0'})}><option value="0">允许</option><option value="1">禁止</option></select></label>
       {id?<label>任务状态<select aria-label="表单任务状态" value={draft.status} disabled={busy} onChange={event=>setDraft({...draft,status:event.target.value as JobWriteRequest['status']})}><DictionaryOptions options={statuses.options} current={draft.status}/></select></label>:<p>新增任务默认暂停，保存后可在列表中启用。</p>}
       <Input label="备注" value={draft.remark??''} onChange={remark=>setDraft({...draft,remark})} isDisabled={busy}/>
-      {error&&<p role="alert">{error}</p>}<Button label="取消" type="button" variant="ghost" isDisabled={busy} onClick={onClose}/><Button label="保存任务" type="submit" isDisabled={busy}/>
+      {error&&<p role="alert">{error}</p>}<div className="post-dialog-actions"><Button label="取消" type="button" variant="secondary" isDisabled={busy} onClick={onClose}/><Button label="保存任务" type="submit" variant="primary" isDisabled={busy}/></div>
     </form>}
     {(loading||readError)&&<Button label="取消" isDisabled={busy} onClick={onClose}/>}</ResourceDialog>
     {cron&&<CronEditor value={draft.cronExpression} onCancel={()=>setCron(false)} onConfirm={expression=>{setDraft({...draft,cronExpression:expression});setCron(false);}}/>}

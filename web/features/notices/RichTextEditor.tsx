@@ -105,5 +105,5 @@ export function RichTextEditor(props: Props) {
     if (clean !== received.current) {received.current = clean; if (clean !== emitted.current) {emitted.current = clean; quill.clipboard.dangerouslyPasteHTML(clean, 'silent');}}
     if (!props.disabled) for (const image of completedImages.current.splice(0)) selection.current = insertUploadedImage(quill, image.index, image.source);
   }, [props.value, props.disabled]);
-  return <div><div ref={container} />{error && <p role="alert">{error}</p>}</div>;
+  return <div className="rich-text-editor"><div ref={container} />{error && <p role="alert">{error}</p>}</div>;
 }

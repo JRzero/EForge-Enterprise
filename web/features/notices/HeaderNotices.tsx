@@ -4,6 +4,7 @@ import type {NoticeFeed} from '../../generated/api';
 import {useApi} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
 import {NoticePreview} from './NoticePreview';
+import {UiIcon} from '../../app/components/UiIcon';
 
 export function HeaderNotices({version}: {version: number}) {
   const api = useApi(), root = useRef<HTMLDivElement>(null), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -46,7 +47,8 @@ export function HeaderNotices({version}: {version: number}) {
   function enter() {clearTimeout(timer.current); if (!preview) setVisible(true);}
   function leave() {clearTimeout(timer.current); timer.current = setTimeout(() => setVisible(false), 150);}
   return <div ref={root} className="header-notices" onMouseEnter={enter} onMouseLeave={leave} onKeyDown={event => {if (event.key === 'Escape') {setVisible(false); event.stopPropagation();}}}>
-    <Button label={`通知公告（${data?.unreadCount ?? 0} 条未读）`} variant="ghost" size="sm" aria-expanded={visible} aria-controls="header-notice-list" onClick={() => {clearTimeout(timer.current); setVisible(true);}} />
+    <Button label={`通知公告（${data?.unreadCount ?? 0} 条未读）`} icon={<UiIcon name="bell" />} isIconOnly variant="ghost" size="sm" aria-expanded={visible} aria-controls="header-notice-list" onClick={() => {clearTimeout(timer.current); setVisible(true);}} />
+    {!!data?.unreadCount && <span className="header-notice-badge" aria-hidden="true">{data.unreadCount > 99 ? '99+' : data.unreadCount}</span>}
     {visible && <section id="header-notice-list" className="notice-popover" style={mobileTop===undefined?undefined:{top:mobileTop,maxHeight:Math.max(80,window.innerHeight-mobileTop-12),overflow:'auto'}} aria-label="顶部公告列表" onMouseEnter={enter} onMouseLeave={leave}>
       <div className="notice-feed-toolbar"><h2>通知公告</h2><Button label="全部已读" variant="ghost" size="sm" isDisabled={loading || busy || !data?.unreadCount || !!error} onClick={() => {void mark(data?.items.filter(item => !item.read).map(item => item.id) ?? []);}} /></div>
       {loading ? <p role="status">正在加载公告…</p> : error ? <><p role="alert">{error}</p><Button label="重试公告" onClick={() => setReload(value => value + 1)} /></> : !data?.items.length ? <p>暂无公告</p> : <ul>{data.items.map(item => <li key={item.id} className={item.read ? 'notice-is-read' : ''}><button type="button" disabled={busy} aria-label={`阅读 ${item.title}（${item.read ? '已读' : '未读'}）`} onClick={() => {setActionError(''); setVisible(false); setPreview(item.id);}}><span>{item.type === '1' ? '通知' : '公告'}</span><strong>{item.title}</strong><time>{item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN') : '—'}</time></button></li>)}</ul>}

@@ -10,6 +10,7 @@ import {Application} from './Application';
 import {browserSessionStorage, createSessionRuntime} from '../integration/session';
 import './styles.css';
 import './enterprise-theme.css';
+import './workspace-layout.css';
 const runtime = createSessionRuntime(browserSessionStorage());
 const router = createBrowserRouterAdapter();
 void runtime.restore();

@@ -2,6 +2,27 @@ import {test, expect} from './fixtures';
 import type {Page} from '@playwright/test';
 const id='9007199254740993';
 const table={id,name:'ef_test',comment:'<img src=x onerror=alert(1)>',className:'Example',category:'crud',webType:'eforge-react'};
+
+test('generator component visual review covers all configuration panels without writing',async({page},info)=>{
+  const detail={table:{...table,comment:'示例业务表'},configuration:{packageName:'io.example',moduleName:'sample',businessName:'example',functionName:'示例管理',author:'作者',formColumns:2,outputType:'0',outputPath:'/',options:{parentMenuId:'0',generateDetail:false}},columns:[{id:'11',name:'entry_id',databaseType:'bigint',primaryKey:true,javaType:'Long',javaField:'entryId',comment:'编号',required:false,insertable:false,editable:false,listed:true,queryable:false,queryType:'EQ',controlType:'input',order:0}],tables:[]};
+  let writes=0;
+  await page.route('**/api/v1/tool/generator/tables?*',route=>route.fulfill({json:{items:[detail.table],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/tool/generator/tables/'+id,route=>{if(route.request().method()!=='GET')writes++;return route.fulfill({json:detail});});
+  await page.setViewportSize({width:1440,height:1000});
+  await login(page,['tool:gen:list','tool:gen:query','tool:gen:edit']);
+  await page.getByRole('button',{name:'编辑 ef_test',exact:true}).click();
+  const dialog=page.getByRole('dialog');await expect(dialog.getByRole('tablist')).toBeVisible();
+  for(const [label,name] of [['基本信息','basic'],['字段信息','fields'],['生成信息','output']] as const) {
+    await dialog.getByRole('tab',{name:label,exact:true}).click();
+    await page.screenshot({path:info.outputPath(name+'-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.screenshot({path:info.outputPath(name+'-mobile.png'),fullPage:true});
+    await page.setViewportSize({width:1440,height:1000});
+  }
+  await dialog.getByRole('button',{name:'取消',exact:true}).click();
+  expect(writes).toBe(0);
+});
 async function login(page:Page,permissions:string[],roles:string[]=[]){
   await page.route('**/api/v1/tool/generator/menu-options',route=>route.fulfill({json:[{id:'3',parentId:'0',name:'系统工具',kind:'M'},{id:'9007199254740995',parentId:'3',name:'选择菜单',kind:'C'},{id:'9007199254740996',parentId:'9007199254740995',name:'功能',kind:'F'}]}));
   await page.route('**/api/v1/system/dictionaries/options',route=>route.fulfill({json:[{id:'1',name:'通用状态',code:'sys_common_status',status:'0'}]}));

@@ -9,6 +9,7 @@ import {TopNavigation, navigationContains} from './TopNavigation';
 import {LayoutContext,LayoutChangesContext,layoutDefaults,useLayoutPreferences} from './layout-preferences';
 import {matchAppRoute} from '@eforge/app';
 import {routes} from '../routes';
+import {UiIcon} from './UiIcon';
 const mobileQuery = '(max-width: 991px)';
 const sidebarPreference = 'eforge.enterprise.sidebar.v1';
 
@@ -30,7 +31,7 @@ function trapDrawerTab(event: KeyboardEvent<HTMLDivElement>) {
   else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first.focus();}
 }
 export function EnterpriseShell({brand, header, items, pathname, href, ownerId, router, children, activePaths}: {
-  activePaths: readonly string[]; brand: ReactNode; header: (menuButton: ReactNode) => ReactNode; items: NavigationItem[];
+  activePaths: readonly string[]; brand: ReactNode; header: (menuButton: ReactNode, tools: ReactNode) => ReactNode; items: NavigationItem[];
   pathname: string; href: string; ownerId: string; router: AppRouterAdapter; children: ReactNode;
 }) {
   const mobile = useSyncExternalStore(subscribeViewport, isMobile, () => false);
@@ -72,11 +73,11 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
   const close = () => setOpenedFor(null);
   const menuButton = mobile ? <button ref={opener} type="button" className="sidebar-toggle" aria-label="打开菜单" aria-expanded={opened}
     aria-haspopup="dialog" aria-controls={opened ? navigationId : undefined} onClick={() => setOpenedFor({href, owner: ownerId})}>
-    <span aria-hidden="true">☰</span></button> : <button ref={opener} type="button" className="sidebar-toggle" aria-label={collapsed ? '展开菜单' : '收起菜单'}
-      aria-expanded={!collapsed} aria-controls={desktopNavigationId} onClick={() => setCollapsed(value => !value)}><span aria-hidden="true">☰</span></button>;
+    <UiIcon name="menu" /></button> : <button ref={opener} type="button" className="sidebar-toggle" aria-label={collapsed ? '展开菜单' : '收起菜单'}
+      aria-expanded={!collapsed} aria-controls={desktopNavigationId} onClick={() => setCollapsed(value => !value)}><UiIcon name="menu" /></button>;
   return <LayoutChangesContext.Provider value={setPreferences}><LayoutContext.Provider value={preferences}><div className="enterprise-layout" style={{"--ef-color-accent":preferences.theme} as React.CSSProperties} data-side-theme={preferences.sideTheme} data-density={preferences.density} data-fixed-header={preferences.fixedHeader} data-show-logo={preferences.sidebarLogo} data-sidebar-collapsed={!mobile && collapsed} data-sidebar-hidden={hideSidebar} data-navigation-mode={mobile ? 'left' : mode}>
-    <AppShell sidebarWidth={!mobile && collapsed ? 64 : 240} brand={brand} navigation={<div id={desktopNavigationId}><Navigation items={sideItems} pathname={pathname} router={router} activePaths={activePaths} collapsed={!mobile && collapsed} /></div>}
-      header={<>{header(<>{hideSidebar && preferences.sidebarLogo ? <div className="top-navigation-brand">{brand}</div> : null}{!hideSidebar ? menuButton : null}<button ref={settingsButton} type="button" aria-label="布局设置" onClick={() => {setSettingMessage('');setSettings(true);}}>⚙</button><HeaderUtilities/></>)}
+    <AppShell sidebarWidth={!mobile && collapsed ? 54 : 200} brand={brand} navigation={<div id={desktopNavigationId}><Navigation items={sideItems} pathname={pathname} router={router} activePaths={activePaths} collapsed={!mobile && collapsed} /></div>}
+      header={<>{header(<>{hideSidebar && preferences.sidebarLogo ? <div className="top-navigation-brand">{brand}</div> : null}{!hideSidebar ? menuButton : null}</>, <><HeaderUtilities/><button ref={settingsButton} type="button" className="header-icon-button" aria-label="布局设置" title="布局设置" onClick={() => {setSettingMessage('');setSettings(true);}}><UiIcon name="settings" /></button></>)}
         {!mobile && mode !== 'left' ? <TopNavigation items={items} pathname={pathname} href={href} activePaths={activePaths} router={router}
           mixed={mode === 'mixed'} selected={selectedKey} onSelect={key => setSelectedRoot({href,owner:ownerId,key})}/> : null}</>}>{children}{preferences.footerVisible ? <footer className="enterprise-footer">{preferences.footerContent}</footer> : null}</AppShell>
     {settings ? <ResourceDialog titleId={settingsTitle} busy={false} onCancel={closeSettings} closeOnBackdrop>
@@ -90,7 +91,7 @@ export function EnterpriseShell({brand, header, items, pathname, href, ownerId, 
         {([['tagsView','显示页面标签'],['tagsIcon','显示页签图标'],['fixedHeader','固定头部'],['sidebarLogo','显示 Logo'],['dynamicTitle','动态标题'],['footerVisible','显示页脚']] as const).map(([property,label])=><label key={property}><input type="checkbox" checked={preferences[property]} disabled={property==='tagsIcon' && !preferences.tagsView} onChange={event=>setPreferences(current=>({...current,[property]:event.target.checked}))}/>{label}</label>)}
         <label><input type="checkbox" checked={preferences.tagsViewPersist ?? false} disabled={!preferences.tagsView} onChange={event=>setPreferences(current=>({...current,tagsViewPersist:event.target.checked}))}/>持久化标签页</label>
         <label>页脚内容<input aria-label="页脚内容" maxLength={1024} value={preferences.footerContent} onChange={event=>setPreferences(current=>({...current,footerContent:event.target.value}))}/></label>
-      </fieldset>{settingMessage ? <p role="status">{settingMessage}</p> : null}<div className="state-actions">
+      </fieldset><div className="layout-reference-links"><a href="https://github.com/JRzero/EForge-Enterprise" target="_blank" rel="noopener noreferrer">源码仓库</a><a href="https://doc.ruoyi.vip/" target="_blank" rel="noopener noreferrer">参考文档</a></div>{settingMessage ? <p role="status">{settingMessage}</p> : null}<div className="state-actions">
         <button type="button" onClick={() => {try {save();setSettingMessage('布局已保存');} catch {setSettingMessage('无法保存布局，请检查浏览器存储设置');}}}>保存配置</button>
         <button type="button" onClick={() => {setPreferences({...layoutDefaults});try {reset();setSettingMessage('已恢复默认布局');} catch {setSettingMessage('当前布局已恢复，无法清除保存的配置');}}}>恢复默认</button>
         <button type="button" onClick={closeSettings}>关闭设置</button></div></section>

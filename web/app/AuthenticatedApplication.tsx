@@ -17,6 +17,7 @@ import {routes} from './routes';
 import {PageWorkspace, type PageUnloadGuard} from './components/PageWorkspace';
 import {toEForgePermissions} from '../integration/permissions';
 import {DeferredFeature} from './components/DeferredFeature';
+import {UiIcon} from './components/UiIcon';
 const loadHeaderNotices = () => import('../features/notices/HeaderNotices').then(module => ({default: module.HeaderNotices}));
 
 function StatePage({code, router}: {code: '403' | '404'; router: AppRouterAdapter}) {
@@ -85,13 +86,12 @@ export function AuthenticatedApplication({runtime, router, bootstrap, href}: {ru
         event.preventDefault(); router.navigate('/dashboard');
       }
     }}><span className="brand-mark">E</span><span>EForge<span className="brand-subtitle">Enterprise</span></span></a>}
-      header={menuButton => <div className="enterprise-header">{menuButton}<span>企业工作空间</span><div><NavigationSearch items={navigation} router={router} /><span className="account-name">{snapshot.user.displayName}</span>
+      header={(menuButton, shellTools) => <div className="enterprise-header"><div className="enterprise-header-left">{menuButton}{match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : <span>EForge Enterprise</span>}</div><div className="enterprise-header-actions"><NavigationSearch items={navigation} router={router} />{shellTools}
         <DeferredFeature load={loadHeaderNotices} componentProps={{version: noticeVersion}} fallback={null}
           errorFallback={retry => <span role="alert">公告暂时无法加载<Button label="重试通知公告" variant="ghost" size="sm" onClick={retry} /></span>} />
-        <a className="header-account-link" aria-label="个人中心" href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}><AccountAvatar key={snapshot.user.id+snapshot.user.avatarUrl} user={snapshot.user}/>个人中心</a>
-        <Button label="锁定屏幕" variant="ghost" size="sm" isDisabled={logoutBusy} onClick={lockScreen}/>
-        <Button label={logoutBusy ? '正在退出…' : '退出登录'} variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
-      {match && allowed ? <NavigationBreadcrumbs items={navigation} routes={routes} match={match} router={router} /> : null}
+        <a className="header-account-link" aria-label="个人中心" title="个人中心" href="/user/profile" onClick={event => { if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); router.navigate('/user/profile'); } }}><AccountAvatar key={snapshot.user.id+snapshot.user.avatarUrl} user={snapshot.user}/><span className="header-account-name account-name">{snapshot.user.displayName}</span></a>
+        <Button label="锁定屏幕" icon={<UiIcon name="lock" />} isIconOnly variant="ghost" size="sm" isDisabled={logoutBusy} onClick={lockScreen}/>
+        <Button label={logoutBusy ? '正在退出…' : '退出登录'} icon={<UiIcon name="logout" />} isIconOnly variant="ghost" size="sm" isDisabled={logoutBusy} onClick={() => { void logout(); }} /></div></div>}>
       {logoutError ? <p role="alert">{logoutError}</p> : null}
       <PageWorkspace key={workspaceOwnerKey} unloadGuard={unloadGuard} ownerId={snapshot.user.id} href={contentHref} items={navigation} permissions={permissions} router={router}
         fallback={<StatePage code={match?'403':'404'} router={router} />} />

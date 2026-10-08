@@ -112,11 +112,11 @@ export function GeneratorPage() {
     {customResult&&!confirmation?<div aria-label="自定义输出结果"><ul>{customResult.files?.map((file,index)=><li key={index}>{file.path}：{stateLabels[file.state ?? ''] ?? '结果未确认'}</li>)}</ul></div>:null}
     {preview?<ResourceDialog titleId="generator-preview-title" busy={false} onCancel={()=>setPreview(null)}><h2 id="generator-preview-title">代码预览</h2><select aria-label="预览文件" value={previewIndex} onChange={event=>{setPreviewIndex(Number(event.target.value));setActionError('');}}>{preview.files?.map((file,index)=><option key={file.path} value={index}>{file.path}</option>)}</select>
       <GeneratorCodePreview source={preview.files?.[previewIndex]?.content ?? ''}/>{actionError?<p role="alert">{actionError}</p>:null}
-      <Button label="复制代码" onClick={()=>{void navigator.clipboard.writeText(preview.files?.[previewIndex]?.content ?? '').then(()=>setFeedback('代码已复制。')).catch(()=>setActionError('复制未完成，可在代码区选择文本复制。'));}}/><Button label="关闭预览" onClick={()=>setPreview(null)}/>
+      <div className="post-dialog-actions"><Button label="复制代码" variant="secondary" onClick={()=>{void navigator.clipboard.writeText(preview.files?.[previewIndex]?.content ?? '').then(()=>setFeedback('代码已复制。')).catch(()=>setActionError('复制未完成，可在代码区选择文本复制。'));}}/><Button label="关闭预览" variant="secondary" onClick={()=>setPreview(null)}/></div>
     </ResourceDialog>:null}
     {creating?<ResourceDialog titleId="generator-create-title" busy={busy} onCancel={()=>setCreating(false)}><h2 id="generator-create-title">创建数据库表</h2><label>建表 SQL<textarea aria-label="建表 SQL" value={sql} disabled={busy} onChange={event=>{setSql(event.target.value);setCreation(null);setActionError('');}}/></label>
       <label>初始前端类型<select aria-label="初始前端类型" value={template} disabled={busy} onChange={event=>{setTemplate(event.target.value);setCreation(null);setActionError('');}}>{['eforge-react','element-ui','element-plus','element-plus-typescript'].map(value=><option key={value}>{value}</option>)}</select></label>
-      {creationResult}{actionError?<p role="alert">{actionError}</p>:null}<Button label={busy?'正在建表…':'执行建表'} isDisabled={busy} onClick={()=>{void create();}}/><Button label="关闭" isDisabled={busy} onClick={()=>setCreating(false)}/>
+      {creationResult}{actionError?<p role="alert">{actionError}</p>:null}<div className="post-dialog-actions"><Button label={busy?'正在建表…':'执行建表'} variant="primary" isDisabled={busy} onClick={()=>{void create();}}/><Button label="关闭" variant="secondary" isDisabled={busy} onClick={()=>setCreating(false)}/></div>
     </ResourceDialog>:null}
   </section>;
 }
