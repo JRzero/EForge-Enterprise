@@ -11,6 +11,7 @@ export {TagMenu} from './TagMenu';
 export type {TagMenuAction} from './TagMenu';
 export type {PageTag, TagNavigationProps} from './TagNavigation';
 export {FormPage, PageForm, FormActions, FormSection} from './FormPage';
+export {DetailPage, DetailSection, DetailField} from './DetailPage';
 export {FrontendLayout} from './FrontendLayout';
 export type {FrontendNavigationItem, FrontendLayoutProps} from './FrontendLayout';
 export {ListPage, ListFilters, ListToolbar} from '../app/components/ListPage';

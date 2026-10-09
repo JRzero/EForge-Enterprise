@@ -10,9 +10,8 @@ import {UploadEntries} from '../../app/components/UploadEntries';
 import {GrantTree} from '../../features/roles/GrantTree';
 import {IconPicker} from '../../features/menus/IconPicker';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
-import '../../app/styles.css';
-import '../../app/enterprise-theme.css';
-import '../../app/workspace-layout.css';
+import {Select,TextareaControl} from '../../ui/native';
+import '../../ui/theme.css';
 
 // Browser-only presentation fixture. Uses the real shared components, without
 // auth bootstrap, production routes, network uploads or business writes.
@@ -25,6 +24,10 @@ function Gallery(){
         <Input label="错误账号" value="" status={{type:'error',message:'请输入账号'}} onChange={()=>{}}/>
         <Button label="主要操作" variant="primary"/><Button label="次要操作" variant="secondary"/><Button label="禁用操作" isDisabled/>
       </form>
+      <label>统一选择框<Select defaultValue="normal"><option value="normal">正常</option></Select></label>
+      <label>禁用选择框<Select disabled><option>不可编辑</option></Select></label>
+      <label>统一文本域<TextareaControl defaultValue="说明"/></label>
+      <label>错误文本域<TextareaControl aria-invalid="true"/></label>
       <ColumnVisibilityMenu labels={{name:'名称',status:'状态',created:'创建时间'}} visibility={visibility} onChange={setVisibility}/>
       <IconPicker value={icon} disabled={false} onChange={setIcon}/>
       <GrantTree label="菜单权限" kind="菜单" initiallyExpanded nodes={[{key:'system',label:'系统管理'},{key:'read',parentKey:'system',label:'查看用户'},{key:'write',parentKey:'system',label:'修改用户'}]} selected={selected} linked={linked} disabled={false} onChange={setSelected} onLinkedChange={(value,keys)=>{setLinked(value);setSelected(keys);}}/>

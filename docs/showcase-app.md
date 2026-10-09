@@ -13,7 +13,7 @@
 | 应用概览、前台模板 | FrontendLayout、BrandMark、Button |
 | 列表模板 | ListPage、ListFilters、ListToolbar、DataTable、ColumnVisibilityMenu、ListPagination、ResourceDialog |
 | 表单模板 | FormPage、PageForm、FormSection、FormActions、Input、TextArea、Switch、Feedback |
-| 详情模板 | DetailPage、Tag、详情字段与处理记录 |
+| 详情模板 | DetailPage、DetailSection、DetailField、Tag、处理记录 |
 | 账户模板 | AccountLayout、PasswordField、登录／注册表单演示 |
 | 基础组件 | Button、Input、TextArea、Select、NativeInput、Field、Selector、Checkbox、Switch、Tag、Badge、Avatar、AccountAvatar、DictionaryTag、Card、Heading、Text、Divider、Stack、HStack、VStack、FormLayout、Tooltip、UiIcon |
 | 反馈与弹层 | Feedback、EmptyState、Spinner、Skeleton、ResourceDialog、Popover |
@@ -32,6 +32,10 @@
 
 ## 开发与复用
 
+表单与详情参照 spcore model-app 的横向表单（100px 标签）组织：共用白色面板、标题区、分组分隔线和底部操作区。
+表单保留必填语义，开关与输入区对齐；详情使用相同字段栅格的只读值，状态归入字段，不放空白侧栏。
+公共实现为 `web/ui/FormPage.tsx`、`web/ui/DetailPage.tsx` 和 `web/ui/page-templates.css`；600px 以下改为标签在上。
+
 - 页面入口：`web/templates/showcase.tsx`；局部展示布局：`web/templates/showcase.css`。
 - 所有展示控件从 `web/ui` 公共入口导入，不直接引用 Astryx，也不复制依赖实现。
 - URL hash 支持栏目直达、刷新恢复与浏览器后退；左侧提供栏目搜索。
@@ -45,3 +49,13 @@
 原前台模板测试通过；前端 lint、typecheck、126项单元测试及生产构建通过。
 截图检查曾发现 DashboardPage 的12列栅格使图表挤窄，修复为整行后新增宽度断言并重新通过。
 日志：`web/showcase-interactions.log`、`web/showcase-final.log`、`web/showcase-build.log`。
+
+### 表单/详情与公共控件同步验收
+
+2026-10-09：100px 横向标签、开关对齐、必填语义、8个详情字段及无空侧栏已增加浏览器断言。
+公共 Select/TextareaControl 的圆角、字号、焦点、禁用及错误边框通过真实计算样式验证；组件验收页统一加载产品主题。
+固定最终源码后，205项模拟 API 浏览器测试、126项单元测试、lint/typecheck/生产构建全部通过；
+表单桌面和详情手机、公共控件桌面截图已人工复核。日志为 `web/ui-sync-final-e2e.log`、
+`web/ui-sync-final-unit.log`、`web/ui-sync-final-build.log`。
+首轮必填装饰星号污染可访问名称已修复；中途热更新导致的两项会话失败在停止修改后的全量重跑通过。
+本轮是公共样式与模板验收，不代表全部业务编辑器均迁移为 DetailPage，也不作为新的后端真实环境验收证据。

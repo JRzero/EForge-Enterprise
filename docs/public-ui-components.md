@@ -13,7 +13,7 @@ remain in their existing owners.
 | `ui/native` | Native input, button, select, textarea and table adapters; keep browser semantics and caller props |
 | `ui/data` | Generic DataTable; preserves EForge columns, selection, sorting and pagination types |
 | `ui/patterns` | EForge pattern components, including PermissionGate; frontend checks remain UX only |
-| `ui/pages` | ListPage, ListFilters, ListToolbar, FormPage, PageForm, FormSection and FormActions |
+| `ui/pages` | ListPage, ListFilters, ListToolbar, FormPage, PageForm, FormSection, FormActions, DetailPage, DetailSection and DetailField |
 | `ui/index` | Basic controls plus tags, feedback, pagination, column visibility, dialogs, uploads, file/image display, avatars, brand and icons |
 | `ui/workspace` | EnterpriseShell, PageWorkspace, navigation, search/breadcrumbs, TagNavigation/TagMenu, header utilities and error boundaries |
 | `ui/editors` | Rich text editor/safe content, password field, icon picker and SelectionTree |
@@ -47,6 +47,17 @@ Filter visibility, reset/query execution, columns and selection remain controlle
 by each feature. FormPage reuses the page frame; PageForm forwards native form
 props and refs, with optional FormActions. Labels use the shared desktop/mobile
 alignment rules. Profile, account and resource forms use the shared form boundary.
+
+FormPage and DetailPage share a white panel, header, section dividers and footer
+actions. The form/detail field grid follows spcore model-app's 100px horizontal
+labels and becomes vertical below 600px. DetailField renders read-only values;
+status belongs in a field rather than an empty sidebar. This is a reusable page
+template, not a replacement of each feature's editor data model.
+
+Select and TextareaControl add stable public CSS classes while forwarding native
+props/refs. Their border, typography, focus, disabled and invalid styles are shared
+by the showcase and business consumers. The component appearance fixture imports
+the same `ui/theme.css` as the product, so it also exercises the latest theme.
 
 ESLint prevents app/features/templates from importing controls directly from
 the upstream presentation packages or introducing raw input/button/select/

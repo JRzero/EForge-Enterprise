@@ -7,6 +7,15 @@ test('shared component details retain focus, mixed grants, file ordering and ima
   const account=page.getByLabel('账号',{exact:true});await account.focus();
   expect(await account.evaluate(element=>getComputedStyle(element).outlineStyle)).toBe('none');
   await expect(page.getByLabel('禁用账号')).toBeDisabled();
+  const select=page.getByLabel('统一选择框'),textarea=page.getByLabel('统一文本域');
+  for(const control of [select,textarea]){
+    expect(await control.evaluate(element=>getComputedStyle(element).borderRadius)).toBe('4px');
+    expect(await control.evaluate(element=>getComputedStyle(element).fontSize)).toBe('14px');
+    await control.focus();
+    expect(await control.evaluate(element=>getComputedStyle(element).outlineStyle)).toBe('solid');
+  }
+  await expect(page.getByLabel('禁用选择框')).toBeDisabled();
+  expect(await page.getByLabel('错误文本域').evaluate(element=>getComputedStyle(element).borderTopColor)).toBe('rgb(220, 53, 69)');
   const invalidBox=await page.getByLabel('错误账号',{exact:true}).boundingBox(),messageBox=await page.locator('[data-type=error][data-variant=attached]').boundingBox();
   expect(messageBox!.y).toBeGreaterThanOrEqual(invalidBox!.y+invalidBox!.height);
   expect(await page.locator('[data-grant-key="system"]').evaluate((input:HTMLInputElement)=>input.indeterminate)).toBe(true);

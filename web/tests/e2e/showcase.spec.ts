@@ -14,6 +14,19 @@ test('showcase sections render on desktop and mobile without business API calls'
       await expect(page.locator('.chart-surface svg').first()).toBeVisible();
       for(const chart of await page.locator('.chart-surface').all())expect((await chart.boundingBox())!.width).toBeGreaterThan(200);
     }
+    if(section==='form'){
+      const labels=page.locator('.form-section > div > label');
+      for(const label of await labels.all())expect((await label.boundingBox())!.width).toBe(100);
+      const field=await page.getByRole('textbox',{name:/^客户名称/}).boundingBox();
+      const toggle=await page.locator('.form-control-offset').boundingBox();
+      expect(Math.abs(field!.x-toggle!.x)).toBeLessThan(16);
+      await expect(page.getByRole('textbox',{name:/^客户名称/})).toHaveAttribute('aria-required','true');
+    }
+    if(section==='detail'){
+      await expect(page.locator('.detail-field')).toHaveCount(8);
+      for(const label of await page.locator('.detail-field dt').all())expect((await label.boundingBox())!.width).toBe(100);
+      await expect(page.locator('.detail-page aside')).toHaveCount(0);
+    }
     await page.screenshot({path:info.outputPath(`${section}-desktop.png`),fullPage:true});
     await page.setViewportSize({width:390,height:844});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),section).toBe(true);
