@@ -37,6 +37,23 @@ test('work entry count includes nested actionable entries after permission and r
   await fixtures(page, true);
   await login(page);
   await expect(page.locator('.summary-card').filter({has: page.getByText('工作入口', {exact: true})}).locator('strong')).toHaveText('3');
+  await page.locator('.ef-app-shell__nav').getByRole('button',{name:'系统管理',exact:true}).click();
+  await openUsers(page);
+  await page.setViewportSize({width:320,height:844});
+  const strip=page.locator('.page-tags-strip');
+  await expect(strip).toHaveCSS('scrollbar-width','none');
+  expect(await strip.evaluate(element=>element.scrollWidth>element.clientWidth)).toBe(true);
+  await strip.getByRole('link').first().focus();
+  await page.getByRole('button',{name:'滚动到末个标签',exact:true}).click();
+  await expect.poll(()=>strip.evaluate(element=>element.scrollLeft+element.clientWidth>=element.scrollWidth-1)).toBe(true);
+  await page.getByRole('button',{name:'滚动到首个标签',exact:true}).click();
+  await expect.poll(()=>strip.evaluate(element=>element.scrollLeft)).toBe(0);
+  await strip.getByRole('link').last().focus();
+  await page.keyboard.press('Home');
+  await expect(strip.getByRole('link').first()).toBeFocused();
+  await expect.poll(()=>strip.evaluate(element=>element.scrollLeft)).toBe(0);
+  await page.keyboard.press('End');
+  await expect(strip.getByRole('link').last()).toBeFocused();
 });
 
 test('a failed lazy page keeps shell navigation usable and a manual application reload recovers', async ({page},info) => {

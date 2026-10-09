@@ -322,3 +322,14 @@ cases passed. Desktop dropdown and mobile captures were visually reviewed.
 126 unit tests passed, as did lint/typecheck and production build. Evidence:
 `web/component-detail-audit.log`, `web/component-detail-final.log`, and
 `web/component-detail-build.log`. Backend services were not changed.
+
+### Hidden tab-strip scrollbar (2026-10-09)
+
+The tab strip hides its scrollbar with standard and WebKit rules while retaining
+native horizontal overflow. Arrow buttons, touch/trackpad scrolling and keyboard
+focus navigation remain available; vertical overflow is clipped to prevent a
+second scrollbar. No other page or table scrollbars are hidden.
+Seven theme/workspace browser checks pass, including a 320 px overflow case
+that reaches both ends using the buttons and focuses tabs using Home/End.
+Lint/typecheck and build pass (`web/tag-scrollbar-check.log`,
+`web/tag-scrollbar-build.log`).
