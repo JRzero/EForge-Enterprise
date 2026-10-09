@@ -2,6 +2,7 @@ import {test, expect} from './fixtures';
 
 test('reference theme keeps lists and dialogs operable at desktop and mobile widths', async ({page}, testInfo) => {
   await page.route('**/captchaImage', route => route.fulfill({json: {code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/system/dictionaries/lookup/sys_normal_disable', route => route.fulfill({json:[{value:'0',label:'正常',style:'PRIMARY',defaultEntry:true},{value:'1',label:'停用',style:'DANGER',defaultEntry:false}]}));
   await page.route('**/api/v1/auth/login', route => route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
   await page.route('**/api/v1/app/bootstrap', route => route.fulfill({json:{
     user:{id:'2',username:'designer',displayName:'界面验收'},roles:[],permissions:['system:post:list','system:post:add','system:post:edit','system:post:export'],
@@ -35,6 +36,28 @@ test('reference theme keeps lists and dialogs operable at desktop and mobile wid
   await expect(page.locator('.ef-data-table th').first()).toHaveCSS('font-weight','400');
   await expect(page.getByRole('cell',{name:'研发工程师',exact:true})).toHaveCSS('font-size','12px');
   await expect(page.locator('.list-filters label').first()).toHaveCSS('font-size','14px');
+  const query = page.getByRole('button',{name:'查询',exact:true});
+  await expect(query).toHaveCSS('border-radius','4px');
+  await expect(query).toHaveCSS('font-size','14px');
+  await query.hover();
+  await expect(query).toHaveCSS('background-color','rgb(82, 142, 255)');
+  await page.mouse.down();
+  await expect(query).toHaveCSS('background-color','rgb(20, 75, 204)');
+  await page.mouse.up();
+  const reset = page.getByRole('button',{name:'重置',exact:true});
+  await reset.hover();
+  await expect(reset).toHaveCSS('background-color','rgb(255, 255, 255)');
+  await expect(reset).toHaveCSS('border-top-color','rgb(36, 104, 242)');
+  const disabled = page.getByRole('button',{name:'上一页',exact:true});
+  await expect(disabled).toBeDisabled();
+  await expect(disabled).toHaveCSS('color','rgb(184, 186, 191)');
+  await expect(disabled).toHaveCSS('background-color','rgb(247, 248, 250)');
+  const tag = page.locator('.ui-tag').first();
+  await expect(tag).toHaveCSS('font-size','12px');
+  await expect(tag).toHaveCSS('border-radius','0px');
+  await expect(tag).toHaveCSS('color','rgb(255, 255, 255)');
+  await expect(tag).toHaveCSS('background-color','rgb(36, 104, 242)');
+  await page.mouse.move(0,0);
   await page.screenshot({path:testInfo.outputPath('desktop.png'),fullPage:true});
   await page.getByRole('button',{name:'新增岗位',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();

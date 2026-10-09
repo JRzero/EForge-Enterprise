@@ -280,3 +280,23 @@ passed all 19 tests, including exact reference colors/font sizes and custom
 theme persistence (`web/spcore-colors-final.log`). Populated desktop, focus,
 dialog and mobile screenshots were inspected. No backend code changed or
 backend service was restarted for this presentation change.
+
+### Buttons and status tags (2026-10-09)
+
+The shared theme now follows the reference project's installed AMIS cxd button
+and Tag tokens: desktop buttons are 32 px minimum, 14 px/400, 4 px radius and
+4/12 px padding. Primary hover/active are #528eff/#144bcc; secondary hover stays
+white with blue text/border. Disabled buttons use #f7f8fa and #b8babf without
+opacity stacking. Text actions stay transparent; current-page highlighting and
+40 px mobile touch targets are retained. Custom themes derive their own states.
+Existing secondary-variant form submit buttons also receive primary states.
+
+Public Tag and DictionaryTag share 24 px height, 12 px/400 text, square corners,
+no border and solid reference status fills: blue, green #30bf13, orange #ff9326,
+red #f23d3d and gray #b8babf with white text. Status labels remain visible.
+Validation includes 126 unit tests, lint/typecheck and production build, 18
+navigation tests and the final two desktop/mobile theme/template browser tests.
+The theme test exercises hover, pressed, disabled and real dictionary-tag CSS;
+desktop capture was visually checked. Initial sandbox file access failures were
+rerun with normal local permissions; missing test dictionary data was supplied.
+Evidence: `web/button-tag-theme-accepted.log`, `web/button-tag-build.log`.
