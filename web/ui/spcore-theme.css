@@ -1,0 +1,21 @@
+/* Measured from the spcore model-app menu and AMIS customer list. */
+.enterprise-layout, .login-layout { --ui-text: #151b26; --ui-muted: #5c5f66; }
+.enterprise-layout :is(button,input,select,textarea) { font-family: inherit; }
+.enterprise-layout .list-filters label { font-size: var(--ui-control-font); font-weight: 400; color: #5c5f66; }
+.enterprise-layout .ef-data-table th { font-size: 14px; font-weight: 400; color: #151b26; background: #f7f8fa; }
+.enterprise-layout .ef-data-table td { font-size: 12px; font-weight: 400; color: #151b26; }
+.enterprise-layout .ef-data-table__sort { font: inherit; color: inherit; }
+.enterprise-layout .post-table { border-color: #e8e9eb; }
+.enterprise-layout .ef-data-table :is(th,td) { border-bottom-color: #e8e9eb; }
+.enterprise-layout[data-side-theme=light] { --ui-menu-text: #616c79; --ui-menu-active: #2174cc; --ui-menu-selected: #eaf3fc; }
+.enterprise-layout[data-side-theme=light] .ef-app-shell__sidebar { border-right: 1px solid #e3e8ed; }
+.enterprise-layout[data-side-theme=light] .enterprise-navigation .enterprise-navigation { background: #fff; }
+.enterprise-layout[data-side-theme=light] :is(.ef-app-shell__sidebar,.sidebar-drawer-body,.navigation-popup) .enterprise-navigation :is(a,.navigation-disclosure) {
+  color: var(--ui-menu-text); font-size: 14px; font-weight: 400;
+}
+.enterprise-layout[data-side-theme=light] :is(.ef-app-shell__sidebar,.sidebar-drawer-body,.navigation-popup) .enterprise-navigation :is(a,.navigation-disclosure):hover { background: #f4f7fa; }
+.enterprise-layout[data-side-theme=light] :is(.ef-app-shell__sidebar,.sidebar-drawer-body,.navigation-popup) .enterprise-navigation a[aria-current=page] {
+  color: var(--ui-menu-active); background: var(--ui-menu-selected); font-weight: 600; border-inline-start-color: transparent;
+}
+.enterprise-layout[data-side-theme=light] .enterprise-brand { color: #263441; }
+.enterprise-layout .enterprise-breadcrumbs { font-size: 13px; }

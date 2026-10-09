@@ -24,6 +24,17 @@ test('reference theme keeps lists and dialogs operable at desktop and mobile wid
   await page.getByRole('button',{name:'登录',exact:true}).click();
   await expect(page.getByRole('cell',{name:'研发工程师',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'查询',exact:true})).toBeVisible();
+  await expect(page.locator('.enterprise-layout')).toHaveAttribute('data-side-theme','light');
+  const selected = page.locator('.ef-app-shell__nav a[aria-current=page]');
+  await expect(selected).toHaveCSS('color','rgb(33, 116, 204)');
+  await expect(selected).toHaveCSS('background-color','rgb(234, 243, 252)');
+  await expect(selected).toHaveCSS('font-size','14px');
+  await expect(selected).toHaveCSS('font-weight','600');
+  await expect(page.getByRole('button',{name:'查询',exact:true})).toHaveCSS('background-color','rgb(36, 104, 242)');
+  await expect(page.locator('.ef-data-table th').first()).toHaveCSS('font-size','14px');
+  await expect(page.locator('.ef-data-table th').first()).toHaveCSS('font-weight','400');
+  await expect(page.getByRole('cell',{name:'研发工程师',exact:true})).toHaveCSS('font-size','12px');
+  await expect(page.locator('.list-filters label').first()).toHaveCSS('font-size','14px');
   await page.screenshot({path:testInfo.outputPath('desktop.png'),fullPage:true});
   await page.getByRole('button',{name:'新增岗位',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();

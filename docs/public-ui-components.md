@@ -259,3 +259,24 @@ fields. Actions never split internally; button spacing remains 8 px.
 All 16 route checks assert the right edge and mobile row separation; the related
 browser run passed 20 tests (`web/search-actions.log`). Role desktop/mobile
 captures were inspected. Lint/typecheck and production build pass.
+
+### spcore palette and typography (2026-10-09)
+
+Measured the running spcore model-app customer list and checked its source.
+The default sidebar now uses white, inactive text #616c79, selected background
+#eaf3fc and selected text #2174cc (14 px, weight 600). Primary buttons remain
+#2468f2 at 14 px. Search labels use #5c5f66 at 14 px; table headers use #151b26
+at 14 px/400 on #f7f8fa, with body cells at 12 px/400 and #e8e9eb separators.
+These overrides live in the shared `web/ui/spcore-theme.css` entry.
+Existing saved appearance preferences are preserved, and custom primary colors
+also continue to affect selected menu text/background. The default is light;
+users with a saved dark sidebar can explicitly change it in layout settings.
+
+Validation: 126 unit tests passed; final lint, typecheck and production build
+passed. The 16-route desktop/mobile layout matrix and standalone template passed
+in the initial targeted run. Two obsolete navigation expectations (dark default
+and selected-menu left border) were updated; the final navigation/theme run
+passed all 19 tests, including exact reference colors/font sizes and custom
+theme persistence (`web/spcore-colors-final.log`). Populated desktop, focus,
+dialog and mobile screenshots were inspected. No backend code changed or
+backend service was restarted for this presentation change.
