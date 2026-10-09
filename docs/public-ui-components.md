@@ -187,3 +187,39 @@ Browser checks at 1920/1280/390 px verify text/control centers, spacing and
 bounds, then change page size and submit a page jump. All 15 related dictionary,
 log and standalone-template tests pass; screenshots are under the ignored
 `web/test-results/pagination-layout` directory.
+
+### Cross-page template acceptance (2026-10-09)
+
+Source inventory confirms that all 16 ordinary list route entries use the
+shared ListPage/ListFilters/ListToolbar layout and public DataTable surface:
+users, roles, role users, departments, menus, posts, dictionary types/data,
+configurations, notices, operation/login logs, online sessions, jobs/job logs
+and generator tables. Paged lists also use the shared Pagination; department
+and menu trees intentionally do not add pagination.
+
+Native Table remains appropriate for three non-list structures: user-import
+result reports, the editable generator field matrix and server memory property
+comparison. Cache name/key lists and disk tables use DataTable within their
+specialized monitoring layouts. These are not unconverted ordinary lists.
+
+The new `list-template-audit.spec.ts` visits all 16 entries at 1440 and 390 px
+with mocked empty data. It checks shared table mounting, no page errors,
+search/toolbar label centers, one control per filter, pagination alignment and
+viewport bounds, and saves 32 screenshots. Populated-state behavior remains
+covered by each feature's existing browser tests. Screenshot review additionally
+found the generator sort selector inheriting vertical form-label layout; the
+shared toolbar now explicitly aligns label/control horizontally.
+
+This is frontend template acceptance, not a new backend or generated-code
+deployment acceptance. The previous local backend-refresh restriction remains.
+
+Final local acceptance: all **202 browser tests** pass, including the 16-route
+matrix and populated-state feature regressions. Lint, typecheck, generated-client
+reproducibility, all **126 unit tests** and the final production build pass.
+Evidence: ignored `web/template-acceptance-final.log`,
+`web/template-acceptance-build.log`, and 32 route captures in
+`web/test-results/template-acceptance-final/list-template-audit-*`.
+The earlier full run was not accepted: two toolbar alignment assertions failed,
+and three resource-loading cases overlapped the generated-client check writing
+the watched API file. The final run used the corrected CSS specificity and ran
+without concurrent generation or source changes; all 202 passed without retries.
