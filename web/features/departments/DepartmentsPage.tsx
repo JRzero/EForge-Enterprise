@@ -120,8 +120,8 @@ export function DepartmentsPage() {
   return <ListPage className="posts-page departments-page" title="部门管理" description="维护组织层级、部门状态与显示顺序。" eyebrow="系统管理">
     <DictionaryNotice dictionary={statusDictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => discardSorts(() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); })} /></>} onSubmit={event => { event.preventDefault(); discardSorts(() => {setFilters({...draft}); setVersion(value => value + 1);}); }}>
-      <Input label="部门名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>部门状态筛选<Select aria-label="部门状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+      <Input label="部门名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
+      <label>部门状态<Select aria-label="部门状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
 
     </ListFilters>
     <ListToolbar >

@@ -69,13 +69,13 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   await expect(page.getByRole('dialog').getByLabel('岗位名称', {exact: true})).toHaveValue(`${name}-重复`);
   await discard.getByRole('button', {name: '放弃修改', exact: true}).click(); await expect(discard).toHaveCount(0); await expect(page.getByRole('dialog')).toHaveCount(0);
 
-  await page.getByLabel('岗位编码筛选', {exact: true}).fill(code);
+  await page.locator('.list-filters').getByLabel('岗位编码', {exact: true}).fill(code);
   await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect(page.getByRole('cell', {name: code, exact: true})).toBeVisible();
   await page.getByRole('button', {name: '隐藏筛选', exact: true}).click();
-  await expect(page.getByLabel('岗位编码筛选', {exact: true})).toBeHidden();
+  await expect(page.locator('.list-filters').getByLabel('岗位编码', {exact: true})).toBeHidden();
   await page.getByRole('button', {name: '显示筛选', exact: true}).click();
-  await expect(page.getByLabel('岗位编码筛选', {exact: true})).toHaveValue(code);
+  await expect(page.locator('.list-filters').getByLabel('岗位编码', {exact: true})).toHaveValue(code);
   await page.getByRole('button', {name: `修改 ${name}`, exact: true}).click();
   await expect(page.getByLabel('备注', {exact: true})).toHaveValue('浏览器真实操作');
   await page.getByLabel('岗位状态', {exact: true}).selectOption('1');
@@ -84,11 +84,11 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   await page.getByRole('button', {name: '保存岗位', exact: true}).click();
   await expect(page.getByRole('cell', {name: '停用', exact: true})).toBeVisible();
   await page.reload(); await expect(page.getByRole('heading', {name: '岗位管理', exact: true})).toBeVisible();
-  await page.getByLabel('岗位编码筛选', {exact: true}).fill(code);
-  await page.getByLabel('状态筛选', {exact: true}).selectOption('0');
+  await page.locator('.list-filters').getByLabel('岗位编码', {exact: true}).fill(code);
+  await page.locator('.list-filters').getByLabel('状态', {exact: true}).selectOption('0');
   await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect(page.getByText('暂无岗位', {exact: true})).toBeVisible();
-  await page.getByLabel('状态筛选', {exact: true}).selectOption('1');
+  await page.locator('.list-filters').getByLabel('状态', {exact: true}).selectOption('1');
   await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect(page.getByRole('cell', {name: code, exact: true})).toBeVisible();
   await page.getByText('显示列', {exact: true}).click();
@@ -124,7 +124,7 @@ test('real server pagination, page size, independent-session shrinking totals an
       if (response.status !== 201) throw new Error('Pagination fixture creation failed.');
     }
   }, prefix);
-  await page.getByLabel('岗位名称筛选', {exact: true}).fill(prefix);
+  await page.locator('.list-filters').getByLabel('岗位名称', {exact: true}).fill(prefix);
   await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
   await expect(page.getByRole('cell', {name: `${prefix}-9`, exact: true})).toBeVisible();
@@ -134,7 +134,7 @@ test('real server pagination, page size, independent-session shrinking totals an
   await expect(page.getByRole('button', {name: '下一页', exact: true})).toBeDisabled();
   await page.getByRole('button', {name: '第 1 页', exact: true}).click(); await expect(page.getByRole('cell', {name: `${prefix}-0`, exact: true})).toBeVisible();
   await page.getByLabel('跳至页码', {exact: true}).fill('2'); await page.getByRole('button', {name: '跳转', exact: true}).click(); await expect(page.getByRole('cell', {name: `${prefix}-10`, exact: true})).toBeVisible();
-  await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
+  await expect(page.locator('.list-filters').getByLabel('岗位名称', {exact: true})).toHaveValue(prefix);
   await page.getByRole('button', {name: '上一页', exact: true}).click();
   await page.getByLabel('每页条数', {exact: true}).selectOption('20');
   await expect(page.getByRole('cell', {name: `${prefix}-11`, exact: true})).toBeVisible();
@@ -145,7 +145,7 @@ test('real server pagination, page size, independent-session shrinking totals an
   const other = await browser.newPage({baseURL: String(test.info().project.use.baseURL)});
   try {
     await login(other);
-    await other.getByLabel('岗位名称筛选', {exact: true}).fill(prefix);
+    await other.getByLabel('岗位名称', {exact: true}).fill(prefix);
     await other.getByRole('button', {name: '查询', exact: true}).click();
     await other.getByLabel('每页条数', {exact: true}).selectOption('30');
     for (const index of [9, 10, 11]) await other.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();
@@ -156,7 +156,7 @@ test('real server pagination, page size, independent-session shrinking totals an
     await page.getByRole('button', {name: '刷新列表', exact: true}).click();
     await expect(page.getByText('共 9 条，第 1 页', {exact: true})).toBeVisible();
     await expect(page.getByRole('cell', {name: `${prefix}-0`, exact: true})).toBeVisible();
-    await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
+    await expect(page.locator('.list-filters').getByLabel('岗位名称', {exact: true})).toHaveValue(prefix);
     await other.evaluate(async prefix => {
       const token = JSON.parse(sessionStorage.getItem('eforge.enterprise.session.v1')!).accessToken;
       for (let index = 12; index < 15; index++) {
@@ -181,6 +181,6 @@ test('real server pagination, page size, independent-session shrinking totals an
     await page.getByRole('button', {name: '刷新列表', exact: true}).click();
     await expect(page.getByText('共 0 条，第 1 页', {exact: true})).toBeVisible();
     await expect(page.getByText('暂无岗位', {exact: true})).toBeVisible();
-    await expect(page.getByLabel('岗位名称筛选', {exact: true})).toHaveValue(prefix);
+    await expect(page.locator('.list-filters').getByLabel('岗位名称', {exact: true})).toHaveValue(prefix);
   } finally { await other.close(); }
 });

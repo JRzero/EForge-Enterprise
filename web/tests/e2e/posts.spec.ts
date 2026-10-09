@@ -10,7 +10,7 @@ test('successful shrinking totals normalize the page while failed refresh preser
     return route.fulfill(failed?{status:503,json:{code:'POST_UNAVAILABLE'}}:{json:{items:current<=Math.ceil(total/10)?[{id:String(current),code:'page'+current,name:'收缩页'+current,sort:0,status:'0'}]:[],total,page:current,pageSize:10}});
   });
   await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('reader');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
-  await expect(page.getByRole('cell',{name:'收缩页1',exact:true})).toBeVisible();await page.getByLabel('岗位编码筛选',{exact:true}).fill('owned-filter');await page.getByRole('button',{name:'查询',exact:true}).click();
+  await expect(page.getByRole('cell',{name:'收缩页1',exact:true})).toBeVisible();await page.locator('.list-filters').getByLabel('岗位编码',{exact:true}).fill('owned-filter');await page.getByRole('button',{name:'查询',exact:true}).click();
   await expect.poll(()=>queries.at(-1)?.get('code')).toBe('owned-filter');await page.getByRole('button',{name:'第 2 页',exact:true}).click();await expect(page.getByRole('cell',{name:'收缩页2',exact:true})).toBeVisible();
   failed=true;await page.getByRole('button',{name:'刷新列表',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();expect(queries.at(-1)?.get('page')).toBe('2');await expect(page.getByText('共 0 条，第 2 页',{exact:true})).toBeVisible();
   failed=false;total=9;const before=queries.length;await page.getByRole('button',{name:'重试列表',exact:true}).click();
@@ -18,7 +18,7 @@ test('successful shrinking totals normalize the page while failed refresh preser
   expect(queries.slice(before).every(query=>query.get('code')==='owned-filter')).toBe(true);
   total=12;await page.getByRole('button',{name:'刷新列表',exact:true}).click();await expect(page.getByRole('button',{name:'第 2 页',exact:true})).toBeVisible();await page.getByRole('button',{name:'第 2 页',exact:true}).click();await expect(page.getByRole('cell',{name:'收缩页2',exact:true})).toBeVisible();
   total=0;const emptyStart=queries.length;await page.getByRole('button',{name:'刷新列表',exact:true}).click();await expect(page.getByText('共 0 条，第 1 页',{exact:true})).toBeVisible();expect(queries.slice(emptyStart).map(query=>query.get('page'))).toEqual(['2','1']);
-  await expect(page.getByLabel('岗位编码筛选',{exact:true})).toHaveValue('owned-filter');
+  await expect(page.locator('.list-filters').getByLabel('岗位编码',{exact:true})).toHaveValue('owned-filter');
 });
 
 test('post page numbers and bounded jump drive typed paging and retain filters on mobile', async ({page}) => {
@@ -35,7 +35,7 @@ test('post page numbers and bounded jump drive typed paging and retain filters o
   await expect(page.getByRole('cell', {name: '岗位页1', exact: true})).toBeVisible();
   const navigation = page.getByRole('navigation', {name: '分页导航', exact: true});
   await expect(navigation.getByRole('button', {name: /^第 \d+ 页$/})).toHaveCount(7);
-  await page.getByLabel('岗位编码筛选', {exact: true}).fill('read'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('code')).toBe('read');
+  await page.locator('.list-filters').getByLabel('岗位编码', {exact: true}).fill('read'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('code')).toBe('read');
   await page.getByRole('button', {name: '第 3 页', exact: true}).click(); await expect(page.getByRole('cell', {name: '岗位页3', exact: true})).toBeVisible();
   await expect(page.getByRole('button', {name: '第 3 页', exact: true})).toHaveAttribute('aria-current', 'page');
   await page.getByLabel('跳至页码', {exact: true}).fill('10'); await page.getByRole('button', {name: '跳转', exact: true}).click(); await expect(page.getByRole('cell', {name: '岗位页10', exact: true})).toBeVisible();
@@ -49,7 +49,7 @@ test('post page numbers and bounded jump drive typed paging and retain filters o
   await page.getByLabel('每页条数', {exact: true}).selectOption('30'); await expect.poll(() => queries.at(-1)?.get('pageSize')).toBe('30'); await expect(page.getByRole('cell', {name: '岗位页1', exact: true})).toBeVisible();
   await page.setViewportSize({width: 390, height: 844}); await page.getByRole('button', {name: '第 4 页', exact: true}).click(); await expect(page.getByRole('cell', {name: '岗位页4', exact: true})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  expect(queries.at(-1)?.get('code')).toBe('read'); await expect(page.getByLabel('岗位编码筛选', {exact: true})).toHaveValue('read');
+  expect(queries.at(-1)?.get('code')).toBe('read'); await expect(page.locator('.list-filters').getByLabel('岗位编码', {exact: true})).toHaveValue('read');
 });
 
 test('posts list supports failure recovery and respects read-only permissions', async ({page}) => {
@@ -91,7 +91,7 @@ test('shared dictionary labels recover independently and drive list, filter and 
   await page.goto('/post'); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click();
   await expect(page.getByRole('cell', {name: 'example', exact: true})).toBeVisible(); await expect(page.getByRole('alert')).toContainText('字典标签加载失败');
   failed = false; await page.getByRole('button', {name: '重试字典标签'}).click(); await expect(page.getByRole('cell', {name: '自定义启用', exact: true})).toBeVisible(); await expect(page.locator('.tag-warning.custom-label')).toHaveText('自定义启用');
-  await expect(page.getByLabel('状态筛选').getByRole('option', {name: '自定义停用', exact: true})).toHaveAttribute('value', '1');
+  await expect(page.locator('.list-filters').getByLabel('状态').getByRole('option', {name: '自定义停用', exact: true})).toHaveAttribute('value', '1');
   await page.getByRole('button', {name: '新增岗位'}).click(); await expect(page.getByRole('dialog').getByLabel('岗位状态').getByRole('option', {name: '自定义启用', exact: true})).toHaveAttribute('value', '0'); await page.keyboard.press('Escape');
   await page.route('**/api/v1/system/dictionaries/lookup/sys_normal_disable', route => route.fulfill({json: [{value: '1', label: '仅剩停用', style: 'INFO', defaultEntry: false}]}));
   await page.reload(); await expect(page.locator('.dictionary-tags')).toHaveText('0'); await page.getByRole('button', {name: '新增岗位'}).click();

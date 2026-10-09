@@ -77,9 +77,9 @@ export function MenusPage() {
   }
   function query(event: FormEvent) { event.preventDefault(); setFilters({...draft}); setVersion(value => value + 1); }
   return <ListPage className="posts-page menus-page" title="菜单管理" description="维护目录、页面、外链和按钮权限。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={visibilityDictionary} />
-    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></>} onSubmit={query}><Input label="菜单名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>菜单状态筛选<Select aria-label="菜单状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
-      <label>显示状态筛选<Select aria-label="显示状态筛选" value={draft.visible} onChange={event => setDraft({...draft, visible: event.target.value})}><option value="">全部</option><DictionaryOptions options={visibilityOptions} current={draft.visible} /></Select></label>
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setVersion(value => value + 1); }} /></>} onSubmit={query}><Input label="菜单名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
+      <label>菜单状态<Select aria-label="菜单状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+      <label>显示状态<Select aria-label="显示状态" value={draft.visible} onChange={event => setDraft({...draft, visible: event.target.value})}><option value="">全部</option><DictionaryOptions options={visibilityOptions} current={draft.visible} /></Select></label>
       </ListFilters>
     <ListToolbar ><PermissionGate permission="system:menu:add"><Button label="新增菜单" variant="primary" isDisabled={busy} onClick={() => { void openEditor(); }} /></PermissionGate>
       <PermissionGate permission="system:menu:edit"><Button label="保存菜单排序" variant="secondary" isDisabled={busy || !rows.some(row => sorts[row.id] !== undefined && sorts[row.id] !== row.sort)} onClick={() => { void saveSort(); }} /></PermissionGate>

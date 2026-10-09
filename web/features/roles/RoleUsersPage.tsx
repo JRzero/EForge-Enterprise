@@ -41,7 +41,7 @@ function RoleUserList({roleId, assigned, version, busy, onAction}: {roleId: stri
   ], [busy, loading, data, selection, assigned, roleId, onAction, statusDictionary.options]);
   function query(event: FormEvent) { event.preventDefault(); setPage(1); setFilters({...draft}); setReload(previous => previous + 1); }
   return <div className="role-user-list"><DictionaryNotice dictionary={statusDictionary} /><ListFilters hidden={!showFilters} actions={<><Button label="查询用户" type="submit" isDisabled={busy} /><Button label="重置用户筛选" variant="secondary" isDisabled={busy} onClick={() => { setDraft({username: '', phone: ''}); setFilters({username: '', phone: ''}); setPage(1); setReload(previous => previous + 1); }} /></>} onSubmit={query}>
-    <Input label="用户账号筛选" value={draft.username} isDisabled={busy} onChange={username => setDraft({...draft, username})} /><Input label="手机号码筛选" value={draft.phone} isDisabled={busy} onChange={phone => setDraft({...draft, phone})} />
+    <Input label="用户账号" value={draft.username} isDisabled={busy} onChange={username => setDraft({...draft, username})} /><Input label="手机号码" value={draft.phone} isDisabled={busy} onChange={phone => setDraft({...draft, phone})} />
 
   </ListFilters><ListToolbar ><PermissionGate permission="system:role:edit"><Button label={assigned ? '批量取消授权' : '确认添加用户'} isDisabled={busy || !selected.length || roleId === '1'} onClick={() => onAction(selected)} /></PermissionGate>
     <Button label="刷新用户列表" variant="ghost" isDisabled={busy || loading} onClick={() => setReload(previous => previous + 1)} /><Button label={showFilters ? '隐藏用户筛选' : '显示用户筛选'} variant="ghost" isDisabled={busy} onClick={() => setShowFilters(previous => !previous)} />

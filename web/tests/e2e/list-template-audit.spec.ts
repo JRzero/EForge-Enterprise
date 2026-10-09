@@ -30,6 +30,8 @@ for (const route of cases) test(`shared list layout: ${route.url}`, async ({page
   await page.getByRole('button', {name: '登录', exact: true}).click();
   const list = page.locator('.list-page');
   await expect(list).toBeVisible();
+  await expect(list.locator(':scope > .ef-page-header')).toHaveCount(0);
+  for (const field of await list.locator('.list-filter-field').all()) await expect(field).not.toContainText('筛选');
   await expect(list.locator('.enterprise-data-table table').first()).toBeVisible();
   await expect(list.getByRole('alert')).toHaveCount(0);
   for (const width of [1440, 390]) {
@@ -49,6 +51,13 @@ for (const route of cases) test(`shared list layout: ${route.url}`, async ({page
       expect(metrics.offset).toBeLessThanOrEqual(3);
       expect(metrics.left).toBeGreaterThanOrEqual(0);
       expect(metrics.right).toBeLessThanOrEqual(width);
+      if (await field.evaluate(element => element.classList.contains('list-filter-field'))) {
+        const labelColumn = await field.evaluate(element => {
+          const group = element.firstElementChild!;
+          return getComputedStyle(group).gridTemplateColumns.split(' ')[0];
+        });
+        expect(labelColumn).toBe('80px');
+      }
     }
     for (const label of await list.locator('.pagination-field:visible').all()) {
       const offset = await label.evaluate(element => {

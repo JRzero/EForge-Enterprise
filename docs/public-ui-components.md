@@ -223,3 +223,27 @@ The earlier full run was not accepted: two toolbar alignment assertions failed,
 and three resource-loading cases overlapped the generated-client check writing
 the watched API file. The final run used the corrected CSS specificity and ran
 without concurrent generation or source changes; all 202 passed without retries.
+
+### Compact list presentation (2026-10-09)
+
+Per the subsequent UI request, ListPage now omits its visible title/description
+block by default. A visually hidden heading preserves assistive navigation;
+breadcrumbs and workspace tabs still identify the page. FormPage explicitly
+retains its form heading via `showHeader`.
+
+Search field labels drop the redundant Chinese suffix “筛选”. Both EForge Input
+and native select/date fields use the same 80 px right-aligned label column,
+8 px gap and 160 px desktop control column; mobile retains the label width and
+lets controls fill the available space. The 16-route audit now asserts the
+absent visible header, simplified field text and exact label-column width.
+Search-related tests scope their field lookup to the search form so identically
+named editor fields and column-visibility checkboxes remain unambiguous.
+
+Validation for this change: lint/typecheck, 126 unit tests and production build
+pass. The full 202-case browser run passed 200; two tests still clicked the
+removed visible title to dismiss popovers. Those interactions now click the
+list's blank padding instead, and all 19 navigation/user tests passed on rerun
+without product-code changes. The 16-route layout matrix passed with 80 px
+label columns on desktop/mobile. Logs: `web/list-labels-final.log` and
+`web/list-labels-clicks.log`. Live-test selectors were updated but the live
+backend suite was not rerun for this presentation-only change.

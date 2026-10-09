@@ -2,10 +2,10 @@ import {Children, Fragment, isValidElement, type ComponentPropsWithoutRef, type 
 import {PageHeader} from '../../ui/patterns';
 
 /** Product list layout matching the spcore object-model lists. */
-export function ListPage({title, description, eyebrow, className = '', children}: {
-  title: string; description?: string; eyebrow?: string; className?: string; children: ReactNode;
+export function ListPage({title, description, eyebrow, showHeader = false, className = '', children}: {
+  title: string; description?: string; eyebrow?: string; showHeader?: boolean; className?: string; children: ReactNode;
 }) {
-  return <section className={`list-page ${className}`}><PageHeader title={title} description={description} eyebrow={eyebrow}/>
+  return <section className={`list-page ${className}`}>{showHeader ? <PageHeader title={title} description={description} eyebrow={eyebrow}/> : <h1 className="list-page-title">{title}</h1>}
     <div className="list-page-body">{children}</div></section>;
 }
 

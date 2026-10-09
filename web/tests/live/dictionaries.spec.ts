@@ -10,7 +10,7 @@ test('real dictionary type/data CRUD, duplicate values, rename, styled comma key
   const code = `browser_dict_${Date.now()}`, name = `浏览器字典${Date.now()}`;
   await page.getByRole('button', {name: '新增字典类型', exact: true}).click(); let dialog = page.getByRole('dialog');
   await dialog.getByLabel('字典名称', {exact: true}).fill(name); await dialog.getByLabel('字典类型标识').fill(code); await dialog.getByLabel('备注').fill('真实验证'); await dialog.getByRole('button', {name: '保存字典'}).click(); await expect(dialog).toHaveCount(0);
-  await page.locator('[data-page-path]:visible').getByLabel('字典类型筛选').fill(code); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('button', {name, exact: true})).toBeVisible();
+  await page.locator('[data-page-path]:visible .list-filters').getByLabel('字典类型', {exact:true}).fill(code); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('button', {name, exact: true})).toBeVisible();
   await page.getByRole('button', {name: '新增字典类型', exact: true}).click(); dialog = page.getByRole('dialog'); await dialog.getByLabel('字典名称', {exact: true}).fill('重复'); await dialog.getByLabel('字典类型标识').fill(code); await dialog.getByRole('button', {name: '保存字典'}).click(); await expect(dialog.getByRole('alert')).toBeVisible(); await page.keyboard.press('Escape');
   const discard = page.getByRole('alertdialog', {name: '有未保存的修改', exact: true}); await expect(discard).toBeVisible();
   await expect(dialog.getByLabel('字典名称', {exact: true})).toHaveValue('重复'); await expect(dialog.getByLabel('字典类型标识')).toHaveValue(code);
@@ -23,16 +23,16 @@ test('real dictionary type/data CRUD, duplicate values, rename, styled comma key
   await expect(page.getByRole('cell', {name: 'a,b', exact: true})).toHaveCount(2); await expect(page.locator('.tag-warning').filter({hasText: '逗号标签'})).toBeVisible();
   await page.getByRole('button', {name: '修改字典 逗号标签', exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.getByLabel('默认项')).toBeChecked(); await dialog.getByLabel('显示顺序').fill('-1'); await dialog.getByRole('button', {name: '保存字典'}).click(); await expect(dialog.getByRole('alert')).toContainText('请检查'); await dialog.getByLabel('显示顺序').fill('2147483647'); await dialog.getByLabel('回显样式').selectOption('DEFAULT'); await dialog.getByLabel('样式属性').fill(''); await dialog.getByLabel('默认项').uncheck(); await dialog.getByLabel('字典状态').selectOption('1'); await dialog.getByLabel('备注').fill(''); await dialog.getByRole('button', {name: '保存字典'}).click(); await expect(dialog).toHaveCount(0);
   await page.getByRole('button', {name: '修改字典 逗号标签', exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.getByLabel('显示顺序')).toHaveValue('2147483647'); await expect(dialog.getByLabel('回显样式')).toHaveValue('DEFAULT'); await expect(dialog.getByLabel('样式属性')).toHaveValue(''); await expect(dialog.getByLabel('备注')).toHaveValue(''); await expect(dialog.getByLabel('默认项')).not.toBeChecked(); await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0); await expect(discard).toHaveCount(0);
-  await page.locator('[data-page-path]:visible').getByLabel('状态筛选').selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: '重复键值标签', exact: true})).toHaveCount(0);
+  await page.locator('[data-page-path]:visible').getByLabel('状态').selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: '重复键值标签', exact: true})).toHaveCount(0);
   const pending = page.waitForEvent('download'); await page.getByRole('button', {name: '导出字典'}).click(); const download = await pending; expect(download.suggestedFilename()).toBe('字典数据.xlsx'); const xml = workbookXml(await readFile((await download.path())!)); expect(xml).toContain('逗号标签'); expect(xml).toContain('a,b'); expect(xml).not.toContain('重复键值标签');
-  await page.getByRole('button', {name: '关闭字典数据'}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible(); await page.locator('[data-page-path]:visible').getByLabel('字典类型筛选').fill(code); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.getByRole('button', {name: '关闭字典数据'}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible(); await page.locator('[data-page-path]:visible .list-filters').getByLabel('字典类型', {exact:true}).fill(code); await page.getByRole('button', {name: '查询', exact: true}).click();
   await page.getByRole('button', {name: `删除字典 ${name}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByRole('alertdialog').getByRole('alert')).toBeVisible(); await page.getByRole('button', {name: '取消', exact: true}).click();
   await page.getByRole('button', {name: `修改字典 ${name}`, exact: true}).click(); dialog = page.getByRole('dialog'); await dialog.getByLabel('字典类型标识').fill(`${code}_renamed`); await dialog.getByLabel('备注').fill(''); await dialog.getByRole('button', {name: '保存字典'}).click(); await expect(dialog).toHaveCount(0);
   await page.getByRole('button', {name: `预览字典 ${name}`, exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.locator('p[role=status]')).toHaveText('共计 2 条，正常 1 条，停用 1 条'); await expect(dialog.getByText('逗号标签', {exact: true})).toBeVisible(); await expect(dialog.getByText(`${code}_renamed`, {exact: true})).toBeVisible(); await page.keyboard.press('Escape');
   await page.getByRole('button', {name, exact: true}).click(); await expect(page).toHaveURL(new RegExp(`/dict/data/${dictionaryId}$`));
   for (const label of ['逗号标签', '重复键值标签']) await page.getByRole('checkbox', {name: `选择字典 ${label}`, exact: true}).check();
   await page.getByRole('button', {name: '删除所选字典'}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无字典记录', {exact: true})).toBeVisible();
-  await page.getByRole('button', {name: '关闭字典数据'}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible(); await page.locator('[data-page-path]:visible').getByLabel('字典类型筛选').fill(code); await page.getByRole('button', {name: '查询', exact: true}).click(); await page.getByRole('button', {name: `删除字典 ${name}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无字典记录', {exact: true})).toBeVisible();
+  await page.getByRole('button', {name: '关闭字典数据'}).click(); await expect(page.getByRole('heading', {name: '字典管理', exact: true})).toBeVisible(); await page.locator('[data-page-path]:visible .list-filters').getByLabel('字典类型', {exact:true}).fill(code); await page.getByRole('button', {name: '查询', exact: true}).click(); await page.getByRole('button', {name: `删除字典 ${name}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无字典记录', {exact: true})).toBeVisible();
   await page.getByRole('button', {name: '刷新字典缓存'}).click(); await expect(page.getByText('字典缓存已刷新。', {exact: true})).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -84,11 +84,11 @@ test('real dictionary label/style changes reach all existing management pages an
   });
   try {
     for (const [path, heading, filter, add, editor] of [
-      ['/post', '岗位管理', '状态筛选', '新增岗位', '岗位状态'],
-      ['/dept', '部门管理', '部门状态筛选', '新增部门', '部门状态'],
-      ['/role', '角色管理', '状态筛选', '新增角色', '角色状态'],
-      ['/menu', '菜单管理', '菜单状态筛选', '新增菜单', '菜单状态'],
-      ['/user', '用户管理', '用户状态筛选', '新增用户', '用户状态'],
+      ['/post', '岗位管理', '状态', '新增岗位', '岗位状态'],
+      ['/dept', '部门管理', '部门状态', '新增部门', '部门状态'],
+      ['/role', '角色管理', '状态', '新增角色', '角色状态'],
+      ['/menu', '菜单管理', '菜单状态', '新增菜单', '菜单状态'],
+      ['/user', '用户管理', '用户状态', '新增用户', '用户状态'],
     ]) {
       await page.goto(path!); await expect(page.getByRole('heading', {name: heading!, exact: true})).toBeVisible(); await expect(page.locator('.custom-live').filter({hasText: '自定义正常标签'}).first()).toBeVisible();
       await expect(page.locator('[data-page-path]:visible').getByLabel(filter!, {exact: true}).getByRole('option', {name: '自定义正常标签', exact: true})).toHaveAttribute('value', '0');
@@ -125,7 +125,7 @@ test('real dictionary pagination, date filters, whole preview, type switching, c
     }
     return {types, entryIds: entries.map(row => row.id)};
   }, prefix);
-  await page.locator('[data-page-path]:visible').getByLabel('字典类型筛选').fill(prefix); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.locator('[data-page-path]:visible .list-filters').getByLabel('字典类型', {exact:true}).fill(prefix); await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible(); await page.getByRole('button', {name: '下一页', exact: true}).click(); await expect(page.getByText('共 12 条，第 2 页', {exact: true})).toBeVisible();
   await expect(page.getByRole('button', {name: `${prefix}_类型10`, exact: true})).toBeVisible();
   for (const index of [10, 11]) await page.getByRole('checkbox', {name: `选择字典 ${prefix}_类型${index}`, exact: true}).check();

@@ -9,7 +9,7 @@ async function login(page: Page) {
   await expect(page.getByRole('cell', {name: 'admin', exact: true})).toBeVisible();
 }
 async function query(page: Page, username: string) {
-  await page.getByLabel('登录账号筛选', {exact: true}).fill(username); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.locator('.list-filters').getByLabel('登录账号', {exact: true}).fill(username); await page.getByRole('button', {name: '查询', exact: true}).click();
 }
 async function create(page: Page, username: string) {
   await page.getByRole('button', {name: '新增用户', exact: true}).click(); const dialog = page.getByRole('dialog');
@@ -44,7 +44,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   await dialog.getByRole('group', {name: '岗位', exact: true}).getByLabel('项目经理', {exact: true}).check();
   await expect(dialog.getByLabel('超级管理员', {exact: true})).toHaveCount(0); await dialog.getByRole('button', {name: '保存用户', exact: true}).click(); await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('cell', {name: username, exact: true})).toBeVisible();
-  await page.getByLabel('手机号码筛选', {exact: true}).fill('13900000005'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: username, exact: true})).toBeVisible(); await page.getByLabel('手机号码筛选', {exact: true}).fill(''); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.locator('.list-filters').getByLabel('手机号码', {exact: true}).fill('13900000005'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: username, exact: true})).toBeVisible(); await page.locator('.list-filters').getByLabel('手机号码', {exact: true}).fill(''); await page.getByRole('button', {name: '查询', exact: true}).click();
   await createDuplicate();
   async function createDuplicate() {
     await page.getByRole('button', {name: '新增用户', exact: true}).click(); const form = page.getByRole('dialog');
@@ -70,7 +70,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   await page.getByRole('button', {name: `启用用户 ${username}`, exact: true}).click(); await page.getByRole('button', {name: '确认保存', exact: true}).click(); await expect(page.getByRole('button', {name: `停用用户 ${username}`, exact: true})).toBeVisible();
   await page.getByRole('button', {name: `重置密码 ${username}`, exact: true}).click(); dialog = page.getByRole('dialog'); await dialog.getByLabel('新密码', {exact: true}).fill('bad'); await dialog.getByRole('button', {name: '确认保存', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('5–20'); await dialog.getByLabel('新密码', {exact: true}).fill('Reset12345'); await dialog.getByRole('button', {name: '确认保存', exact: true}).click(); await expect(dialog).toHaveCount(0);
   expect(await authenticate(page, username, 'Browser123')).not.toBe(200); expect(await authenticate(page, username, 'Reset12345')).toBe(200);
-  await page.getByLabel('用户状态筛选', {exact: true}).selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByText('暂无用户', {exact: true})).toBeVisible(); await page.getByLabel('用户状态筛选', {exact: true}).selectOption('0'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: username, exact: true})).toBeVisible();
+  await page.getByLabel('用户状态', {exact: true}).selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByText('暂无用户', {exact: true})).toBeVisible(); await page.getByLabel('用户状态', {exact: true}).selectOption('0'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: username, exact: true})).toBeVisible();
   await page.getByText('显示列', {exact: true}).click(); await page.getByLabel('用户昵称', {exact: true}).uncheck(); await expect(page.getByRole('columnheader', {name: '用户昵称', exact: true})).toHaveCount(0); await page.getByLabel('用户昵称', {exact: true}).check();
   const allColumns=page.getByRole('checkbox',{name:'列展示',exact:true});await expect(allColumns).toBeChecked();
   await page.getByRole('checkbox',{name:'手机号码',exact:true}).uncheck();await expect(allColumns).toBeChecked({indeterminate:true});
@@ -78,7 +78,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   await allColumns.uncheck();await expect(page.getByRole('columnheader',{name:'登录账号',exact:true})).toHaveCount(0);
   await allColumns.check();await expect(page.getByRole('columnheader',{name:'登录账号',exact:true})).toBeVisible();
   const download = page.waitForEvent('download'); await page.getByRole('button', {name: '导出用户', exact: true}).click(); const file = await download; const xml = workbookXml(await readFile((await file.path())!)); expect(xml).toContain(username); expect(xml).not.toContain('Reset12345');
-  await page.getByRole('button', {name: '隐藏筛选', exact: true}).click(); await expect(page.getByLabel('登录账号筛选', {exact: true})).toBeHidden(); await page.getByRole('button', {name: '显示筛选', exact: true}).click();
+  await page.getByRole('button', {name: '隐藏筛选', exact: true}).click(); await expect(page.locator('.list-filters').getByLabel('登录账号', {exact: true})).toBeHidden(); await page.getByRole('button', {name: '显示筛选', exact: true}).click();
   await page.screenshot({path: 'test-results/live-users.png', fullPage: true}); await page.getByRole('button', {name: `删除用户 ${username}`, exact: true}).click(); await page.getByRole('button', {name: '取消', exact: true}).click(); await page.getByRole('button', {name: `删除用户 ${username}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除', exact: true}).click(); await expect(page.getByText('暂无用户', {exact: true})).toBeVisible(); expect(errors).toEqual([]);
 });
 

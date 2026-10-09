@@ -119,9 +119,9 @@ export function PostsPage() {
   return <ListPage className="posts-page" title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理">
     <DictionaryNotice dictionary={statusDictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} /></>} onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
-      <Input label="岗位编码筛选" value={draft.code} onChange={code => setDraft({...draft, code})} />
-      <Input label="岗位名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <label>状态筛选<Select aria-label="状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+      <Input label="岗位编码" value={draft.code} onChange={code => setDraft({...draft, code})} />
+      <Input label="岗位名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
+      <label>状态<Select aria-label="状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
 
     </ListFilters>
     <ListToolbar >

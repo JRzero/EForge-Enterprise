@@ -39,12 +39,12 @@ test('configuration filters and exports retain applied dates, false builtin and 
   await page.route('**/api/v1/system/configurations?*', route => {queries.push(new URL(route.request().url()).searchParams); return route.fulfill({json: {items: [row], total: 1, page: 1, pageSize: 10}});});
   await page.route('**/api/v1/system/configurations/export?*', route => {exported = new URL(route.request().url()).searchParams; return route.fulfill({body: Buffer.from([80, 75, 3, 4]), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});});
   await login(page, ['system:config:list', 'system:config:export']);
-  await page.getByLabel('参数名称筛选').fill('中文 & 名称'); await page.getByLabel('参数键名筛选').fill(row.key); await page.getByLabel('系统内置筛选').selectOption('N');
+  await page.locator('.list-filters').getByLabel('参数名称').fill('中文 & 名称'); await page.locator('.list-filters').getByLabel('参数键名').fill(row.key); await page.locator('.list-filters').getByLabel('系统内置').selectOption('N');
   await page.getByLabel('开始日期').fill('2026-10-04'); await page.getByLabel('结束日期').fill('2026-10-05'); await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect.poll(() => queries.at(-1)?.get('builtin')).toBe('false'); expect(queries.at(-1)?.get('key')).toBe(row.key); expect(queries.at(-1)?.get('from')).toBe('2026-10-04');
-  await page.getByLabel('参数名称筛选').fill('尚未应用');
+  await page.locator('.list-filters').getByLabel('参数名称').fill('尚未应用');
   const pending = page.waitForEvent('download'); await page.getByRole('button', {name: '导出参数'}).click(); expect((await pending).suggestedFilename()).toBe('参数数据.xlsx');
   expect(exported?.get('name')).toBe('中文 & 名称'); expect(exported?.get('builtin')).toBe('false'); expect(exported?.get('to')).toBe('2026-10-05');
-  await page.getByRole('button', {name: '隐藏筛选'}).click(); await expect(page.getByLabel('参数名称筛选')).toBeHidden(); await page.getByRole('button', {name: '显示筛选'}).click();
-  await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.getByLabel('参数名称筛选')).toHaveValue(''); await expect.poll(() => queries.at(-1)?.get('builtin')).toBe(null);
+  await page.getByRole('button', {name: '隐藏筛选'}).click(); await expect(page.locator('.list-filters').getByLabel('参数名称')).toBeHidden(); await page.getByRole('button', {name: '显示筛选'}).click();
+  await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.locator('.list-filters').getByLabel('参数名称')).toHaveValue(''); await expect.poll(() => queries.at(-1)?.get('builtin')).toBe(null);
 });

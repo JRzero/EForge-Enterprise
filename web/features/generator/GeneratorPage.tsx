@@ -82,7 +82,7 @@ export function GeneratorPage() {
   return <ListPage className="posts-page generator-page" title="代码生成" description="管理生成配置、同步字段并预览生成文件。" eyebrow="系统工具">
 
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit"/><Button label="重置" variant="secondary" onClick={()=>{setDraft(emptyFilters);setFilters(emptyFilters);setPage(1);refresh();}}/></>} onSubmit={event=>{event.preventDefault();if(draft.from&&draft.to&&draft.from>draft.to){setActionError('开始日期不能晚于结束日期。');return;}setPage(1);setFilters({...draft});refresh();}}>
-      <Input label="表名称筛选" value={draft.name} onChange={name=>setDraft({...draft,name})}/><Input label="表描述筛选" value={draft.comment} onChange={comment=>setDraft({...draft,comment})}/>
+      <Input label="表名称" value={draft.name} onChange={name=>setDraft({...draft,name})}/><Input label="表描述" value={draft.comment} onChange={comment=>setDraft({...draft,comment})}/>
       <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/></label>
       <label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/></label>
 

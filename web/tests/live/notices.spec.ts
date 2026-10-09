@@ -4,7 +4,7 @@ async function login(page: Page, username = 'admin', password = 'admin123') {
   await expect(page.getByRole('heading', {name: username === 'admin' ? '通知公告' : '暂无访问权限', exact: true})).toBeVisible();
 }
 async function logout(page: Page) {await page.getByRole('button', {name: '退出登录', exact: true}).click(); await expect(page.getByLabel('账号', {exact: true})).toBeVisible();}
-async function filter(page: Page, title: string) {await page.getByLabel('公告标题筛选', {exact: true}).fill(title); await page.getByRole('button', {name: '查询', exact: true}).click();}
+async function filter(page: Page, title: string) {await page.locator('.list-filters').getByLabel('公告标题', {exact: true}).fill(title); await page.getByRole('button', {name: '查询', exact: true}).click();}
 
 test('real notice editor uploads PNG/JPG/SVG, retains rich text, reads, clears and deletes', async ({page}) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message)); await login(page);
@@ -64,7 +64,7 @@ test('real notice editor uploads PNG/JPG/SVG, retains rich text, reads, clears a
   await page.getByRole('button', {name: `已读用户 ${title}`, exact: true}).click(); await expect(page.getByRole('dialog').getByRole('cell', {name: 'admin', exact: true})).toBeVisible(); await page.keyboard.press('Escape');
   await page.getByRole('checkbox', {name: `选择公告 ${title}`, exact: true}).check(); await page.getByRole('button', {name: '修改所选公告'}).click(); dialog = page.getByRole('dialog'); await dialog.getByRole('textbox', {name: '公告内容'}).fill(''); await dialog.getByLabel('备注', {exact: true}).fill(''); await dialog.getByLabel('公告类型', {exact: true}).selectOption('1'); await dialog.getByRole('radio', {name: '关闭', exact: true}).check(); await dialog.getByRole('button', {name: '保存公告'}).click(); await expect(dialog).toHaveCount(0);
   await page.getByRole('button', {name: `修改 ${title}`, exact: true}).click(); dialog = page.getByRole('dialog'); await expect(dialog.getByLabel('备注', {exact: true})).toHaveValue(''); await expect(dialog.getByRole('textbox', {name: '公告内容'})).toHaveText(''); await page.keyboard.press('Escape');
-  await page.getByLabel('操作人员筛选', {exact: true}).fill('admin'); await page.getByLabel('公告类型筛选', {exact: true}).selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: title, exact: true})).toBeVisible();
+  await page.locator('.list-filters').getByLabel('操作人员', {exact: true}).fill('admin'); await page.locator('.list-filters').getByLabel('公告类型', {exact: true}).selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('cell', {name: title, exact: true})).toBeVisible();
   await page.getByRole('button', {name: `删除 ${title}`, exact: true}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无公告', {exact: true})).toBeVisible(); expect(errors).toEqual([]);
 });
 
@@ -93,5 +93,5 @@ test('real notice paging, last-page recovery, column visibility and batch deleti
   for (const index of [0, 1]) await page.getByRole('checkbox', {name: `选择公告 ${prefix}-${index}`, exact: true}).check(); await page.getByRole('button', {name: '删除所选公告'}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('共 10 条，第 1 页', {exact: true})).toBeVisible();
   await page.getByText('显示列', {exact: true}).click(); await page.getByRole('checkbox', {name: '创建者', exact: true}).uncheck(); await expect(page.getByRole('columnheader', {name: '创建者', exact: true})).toHaveCount(0); await page.getByText('显示列', {exact: true}).click();
   await page.getByLabel('每页条数', {exact: true}).selectOption('20'); for (let index = 2; index < 12; index++) await page.getByRole('checkbox', {name: `选择公告 ${prefix}-${index}`, exact: true}).check(); await page.getByRole('button', {name: '删除所选公告'}).click(); await expect(page.getByRole('alertdialog')).toContainText('10 个公告'); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无公告', {exact: true})).toBeVisible();
-  await page.getByRole('button', {name: '隐藏筛选'}).click(); await expect(page.getByLabel('公告标题筛选')).toBeHidden(); await page.getByRole('button', {name: '显示筛选'}).click(); await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.getByLabel('公告标题筛选')).toHaveValue('');
+  await page.getByRole('button', {name: '隐藏筛选'}).click(); await expect(page.locator('.list-filters').getByLabel('公告标题')).toBeHidden(); await page.getByRole('button', {name: '显示筛选'}).click(); await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.locator('.list-filters').getByLabel('公告标题')).toHaveValue('');
 });

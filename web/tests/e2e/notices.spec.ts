@@ -44,13 +44,13 @@ test('notice filters, reader search/paging, retry and cancelled detail preserve 
   const readerQueries: URLSearchParams[] = []; let readersFail = true;
   await page.route(`**/api/v1/system/notices/${id}/readers?*`, route => {readerQueries.push(new URL(route.request().url()).searchParams); return route.fulfill(readersFail ? {status: 503, json: {}} : {json: {items: [{userId: id, username: 'reader', displayName: '读者姓名', departmentName: '部门', phone: '123', readAt: '2026-10-05T00:00:00Z'}], total: 12, page: 1, pageSize: 10}});});
   await login(page, ['system:notice:list']); await expect(page.getByRole('cell', {name: row.title, exact: true})).toBeVisible();
-  await page.getByLabel('公告标题筛选').fill('中文 & 公告'); await page.getByLabel('操作人员筛选').fill('作者 / &'); await page.getByLabel('公告类型筛选').selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('type')).toBe('1'); expect(queries.at(-1)?.get('author')).toBe('作者 / &');
+  await page.locator('.list-filters').getByLabel('公告标题').fill('中文 & 公告'); await page.locator('.list-filters').getByLabel('操作人员').fill('作者 / &'); await page.locator('.list-filters').getByLabel('公告类型').selectOption('1'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('type')).toBe('1'); expect(queries.at(-1)?.get('author')).toBe('作者 / &');
   await page.getByRole('button', {name: `已读用户 ${row.title}`, exact: true}).click(); const dialog = page.getByRole('dialog'); await expect(dialog.getByRole('alert')).toContainText('服务暂时不可用'); readersFail = false; await dialog.getByRole('button', {name: '重试读者'}).click(); await expect(dialog.getByRole('cell', {name: '读者姓名', exact: true})).toBeVisible();
   await dialog.getByLabel('读者账号或姓名').fill('姓名 & 搜索'); await dialog.getByRole('button', {name: '搜索读者'}).click(); await expect.poll(() => readerQueries.at(-1)?.get('search')).toBe('姓名 & 搜索'); await dialog.getByRole('button', {name: '读者下一页'}).click(); await expect.poll(() => readerQueries.at(-1)?.get('page')).toBe('2');
   await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
   let aborted = false; page.on('requestfailed', request => {if (request.url().endsWith(`/notices/${id}`)) aborted = true;}); await page.route(`**/api/v1/system/notices/${id}`, () => {});
   await page.getByRole('button', {name: `预览 ${row.title}`, exact: true}).click(); await expect(page.getByRole('dialog').getByText('正在加载公告…', {exact: true})).toBeVisible(); await page.keyboard.press('Escape'); await expect.poll(() => aborted).toBe(true);
-  await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.getByLabel('公告标题筛选')).toHaveValue(''); await expect.poll(() => queries.at(-1)?.get('type')).toBe(null);
+  await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.locator('.list-filters').getByLabel('公告标题')).toHaveValue(''); await expect.poll(() => queries.at(-1)?.get('type')).toBe(null);
 });
 
 test('top notices remain available without management grants and only confirm persisted read state', async ({page}) => {

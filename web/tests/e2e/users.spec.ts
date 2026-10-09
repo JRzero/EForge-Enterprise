@@ -22,6 +22,6 @@ test('read-only user permissions, scoped department roots, failure retry and mob
   await allColumns.press('Escape');
   await expect(page.locator('.post-toolbar summary')).toBeFocused(); await expect(allColumns).toBeHidden();
   await page.getByText('显示列', {exact:true}).click(); await expect(allColumns).toBeVisible();
-  await page.getByRole('heading',{name:'用户管理',exact:true}).click(); await expect(allColumns).toBeHidden();
+  await page.locator('.list-page-body').click({position:{x:4,y:4}}); await expect(allColumns).toBeHidden();
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

@@ -17,19 +17,19 @@ async function setup(page:Page,cached=true){
 async function navigate(page:Page,name:string){await page.locator('.ef-app-shell__nav').getByRole('link',{name,exact:true}).click();await expect(page.getByRole('heading',{name,exact:true})).toBeVisible();}
 test('cached real resource drafts survive tab switches; refresh, close and logout discard them',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await setup(page);
-  await navigate(page,'角色管理');await page.getByLabel('角色名称筛选',{exact:true}).fill('未提交草稿');
+  await navigate(page,'角色管理');await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('未提交草稿');
   await navigate(page,'岗位管理');const tabs=page.getByRole('navigation',{name:'页面标签'});
   await expect(tabs.getByRole('link')).toHaveCount(3);await expect(tabs.getByRole('button',{name:'关闭标签 工作台'})).toHaveCount(0);
-  await tabs.getByRole('link',{name:'页面标签：角色管理',exact:true}).click();await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('未提交草稿');
-  await tabs.getByRole('button',{name:'刷新当前页面'}).click();await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('');
-  await page.getByLabel('角色名称筛选',{exact:true}).fill('关闭后不保留');await tabs.getByRole('button',{name:'关闭标签 角色管理'}).click();
-  await expect(tabs.getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);await navigate(page,'角色管理');await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('');
+  await tabs.getByRole('link',{name:'页面标签：角色管理',exact:true}).click();await expect(page.locator('.list-filters').getByLabel('角色名称',{exact:true})).toHaveValue('未提交草稿');
+  await tabs.getByRole('button',{name:'刷新当前页面'}).click();await expect(page.locator('.list-filters').getByLabel('角色名称',{exact:true})).toHaveValue('');
+  await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('关闭后不保留');await tabs.getByRole('button',{name:'关闭标签 角色管理'}).click();
+  await expect(tabs.getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);await navigate(page,'角色管理');await expect(page.locator('.list-filters').getByLabel('角色名称',{exact:true})).toHaveValue('');
   await page.getByRole('button',{name:'退出登录'}).click();await expect(page.getByRole('heading',{name:'登录工作空间'})).toBeVisible();await expect(tabs).toHaveCount(0);expect(errors).toEqual([]);
 });
 test('uncached pages reset on switching; context actions retain the affix and close correct sides',async({page})=>{
-  await setup(page,false);await navigate(page,'角色管理');await page.getByLabel('角色名称筛选',{exact:true}).fill('不缓存');
+  await setup(page,false);await navigate(page,'角色管理');await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('不缓存');
   await navigate(page,'岗位管理');const tabs=page.getByRole('navigation',{name:'页面标签'});await tabs.getByRole('link',{name:'页面标签：角色管理',exact:true}).click();
-  await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('');
+  await expect(page.locator('.list-filters').getByLabel('角色名称',{exact:true})).toHaveValue('');
   await tabs.getByRole('link',{name:'页面标签：角色管理',exact:true}).click({button:'right'});const menu=page.getByRole('menu',{name:'标签操作菜单'});
   await expect(menu.getByRole('menuitem',{name:'刷新页面'})).toBeFocused();await page.keyboard.press('ArrowDown');await expect(menu.getByRole('menuitem',{name:'关闭当前'})).toBeFocused();
   await menu.getByRole('menuitem',{name:'关闭右侧'}).click();await expect(tabs.getByRole('link')).toHaveCount(2);
@@ -39,7 +39,7 @@ test('uncached pages reset on switching; context actions retain the affix and cl
   await expect(page.getByRole('heading',{name:'你好，管理员'})).toBeVisible();await expect(tabs.getByRole('link')).toHaveCount(1);
 });
 test('dropdown, fullscreen escape, mobile scrolling and revoked cache isolate resource pages',async({page})=>{
-  const state=await setup(page);await navigate(page,'角色管理');await page.getByLabel('角色名称筛选',{exact:true}).fill('旧权限草稿');
+  const state=await setup(page);await navigate(page,'角色管理');await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('旧权限草稿');
   const tabs=page.getByRole('navigation',{name:'页面标签'});await tabs.getByRole('button',{name:'标签操作'}).click();
   await page.getByRole('menuitem',{name:'全屏显示'}).click();await expect(page.locator('.ef-app-shell__sidebar')).toBeHidden();await page.keyboard.press('Escape');await expect(page.locator('.ef-app-shell__sidebar')).toBeVisible();
   await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -89,22 +89,22 @@ test('a bootstrap permission refresh clears retained pages immediately without r
   const state=await setup(page);state.permissions.push('system:role:add');await page.reload();
   await page.route('**/api/v1/system/roles/menus',route=>route.fulfill({json:[]}));
   await page.route('**/api/v1/system/roles',route=>{state.permissions=['app:dashboard:view','system:post:list'];return route.fulfill({status:201,json:{id:'3',name:'已保存角色',key:'saved',sort:0,status:'0'}});});
-  await navigate(page,'角色管理');await page.getByLabel('角色名称筛选',{exact:true}).fill('原权限草稿');
-  await navigate(page,'岗位管理');await page.getByLabel('岗位名称筛选',{exact:true}).fill('其他草稿');
+  await navigate(page,'角色管理');await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('原权限草稿');
+  await navigate(page,'岗位管理');await page.locator('.list-filters').getByLabel('岗位名称',{exact:true}).fill('其他草稿');
   await page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：角色管理',exact:true}).click();
   await page.getByRole('button',{name:'新增角色',exact:true}).click();const dialog=page.getByRole('dialog');
   await dialog.getByLabel('角色名称',{exact:true}).fill('已保存角色');await dialog.getByLabel('权限字符',{exact:true}).fill('saved');
   await dialog.getByRole('button',{name:'保存角色',exact:true}).click();await expect(page.getByRole('heading',{name:'暂无访问权限'})).toBeVisible();
   await expect(page.locator('[data-page-path="/role"]')).toHaveCount(0);await expect(page.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);
-  await navigate(page,'岗位管理');await expect(page.getByLabel('岗位名称筛选',{exact:true})).toHaveValue('');
+  await navigate(page,'岗位管理');await expect(page.locator('.list-filters').getByLabel('岗位名称',{exact:true})).toHaveValue('');
 });
 test('remembered links are separated by bootstrap account identity and page drafts never survive logout',async({page})=>{
-  const state=await setup(page);await navigate(page,'角色管理');await page.getByLabel('角色名称筛选',{exact:true}).fill('账号一草稿');
+  const state=await setup(page);await navigate(page,'角色管理');await page.locator('.list-filters').getByLabel('角色名称',{exact:true}).fill('账号一草稿');
   await page.getByLabel('记住标签',{exact:true}).check();await page.getByRole('button',{name:'退出登录'}).click();
   await expect(page.getByRole('heading',{name:'登录工作空间'})).toBeVisible();state.userId='2';
   await page.getByLabel('账号',{exact:true}).fill('admin');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
   const tabs=page.getByRole('navigation',{name:'页面标签'});await expect(tabs.getByRole('link')).toHaveCount(1);await expect(page.getByLabel('记住标签',{exact:true})).not.toBeChecked();
-  await navigate(page,'角色管理');await expect(page.getByLabel('角色名称筛选',{exact:true})).toHaveValue('');
+  await navigate(page,'角色管理');await expect(page.locator('.list-filters').getByLabel('角色名称',{exact:true})).toHaveValue('');
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('eforge.enterprise.page-tabs.v1.1')!).hrefs)).toEqual(['/role']);
 });
 test('completed cached table selection remains exact after hiding and restoring the page',async({page})=>{

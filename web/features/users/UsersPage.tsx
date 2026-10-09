@@ -182,8 +182,8 @@ export function UsersPage() {
       </li>)}</ul>
     </aside><div className="user-content">
       <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} /></>} onSubmit={event => { event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; } setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
-        <Input label="登录账号筛选" value={draft.username} onChange={username => setDraft({...draft, username})} /><Input label="手机号码筛选" value={draft.phone} onChange={phone => setDraft({...draft, phone})} />
-        <label>用户状态筛选<Select aria-label="用户状态筛选" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
+        <Input label="登录账号" value={draft.username} onChange={username => setDraft({...draft, username})} /><Input label="手机号码" value={draft.phone} onChange={phone => setDraft({...draft, phone})} />
+        <label>用户状态<Select aria-label="用户状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
         <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
 
       </ListFilters>

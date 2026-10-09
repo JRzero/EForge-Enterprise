@@ -68,9 +68,9 @@ test('dictionary search fields align independently across desktop wrapping and m
     }
     await filters.screenshot({path: info.outputPath(`dictionary-search-${width}.png`)});
   }
-  await page.getByLabel('字典类型筛选').fill('test_dict');
+  await page.locator('.list-filters').getByLabel('字典类型').fill('test_dict');
   await page.getByRole('button', {name: '重置', exact: true}).click();
-  await expect(page.getByLabel('字典类型筛选')).toHaveValue('');
+  await expect(page.locator('.list-filters').getByLabel('字典类型')).toHaveValue('');
 });
 async function authenticate(page: Page, permissions: string[], path = '/dict') {
   await page.route('**/captchaImage', route => route.fulfill({json: {code: 200, captchaEnabled: false}}));

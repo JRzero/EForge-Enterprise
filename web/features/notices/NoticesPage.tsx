@@ -86,8 +86,8 @@ export function NoticesPage() {
   return <ListPage className="posts-page notices-page" title="通知公告" description="管理通知和公告，发布内容并查看已读用户。">
 
     <DictionaryNotice dictionary={types} /><DictionaryNotice dictionary={statuses} />
-    {showFilters && <ListFilters actions={<><Button label="查询" type="submit" /><Button label="重置" variant="ghost" onClick={() => {setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1);}} /></>} onSubmit={apply}><Input label="公告标题筛选" value={draft.title} onChange={title => setDraft({...draft, title})} /><Input label="操作人员筛选" value={draft.author} onChange={author => setDraft({...draft, author})} />
-      <label>公告类型筛选<Select aria-label="公告类型筛选" value={draft.type} onChange={event => setDraft({...draft, type: event.target.value})}><option value="">全部</option><DictionaryOptions options={types.options} current={draft.type} /></Select></label></ListFilters>}
+    {showFilters && <ListFilters actions={<><Button label="查询" type="submit" /><Button label="重置" variant="ghost" onClick={() => {setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1);}} /></>} onSubmit={apply}><Input label="公告标题" value={draft.title} onChange={title => setDraft({...draft, title})} /><Input label="操作人员" value={draft.author} onChange={author => setDraft({...draft, author})} />
+      <label>公告类型<Select aria-label="公告类型" value={draft.type} onChange={event => setDraft({...draft, type: event.target.value})}><option value="">全部</option><DictionaryOptions options={types.options} current={draft.type} /></Select></label></ListFilters>}
     <ListToolbar >
       <PermissionGate permission="system:notice:add"><Button label="新增公告" variant="primary" isDisabled={busy || types.loading || statuses.loading || !!types.error || !!statuses.error} onClick={() => {setActionError(''); setEditor({form: {...emptyForm}});}} /></PermissionGate>
       <PermissionGate permission="system:notice:edit"><Button label="修改所选公告" variant="secondary" isDisabled={busy || selected.length !== 1} onClick={() => {void edit(selected[0]!);}} /></PermissionGate>

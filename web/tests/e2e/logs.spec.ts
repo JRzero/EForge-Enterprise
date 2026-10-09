@@ -12,12 +12,11 @@ async function login(page: Page, path: string, permissions: string[]) {
   await page.goto(path); await page.getByLabel('账号', {exact: true}).fill('reader'); await page.getByLabel('密码', {exact: true}).fill('password'); await page.getByRole('button', {name: '登录', exact: true}).click();
 }
 
-test('object-model list template aligns mixed filters and separates its heading from the list body',async({page},info)=>{
+test('object-model list template aligns mixed filters without a visible heading block',async({page},info)=>{
   await page.route('**/api/v1/monitor/operation-logs?*',route=>route.fulfill({json:{items:[operation],total:1,page:1,pageSize:10}}));
   await page.setViewportSize({width:1600,height:1000});await login(page,'/operlog',['monitor:operlog:list']);
   await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
-  const heading=(await page.locator('.list-page > header').boundingBox())!,body=(await page.locator('.list-page-body').boundingBox())!;
-  expect(heading.y+heading.height).toBeLessThanOrEqual(body.y+1);
+  await expect(page.locator('.list-page > header')).toHaveCount(0);
   await page.screenshot({path:info.outputPath('list-desktop.png'),fullPage:true});
   for(const field of await page.locator('.list-filter-field').all()) {
     const metrics=await field.evaluate(el=>{const label=el.querySelector('label')!,control=el.querySelector('input,select')!;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return {labelX:a.x,controlX:b.x,labelY:a.y,labelHeight:a.height,controlY:b.y,controlHeight:b.height};});

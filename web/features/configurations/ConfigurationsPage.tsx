@@ -99,9 +99,9 @@ export function ConfigurationsPage() {
   return <ListPage className="posts-page" title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理">
     <DictionaryNotice dictionary={dictionary} />
     <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
-      <Input label="参数名称筛选" value={draft.name} onChange={name => setDraft({...draft, name})} />
-      <Input label="参数键名筛选" value={draft.key} onChange={key => setDraft({...draft, key})} />
-      <label>系统内置筛选<Select aria-label="系统内置筛选" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>
+      <Input label="参数名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
+      <Input label="参数键名" value={draft.key} onChange={key => setDraft({...draft, key})} />
+      <label>系统内置<Select aria-label="系统内置" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>
       <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label>
       <label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
 
