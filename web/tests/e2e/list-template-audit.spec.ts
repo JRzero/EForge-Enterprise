@@ -37,6 +37,21 @@ for (const route of cases) test(`shared list layout: ${route.url}`, async ({page
   for (const width of [1440, 390]) {
     await page.setViewportSize({width, height: 1000});
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    for (const form of await list.locator('.list-filters:visible').all()) {
+      const actions = form.locator('.list-filter-actions');
+      if (await actions.count()) {
+        const bounds = (await form.boundingBox())!, group = (await actions.boundingBox())!;
+        expect(Math.abs(bounds.x + bounds.width - group.x - group.width)).toBeLessThanOrEqual(2);
+        const buttons = await actions.getByRole('button').all();
+        const first = (await buttons[0]!.boundingBox())!, last = (await buttons.at(-1)!.boundingBox())!;
+        expect(Math.abs(first.y + first.height / 2 - last.y - last.height / 2)).toBeLessThanOrEqual(2);
+        expect(last.x - first.x - first.width).toBeGreaterThanOrEqual(8);
+        if (width === 390) {
+          const field = (await form.locator('.list-filter-field').last().boundingBox())!;
+          expect(group.y - field.y - field.height).toBeGreaterThanOrEqual(12);
+        }
+      }
+    }
     const fields = list.locator('.list-filter-field:visible, .list-toolbar > label:visible');
     for (const field of await fields.all()) {
       await expect(field.locator('input,select')).toHaveCount(1);

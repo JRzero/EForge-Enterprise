@@ -19,7 +19,7 @@
 .post-filters.list-filters .list-filter-field > label { align-items: center; text-align: right; }
 .list-filter-field > label > :is(input,select) { width: 160px; min-width: 0; text-align: left; }
 .list-filter-field > label > input[type=date] { width: 160px; }
-.list-filter-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.list-filter-actions { display: flex; align-items: center; flex-wrap: nowrap; flex-shrink: 0; gap: 8px; margin-inline-start: auto; }
 .list-toolbar { margin: 0 0 16px; gap: 8px; }
 .list-toolbar > label, .posts-page .post-toolbar.list-toolbar > label { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; margin: 0; white-space: nowrap; }
 .list-page-body table { border-left: 0; border-right: 0; }
@@ -39,6 +39,7 @@
   .list-page > .ef-page-header h1 { font-size: 21px; }
   .list-page-body { padding: 16px 12px; }
   .list-filters { gap: 12px; }
+  .list-filter-actions { flex-basis: 100%; justify-content: flex-end; }
   .post-filters.list-filters > .list-filter-field { flex: 1 1 100%; }
   .list-filter-field > div:has([data-pressable-container]), .list-filter-field > label { display: grid; grid-template-columns: 80px minmax(0,1fr); gap: 8px; }
   .list-filter-field [data-pressable-container], .list-filter-field > label > :is(input,select), .list-filter-field > label > input[type=date] { width: 100%; }

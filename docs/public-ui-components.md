@@ -247,3 +247,15 @@ without product-code changes. The 16-route layout matrix passed with 80 px
 label columns on desktop/mobile. Logs: `web/list-labels-final.log` and
 `web/list-labels-clicks.log`. Live-test selectors were updated but the live
 backend suite was not rerun for this presentation-only change.
+
+### Search action placement (2026-10-09)
+
+Compared the spcore model-app `schema.js` inline filter with its paired primary
+submit and secondary reset actions. The product keeps that compact pair, with
+an intentional adaptation for multi-row enterprise filters: the group aligns
+to the right of the final filter row instead of immediately following the last
+field. At mobile width it occupies its own right-aligned row, 12 px below the
+fields. Actions never split internally; button spacing remains 8 px.
+All 16 route checks assert the right edge and mobile row separation; the related
+browser run passed 20 tests (`web/search-actions.log`). Role desktop/mobile
+captures were inspected. Lint/typecheck and production build pass.
