@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn" targetNamespace="https://eforge.io/workflow">
+  <process id="leaveApproval" name="请假审批" isExecutable="true">
+    <startEvent id="start" name="提交申请"/>
+    <sequenceFlow id="toReview" sourceRef="start" targetRef="review"/>
+    <userTask id="review" name="审批请假" flowable:candidateGroups="role:2"/>
+    <sequenceFlow id="toDecision" sourceRef="review" targetRef="decision"/>
+    <exclusiveGateway id="decision" name="审批结果"/>
+    <sequenceFlow id="toApproved" sourceRef="decision" targetRef="approvedEnd">
+      <conditionExpression>${approved == true}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="toRejected" sourceRef="decision" targetRef="rejectedEnd">
+      <conditionExpression>${approved == false}</conditionExpression>
+    </sequenceFlow>
+    <endEvent id="approvedEnd" name="批准"/>
+    <endEvent id="rejectedEnd" name="拒绝"/>
+  </process>
+</definitions>

@@ -31,6 +31,8 @@
         <jwt.version>0.9.1</jwt.version>
         <jaxb-api.version>2.3.1</jaxb-api.version>
         <springdoc.version>2.9.0</springdoc.version>
+        <flowable.version>7.2.0</flowable.version>
+        <eforge.build.directory>${project.basedir}/target</eforge.build.directory>
     </properties>
 
     <!-- 依赖声明 -->
@@ -174,6 +176,8 @@
     </dependencyManagement>
 
     <modules>
+        <module>eforge-workflow-api</module>
+        <module>eforge-workflow</module>
         <module>eforge-boot</module>
         <module>eforge-framework</module>
         <module>eforge-system</module>
@@ -184,6 +188,7 @@
     <packaging>pom</packaging>
 
     <build>
+        <directory>${eforge.build.directory}</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

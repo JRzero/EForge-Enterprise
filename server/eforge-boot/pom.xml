@@ -16,6 +16,11 @@
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>io.eforge.enterprise</groupId>
+            <artifactId>eforge-workflow</artifactId>
+            <version>${eforge.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

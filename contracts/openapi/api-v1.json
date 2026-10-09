@@ -3950,6 +3950,115 @@
           "username"
         ],
         "type": "object"
+      },
+      "WorkflowDecisionRequest": {
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "taskKey": {
+            "minLength": 1,
+            "pattern": "[A-Za-z][A-Za-z0-9_]{0,63}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approved",
+          "taskKey"
+        ],
+        "type": "object"
+      },
+      "WorkflowScenarioRequest": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowDecisionRequest"
+            },
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array"
+          },
+          "expectedEnd": {
+            "minLength": 1,
+            "pattern": "[A-Za-z][A-Za-z0-9_]{0,63}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decisions",
+          "expectedEnd",
+          "name"
+        ],
+        "type": "object"
+      },
+      "WorkflowScenarioResponse": {
+        "properties": {
+          "completedTasks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "endActivity": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowStatus": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowValidationRequest": {
+        "properties": {
+          "bpmnXml": {
+            "maxLength": 262144,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowScenarioRequest"
+            },
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "bpmnXml",
+          "scenarios"
+        ],
+        "type": "object"
+      },
+      "WorkflowValidationResponse": {
+        "properties": {
+          "processKey": {
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowScenarioResponse"
+            },
+            "type": "array"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -9787,6 +9896,56 @@
         },
         "tags": [
           "generator-synchronization-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/status": {
+      "get": {
+        "operationId": "getWorkflowStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-validation-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/validation": {
+      "post": {
+        "operationId": "validateWorkflowScenarios",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowValidationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowValidationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-validation-controller"
         ]
       }
     }

@@ -1,0 +1,12 @@
+formatVersion: 1
+key: leaveApproval
+name: 请假审批
+businessType: leave
+formKey: sample.leave
+process: process.bpmn20.xml
+variables: variables.schema.json
+scenarios:
+  - scenarios/approved.json
+  - scenarios/rejected.json
+# Explicit sample binding to the existing ordinary-user role. Publication must validate the role.
+# This directory is not on Flowable's automatic deployment classpath.

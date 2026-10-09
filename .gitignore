@@ -1,5 +1,6 @@
 # Maven
 **/target/
+**/target-flowable*/
 *.class
 
 # Node / frontend

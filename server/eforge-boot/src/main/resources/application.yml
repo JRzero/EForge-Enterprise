@@ -92,6 +92,31 @@ springdoc:
       paths-to-match: '/**'
       packages-to-scan: io.eforge.enterprise.web.controller
 
+# Engine schema is installed explicitly; never auto-upgrade production tables.
+flowable:
+  process:
+    enabled: ${EFORGE_WORKFLOW_ENABLED:false}
+    enable-safe-xml: true
+  database-schema-update: false
+  check-process-definitions: false
+  async-executor-activate: false
+  async-history-executor-activate: false
+  db-identity-used: false
+  idm:
+    enabled: false
+  eventregistry:
+    enabled: false
+  app:
+    enabled: false
+  cmmn:
+    enabled: false
+  dmn:
+    enabled: false
+  content:
+    enabled: false
+  form:
+    enabled: false
+
 eforge:
   cors:
     # Comma-separated exact origins. Wildcards are intentionally unsupported.

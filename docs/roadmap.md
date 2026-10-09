@@ -1,5 +1,9 @@
 # EForge Enterprise Roadmap
 
+## Flowable iteration (2026-10-09)
+
+The user authorized implementation of the previously discussed Flowable integration. Track the full scope in [spec](../spec/flowable-integration.md) and [tasks](../tasks/flowable-integration.md). Optional official engine integration, explicit MySQL schema and transaction/security foundations are under verification. Approval business paths, shared pages and Agent maintenance are not yet complete. This iteration does not reactivate the deferred form builder.
+
 ## Current scope adjustment (2026-10-06)
 
 The user deferred the online form builder. It is excluded from current development and acceptance, while its original inventory is retained for future work. Historical entries below do not override this decision. Generator work, scheduled jobs, shell/shared capabilities and every other required capability remain in scope. Deferred work must not be reported as completed.

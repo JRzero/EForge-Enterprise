@@ -951,6 +951,32 @@ export type PreviewResponse = {
     generationDate?: string;
     tableId?: string;
 };
+export type WorkflowStatus = {
+    enabled?: boolean;
+};
+export type WorkflowDecisionRequest = {
+    approved: boolean;
+    taskKey: string;
+};
+export type WorkflowScenarioRequest = {
+    decisions: WorkflowDecisionRequest[];
+    expectedEnd: string;
+    name: string;
+};
+export type WorkflowValidationRequest = {
+    bpmnXml: string;
+    scenarios: WorkflowScenarioRequest[];
+};
+export type WorkflowScenarioResponse = {
+    completedTasks?: string[];
+    endActivity?: string;
+    name?: string;
+};
+export type WorkflowValidationResponse = {
+    processKey?: string;
+    scenarios?: WorkflowScenarioResponse[];
+    sha256?: string;
+};
 /**
  * Get the current user and authorized application navigation
  */
@@ -2589,4 +2615,22 @@ export function synchronizeGeneratorTable(id: string, opts?: Oazapfts.RequestOpt
         ...opts,
         method: "POST"
     });
+}
+export function getWorkflowStatus(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowStatus;
+    }>("/api/v1/workflow/status", {
+        ...opts
+    });
+}
+export function validateWorkflowScenarios(workflowValidationRequest: WorkflowValidationRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowValidationResponse;
+    }>("/api/v1/workflow/validation", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: workflowValidationRequest
+    }));
 }

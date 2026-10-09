@@ -1,12 +1,13 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
-    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness, [switch]$VerifyGeneratedReact, [switch]$VerifyGeneratedReactOnly)
+    [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness, [switch]$VerifyGeneratedReact, [switch]$VerifyGeneratedReactOnly,
+    [string]$JarPath = '', [switch]$EnableWorkflow)
 $ErrorActionPreference = 'Stop'
 if ($VerifyGeneratedReactOnly -and $VerifyWeb) {throw 'Focused generated mode cannot be combined with the complete framework browser flag.'}
 if ($VerifyGeneratedReactOnly) { $VerifyGeneratedReact = $true }
 if ($VerifyGeneratedReact) { $VerifyGeneratedBusiness = $true }
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
-$jar = Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar'
+$jar = if ($JarPath) { (Resolve-Path -LiteralPath $JarPath).Path } else { Join-Path $repoRoot 'server/eforge-boot/target/eforge-boot.jar' }
 if (!(Test-Path -LiteralPath $jar)) { throw 'Package the server before running integration verification.' }
 $runId = [guid]::NewGuid().ToString('N').Substring(0, 12)
 $mysqlName = "eforge-auth-mysql-$runId"
@@ -71,6 +72,13 @@ try {
             & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
         if ($LASTEXITCODE -ne 0) { throw "Migration failed: $($migration.Name)" }
     }
+    if ($EnableWorkflow) {
+        foreach ($workflowSchemaFile in @('01-common.sql','02-engine.sql','03-history.sql')) {
+            Get-Content -LiteralPath (Join-Path $repoRoot "sql/workflow/flowable-7.2.0/$workflowSchemaFile") -Raw |
+                & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
+            if ($LASTEXITCODE -ne 0) { throw 'Explicit workflow schema initialization failed.' }
+        }
+    }
     if ($VerifyWeb -or $VerifyGeneratedReact) {
         # Isolate unrelated browser modules from the original default-on reminder.
         # The reminder's real browser case enables the actual canonical settings and restores them.
@@ -113,6 +121,7 @@ try {
         EFORGE_SERVER_PORT = "$AppPort"; EFORGE_TOKEN_SECRET = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
         EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_CONSOLE_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         EFORGE_CONSOLE_SECURE_COOKIE = 'false'
+        EFORGE_WORKFLOW_ENABLED = "$($EnableWorkflow.IsPresent)".ToLowerInvariant()
         EFORGE_DRUID_USERNAME = 'console-validator'; EFORGE_DRUID_PASSWORD = $testPassword
         EFORGE_DRUID_SQL_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_WEB_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         GEN_ALLOWOVERWRITE = "$($EnableCustomOutput.IsPresent)".ToLowerInvariant(); GEN_OUTPUTROOT = $customOutputDirectory
@@ -182,6 +191,14 @@ try {
     Assert-Check ($sessions.Count -eq 1) 'Expected exactly one Redis login session.'
     $ttl = Invoke-Docker exec $redisName redis-cli ttl $sessions[0]
     Assert-Check ([int]$ttl -gt 0) 'Login session must expire.'
+    if ($EnableWorkflow) {
+        $workflowDeployments = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT COUNT(*) FROM ACT_RE_DEPLOYMENT;'
+        Assert-Check ([int]$workflowDeployments -eq 0) 'Workflow must not automatically deploy processes on startup.'
+    } else {
+        $workflowTables = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='eforge_enterprise' AND LEFT(UPPER(table_name),4)='ACT_';"
+        Assert-Check ([int]$workflowTables -eq 0) 'Disabled workflow must not create engine tables.'
+    }
+    . (Join-Path $PSScriptRoot 'verify-workflow-validation-integration.ps1')
     if ($VerifyGeneratedBusiness) {
         . (Join-Path $PSScriptRoot 'verify-generated-business-integration.ps1')
     }
@@ -301,6 +318,7 @@ try {
     $commonLogin = (Request '/api/v1/auth/login' 'POST' '{"username":"ry","password":"admin123"}').Content | ConvertFrom-Json
     Assert-Check ([bool]$commonLogin.accessToken) 'Ordinary user login failed.'
     $commonHeaders = @{ Authorization = "Bearer $($commonLogin.accessToken)" }
+    Assert-Problem (Request '/api/v1/workflow/validation' 'POST' $workflowValidationBody $commonHeaders) 403 'ACCESS_DENIED'
     Assert-Check ((Request '/api/v1/system/notices/feed' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Ordinary users retain notice feed reads.'
     Assert-Check ((Request '/api/v1/system/notices/1' 'GET' '' $commonHeaders).StatusCode -eq 200) 'Ordinary users retain original notice detail reads.'
     Assert-Check ((Request '/api/v1/system/notices/read' 'POST' '{"ids":["1"]}' $commonHeaders).StatusCode -eq 204) 'Ordinary users must record their own notice read state.'

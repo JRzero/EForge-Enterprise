@@ -74,7 +74,9 @@ class GeneratorEforgeApiTemplateTest {
         }
         String fullClasspath=System.getProperty("java.class.path");
         var entries=Arrays.asList(fullClasspath.split(java.util.regex.Pattern.quote(java.io.File.pathSeparator)));
-        var backendEntries=entries.stream().filter(entry->{String normalized=entry.replace((char)92,'/');return !normalized.endsWith("/eforge-boot/target/classes")&&!normalized.endsWith("/eforge-boot/target/test-classes");}).toList();
+        var bootOutput=java.nio.file.Path.of(io.eforge.enterprise.RuoYiApplication.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().normalize();
+        var testOutput=java.nio.file.Path.of(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath().normalize();
+        var backendEntries=entries.stream().filter(entry->{var path=java.nio.file.Path.of(entry).toAbsolutePath().normalize();return !path.equals(bootOutput)&&!path.equals(testOutput);}).toList();
         assertTrue(backendEntries.size()<entries.size(),"The product compile must exclude actual boot output.");
         String backendClasspath=String.join(java.io.File.pathSeparator,backendEntries);
         var backendSources=sourceFiles.stream().filter(file->!file.replace((char)92,'/').contains("/generated/api/")).toList();

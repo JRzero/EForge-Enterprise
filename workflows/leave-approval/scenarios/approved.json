@@ -1,0 +1,5 @@
+{
+  "name": "批准请假",
+  "decisions": [{ "taskKey": "review", "approved": true }],
+  "expectedEnd": "approvedEnd"
+}

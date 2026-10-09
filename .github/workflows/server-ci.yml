@@ -5,6 +5,7 @@ on:
     branches: [main, 'feat/**', 'fix/**', 'refactor/**', 'codex/**']
     paths:
       - 'server/**'
+      - 'workflows/**'
       - 'sql/**'
       - 'web/**'
       - 'contracts/openapi/**'
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - 'server/**'
+      - 'workflows/**'
       - 'sql/**'
       - 'web/**'
       - 'contracts/openapi/**'
@@ -61,6 +63,7 @@ jobs:
           if ('${{ matrix.profile }}' -eq 'enabled') {
             $ciAuthOptions.EnableConsoles = $true
             $ciAuthOptions.EnableCustomOutput = $true
+            $ciAuthOptions.EnableWorkflow = $true
           }
           ./server/scripts/verify-auth-integration.ps1 @ciAuthOptions
       - name: Verify live OpenAPI snapshot matches the committed contract
@@ -91,6 +94,12 @@ jobs:
 
       - name: Verify server
         run: mvn -B -ntp -f server/pom.xml verify
+
+      - name: Verify optional Flowable and business transactions on actual MySQL
+        shell: pwsh
+        run: |
+          ./server/scripts/verify-workflow-engine.ps1 -LowerCaseTableNames 0
+          ./server/scripts/verify-workflow-engine.ps1 -LowerCaseTableNames 1
 
       - name: Verify prepared creation SQL fidelity on isolated MySQL
         shell: pwsh
