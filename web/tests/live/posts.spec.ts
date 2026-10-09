@@ -145,7 +145,7 @@ test('real server pagination, page size, independent-session shrinking totals an
   const other = await browser.newPage({baseURL: String(test.info().project.use.baseURL)});
   try {
     await login(other);
-    await other.getByLabel('岗位名称', {exact: true}).fill(prefix);
+    await other.locator('.list-filters').getByLabel('岗位名称', {exact: true}).fill(prefix);
     await other.getByRole('button', {name: '查询', exact: true}).click();
     await other.getByLabel('每页条数', {exact: true}).selectOption('30');
     for (const index of [9, 10, 11]) await other.getByRole('checkbox', {name: `选择岗位 ${prefix}-岗位-${index}`, exact: true}).check();

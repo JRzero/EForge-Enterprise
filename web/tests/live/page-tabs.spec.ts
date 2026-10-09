@@ -42,8 +42,8 @@ test('actual menu grant withdrawal and bootstrap refresh evict cached data witho
     const username='t'+stamp,userReply=await page.request.post('/api/v1/system/users',{headers:auth,data:{user:{username,displayName:'标签验证账号',departmentId:'103',sex:'2',status:'0',roleIds:[role.id],postIds:[]},password:'Browser123'}});
     expect(userReply.status()).toBe(201);userId=(await userReply.json()).id;
     await page.evaluate(()=>sessionStorage.removeItem('eforge.enterprise.session.v1'));const member=page;await test.step('Sign in as the owned member account',async()=>{await login(member,username,'Browser123');});const memberAuth=await headers(member);
-    await navigate(member,'角色管理');await member.getByLabel('角色名称',{exact:true}).fill('真实旧授权草稿');await navigate(member,'岗位管理');
-    await member.getByLabel('岗位名称',{exact:true}).fill('真实另一页草稿');
+    await navigate(member,'角色管理');await member.locator('[data-page-path]:visible .list-filters').getByLabel('角色名称',{exact:true}).fill('真实旧授权草稿');await navigate(member,'岗位管理');
+    await member.locator('[data-page-path]:visible .list-filters').getByLabel('岗位名称',{exact:true}).fill('真实另一页草稿');
     const revokedKeys=keys.filter(key=>!menus.some(item=>item.key===key && item.permission==='system:role:list'));
     expect((await page.request.put('/api/v1/system/roles/'+role.id,{headers:auth,data:{...roleBody,menuKeys:revokedKeys}})).status()).toBe(204);
     expect((await member.request.get('/api/v1/system/roles?page=1&pageSize=10',{headers:memberAuth})).status()).toBe(403);
@@ -61,7 +61,7 @@ test('actual menu grant withdrawal and bootstrap refresh evict cached data witho
     const bootstrap=await (await refreshed).json();expect(bootstrap.permissions).not.toContain('system:role:list');
     await expect(member.locator('[data-page-path="/role"]')).toHaveCount(0);
     await expect(member.getByRole('navigation',{name:'页面标签'}).getByRole('link',{name:'页面标签：角色管理',exact:true})).toHaveCount(0);
-    await navigate(member,'岗位管理');await expect(member.getByLabel('岗位名称',{exact:true})).toHaveValue('');
+    await navigate(member,'岗位管理');await expect(member.locator('[data-page-path]:visible .list-filters').getByLabel('岗位名称',{exact:true})).toHaveValue('');
     await member.getByRole('button',{name:'退出登录'}).click();await expect(member.getByRole('heading',{name:'登录工作空间'})).toBeVisible();
   }finally{
     if(userId)expect((await page.request.delete('/api/v1/system/users',{headers:auth,data:{ids:[userId]}})).status()).toBe(204);
