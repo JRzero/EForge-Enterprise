@@ -64,3 +64,46 @@
 @media (max-width: 640px) {
   :is(.enterprise-layout, .login-layout) button[data-variant][data-variant] { min-height: 40px; }
 }
+
+/* Compact controls have their own geometry; do not inherit full button padding. */
+.enterprise-layout .enterprise-header-actions button[data-variant][data-variant] {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 36px; min-height: 36px; padding: 7px;
+  border: 0; background: transparent; color: #5a6472;
+}
+.enterprise-layout .enterprise-header-actions button[data-variant][data-variant]:hover:not(:disabled) { background: #f4f7fa; color: var(--ui-primary); }
+.enterprise-layout .post-row-actions button[data-variant][data-variant] { min-height: 28px; padding: 2px 6px; font-size: 12px; }
+.enterprise-layout .post-pagination :is(input, select, button[data-variant]) { height: 32px; min-height: 32px; }
+.enterprise-layout .post-pagination button[aria-current=page]:hover { color: #fff; background: var(--ui-primary-hover, #528eff); }
+
+.enterprise-layout .page-tags { height: 36px; padding: 3px 8px; align-items: center; }
+.enterprise-layout .page-tags > button {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 28px; min-height: 28px; padding: 0 8px; line-height: 1;
+  font-size: 12px; border: 1px solid var(--ui-border); border-radius: 3px;
+}
+.enterprise-layout .page-tags > .page-tags-icon { width: 28px; padding: 0; }
+.page-tags svg { display: block; flex-shrink: 0; }
+.enterprise-layout .page-tags-strip { align-items: center; }
+.enterprise-layout .page-tag { height: 28px; box-sizing: border-box; }
+.enterprise-layout .page-tag a { padding: 0 8px; line-height: 26px; }
+.enterprise-layout .page-tag button { display: inline-flex; align-items: center; justify-content: center; width: 24px; padding: 0; }
+.enterprise-layout .page-tags > button:hover:not(:disabled),
+.enterprise-layout .page-tags > button[aria-expanded=true] { color: var(--ui-primary); background: var(--ui-primary-soft); border-color: var(--ui-primary); }
+.enterprise-layout .page-tag button:hover { background: var(--ui-primary-soft); }
+.enterprise-layout .page-tag:has(a[aria-current=page]) button:hover { background: #ffffff26; }
+.enterprise-layout .page-tags button:disabled { color: #b8babf; background: #f7f8fa; opacity: 1; cursor: not-allowed; }
+.enterprise-layout .page-tags-persist { gap: 6px; font-size: 12px; }
+.enterprise-layout .page-tag-menu { padding: 4px; border-color: var(--ui-border); }
+.enterprise-layout .page-tag-menu button { min-height: 32px; padding: 6px 12px; font-size: 13px; border-radius: 3px; }
+.enterprise-layout .page-tag-menu button:disabled { color: #b8babf; opacity: 1; background: transparent; }
+@media (max-width: 640px) {
+  .enterprise-layout .page-tags { height: 44px; }
+  .enterprise-layout .page-tags > button { height: 36px; min-height: 36px; }
+  .enterprise-layout .page-tags > .page-tags-icon { width: 32px; }
+  .enterprise-layout .page-tag { height: 36px; }
+  .enterprise-layout .page-tag a { line-height: 34px; }
+  .enterprise-layout .page-tag button { width: 28px; }
+  .enterprise-layout .post-row-actions button[data-variant][data-variant] { min-height: 36px; }
+  .enterprise-layout .post-pagination :is(input, select, button[data-variant]) { height: 36px; min-height: 36px; }
+}

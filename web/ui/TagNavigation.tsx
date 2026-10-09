@@ -1,5 +1,10 @@
 import type {KeyboardEvent, MouseEvent, ReactNode, RefObject} from 'react';
 
+function StripIcon({kind}: {kind: 'left' | 'right' | 'down' | 'close'}) {
+  const paths = {left: 'm14 6-6 6 6 6', right: 'm10 6 6 6-6 6', down: 'm6 9 6 6 6-6', close: 'm6 6 12 12M18 6 6 18'};
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={paths[kind]}/></svg>;
+}
+
 export interface PageTag {path: string; href: string; title: string; affix: boolean; icon?: string}
 export interface TagNavigationProps {
   items: readonly PageTag[]; activePath?: string; hidden?: boolean; showIcons?: boolean;
@@ -20,17 +25,17 @@ export function TagNavigation({items, activePath, hidden, showIcons, stripRef, s
     if (next !== undefined) {event.preventDefault(); stripRef.current?.querySelectorAll<HTMLAnchorElement>('a')[next]?.focus();}
   }
   return <nav hidden={hidden} aria-label="页面标签" className="page-tags">
-    <button type="button" aria-label="滚动到首个标签" disabled={!scroll.left} onClick={() => stripRef.current?.scrollTo({left: 0, behavior: 'smooth'})}>‹</button>
+    <button className="page-tags-icon" type="button" aria-label="滚动到首个标签" disabled={!scroll.left} onClick={() => stripRef.current?.scrollTo({left: 0, behavior: 'smooth'})}><StripIcon kind="left"/></button>
     <div ref={stripRef} className="page-tags-strip">{items.map((item,index) => <span key={item.path} className="page-tag">
       <a href={item.href} aria-label={`页面标签：${item.title}`} aria-current={activePath === item.path ? 'page' : undefined} onKeyDown={event => keyboard(event,index)}
         onClick={event => {if (!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {event.preventDefault(); onNavigate(item);}}}
         onAuxClick={event => {if (event.button === 1) {event.preventDefault(); if (!item.affix) onClose(item);}}}
         onContextMenu={event => {event.preventDefault(); onContextMenu(item,event);}}>
         {showIcons ? renderIcon?.(item.icon) : null}{item.title}{item.affix ? <span aria-label="固定标签">●</span> : null}
-      </a>{!item.affix ? <button type="button" aria-label={`关闭标签 ${item.title}`} onClick={() => onClose(item)}>×</button> : null}
+      </a>{!item.affix ? <button type="button" aria-label={`关闭标签 ${item.title}`} onClick={() => onClose(item)}><StripIcon kind="close"/></button> : null}
     </span>)}</div>
-    <button type="button" aria-label="滚动到末个标签" disabled={!scroll.right} onClick={() => stripRef.current?.scrollTo({left: stripRef.current.scrollWidth, behavior: 'smooth'})}>›</button>
-    <button type="button" aria-label="标签操作" aria-expanded={expanded} onClick={onActions}>⌄</button>
+    <button className="page-tags-icon" type="button" aria-label="滚动到末个标签" disabled={!scroll.right} onClick={() => stripRef.current?.scrollTo({left: stripRef.current.scrollWidth, behavior: 'smooth'})}><StripIcon kind="right"/></button>
+    <button className="page-tags-icon page-tags-actions" type="button" aria-label="标签操作" aria-haspopup="menu" aria-expanded={expanded} onClick={onActions}><StripIcon kind="down"/></button>
     <button type="button" aria-label="刷新当前页面" disabled={!canRefresh} onClick={onRefresh}>刷新</button>
     <label className="page-tags-persist"><input type="checkbox" checked={persist} onChange={event => onPersist(event.target.checked)}/>记住标签</label>
   </nav>;

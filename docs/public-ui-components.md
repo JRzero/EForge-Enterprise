@@ -300,3 +300,25 @@ The theme test exercises hover, pressed, disabled and real dictionary-tag CSS;
 desktop capture was visually checked. Initial sandbox file access failures were
 rerun with normal local permissions; missing test dictionary data was supplied.
 Evidence: `web/button-tag-theme-accepted.log`, `web/button-tag-build.log`.
+
+### Component detail review (2026-10-09)
+
+Replaced font-dependent tag-strip arrows and close glyphs with centered SVGs.
+Desktop strip controls/tabs share 28 px height; mobile controls/tabs are 36 px.
+Dropdown expanded/hover/disabled states, close-button feedback and menu rows now
+use the shared palette. The dropdown declares a menu popup. Escape restores the
+actual opener (dropdown button or context-menu tag), falling back to the active
+tag only when that opener is gone.
+
+Scoped compact header icon buttons and table row actions so the general button
+padding no longer enlarges them. Pagination controls share a height, and the
+current page keeps its selected contrast on hover. Existing form alignment,
+custom theme settings and mobile table scrolling remain intact.
+
+The initial 42-case browser audit passed 41, including all 16 list routes in
+desktop/mobile and navigation/template/workspace checks. Its new focus-return
+assertion exposed the opener bug; after fixing it, all seven theme/workspace
+cases passed. Desktop dropdown and mobile captures were visually reviewed.
+126 unit tests passed, as did lint/typecheck and production build. Evidence:
+`web/component-detail-audit.log`, `web/component-detail-final.log`, and
+`web/component-detail-build.log`. Backend services were not changed.

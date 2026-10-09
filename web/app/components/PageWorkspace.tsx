@@ -71,6 +71,7 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId,un
   const [fullscreen,setFullscreen]=useState(false);
   const [menuPoint,setMenuPoint]=useState<{x:number;y:number}|undefined>();
   const menuElement=useRef<HTMLDivElement>(null);
+  const menuOpener=useRef<HTMLElement | null>(null);
   const strip=useRef<HTMLDivElement>(null),workspace=useRef<HTMLDivElement>(null);
   const [scroll,setScroll]=useState({left:false,right:false});
   const target=views.find(item=>item.path===(selected ?? active?.path));
@@ -167,13 +168,13 @@ export function PageWorkspace({href,items,permissions,router,fallback,ownerId,un
       renderIcon={name=><MenuIcon name={name}/>}
       onNavigate={item=>{router.navigate(item.href);setSelected(null);}}
       onClose={item=>{const target=views.find(view=>view.path===item.path);if(target)close(target,'current');}}
-      onContextMenu={(item,event)=>{setMenuPoint({x:Math.max(8,Math.min(event.clientX,window.innerWidth-170)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-300))});setSelected(item.path);}}
-      onActions={event=>{event.stopPropagation();setMenuPoint(undefined);setSelected(selected?null:active?.path ?? views[0]?.path ?? null);}}
+      onContextMenu={(item,event)=>{menuOpener.current=event.currentTarget;setMenuPoint({x:Math.max(8,Math.min(event.clientX,window.innerWidth-170)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-300))});setSelected(item.path);}}
+      onActions={event=>{event.stopPropagation();menuOpener.current=event.currentTarget;setMenuPoint(undefined);setSelected(selected?null:active?.path ?? views[0]?.path ?? null);}}
       onRefresh={()=>{const current=views.find(item=>item.path===active?.path);if(current)refresh(current);}}
       onPersist={value=>{setPersist(value);changeLayout?.(current=>({...current,tagsViewPersist:value}));}}/>
 
     {selected && target?<TagMenu menuRef={menuElement} point={menuPoint}
-      onDismiss={()=>{setSelected(null);strip.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]')?.focus();}}
+      onDismiss={()=>{setSelected(null);if(menuOpener.current?.isConnected)menuOpener.current.focus();else strip.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]')?.focus();}}
       actions={[
         {id:'refresh',label:'刷新页面',onSelect:()=>refresh(target)},
         ...(!target.affix?[{id:'current',label:'关闭当前',onSelect:()=>close(target,'current')}]:[]),
