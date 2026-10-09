@@ -1,0 +1,50 @@
+.frontend-layout:has(.showcase-layout) .frontend-content { max-width: 1600px; }
+.showcase-layout { display:grid; grid-template-columns:210px minmax(0,1fr); gap:28px; align-items:start; }
+.showcase-sidebar { background:#fff; padding:16px; border:1px solid #e8e9eb; border-radius:8px; position:sticky; top:16px; }
+.showcase-sidebar nav { display:grid; gap:4px; margin-top:16px; }
+.showcase-sidebar a { padding:9px 12px; text-decoration:none; color:#5c5f66; border-radius:4px; }
+.showcase-sidebar a[aria-current=page] { color:#2468f2; background:#eaf3fc; font-weight:600; }
+.showcase-main { min-width:0; }
+.showcase-heading { margin-bottom:24px; }
+.showcase-heading > span { font-size:11px; letter-spacing:2px; color:#84868c; }
+.showcase-heading h1 { font-size:26px; margin:8px 0; }
+.showcase-heading p,.showcase-note { color:#5c5f66; line-height:1.7; }
+.showcase-block { background:#fff; border:1px solid #e8e9eb; border-radius:8px; padding:24px; margin-bottom:20px; min-width:0; }
+.showcase-block h2 { margin:0 0 16px; font-size:18px; }
+.showcase-row { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.showcase-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.showcase-grid label { display:grid; gap:8px; }
+.showcase-grid input,.showcase-grid select { min-width:0; max-width:100%; }
+.showcase-tile { background:#fff; border:1px solid #e8e9eb; border-radius:8px; padding:22px; text-decoration:none; color:#151b26; }
+.showcase-tile:hover { border-color:#2468f2; }
+.showcase-tile h2 { font-size:16px; margin:0 0 12px; display:flex; justify-content:space-between; }
+.showcase-tile h2 span { color:#2468f2; }
+.showcase-tile p { color:#5c5f66; margin:0; line-height:1.7; }
+.showcase-hero { display:flex; gap:24px; align-items:center; padding:32px; background:#eaf3fc; border-radius:8px; margin-bottom:24px; }
+.showcase-hero .eforge-logo { width:64px; height:64px; }
+.showcase-hero h2 { font-size:24px; margin-top:0; }
+.showcase-hero p { margin:12px 0 20px; line-height:1.7; color:#5c5f66; }
+.showcase-block p { line-height:1.7; }
+.showcase-block li { line-height:2; }
+.showcase-description { display:grid; grid-template-columns:100px 1fr; gap:16px; }
+.showcase-description dd { margin:0; }
+.showcase-account .login-layout { min-height:0; padding:24px; }
+.showcase-account .login-panel { min-height:0; }
+.showcase-workspace { position:relative; min-width:0; }
+.showcase-main .chart-surface { height:280px; }
+.showcase-main .ef-dashboard-page__grid > .showcase-grid { grid-column:1 / -1; width:100%; min-width:0; }
+.showcase-main .ef-detail-page .ef-page__body { background:#fff; padding:24px; border:1px solid #e8e9eb; border-radius:8px; }
+.showcase-main .ef-detail-page h3 { margin:24px 0 12px; }
+.showcase-main .ef-detail-page li { line-height:2; }
+.showcase-main .demo-chart-card { min-width:0; background:white; padding:20px; border:1px solid #e8e9eb; border-radius:8px; }
+.showcase-main .demo-chart-table { overflow:auto; }
+.showcase-main .form-section { gap:16px; }
+.showcase-main .list-page-body { border:1px solid #e8e9eb; border-radius:8px; }
+.showcase-main .form-page .enterprise-form { max-width:100%; }
+.showcase-main .showcase-block > strong { font-size:32px; color:#2468f2; }
+.showcase-shell .ef-app-shell { min-height:340px; height:auto; }
+.showcase-shell .ef-app-shell__sidebar { height:auto; }
+.showcase-shell .ef-app-shell__content { padding:16px; }
+.showcase-shell nav { display:grid; gap:16px; padding:12px; }
+.showcase-shell .ef-app-shell__header { padding:12px; }
+@media(max-width:900px){.showcase-layout{grid-template-columns:1fr}.showcase-sidebar{position:static}.showcase-sidebar nav{display:flex;flex-wrap:wrap}.showcase-grid{grid-template-columns:1fr}.showcase-block{padding:16px}.showcase-hero{padding:20px}.showcase-hero .eforge-logo{display:none}.showcase-account .login-layout{padding:0}.showcase-account .login-card{max-width:100%;padding:20px}.showcase-description{grid-template-columns:80px minmax(0,1fr)}}

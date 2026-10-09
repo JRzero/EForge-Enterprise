@@ -20,6 +20,7 @@ function FrontendExample(){
       <Input label="客户名称" value={name} onChange={setName} aria-required="true"/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/>
     </PageForm></FormPage>}
     {message?<Feedback aria-label="操作反馈">{message}</Feedback>:null}
+    <p><a href="/showcase.html">浏览全部页面模板与组件示例 →</a></p>
   </FrontendLayout></EForgeProvider>;
 }
 createRoot(document.getElementById('root')!).render(<FrontendExample/>);
