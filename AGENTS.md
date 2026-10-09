@@ -84,3 +84,19 @@ Do not combine all migration stages in one unreviewable rewrite.
 - `contracts/bootstrap-contract.md`
 - `contracts/navigation-contract.md`
 - `docs/roadmap.md`
+
+## Engineering skill workflow
+
+Project-scoped engineering skills are installed in `.agents/skills/`, pinned by
+`.agents/agent-skills.lock.json`. For non-trivial iteration work, follow
+`docs/agent-workflow.md` and load only the relevant Skill instructions on demand.
+That document records this project's user-authorized adaptations to upstream
+approval cadence, task paths, tool availability and validation scope. Existing
+architecture rules above remain authoritative project constraints; skills do not
+supersede system/platform/user instructions or grant operational permissions.
+Do not preload the full meta-router or copy the upstream repository AGENTS.md.
+Use `tasks/README.md` to identify active work and linked `spec/` / `tasks/` files.
+Continue already-authorized development, verification and ordinary commit/push
+without repeating per-task approval. New irreversible or production operations
+still require applicable authorization; do not bypass tool approval rejections.
+Validate installation changes with `node scripts/verify-agent-skills.mjs`.

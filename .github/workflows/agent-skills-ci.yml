@@ -1,0 +1,17 @@
+name: agent-skills-ci
+on:
+  push:
+    paths: ['.agents/**', 'AGENTS.md', 'docs/agent-workflow.md', 'spec/**', 'tasks/**', 'scripts/verify-agent-skills.mjs', '.github/workflows/agent-skills-ci.yml']
+  pull_request:
+    paths: ['.agents/**', 'AGENTS.md', 'docs/agent-workflow.md', 'spec/**', 'tasks/**', 'scripts/verify-agent-skills.mjs', '.github/workflows/agent-skills-ci.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - run: node scripts/verify-agent-skills.mjs
