@@ -22,6 +22,9 @@ grep -Fq 'enabled: ${EFORGE_SWAGGER_UI_ENABLED:false}' "$APP"   || fail "Swagger
 
 grep -Fq 'enabled: ${EFORGE_OPENAPI_ENABLED:false}' "$APP"   || fail "OpenAPI docs must be disabled by default"
 
+grep -Fq 'enabled: ${EFORGE_WORKFLOW_ENABLED:false}' "$APP" || fail "Workflow must be disabled by default"
+grep -Fq 'async-enabled: ${EFORGE_WORKFLOW_ASYNC_ENABLED:false}' "$APP" || fail "Workflow background execution must be disabled by default"
+
 grep -Fq 'enabled: ${EFORGE_DRUID_CONSOLE_ENABLED:false}' "$DRUID"   || fail "Druid console must be disabled by default"
 
 grep -Fq 'password: ${EFORGE_DB_PASSWORD}' "$DRUID"   || fail "database password must come from EFORGE_DB_PASSWORD"

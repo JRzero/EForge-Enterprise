@@ -24,6 +24,14 @@ class WorkflowBpmnPolicyTest {
         assertThat(process.xml()).isEqualTo(XML);
         assertThat(process.sha256()).hasSize(64);
     }
+    @Test void permitsOnlyAsyncCreationOfTheDirectFirstHumanTask() {
+        String first=XML.replace("flowable:candidateGroups=\"role:2\"","flowable:async=\"true\" flowable:candidateGroups=\"role:2\"");
+        assertThat(WorkflowBpmnPolicy.validate(first).xml()).isEqualTo(first);
+        assertThatThrownBy(()->WorkflowBpmnPolicy.validate(first.replace("flowable:async=\"true\"","flowable:asyncLeave=\"true\""))).isInstanceOf(ApiFailure.class);
+        String second=first.replace("targetRef=\"review\"","targetRef=\"first\"").replace("<userTask id=\"review\"","<userTask id=\"first\" flowable:assignee=\"2\"/><sequenceFlow id=\"firstNext\" sourceRef=\"first\" targetRef=\"review\"/><userTask id=\"review\"");
+        assertThatThrownBy(()->WorkflowBpmnPolicy.validate(second)).isInstanceOf(ApiFailure.class);
+        assertThatThrownBy(()->WorkflowBpmnPolicy.validate(first.replace("flowable:async=\"true\"","flowable:async=\"${true}\""))).isInstanceOf(ApiFailure.class);
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {

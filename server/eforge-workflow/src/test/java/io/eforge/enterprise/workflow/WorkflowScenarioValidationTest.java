@@ -18,6 +18,16 @@ class WorkflowScenarioValidationTest {
             "flowable.check-process-definitions=false", "flowable.async-executor-activate=false", "flowable.database-schema-update=true");
     private String xml() throws Exception { return Files.readString(Path.of("../../workflows/leave-approval/process.bpmn20.xml")); }
     private Scenario scenario(boolean approved) { return new Scenario(approved ? "approved" : "rejected", List.of(new Decision("review", approved)), approved ? "approvedEnd" : "rejectedEnd"); }
+    @Test void boundedAsyncCreationIsActuallyExecutedInsideRolledBackScenarios() throws Exception {
+        String async=xml().replace("<userTask id=\"review\"","<userTask flowable:async=\"true\" id=\"review\"");
+        runner.run(context->{
+            var engine=context.getBean(ProcessEngine.class);
+            var result=new WorkflowScenarioValidation(engine,context.getBean(WorkflowUnitOfWork.class)).validate(new Request(async,List.of(scenario(true),scenario(false))));
+            assertThat(result.scenarios()).hasSize(2);assertEmpty(engine);
+            assertThat(engine.getManagementService().createJobQuery().count()).isZero();
+            assertThat(engine.getManagementService().createDeadLetterJobQuery().count()).isZero();
+        });
+    }
 
     @Test void actualScenariosReturnImmutableProofAndLeaveNoDeploymentRuntimeOrHistory() throws Exception {
         String xml = xml();

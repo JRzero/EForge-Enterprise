@@ -118,6 +118,8 @@ flowable:
     enabled: false
 
 eforge:
+  workflow:
+    async-enabled: ${EFORGE_WORKFLOW_ASYNC_ENABLED:false}
   cors:
     # Comma-separated exact origins. Wildcards are intentionally unsupported.
     allowed-origins: ${EFORGE_CORS_ALLOWED_ORIGINS:http://localhost:5173}

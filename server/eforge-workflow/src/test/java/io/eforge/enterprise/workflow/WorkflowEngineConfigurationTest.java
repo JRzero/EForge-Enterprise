@@ -23,6 +23,16 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import static org.assertj.core.api.Assertions.*;
 
 class WorkflowEngineConfigurationTest {
+    @Test void starterUsesDedicatedBoundedExecutorInsteadOfSharedApplicationPool(){
+        new WorkflowLeaveServiceTest().runner.run(context->{
+            var config=context.getBean(SpringProcessEngineConfiguration.class);
+            var adapter=(org.flowable.common.spring.async.SpringAsyncTaskExecutor)config.getAsyncExecutor().getTaskExecutor();
+            var pool=(org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor)adapter.getAsyncTaskExecutor();
+            assertThat(pool.getThreadNamePrefix()).isEqualTo("eforge-workflow-job-");
+            assertThat(pool.getCorePoolSize()).isEqualTo(1);assertThat(pool.getMaxPoolSize()).isEqualTo(2);
+            assertThat(pool.getQueueCapacity()).isEqualTo(32);
+        });
+    }
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
         .withUserConfiguration(Database.class, WorkflowEngineConfiguration.class)
         .withPropertyValues("flowable.idm.enabled=false", "flowable.eventregistry.enabled=false",

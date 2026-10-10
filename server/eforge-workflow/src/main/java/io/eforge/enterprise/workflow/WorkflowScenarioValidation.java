@@ -37,6 +37,11 @@ public final class WorkflowScenarioValidation implements WorkflowValidation {
                 var results = new ArrayList<ScenarioResult>();
                 for (var scenario : scenarios) {
                     var process = engine.getRuntimeService().startProcessInstanceById(definition.getId(), Map.of("approver", "validation"));
+                    // The only permitted async boundary is initial human-task creation. Execute
+                    // that real job inside this rollback-only proof; no worker can see it uncommitted.
+                    var initialJobs=engine.getManagementService().createJobQuery().processInstanceId(process.getId()).list();
+                    if(initialJobs.size()>1)throw invalid();
+                    if(!initialJobs.isEmpty())engine.getManagementService().executeJob(initialJobs.get(0).getId());
                     var completed = new ArrayList<String>();
                     for (var decision : scenario.decisions()) {
                         var tasks = engine.getTaskService().createTaskQuery().processInstanceId(process.getId()).list();

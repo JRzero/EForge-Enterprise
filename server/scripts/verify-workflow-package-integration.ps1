@@ -53,6 +53,8 @@ try {
     Assert-Problem (Request '/api/v1/workflow/activations/leave' 'GET' '' $workflowReaderHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/workflow/packages/00000000-0000-0000-0000-000000000001/releases' 'POST' '{"expectedRevision":"1"}' $workflowReaderHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/workflow/activations/leave' 'PUT' '{"releaseId":"00000000-0000-0000-0000-000000000001","expectedRevision":"0"}' $workflowReaderHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/workflow/releases/00000000-0000-0000-0000-000000000001/failed-jobs' 'GET' '' $workflowReaderHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/workflow/jobs/job/retry' 'POST' '{"commandId":"00000000-0000-0000-0000-000000000001","leaveId":"00000000-0000-0000-0000-000000000001"}' $workflowReaderHeaders) 403 'ACCESS_DENIED'
 } finally {
     Assert-Check ((Request '/api/v1/system/users' 'DELETE' (@{ids=@($workflowReaderId)} | ConvertTo-Json -Compress) $authorized).StatusCode -eq 204) 'Owned workflow identity cleanup failed.'
 }

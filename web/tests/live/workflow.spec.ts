@@ -79,3 +79,34 @@ test('real workflow read-only grants and immediate backend revocation',async({pa
     await page.request.post('/logout',{headers:auth});
   }
 });
+
+test('real workflow failed job is confirmed in the browser and recovers a pending human task',async({page})=>{
+  test.setTimeout(90000);await login(page);
+  const signed=await page.request.post('/api/v1/auth/login',{data:{username:'admin',password:'admin123'}});expect(signed.status()).toBe(200);
+  const auth={Authorization:`Bearer ${(await signed.json()).accessToken}`};
+  try{
+    if(!process.env.EFORGE_E2E_WORKFLOW_JOB){
+      const status=await page.request.get('/api/v1/workflow/status',{headers:auth});
+      if(!(await status.json()).enabled)await expect(page.getByText('工作流尚未启用，请联系管理员。')).toBeVisible();
+      else{
+        const rows=await page.request.get('/api/v1/workflow/packages',{headers:auth});
+        const draft=(await rows.json()).items.find((item:{name:string})=>item.name==='后台恢复验证');expect(draft).toBeTruthy();
+        const releases=await page.request.get(`/api/v1/workflow/packages/${draft.id}/releases`,{headers:auth});
+        const jobs=await page.request.get(`/api/v1/workflow/releases/${(await releases.json()).items[0].id}/failed-jobs`,{headers:auth});
+        expect((await jobs.json()).recoveryEnabled).toBe(false);
+      }
+      return;
+    }
+    const fixture=JSON.parse(process.env.EFORGE_E2E_WORKFLOW_JOB);
+    const row=page.getByRole('row').filter({has:page.getByRole('cell',{name:fixture.name,exact:true})});await row.getByRole('button',{name:'详情',exact:true}).click();
+    const dialog=page.getByRole('dialog',{name:'流程详情与发布版本',exact:true});await dialog.getByRole('button',{name:'版本 1 失败作业',exact:true}).click();
+    const panel=dialog.getByRole('region',{name:'失败作业运维'});await expect(panel.getByRole('cell',{name:fixture.jobId,exact:true})).toBeVisible();
+    await panel.getByRole('button',{name:'恢复作业',exact:true}).click();await expect(panel.getByRole('region',{name:'确认恢复作业'})).toBeVisible();
+    const reply=page.waitForResponse(response=>response.url().endsWith(`/jobs/${fixture.jobId}/retry`));
+    await panel.getByRole('button',{name:'确认恢复',exact:true}).click();expect((await reply).status()).toBe(202);
+    await expect(panel.getByText('恢复请求已入队。请刷新查看结果；审批仍需人工处理。')).toBeVisible();
+    await expect.poll(async()=>{const detail=await page.request.get(`/api/v1/workflow/leaves/${fixture.leaveId}`,{headers:auth});const body=await detail.json();return {status:body.leave.status,tasks:body.tasks.length,history:body.history.length};},{timeout:40000}).toEqual({status:'PENDING',tasks:1,history:1});
+    await page.setViewportSize({width:390,height:844});await panel.scrollIntoViewIfNeeded();await page.screenshot({path:'test-results/live/workflow-job-recovery.png',fullPage:true});
+    expect((await page.request.post(`/api/v1/workflow/leaves/${fixture.leaveId}/withdrawal`,{headers:auth,data:{commandId:crypto.randomUUID(),expectedRevision:'1',comment:'owned browser cleanup'}})).status()).toBe(200);
+  }finally{await page.request.post('/logout',{headers:auth});}
+});

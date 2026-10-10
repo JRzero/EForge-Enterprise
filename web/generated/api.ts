@@ -960,6 +960,16 @@ export type WorkflowActivationRequest = {
     expectedRevision: string;
     releaseId: string;
 };
+export type WorkflowJobRetryRequest = {
+    commandId: string;
+    leaveId: string;
+};
+export type WorkflowJobQueuedResponse = {
+    commandId: string;
+    originalJobId: string;
+    queuedJobId: string;
+    status: string;
+};
 export type LeaveSubmitRequest = {
     endDate: string;
     reason: string;
@@ -1116,6 +1126,25 @@ export type WorkflowPackageValidationResponse = {
     id?: string;
     revision?: string;
     validatedRevision?: string;
+};
+export type WorkflowFailedJobResponse = {
+    createdAt: string;
+    elementId?: string;
+    id: string;
+    leaveId?: string;
+    processId: string;
+    releaseId: string;
+    retries?: number;
+};
+export type PageResponseWorkflowFailedJobResponse = {
+    items: WorkflowFailedJobResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type WorkflowJobsResponse = {
+    page: PageResponseWorkflowFailedJobResponse;
+    recoveryEnabled?: boolean;
 };
 export type WorkflowStatus = {
     enabled?: boolean;
@@ -2787,6 +2816,16 @@ export function activateWorkflowRelease(businessType: string, workflowActivation
         body: workflowActivationRequest
     }));
 }
+export function retryWorkflowJob(id: string, workflowJobRetryRequest: WorkflowJobRetryRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 202;
+        data: WorkflowJobQueuedResponse;
+    }>(`/api/v1/workflow/jobs/${encodeURIComponent(id)}/retry`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: workflowJobRetryRequest
+    }));
+}
 export function submitWorkflowLeave(leaveSubmitRequest: LeaveSubmitRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
@@ -2971,6 +3010,20 @@ export function getWorkflowRelease(id: string, opts?: Oazapfts.RequestOpts) {
         status: 200;
         data: WorkflowReleaseResponse;
     }>(`/api/v1/workflow/releases/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function listFailedWorkflowJobs(id: string, { page, pageSize }: {
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowJobsResponse;
+    }>(`/api/v1/workflow/releases/${encodeURIComponent(id)}/failed-jobs${QS.query(QS.explode({
+        page,
+        pageSize
+    }))}`, {
         ...opts
     });
 }

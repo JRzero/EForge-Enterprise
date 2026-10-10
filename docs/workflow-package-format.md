@@ -36,4 +36,6 @@
 
 `GET /api/v1/workflow/packages/{id}/releases?page=1&pageSize=10` 和 `/api/v1/workflow/releases/{id}` 需要读取权限。`GET /api/v1/workflow/activations/leave` 读取当前选择；`PUT` 同路径需要 `workflow:definition:activate`，内容为 `{releaseId,expectedRevision}`。激活版本从字符串 `"0"` 开始，过期请求返回 409。发布权限不隐含激活权限，新的发布不会改变当前选择。
 
-发布和激活检查静态用户及角色的存在、可用状态与实际候选账号；`${approver}` 目前返回 `WORKFLOW_BINDING_REQUIRED`，等待业务侧明确绑定。检查不保证未来身份一直有效，申请提交和任务操作还必须重新检查当前身份。业务提交、任务 UI、差异界面及 Agent 命令行仍待完成；不能把发布接口验收当作整个工作流已交付。
+发布和激活检查静态用户及角色的存在、可用状态与实际候选账号；`${approver}` 目前返回 `WORKFLOW_BINDING_REQUIRED`，等待业务侧明确绑定。检查不保证未来身份一直有效，申请提交、后台创建和任务操作都会重新检查当前身份。审批、差异、Agent 与运维的验收见任务清单。
+
+可选异步首任务：仅开始节点直接连接的 `userTask` 可声明 `flowable:async="true"`，且激活、提交和恢复均需要显式开启后台执行。校验场景会在回滚事务中执行该初始作业，再验证人工决策；校验不向正式执行器提交作业。其他异步节点、异步离开、脚本、服务调用与任意监听器仍不允许。运行和恢复规则见 [维护说明](workflow-operations.md)。

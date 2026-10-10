@@ -87,3 +87,61 @@ test('workflow comparison is read-only, keeps exact versions and safely retries 
   await comparison.locator('pre').last().scrollIntoViewIfNeeded();
   await page.screenshot({path:'test-results/workflow-comparison-mobile.png',fullPage:true});
 });
+
+test('failed workflow jobs require confirmation, retain command on failure and report queued only',async({page})=>{
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  await page.route(`**/api/v1/workflow/packages/${id}`,route=>route.fulfill({json:{...row,source}}));
+  await page.route(`**/api/v1/workflow/packages/${id}/releases?*`,route=>route.fulfill({json:{items:[{id,name:row.name,packageRevision:revision}],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/workflow/activations/leave',route=>route.fulfill({json:{revision:'0'}}));
+  let readFailure=true,queued=false;const writes:unknown[]=[];
+  await page.route(`**/api/v1/workflow/releases/${id}/failed-jobs?*`,route=>route.fulfill(readFailure?{status:503,json:{code:'WORKFLOW_STORAGE_UNAVAILABLE'}}:{json:{page:{items:queued?[]:[{id:'job-1',processId:'process <safe>',releaseId:id,leaveId:id,elementId:'review',retries:0,createdAt:'2026-10-10T00:00:00Z'}],total:queued?0:1,page:1,pageSize:10},recoveryEnabled:true}}));
+  await page.route('**/api/v1/workflow/jobs/job-1/retry',route=>{
+    writes.push(route.request().postDataJSON());if(writes.length===1)return route.fulfill({status:503,json:{code:'WORKFLOW_STORAGE_UNAVAILABLE'}});
+    queued=true;return route.fulfill({status:202,json:{status:'QUEUED'}});
+  });
+  await login(page,['workflow:definition:list','workflow:operation:list','workflow:operation:retry']);
+  await page.getByRole('button',{name:'详情',exact:true}).click();await page.getByRole('button',{name:`版本 ${revision} 失败作业`,exact:true}).click();
+  const panel=page.getByRole('region',{name:'失败作业运维',exact:true});await expect(panel.getByRole('alert')).toContainText('工作流存储暂不可用');
+  readFailure=false;await panel.getByRole('button',{name:'刷新失败作业'}).click();await expect(panel.getByRole('cell',{name:'process <safe>',exact:true})).toBeVisible();
+  await panel.getByRole('button',{name:'恢复作业',exact:true}).click();expect(writes).toHaveLength(0);
+  await panel.getByRole('button',{name:'确认恢复',exact:true}).click();await expect(panel.getByRole('alert')).toContainText('工作流存储暂不可用');
+  await panel.getByRole('button',{name:'确认恢复',exact:true}).click();await expect(panel.getByText('恢复请求已入队。请刷新查看结果；审批仍需人工处理。')).toBeVisible();
+  expect(writes).toHaveLength(2);expect(writes[0]).toEqual(writes[1]);
+  await expect(panel.getByRole('button',{name:'恢复作业',exact:true})).toHaveCount(0);
+  await page.setViewportSize({width:320,height:900});await panel.scrollIntoViewIfNeeded();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.screenshot({path:'test-results/workflow-jobs-mobile.png',fullPage:true});
+});
+
+test('workflow read-only operation grant hides retry and executor-disabled mode explains restriction',async({page})=>{
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  await page.route(`**/api/v1/workflow/packages/${id}`,route=>route.fulfill({json:{...row,source}}));
+  await page.route(`**/api/v1/workflow/packages/${id}/releases?*`,route=>route.fulfill({json:{items:[{id,name:row.name,packageRevision:revision}],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/workflow/activations/leave',route=>route.fulfill({json:{revision:'0'}}));
+  await page.route(`**/api/v1/workflow/releases/${id}/failed-jobs?*`,route=>route.fulfill({json:{page:{items:[{id:'job-1',processId:'process',releaseId:id,leaveId:id,elementId:'review',retries:0,createdAt:'2026-10-10T00:00:00Z'}],total:1,page:1,pageSize:10},recoveryEnabled:false}}));
+  await login(page,['workflow:definition:list','workflow:operation:list']);await page.getByRole('button',{name:'详情',exact:true}).click();
+  await page.getByRole('button',{name:`版本 ${revision} 失败作业`,exact:true}).click();
+  await expect(page.getByText('当前环境未启用异步恢复，只能查看失败作业。')).toBeVisible();
+  await expect(page.getByRole('button',{name:'恢复作业',exact:true})).toHaveCount(0);
+});
+
+test('workflow activation blocks overlapping recovery until its response completes',async({page})=>{
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  await page.route(`**/api/v1/workflow/packages/${id}`,route=>route.fulfill({json:{...row,source}}));
+  await page.route(`**/api/v1/workflow/packages/${id}/releases?*`,route=>route.fulfill({json:{items:[{id,name:row.name,packageRevision:revision}],total:1,page:1,pageSize:10}}));
+  let finish!:()=>void;const gate=new Promise<void>(resolve=>{finish=resolve;});let activating=false;
+  await page.route('**/api/v1/workflow/activations/leave',async route=>{
+    if(route.request().method()==='PUT'){activating=true;await gate;return route.fulfill({json:{revision:'1',releaseId:id}});}
+    return route.fulfill({json:{revision:'0'}});
+  });
+  await page.route(`**/api/v1/workflow/releases/${id}/failed-jobs?*`,route=>route.fulfill({json:{page:{items:[{id:'job-1',processId:'process',releaseId:id,leaveId:id,elementId:'review',retries:0,createdAt:'2026-10-10T00:00:00Z'}],total:1,page:1,pageSize:10},recoveryEnabled:true}}));
+  try{
+    await login(page,['workflow:definition:list','workflow:definition:activate','workflow:operation:list','workflow:operation:retry']);
+    await page.getByRole('button',{name:'详情',exact:true}).click();await page.getByRole('button',{name:`版本 ${revision} 失败作业`,exact:true}).click();
+    await expect(page.getByRole('button',{name:'恢复作业',exact:true})).toBeEnabled();
+    await page.getByRole('button',{name:`激活版本 ${revision}`,exact:true}).click();await page.getByRole('button',{name:'确认激活',exact:true}).click();
+    await expect.poll(()=>activating).toBe(true);
+    await expect(page.getByRole('button',{name:'恢复作业',exact:true})).toBeDisabled();
+    await expect(page.getByRole('dialog').getByRole('button',{name:'关闭',exact:true})).toBeDisabled();
+  }finally{finish();}
+});

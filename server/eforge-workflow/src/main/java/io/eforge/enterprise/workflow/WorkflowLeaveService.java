@@ -16,8 +16,9 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
     private final JdbcTemplate jdbc;
     private final WorkflowUnitOfWork transaction;
     private final ProcessEngine engine;
+    private final WorkflowTaskCandidates candidates;
     public WorkflowLeaveService(DataSource source,WorkflowUnitOfWork transaction,ProcessEngine engine){
-        this.jdbc=new JdbcTemplate(source);this.transaction=transaction;this.engine=engine;
+        this.jdbc=new JdbcTemplate(source);this.transaction=transaction;this.engine=engine;this.candidates=new WorkflowTaskCandidates(source);
     }
     @Override public Leave submit(Submit request,String actor){
         if(request==null)throw invalid();identity(request.submissionId());
@@ -36,8 +37,12 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
             String release=selected.get(0).get("release_id").toString();
             String definition=jdbc.queryForObject("select definition_id from ef_workflow_release where id=? and business_type='leave'",String.class,release);
             requireLeaveBinding(engine,definition);
+            WorkflowAsyncStart.requireEnabled(engine,definition);
+            var asyncTask=WorkflowAsyncStart.initialTask(engine,definition);
+            if(asyncTask!=null)candidates.requireAvailable(asyncTask);
             var process=engine.getRuntimeService().startProcessInstanceById(definition,"leave:"+id,Map.of("businessType","leave","businessId",id,"submissionId",request.submissionId(),"initiator",actor));
-            requireAvailableTasks(process.getId());
+            if(asyncTask==null)requireAvailableTasks(process.getId());
+            else if(engine.getManagementService().createJobQuery().processInstanceId(process.getId()).count()!=1)throw binding();
             jdbc.update("update ef_workflow_leave set release_id=?,process_id=? where id=?",release,process.getId(),id);
             audit(id,new Command(request.submissionId(),1,null,""),"SUBMIT",actor,digest(request.reason(),request.startDate().toString(),request.endDate().toString()));
             return read(id);
@@ -123,10 +128,7 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
         var tasks=engineTasks(process);if(tasks.isEmpty())throw binding();
         for(var task:tasks){
             var binding=(UserTask)engine.getRepositoryService().getBpmnModel(task.getProcessDefinitionId()).getFlowElement(task.getTaskDefinitionKey());
-            var users=new HashSet<>(binding.getCandidateUsers());if(binding.getAssignee()!=null&&!binding.getAssignee().isBlank())users.add(binding.getAssignee());
-            boolean available=users.stream().anyMatch(user->jdbc.queryForObject("select count(*) from sys_user where user_id=? and status='0' and del_flag='0'",Long.class,user)>0);
-            if(!available)for(var group:binding.getCandidateGroups())if(group.startsWith("role:")&&jdbc.queryForObject("select count(*) from sys_user u join sys_user_role ur on ur.user_id=u.user_id join sys_role r on r.role_id=ur.role_id where r.role_id=? and r.status='0' and r.del_flag='0' and u.status='0' and u.del_flag='0'",Long.class,group.substring(5))>0){available=true;break;}
-            if(!available)throw new ApiFailure(409,"WORKFLOW_CANDIDATE_UNAVAILABLE","当前审批任务没有有效审批人。");
+            candidates.requireAvailable(binding);
         }
     }
     static void requireLeaveBinding(ProcessEngine engine,String definition){

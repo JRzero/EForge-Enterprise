@@ -50,3 +50,13 @@ test('actual HTTP redirect cannot forward the bearer token to another path',asyn
     assert.equal(result.code,'NETWORK_FAILURE');assert.deepEqual(paths,['/api/v1/workflow/status']);
   }finally{await new Promise(resolve=>server.close(resolve));}
 });
+test('job recovery uses an explicit stable command and never executes or retries automatically',async()=>{
+  const calls=[];const fetchImpl=async(url,options)=>{calls.push({url,options});return new Response(JSON.stringify({status:'QUEUED'}),{status:202});};
+  const result=await execute(['retry','--job','job-1','--leave',id,'--command',id],{env,fetchImpl});
+  assert.equal(result.status,202);assert.equal(calls.length,1);assert.match(calls[0].url,/\/jobs\/job-1\/retry$/);
+  assert.equal(calls[0].options.method,'POST');assert.deepEqual(JSON.parse(calls[0].options.body),{commandId:id,leaveId:id});
+  const read=await execute(['jobs','--id',id,'--page','2'],{env,fetchImpl});assert.equal(read.ok,true);
+  assert.match(calls[1].url,/\/failed-jobs\?page=2&pageSize=10$/);assert.equal(calls[1].options.method,'GET');
+  for(const args of [['retry','--job','job-1','--leave',id],['retry','--job','../escape','--leave',id,'--command',id]])
+    assert.equal((await execute(args,{env,fetchImpl:()=>assert.fail('invalid recovery must not send')})).ok,false);
+});

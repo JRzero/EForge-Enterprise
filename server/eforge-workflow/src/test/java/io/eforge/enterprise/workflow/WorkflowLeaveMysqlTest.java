@@ -65,7 +65,7 @@ class WorkflowLeaveMysqlTest {
             });
     }
     private static int status(Runnable work){try{work.run();return 200;}catch(ApiFailure failure){return failure.status();}}
-    private static <T>List<T> concurrent(DataSource source,JdbcTemplate jdbc,String id,Runnable whileWaiting,Callable<T> work)throws Exception {
+    static <T>List<T> concurrent(DataSource source,JdbcTemplate jdbc,String id,Runnable whileWaiting,Callable<T> work)throws Exception {
         var pool=Executors.newFixedThreadPool(2);
         try(var lock=source.getConnection()){
             lock.setAutoCommit(false);try(var statement=lock.prepareStatement("select id from ef_workflow_leave where id=? for update")){statement.setString(1,id);try(var result=statement.executeQuery()){assertThat(result.next()).isTrue();}}

@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={WorkflowReleaseController.class,WorkflowComparisonController.class,PermissionService.class,ApiExceptionHandler.class,
+@ContextConfiguration(classes={WorkflowReleaseController.class,WorkflowComparisonController.class,WorkflowJobController.class,PermissionService.class,ApiExceptionHandler.class,
     ApiRoutingExceptionResolver.class,SpringUtils.class,SecurityConfig.class,ApiSecurityProblemHandler.class,
     AuthenticationEntryPointImpl.class,JwtAuthenticationTokenFilter.class,WorkflowValidationControllerTest.Configuration.class})
 class WorkflowReleaseControllerTest {
@@ -34,6 +34,7 @@ class WorkflowReleaseControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean WorkflowReleases releases;
     @MockitoBean WorkflowComparisons comparisons;
+    @MockitoBean WorkflowJobs jobs;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
     WorkflowReleases.Release release;
@@ -46,6 +47,25 @@ class WorkflowReleaseControllerTest {
         when(releases.activate(eq("leave"),eq(ID),anyLong(),anyString())).thenReturn(new WorkflowReleases.Activation("leave",ID,9007199254740993L));
     }
     void actor(Set<String> grants){var user=new SysUser(2L);user.setUserName("publisher");when(tokens.getLoginUser(any())).thenReturn(new LoginUser(2L,103L,user,grants));}
+    @Test void failedJobMetadataAndRecoveryHaveSeparatePermissionsAndAcceptedStatus()throws Exception {
+        actor(Set.of("workflow:operation:list"));
+        when(jobs.failed(ID,1,10)).thenReturn(new WorkflowJobs.Page(List.of(new WorkflowJobs.Failed("job","process",ID,ID,"review",0,Instant.EPOCH)),1,true));
+        mvc.perform(get(ROOT+"/releases/"+ID+"/failed-jobs")).andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.total").value(1)).andExpect(jsonPath("$.page.items[0].exceptionMessage").doesNotExist());
+        String body="{\"commandId\":\""+ID+"\",\"leaveId\":\""+ID+"\"}";
+        mvc.perform(post(ROOT+"/jobs/job/retry").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        actor(Set.of("workflow:operation:retry"));
+        when(jobs.retry(eq("job"),any(),eq("2"))).thenReturn(new WorkflowJobs.Queued(ID,"job","queued","QUEUED"));
+        mvc.perform(post(ROOT+"/jobs/job/retry").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isAccepted()).andExpect(jsonPath("$.status").value("QUEUED"));
+        verify(jobs).retry("job",new WorkflowJobs.Retry(ID,ID),"2");
+        mvc.perform(get(ROOT+"/releases/"+ID+"/failed-jobs")).andExpect(status().isForbidden());
+    }
+    @Test void recoveryRejectsMalformedCommandsAndReturnsSafeStorageFailure()throws Exception {
+        mvc.perform(post(ROOT+"/jobs/job/retry").contentType(MediaType.APPLICATION_JSON).content("{\"commandId\":\"bad\",\"leaveId\":\""+ID+"\"}")).andExpect(status().isBadRequest());
+        verifyNoInteractions(jobs);
+        when(jobs.failed(ID,1,10)).thenThrow(new ApiFailure(503,"WORKFLOW_STORAGE_UNAVAILABLE","工作流存储暂不可用。"));
+        mvc.perform(get(ROOT+"/releases/"+ID+"/failed-jobs")).andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.code").value("WORKFLOW_STORAGE_UNAVAILABLE"));
+    }
     @Test void publicationAndActivationUseDifferentPermissionsAndAuthenticatedActor() throws Exception {
         actor(Set.of("workflow:definition:publish"));
         mvc.perform(post(PUBLISH).contentType(MediaType.APPLICATION_JSON).content("{\"expectedRevision\":\"9007199254740993\"}"))

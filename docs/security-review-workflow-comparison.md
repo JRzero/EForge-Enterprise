@@ -17,4 +17,5 @@
 - `flowable-comparison-verify.log`：完整隔离 Maven verify 成功。MVC 验证精确版本、原读取权限及输入拒绝；原预览 jar 未重打包。
 - `flowable-comparison-enabled-runtime.log`：新对比、Agent diff 与完整真实 API 终态 PASS，实际 MySQL 比较、证明不变、SQL 故障和恢复通过。
 - 前端 lint/typecheck/128 单元/build/客户端复现通过；`flowable-comparison-browser-accepted.log` 5 项管理页面与对比测试通过。初次生成函数的参数位置已按真实生成接口修正；随后开发 StrictMode 的重复只读请求使固定次数断言失败，改为核验最后一次目标和 GET 行为后通过。
-- 最终两配置真实浏览器、全量交互和精确提交云端仍待终态。独立审查未运行测试，指出的生成契约缺失已由实际应用导出并生成补齐。
+- `a722c66db7729c044f7629756fb50c843361a761` 的 server `38036726933` 四项、web `38036726915` 终态成功；直接 `flowable-comparison-cloud-accepted.log` 证明两配置各 67 真实浏览器与完整 API。全量本地 217 交互测试通过；最终两配置各 3 流程浏览器及完整 API 也终态通过。两实时 OpenAPI 和契约 SHA256 均为 `B8715C5E15F07A6160823A095E792159D124D4A782E62863C3539422673F22E8`。
+- 独立审查未运行测试，指出的生成契约缺失已由实际应用导出并生成补齐。此阶段不代表失败作业运维或整个集成完成。

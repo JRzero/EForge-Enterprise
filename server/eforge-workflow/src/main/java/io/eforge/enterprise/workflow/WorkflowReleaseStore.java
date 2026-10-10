@@ -73,6 +73,7 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
         if(expectedRevision==Long.MAX_VALUE)throw conflict();
         return database(() -> {
             var release=read(releaseId);if(!release.businessType().equals(businessType))throw invalid();
+            WorkflowAsyncStart.requireEnabled(engine,release.processDefinitionId());
             String source=jdbc.queryForObject("select source_json from ef_workflow_release where id=?",String.class,releaseId);
             WorkflowValidation.Request request;
             try {request=json.readValue(source,WorkflowValidation.Request.class);}

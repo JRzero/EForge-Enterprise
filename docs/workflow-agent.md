@@ -19,6 +19,10 @@
 | diff | --id 草稿 UUID、--baseline 基准发布 UUID，可选 --target 目标发布 UUID | workflow:definition:list |
 | activation | 无，当前请假绑定 | workflow:definition:list |
 | activate | --id 发布 UUID、--revision 激活版本 | workflow:definition:activate |
+| jobs | --id 发布 UUID，可选 --page、--page-size | workflow:operation:list |
+| retry | --job 作业 ID、--leave 申请 UUID、--command 命令 UUID | workflow:operation:retry |
+
+失败作业恢复先用 `jobs` 确认发布、申请和作业关联，再由获授权的操作者使用 `retry`。HTTP 202 的 `QUEUED` 只代表重新入队，不能当作执行成功或人工批准。网络结果未知时保留同一 `--command` 和完全相同的参数；成功重放返回原记录，不新建第二个作业。恢复前需解决候选账号、角色或基础设施故障，不能用重复重试掩盖原因。禁用异步执行、实例或定义暂停、申请已结束、身份撤回均不能恢复。
 
 文件内容是 `name`、`businessType: "leave"`、`source: {bpmnXml, scenarios}`，与生成客户端的 WorkflowPackageRequest 一致。草稿更新必须带读取到的精确字符串版本；不得将版本转换成 JavaScript Number。场景结构见 `workflows/leave-approval/scenarios/`，BPMN 与每项场景由后端实际引擎验证。
 

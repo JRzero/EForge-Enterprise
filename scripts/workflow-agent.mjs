@@ -4,7 +4,8 @@ import {pathToFileURL} from 'node:url';
 
 const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const commands={status:[],list:['page','page-size'],read:['id'],create:['file'],update:['id','revision','file'],
-  validate:['id','revision'],publish:['id','revision'],releases:['id','page','page-size'],release:['id'],activation:[],activate:['id','revision'],diff:['id','baseline','target']};
+  validate:['id','revision'],publish:['id','revision'],releases:['id','page','page-size'],release:['id'],activation:[],activate:['id','revision'],diff:['id','baseline','target'],
+  jobs:['id','page','page-size'],retry:['job','leave','command']};
 const failure=(code,status)=>({ok:false,...(status===undefined?{}:{status}),code});
 function requestPlan(args,env){
   const [command,...flags]=args,allowed=commands[command];if(!allowed)throw Error('INVALID_ARGUMENTS');
@@ -15,6 +16,7 @@ function requestPlan(args,env){
   }
   for(const key of allowed.filter(key=>!['page','page-size','target'].includes(key)))if(!options[key])throw Error('INVALID_ARGUMENTS');
   if(options.id&&!uuid.test(options.id))throw Error('INVALID_ARGUMENTS');
+  if(options.job&&!/^[A-Za-z0-9_-]{1,64}$/.test(options.job)||options.leave&&!uuid.test(options.leave)||options.command&&!uuid.test(options.command))throw Error('INVALID_ARGUMENTS');
   if(options.baseline&&!uuid.test(options.baseline)||options.target&&!uuid.test(options.target))throw Error('INVALID_ARGUMENTS');
   if(options.revision!==undefined&&(!/^(0|[1-9][0-9]{0,18})$/.test(options.revision)||BigInt(options.revision)>9223372036854775807n||(command!=='activate'&&options.revision==='0')))throw Error('INVALID_ARGUMENTS');
   if(options.page&&(!/^[1-9][0-9]*$/.test(options.page)||Number(options.page)>1000000))throw Error('INVALID_ARGUMENTS');
@@ -26,9 +28,9 @@ function requestPlan(args,env){
   const root='/api/v1/workflow',query=new URLSearchParams({page:options.page??'1',pageSize:options['page-size']??'10'});
   const path={status:'/status',list:`/packages?${query}`,read:`/packages/${options.id}`,create:'/packages',update:`/packages/${options.id}`,
     validate:`/packages/${options.id}/validation`,publish:`/packages/${options.id}/releases`,releases:`/packages/${options.id}/releases?${query}`,
-    release:`/releases/${options.id}`,activation:'/activations/leave',activate:'/activations/leave',
+    release:`/releases/${options.id}`,activation:'/activations/leave',activate:'/activations/leave',jobs:`/releases/${options.id}/failed-jobs?${query}`,retry:`/jobs/${options.job}/retry`,
     diff:`/packages/${options.id}/comparison?${new URLSearchParams({baselineReleaseId:options.baseline??'',...(options.target?{targetReleaseId:options.target}:{})})}`}[command];
-  const method=['create','validate','publish'].includes(command)?'POST':['update','activate'].includes(command)?'PUT':'GET';
+  const method=['create','validate','publish','retry'].includes(command)?'POST':['update','activate'].includes(command)?'PUT':'GET';
   return {command,options,url:base.origin+root+path,method};
 }
 
@@ -42,6 +44,7 @@ export async function execute(args,{env=process.env,fetchImpl=fetch,readFile=rea
       if(!content||Array.isArray(content)||typeof content!=='object')return failure('INVALID_PACKAGE_FILE');
       body=plan.command==='update'?{expectedRevision:plan.options.revision,content}:content;
     }else if(plan.command==='activate')body={releaseId:plan.options.id,expectedRevision:plan.options.revision};
+    else if(plan.command==='retry')body={commandId:plan.options.command,leaveId:plan.options.leave};
     else if(['validate','publish'].includes(plan.command))body={expectedRevision:plan.options.revision};
   }catch(error){return failure(['INVALID_ARGUMENTS','INVALID_DESTINATION','AUTHENTICATION_REQUIRED'].includes(error.message)?error.message:'INVALID_ARGUMENTS');}
   try{

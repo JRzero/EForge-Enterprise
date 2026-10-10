@@ -12,6 +12,19 @@ import org.springframework.core.io.Resource;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "flowable.process.enabled", havingValue = "true")
 public class WorkflowEngineConfiguration {
+    @Bean @org.flowable.spring.boot.process.Process
+    org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor workflowJobTaskExecutor() {
+        var executor=new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);executor.setMaxPoolSize(2);executor.setQueueCapacity(32);
+        executor.setThreadNamePrefix("eforge-workflow-job-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);executor.setAwaitTerminationSeconds(10);
+        return executor;
+    }
+    @Bean
+    io.eforge.enterprise.workflow.api.WorkflowJobs workflowJobs(javax.sql.DataSource dataSource,
+        io.eforge.enterprise.workflow.api.WorkflowUnitOfWork transactions,org.flowable.engine.ProcessEngine engine) {
+        return new WorkflowJobService(dataSource,transactions,engine);
+    }
     @Bean
     io.eforge.enterprise.workflow.api.WorkflowComparisons workflowComparisons(javax.sql.DataSource dataSource,
         io.eforge.enterprise.workflow.api.WorkflowUnitOfWork transactions) {
@@ -46,14 +59,16 @@ public class WorkflowEngineConfiguration {
     }
     // Official extension point: flowable-7.2.0 ProcessEngineServicesAutoConfiguration.
     @Bean
-    EngineConfigurationConfigurer<SpringProcessEngineConfiguration> workflowEngineRestrictions() {
+    EngineConfigurationConfigurer<SpringProcessEngineConfiguration> workflowEngineRestrictions(javax.sql.DataSource dataSource,
+        @org.springframework.beans.factory.annotation.Value("${eforge.workflow.async-enabled:false}") boolean asyncEnabled) {
         return configuration -> {
             configuration.setBeans(Map.of());
             configuration.setEnableSafeBpmnXml(true);
             configuration.setDisableIdmEngine(true);
             configuration.setDisableEventRegistry(true);
             configuration.setDeploymentResources(new Resource[0]);
-            configuration.setAsyncExecutorActivate(false);
+            configuration.setAsyncExecutorActivate(asyncEnabled);
+            configuration.setEventListeners(java.util.List.of(new WorkflowAsyncStart(configuration,dataSource)));
             configuration.setAsyncHistoryExecutorActivate(false);
         };
     }

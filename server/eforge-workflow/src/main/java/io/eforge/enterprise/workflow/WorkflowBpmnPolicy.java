@@ -60,6 +60,7 @@ public final class WorkflowBpmnPolicy {
                     case "assignee" -> value.equals("${approver}") || value.matches("[1-9][0-9]{0,18}");
                     case "candidateUsers" -> value.matches("[1-9][0-9]{0,18}(,[1-9][0-9]{0,18}){0,49}");
                     case "candidateGroups" -> value.matches("role:[1-9][0-9]{0,18}(,role:[1-9][0-9]{0,18}){0,49}");
+                    case "async" -> value.equals("true") || value.equals("false");
                     default -> false;
                 };
                 if (!allowed) throw invalid();
@@ -135,6 +136,11 @@ public final class WorkflowBpmnPolicy {
             } else if (edges.size() != 1) throw invalid();
         }
         if (start == null) throw invalid();
+        // Only task creation immediately after start may be deferred. Approval decisions and
+        // outcome persistence retain their synchronous business transaction boundary.
+        String first=outgoing.get(start).get(0).getAttribute("targetRef");
+        for(var entry:nodes.entrySet())if("true".equals(entry.getValue().getAttributeNS(FLOWABLE,"async"))
+            && !entry.getKey().equals(first))throw invalid();
         var visited = new HashSet<String>();
         visit(start, outgoing, new HashSet<>(), visited);
         if (visited.size() != nodes.size()) throw invalid();

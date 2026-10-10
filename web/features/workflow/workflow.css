@@ -9,6 +9,8 @@
 .workflow-confirm {border-top:1px solid var(--ui-border);padding-block:16px;margin-block:16px;}
 .workflow-confirm .post-row-actions {margin-top:12px;}
 .workflow-comparison {border-top:1px solid var(--ui-border);margin-block:16px;padding-block:16px;}
+.workflow-jobs {border-top:1px solid var(--ui-border);margin-block:16px;padding-block:16px;}
+.workflow-jobs p {margin-block:12px;overflow-wrap:anywhere;}
 .workflow-comparison p,.workflow-comparison details {margin-block:12px;}
 .workflow-comparison-columns {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-block:12px;}
 .workflow-comparison-columns > div {min-width:0;padding:12px;border:1px solid var(--ui-border);}

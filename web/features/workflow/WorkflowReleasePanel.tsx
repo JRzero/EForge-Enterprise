@@ -9,12 +9,14 @@ import {PermissionGate} from '../../ui/patterns';
 import {errorMessage} from '../../integration/errors';
 import {DetailSection,DetailField} from '../../ui/DetailPage';
 import {WorkflowComparisonPanel} from './WorkflowComparisonPanel';
+import {WorkflowJobsPanel} from './WorkflowJobsPanel';
 
 export function WorkflowReleasePanel({draft,onClose}:{draft:WorkflowPackageResponse;onClose:()=>void}){
   const api=useApi(),[page,setPage]=useState(1),[pageSize,setPageSize]=useState(10),[version,setVersion]=useState(0);
   const [data,setData]=useState<PageResponseWorkflowReleaseResponse|null>(null),[activation,setActivation]=useState<WorkflowActivationResponse|null>(null);
   const [loading,setLoading]=useState(true),[error,setError]=useState(''),[busy,setBusy]=useState(false),[feedback,setFeedback]=useState('');
   const [selected,setSelected]=useState<WorkflowReleaseResponse|null>(null);
+  const [jobs,setJobs]=useState<string|null>(null);
   const [baseline,setBaseline]=useState<WorkflowReleaseResponse|null>(null),[comparison,setComparison]=useState<{baselineId:string;targetId?:string}|null>(null);
   useEffect(()=>{
     const controller=new AbortController();setLoading(true);setError('');setData(null);setActivation(null);setSelected(null);
@@ -30,6 +32,7 @@ export function WorkflowReleasePanel({draft,onClose}:{draft:WorkflowPackageRespo
     {id:'active',header:'状态',cell:({row})=>row.original.id===activation?.releaseId?'当前启用':'未启用'},
     {accessorKey:'publishedAt',header:'发布时间',cell:({row})=>row.original.publishedAt?new Date(row.original.publishedAt).toLocaleString('zh-CN'):'—'},
     {id:'actions',header:'操作',cell:({row})=><div className="post-row-actions">
+      <PermissionGate permission="workflow:operation:list"><Button label="失败作业" aria-label={`版本 ${row.original.packageRevision} 失败作业`} variant="ghost" size="sm" isDisabled={busy||loading||!row.original.id} onClick={()=>{setJobs(row.original.id??null);setSelected(null);}}/></PermissionGate>
       <Button label="设为基准" aria-label={`版本 ${row.original.packageRevision} 设为基准`} variant="ghost" size="sm" isDisabled={busy||loading||!row.original.id} onClick={()=>{setBaseline(row.original);setComparison(null);}}/>
       <Button label="比较此版本" aria-label={`比较版本 ${row.original.packageRevision}`} variant="ghost" size="sm" isDisabled={busy||loading||!baseline?.id||!row.original.id} onClick={()=>{if(baseline?.id&&row.original.id)setComparison({baselineId:baseline.id,targetId:row.original.id});}}/>
       <PermissionGate permission="workflow:definition:activate"><Button label="激活" aria-label={`激活版本 ${row.original.packageRevision}`} variant="ghost" size="sm" isDisabled={busy||loading||!row.original.id||row.original.id===activation?.releaseId} onClick={()=>{setSelected(row.original);setFeedback('');}}/></PermissionGate>
@@ -51,6 +54,7 @@ export function WorkflowReleasePanel({draft,onClose}:{draft:WorkflowPackageRespo
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={busy} onPage={setPage} onSize={setPageSize} autoScroll={false}/>
     {baseline?<div className="post-row-actions"><span>对比基准：发布版本 {baseline.packageRevision}</span><Button label="与当前草稿对比" variant="secondary" isDisabled={busy||loading} onClick={()=>{if(baseline.id)setComparison({baselineId:baseline.id});}}/><Button label="清除对比" variant="ghost" onClick={()=>{setBaseline(null);setComparison(null);}}/></div>:null}
     {comparison&&draft.id?<WorkflowComparisonPanel packageId={draft.id} {...comparison}/>:null}
+    {jobs?<WorkflowJobsPanel key={jobs} releaseId={jobs} dialogBusy={busy} onBusy={setBusy}/>:null}
     {selected?<section aria-label="确认激活"><p>确认激活「{selected.name}」版本 {selected.packageRevision}？</p><div className="post-row-actions"><Button variant="primary" label={busy?'正在激活…':'确认激活'} isDisabled={busy} onClick={()=>{void activate();}}/><Button label="取消激活" variant="secondary" isDisabled={busy} onClick={()=>setSelected(null)}/></div></section>:null}
     <Button label="关闭" variant="secondary" isDisabled={busy} onClick={onClose}/>
   </ResourceDialog>;

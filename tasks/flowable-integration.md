@@ -19,6 +19,8 @@
 
 ## 当前证据
 
+最新阶段：失败作业恢复实现与两种真实 MySQL 并发验证已完成，最终双配置回归和精确提交云端仍在验收，不能按历史阶段标记整个目标完成。
+
 - 工作开始时仓库干净，基于技能安装提交 6a80fdf 新建 codex/flowable-integration。
 - 官方 7.2.0 release 确认为 Spring Boot 3.5.4 基线；项目当前 3.5.16 的实际启用/禁用应用已验证兼容。
 - 已接入官方 Starter、默认关闭及引擎限制；新增主库事务边界与受限审批 BPMN 校验，均未冒充完整业务交付。
@@ -85,4 +87,13 @@
 - 返回双方精确字符串版本、摘要及名称/业务绑定/BPMN/场景的完整前后内容与变更标识；不以文本变化冒充流程语义等价证明。一个一致读取取得双方，差异请求不改校验证明、发布或激活。
 - 发布面板提供基准与目标选择、加载/失败/重新读取、安全文本对照；Agent `diff` 使用同一接口。覆盖同版无差异、草稿变化、不可变旧发布、跨包拒绝、SQL 故障和权限。
 - 该切片已实现；`flowable-comparison-verify.log` 完整 892 项 Maven（23 framework + 39 workflow + 830 boot）通过，Agent 6 项、前端 lint/typecheck/128 单元/build/生成复现通过，`flowable-comparison-all-browser.log` 全量 217 项通过。
+- 最终 `a722c66db7729c044f7629756fb50c843361a761` 的 server `38036726933` 四项、web `38036726915` 均终态成功；直接 `flowable-comparison-cloud-accepted.log` 证明两配置各 67 真实浏览器与完整 API。顺序本地进程 57400 也已终态成功，`flowable-comparison-verified-enabled/disabled-runtime.log` 各 3 流程浏览器和完整 API PASS，两实时契约及仓库契约 SHA256 都为 `B8715C5E15F07A6160823A095E792159D124D4A782E62863C3539422673F22E8`。
 - `flowable-comparison-enabled-runtime.log` 完整真实 API PASS，实际 SQL 对比/证明不变/故障恢复/权限及 Agent diff 通过。最终页面脚本先后修复相对定位范围、组件加载 status 同名的测试错误；`flowable-comparison-verified-enabled-runtime.log` 的 3 项真实流程浏览器已通过，同一进程继续启用完整 API 后默认配置，尚未终态。详见 [对比安全审查](../docs/security-review-workflow-comparison.md)。
+
+## 失败作业运维与后台执行增量（2026-10-10）
+
+- 实现 ADR 0018：独立默认关闭的首个人工任务后台创建、官方专用执行池、规范失败作业查询/202 重新入队、07 同事务审计、V029 独立功能权限、生成客户端、流程版本运维页面与 Agent jobs/retry。不是通用任意作业执行入口。
+- 最终生产源码 `flowable-job-reviewed-verify.log` 完整 Maven 900 项声明，0 failures/errors、11 条件性跳过；真实 MySQL 用例另外实际执行。`flowable-job-withdraw-mysql-0/1.log` 两模式均成功，覆盖官方执行器真实 SQL 失败/死信、双 SQL 等待后的撤权、审计回滚、同命令单入队、实际唯一人工待办，以及角色锁等待/撤权/撤回竞争后零残留。
+- `flowable-job-frontend.log` 生成复现、lint/typecheck、128 单元、build 通过；最终样式再由 `flowable-job-final-build.log` 构建，`flowable-job-all-browser.log` 全量 220 模拟浏览器通过；Agent 7 项通过。
+- 独立审查发现定义暂停、被 Starter 覆盖的共享执行池配置、父级激活与子级恢复互斥问题；各有修前失败/修后通过，最后只读复核无新的确定阻断。见 [作业安全审查](../docs/security-review-workflow-jobs.md)。
+- `flowable-job-enabled-runtime.log` 完整启用 HTTP/Agent 恢复回归 PASS。最终顺序进程 72971 的 `flowable-job-browser-enabled/disabled-runtime.log` 正在验证两配置；启用 4 项真实流程浏览器已通过（实际故障作业恢复后仍需人工审批、手机截图）。完整 API 与禁用配置以进程终态为准，云端尚未提交验收。

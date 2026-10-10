@@ -5,6 +5,10 @@ export class ApiError extends Error {
 }
 function messageFor(status: number, code: string): string {
   if(code==='WORKFLOW_DISABLED')return '工作流尚未启用，请联系管理员。';
+  if(code==='WORKFLOW_ASYNC_DISABLED')return '当前环境尚未启用异步任务创建或恢复。';
+  if(code==='WORKFLOW_JOB_CONFLICT')return '作业或申请状态已变化，请刷新后重新核对。';
+  if(code==='WORKFLOW_JOB_FORBIDDEN')return '当前账号已无权恢复作业，请联系管理员。';
+  if(code==='WORKFLOW_JOB_INVALID')return '作业恢复参数无效，请刷新后重试。';
   if(code==='WORKFLOW_NOT_ACTIVATED')return '尚未启用请假审批流程，请联系流程管理员。';
   if(code==='WORKFLOW_LEAVE_CONFLICT')return '申请内容或审批版本已变化，请重新读取后操作。';
   if(code==='WORKFLOW_TASK_FORBIDDEN')return '当前账号已无权处理此任务，请刷新审批列表。';

@@ -1,8 +1,9 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
     [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness, [switch]$VerifyGeneratedReact, [switch]$VerifyGeneratedReactOnly,
-    [string]$JarPath = '', [switch]$EnableWorkflow)
+    [string]$JarPath = '', [switch]$EnableWorkflow, [switch]$EnableWorkflowAsync)
 $ErrorActionPreference = 'Stop'
+if($EnableWorkflowAsync -and !$EnableWorkflow){throw 'Async workflow verification requires the workflow engine.'}
 if ($VerifyGeneratedReactOnly -and $VerifyWeb) {throw 'Focused generated mode cannot be combined with the complete framework browser flag.'}
 if ($VerifyGeneratedReactOnly) { $VerifyGeneratedReact = $true }
 if ($VerifyGeneratedReact) { $VerifyGeneratedBusiness = $true }
@@ -87,6 +88,9 @@ try {
         Get-Content -LiteralPath (Join-Path $repoRoot 'sql/workflow/06-eforge-workflow-leave.sql') -Raw |
             & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
         if ($LASTEXITCODE -ne 0) { throw 'Workflow leave schema initialization failed.' }
+        Get-Content -LiteralPath (Join-Path $repoRoot 'sql/workflow/07-eforge-workflow-job-audit.sql') -Raw |
+            & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
+        if ($LASTEXITCODE -ne 0) { throw 'Workflow operation audit schema initialization failed.' }
     }
     if ($VerifyWeb -or $VerifyGeneratedReact) {
         # Isolate unrelated browser modules from the original default-on reminder.
@@ -131,6 +135,7 @@ try {
         EFORGE_OPENAPI_ENABLED = 'true'; EFORGE_SWAGGER_UI_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_CONSOLE_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         EFORGE_CONSOLE_SECURE_COOKIE = 'false'
         EFORGE_WORKFLOW_ENABLED = "$($EnableWorkflow.IsPresent)".ToLowerInvariant()
+        EFORGE_WORKFLOW_ASYNC_ENABLED = "$($EnableWorkflowAsync.IsPresent)".ToLowerInvariant()
         EFORGE_DRUID_USERNAME = 'console-validator'; EFORGE_DRUID_PASSWORD = $testPassword
         EFORGE_DRUID_SQL_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant(); EFORGE_DRUID_WEB_STAT_ENABLED = "$($EnableConsoles.IsPresent)".ToLowerInvariant()
         GEN_ALLOWOVERWRITE = "$($EnableCustomOutput.IsPresent)".ToLowerInvariant(); GEN_OUTPUTROOT = $customOutputDirectory
@@ -212,6 +217,7 @@ try {
     . (Join-Path $PSScriptRoot 'verify-workflow-release-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-workflow-agent-integration.ps1')
     . (Join-Path $PSScriptRoot 'verify-workflow-leave-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-workflow-job-integration.ps1')
     if ($VerifyGeneratedBusiness) {
         . (Join-Path $PSScriptRoot 'verify-generated-business-integration.ps1')
     }
@@ -258,6 +264,7 @@ try {
         Assert-Check ($LASTEXITCODE -eq 0) 'Canonical OpenAPI export failed.'
     }
     if ($VerifyWeb) {
+        . (Join-Path $PSScriptRoot 'prepare-workflow-job-browser.ps1')
         $generatorBrowserTable="gmanager_$runId"
         Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise -e "CREATE TABLE $generatorBrowserTable(entry_id BIGINT PRIMARY KEY AUTO_INCREMENT,name VARCHAR(64) NOT NULL,status CHAR(1) NOT NULL DEFAULT '0') COMMENT='管理页验证'; INSERT INTO $generatorBrowserTable(name,status) VALUES('原始业务行','0');" | Out-Null
         $generatorBrowserRowsBefore=Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -N -B -uroot eforge_enterprise -e "SELECT JSON_OBJECT('entry_id',entry_id,'name',name,'status',status) FROM $generatorBrowserTable ORDER BY entry_id;"

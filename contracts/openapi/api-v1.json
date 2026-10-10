@@ -3187,6 +3187,35 @@
         ],
         "type": "object"
       },
+      "PageResponseWorkflowFailedJobResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowFailedJobResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
       "PageResponseWorkflowPackageSummary": {
         "properties": {
           "items": {
@@ -4385,6 +4414,94 @@
         "required": [
           "approved",
           "taskKey"
+        ],
+        "type": "object"
+      },
+      "WorkflowFailedJobResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "elementId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "leaveId": {
+            "type": "string"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "retries": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "processId",
+          "releaseId"
+        ],
+        "type": "object"
+      },
+      "WorkflowJobQueuedResponse": {
+        "properties": {
+          "commandId": {
+            "type": "string"
+          },
+          "originalJobId": {
+            "type": "string"
+          },
+          "queuedJobId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "commandId",
+          "originalJobId",
+          "queuedJobId",
+          "status"
+        ],
+        "type": "object"
+      },
+      "WorkflowJobRetryRequest": {
+        "properties": {
+          "commandId": {
+            "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "type": "string"
+          },
+          "leaveId": {
+            "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "commandId",
+          "leaveId"
+        ],
+        "type": "object"
+      },
+      "WorkflowJobsResponse": {
+        "properties": {
+          "page": {
+            "$ref": "#/components/schemas/PageResponseWorkflowFailedJobResponse"
+          },
+          "recoveryEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "page"
         ],
         "type": "object"
       },
@@ -10552,6 +10669,47 @@
         ]
       }
     },
+    "/api/v1/workflow/jobs/{id}/retry": {
+      "post": {
+        "operationId": "retryWorkflowJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[A-Za-z0-9_-]{1,64}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowJobRetryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowJobQueuedResponse"
+                }
+              }
+            },
+            "description": "Accepted"
+          }
+        },
+        "tags": [
+          "workflow-job-controller"
+        ]
+      }
+    },
     "/api/v1/workflow/leaves": {
       "post": {
         "operationId": "submitWorkflowLeave",
@@ -11230,6 +11388,61 @@
         },
         "tags": [
           "workflow-release-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/releases/{id}/failed-jobs": {
+      "get": {
+        "operationId": "listFailedWorkflowJobs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowJobsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-job-controller"
         ]
       }
     },

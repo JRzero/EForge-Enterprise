@@ -3,6 +3,7 @@ import {submitWorkflowLeave,listMyWorkflowLeaves,listHandledWorkflowLeaves,listP
   claimWorkflowLeaveTask,decideWorkflowLeaveTask,withdrawWorkflowLeave,type LeaveSubmitRequest,type LeaveCommandRequest,type LeaveDecisionRequest,
   getWorkflowStatus,listWorkflowPackages,getWorkflowPackage,createWorkflowPackage,updateWorkflowPackage,
   validateWorkflowPackage,listWorkflowReleases,publishWorkflowPackage,getWorkflowActivation,activateWorkflowRelease,compareWorkflowPackage,
+  listFailedWorkflowJobs,retryWorkflowJob,type WorkflowJobRetryRequest,
   type WorkflowPackageRequest,type WorkflowPackageUpdateRequest,type WorkflowActivationRequest} from '../generated/api';
 import {getRegistrationStatus, registerAccount, type RegistrationRequestWrite} from '../generated/api';
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
@@ -84,6 +85,8 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async getWorkflowActivation(signal?:AbortSignal){return (await getWorkflowActivation('leave',{baseUrl:'',fetch:transport(true),signal})).data;},
     async activateWorkflowRelease(body:WorkflowActivationRequest){return (await activateWorkflowRelease('leave',body,{baseUrl:'',fetch:transport(true)})).data;},
     async compareWorkflowPackage(id:string,baselineId:string,query:Parameters<typeof compareWorkflowPackage>[2],signal?:AbortSignal){return (await compareWorkflowPackage(id,baselineId,query,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async listFailedWorkflowJobs(id:string,query:Parameters<typeof listFailedWorkflowJobs>[1],signal?:AbortSignal){return (await listFailedWorkflowJobs(id,query,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async retryWorkflowJob(id:string,request:WorkflowJobRetryRequest){return (await retryWorkflowJob(id,request,{baseUrl:'',fetch:transport(true)})).data;},
     async unlockScreen(request:UnlockScreenRequestWrite,signal?:AbortSignal){await unlockScreen(request,{baseUrl:'',fetch:transport(true),signal});},
     async authenticatedFetch(input: RequestInfo | URL, init?: RequestInit) {
       const origin = typeof window === 'undefined' ? 'http://eforge.local' : window.location.origin;
