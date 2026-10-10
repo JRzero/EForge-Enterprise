@@ -11,11 +11,19 @@ async function freshHeaders(page: Page) {
   const response = await page.request.post('/api/v1/auth/login', {data: {username: 'admin', password: 'admin123'}}); expect(response.status()).toBe(200);
   return {Authorization: `Bearer ${(await response.json()).accessToken}`};
 }
+async function currentStatistics(page: Page) {
+  // Login replaces the document. Observe an explicit refresh after that navigation,
+  // so the body belongs to the stable page rather than a discarded CDP resource.
+  const refresh = page.getByRole('button', {name: '刷新', exact: true});
+  await expect(refresh).toBeEnabled();
+  const response = page.waitForResponse(reply => reply.url().endsWith('/api/v1/monitor/cache') && reply.status() === 200);
+  await refresh.click();
+  return await (await response).json() as CacheStatistics;
+}
 test('real Redis statistics, SVG charts, refresh and no-role cache denial', async ({page}) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  // Consume the body as soon as it arrives, before login navigation can release its CDP resource.
-  const pending = page.waitForResponse(response => response.url().endsWith('/api/v1/monitor/cache') && response.status() === 200).then(response => response.json() as Promise<CacheStatistics>);
-  const [{headers}, data] = await Promise.all([login(page, '/cache'), pending]);
+  const {headers} = await login(page, '/cache');
+  const data = await currentStatistics(page);
   for (const [label, value] of [['Redis 版本', data.info.version], ['端口', data.info.port], ['Key 数量', data.keyCount], ['使用内存', data.info.usedMemory]]) await expect(page.locator('.cache-info > div').filter({has: page.getByText(label!, {exact: true})}).locator('dd')).toHaveText(value!);
   for (const label of ['Redis 命令统计玫瑰图', 'Redis 内存消耗仪表图']) {await expect(page.getByRole('img', {name: label}).locator('svg')).toBeVisible(); expect(await page.getByRole('img', {name: label}).locator('path').count()).toBeGreaterThan(0);}
   const command = data.commands[0]!; expect(command).toBeDefined(); await page.getByRole('button', {name: new RegExp(`^${command.name}：`)}).focus(); await page.keyboard.press('Enter'); await expect(page.locator('.cache-chart-tooltip')).toContainText(`${command.calls} 次`);
@@ -91,7 +99,7 @@ test('real retained cache reads cancel interrupted refresh, preserve completed v
   }finally{release();expect((await page.request.delete('/api/v1/system/configurations',{headers:await freshHeaders(page),data:{ids:[id]}})).status()).toBe(204);}
 });
 test('real cached Redis statistics retain graphs and keyboard interaction, cancel interrupted reads and explicitly refresh',async({page})=>{
-  const first=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/monitor/cache'&&response.status()===200).then(response=>response.json() as Promise<CacheStatistics>);const [{headers},data]=await Promise.all([login(page,'/cache'),first]);
+  const {headers}=await login(page,'/cache');const data=await currentStatistics(page);
   await expect(page.locator('.cache-info > div').filter({has:page.getByText('Key 数量',{exact:true})}).locator('dd')).toHaveText(data.keyCount);await expect(page.locator('.cache-chart svg')).toHaveCount(2);
   const menus=await(await page.request.get('/api/v1/system/menus',{headers})).json();expect(menus.find((menu:{routeId:string})=>menu.routeId==='monitor-cache').cached).toBe(true);
   const observed:import('@playwright/test').Request[]=[];let blocked=false,release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
