@@ -466,3 +466,32 @@ original user-scoped menu query, including an empty result for a no-grant user;
 this picker does not grant management access. Generator list summaries expose
 outputType to preserve original row ZIP/custom output behavior. Both additions
 are represented in the reproducible generated TypeScript client.
+
+## Workflow integration contracts
+
+`/api/v1/workflow/**` is the application boundary; official Flowable REST and
+engine objects are not exposed. The authoritative DTOs and method signatures
+are in `contracts/openapi/api-v1.json` and the generated `web/generated/api.ts`.
+Flowable-independent services live in `eforge-workflow-api`.
+
+Draft creation returns 201; revision-checked updates, validation, immutable
+publication and explicit activation use independent grants. Revision fields
+remain decimal strings. Comparison is read-only and restricted to one package.
+See `docs/workflow-package-format.md` for the package and scenario contract.
+
+Leave requests bind the authenticated applicant, explicit business submission
+and command identities, immutable release and engine instance. Claim, approve,
+reject and withdraw recheck current identity and qualification inside the
+business transaction. Frontend visibility is not authorization. History and
+business state use concrete records; errors use safe ProblemDetail responses.
+
+Failed-job reads require `workflow:operation:list`; recovery requires
+`workflow:operation:retry` and an existing pending leave bound to the published
+process. POST `/api/v1/workflow/jobs/{id}/retry` accepts `{commandId,leaveId}` and
+returns 202 `{commandId,originalJobId,queuedJobId,status:"QUEUED"}`. Same-actor,
+same-command replay returns the original admission result; mismatched input is
+409. It does not promise task execution or approval. GET
+`/api/v1/workflow/releases/{id}/failed-jobs` returns a concrete response containing
+`PageResponse<WorkflowFailedJobResponse>` and `recoveryEnabled`. Engine exception
+text, SQL and variables are not returned. Disabled workflow returns safe 503
+after normal authentication/permission checks. UI and Agent use these same APIs.

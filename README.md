@@ -28,6 +28,16 @@ Key documents:
 - [Application bootstrap contract](contracts/bootstrap-contract.md)
 - [Navigation contract](contracts/navigation-contract.md)
 - [Architecture decisions](docs/adr/)
+- [Flowable scope and acceptance](tasks/flowable-integration.md)
+- [Workflow installation and operations](docs/workflow-operations.md)
+- [Agent workflow maintenance](docs/workflow-agent.md)
+
+Optional workflow support uses the pinned official Flowable 7.2.0 Process Starter.
+It includes a leave-approval reference application, versioned process packages,
+scenario validation, publication/activation, version comparison and bounded
+failed-job recovery. UI and Agent operations share the authenticated canonical
+API. The engine and background worker are disabled by default; follow the
+explicit SQL and configuration steps in the operations guide before enabling.
 
 ## Repository boundary
 

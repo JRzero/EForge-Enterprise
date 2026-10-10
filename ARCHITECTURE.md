@@ -399,11 +399,21 @@ Forbidden:
 
 ## 14. Deferred architecture
 
+The user-authorized Flowable iteration is an explicit extension to the initial
+baseline: [ADR 0017](docs/adr/0017-optional-flowable-process-engine.md) and
+[ADR 0018](docs/adr/0018-bounded-workflow-job-recovery.md). The server remains a
+modular monolith. `eforge-workflow-api` exposes engine-independent contracts;
+`eforge-workflow` integrates the pinned official Process Starter with the same
+main datasource and transaction manager. Canonical controllers, UI and Agent
+use the existing authentication and authorization boundary. Engine creation and
+background execution are independently disabled by default. Schema installation
+is explicit, and production deployment is separate from development acceptance.
+
 Not part of the initial framework:
 
 - microservices
 - multi-tenancy
-- workflow engine
+- workflow capabilities beyond the accepted integration scope
 - MQ
 - distributed transactions
 - Elasticsearch

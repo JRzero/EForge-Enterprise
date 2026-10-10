@@ -1,25 +1,25 @@
 # Flowable 集成实施与证据
 
-规格：[flowable-integration](../spec/flowable-integration.md)。状态：in_progress。
+规格：[flowable-integration](../spec/flowable-integration.md)。状态：done（2026-10-10；约定范围，不含后续扩展及生产部署）。
 
 按依赖顺序交付，每个阶段必须保留实际命令、结果及限制。日常迭代已授权，无需逐项再询问。
 
 | ID | 任务 | 依赖 | 验收/验证 | 状态 |
 | --- | --- | --- | --- | --- |
-| F01 | 官方版本与可选 Starter | 无 | 编译、启用/禁用上下文测试；默认无引擎/作业/部署 | in_progress |
-| F02 | 主数据源事务及显式 schema 运维 | F01 | MySQL 真实业务+引擎共同回滚，安全默认、升级说明 | in_progress |
-| F03 | 请假业务契约与提交闭环 | F02 | 提交/重复/失败回滚/真实引擎实例 | in_progress |
-| F04 | 当前身份和任务处理 | F03 | 领取/批准/拒绝/撤回/并发/越权/撤权 | in_progress |
-| F05 | 规范查询及审批 UI | F04 | DTO/客户端/列表详情/端到端审批与历史 | in_progress |
-| F06 | 流程包安全验证 | F02 | 允许子集及 XML/脚本/表达式拒绝，真实引擎部署校验 | in_progress |
-| F07 | 草稿/差异/场景/候选发布 | F06 | 不可变摘要、乐观锁、失败无激活、旧实例不变 | in_progress |
-| F08 | 流程管理与运维 UI | F07,F05 | 发布/激活/版本详情/失败重试及权限 E2E | in_progress |
-| F09 | Agent 维护入口 | F07 | 同 API 权限、结构化失败、幂等和使用文档 | in_progress |
-| F10 | 全量回归与交付 | 全部 | 前后端、本地真实环境、云端精确提交终态；更新 roadmap | pending |
+| F01 | 官方版本与可选 Starter | 无 | 编译、启用/禁用上下文测试；默认无引擎/作业/部署 | done |
+| F02 | 主数据源事务及显式 schema 运维 | F01 | MySQL 真实业务+引擎共同回滚，安全默认、升级说明 | done |
+| F03 | 请假业务契约与提交闭环 | F02 | 提交/重复/失败回滚/真实引擎实例 | done |
+| F04 | 当前身份和任务处理 | F03 | 领取/批准/拒绝/撤回/并发/越权/撤权 | done |
+| F05 | 规范查询及审批 UI | F04 | DTO/客户端/列表详情/端到端审批与历史 | done |
+| F06 | 流程包安全验证 | F02 | 允许子集及 XML/脚本/表达式拒绝，真实引擎部署校验 | done |
+| F07 | 草稿/差异/场景/候选发布 | F06 | 不可变摘要、乐观锁、失败无激活、旧实例不变 | done |
+| F08 | 流程管理与运维 UI | F07,F05 | 发布/激活/版本详情/失败重试及权限 E2E | done |
+| F09 | Agent 维护入口 | F07 | 同 API 权限、结构化失败、幂等和使用文档 | done |
+| F10 | 全量回归与交付 | 全部 | 前后端、本地真实环境、云端精确提交终态；更新 roadmap | done |
 
 ## 当前证据
 
-最新阶段：失败作业恢复实现与两种真实 MySQL 并发验证已完成，最终双配置回归和精确提交云端仍在验收，不能按历史阶段标记整个目标完成。
+最终状态：F01–F10 已完成。实现 e7cfae4 的 server 38039102287 全四项及 web 38039102297 均终态成功；见文末最终验收。下文早期“待完成/验收中”保留为历史，不覆盖最终结果。
 
 - 工作开始时仓库干净，基于技能安装提交 6a80fdf 新建 codex/flowable-integration。
 - 官方 7.2.0 release 确认为 Spring Boot 3.5.4 基线；项目当前 3.5.16 的实际启用/禁用应用已验证兼容。
@@ -97,3 +97,15 @@
 - `flowable-job-frontend.log` 生成复现、lint/typecheck、128 单元、build 通过；最终样式再由 `flowable-job-final-build.log` 构建，`flowable-job-all-browser.log` 全量 220 模拟浏览器通过；Agent 7 项通过。
 - 独立审查发现定义暂停、被 Starter 覆盖的共享执行池配置、父级激活与子级恢复互斥问题；各有修前失败/修后通过，最后只读复核无新的确定阻断。见 [作业安全审查](../docs/security-review-workflow-jobs.md)。
 - `flowable-job-enabled-runtime.log` 完整启用 HTTP/Agent 恢复回归 PASS。最终顺序进程 72971 的 `flowable-job-browser-enabled/disabled-runtime.log` 正在验证两配置；启用 4 项真实流程浏览器已通过（实际故障作业恢复后仍需人工审批、手机截图）。完整 API 与禁用配置以进程终态为准，云端尚未提交验收。
+- 最终本地进程 72971 已终态 0：`flowable-job-browser-enabled-runtime.log` 与 `flowable-job-browser-disabled-runtime.log` 均完整 API PASS，各 4 项真实流程浏览器通过；启用配置实际执行故障→死信→页面确认恢复→唯一人工待办→撤回，禁用配置保留安全说明与拒绝。最终两实时 OpenAPI 与仓库契约同 SHA256 `3D7FC784F8576A602E8965C07A0CD0C1B6215C0E93750FE07B5E29238AE15F0C`。安全默认脚本与 25 Skills 安装检查通过。
+- 实现提交 `e7cfae4a1bd9bdedd2c8e7ee2372c42fe3e49e59` 已推送。web `38039102297` 已终态成功；server `38039102287` 尚在运行，不能将尚未结束的两配置全量浏览器或整套后端标为云端成功。
+
+## 最终当前范围验收（2026-10-10）
+
+实现 `e7cfae4a1bd9bdedd2c8e7ee2372c42fe3e49e59` 已推送到 `codex/flowable-integration`。server [38039102287](https://github.com/JRzero/EForge-Enterprise/actions/runs/38039102287) 的 verify、default/enabled auth-runtime、runtime 全四项终态 SUCCESS；web [38039102297](https://github.com/JRzero/EForge-Enterprise/actions/runs/38039102297) 终态 SUCCESS。观察进程 66415 终态 0，未重试或跳过失败检查。
+
+直接日志 `flowable-job-cloud-server-accepted.log` 与 `flowable-job-cloud-web-accepted.log` 证明：900 后端声明（23 framework + 45 workflow + 832 boot，0 failures/errors，11 条件性跳过）、实际 MySQL 两模式完整 workflow/native 作业恢复、128 前端单元、220 模拟浏览器、启用/禁用各 68 真实浏览器、完整 HTTP/API、精确实时 OpenAPI，以及既有生成模块编译/启动/页面/权限/审计回归全部通过。条件性 MySQL 用例在独立两模式步骤实际执行，非以跳过代替。两个配置的契约与生成客户端对应 SHA256 `3D7FC784F8576A602E8965C07A0CD0C1B6215C0E93750FE07B5E29238AE15F0C`。
+
+可用能力：官方可选引擎与显式 schema；请假提交/领取/批准/拒绝/撤回/历史；草稿修订/回滚场景校验/不可变发布/独立激活/版本对比；我发起/待办/已办与流程管理页面；失败作业查询、确认恢复、审计和真实后台执行；同权限 Agent 维护命令。独立审查问题已修复并有失败→通过证据。
+
+当前交付范围完成。引擎及后台执行默认关闭，现有本地预览未重启，未安装或改写生产数据库，未部署生产，尚未合并 main。可视化 BPMN 设计器、复杂会签、实例迁移及动态主管策略属于后续扩展；表单构建器仍明确暂缓，不计完成。普通开发提交不隐含生产发布/激活授权。后续使用见 [运行维护](../docs/workflow-operations.md)、[Agent](../docs/workflow-agent.md) 和 [流程包](../docs/workflow-package-format.md)。
