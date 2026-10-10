@@ -960,6 +960,71 @@ export type WorkflowActivationRequest = {
     expectedRevision: string;
     releaseId: string;
 };
+export type LeaveSubmitRequest = {
+    endDate: string;
+    reason: string;
+    startDate: string;
+    submissionId: string;
+};
+export type LeaveResponse = {
+    createdAt: string;
+    endDate: string;
+    id: string;
+    initiatorId: string;
+    processId: string;
+    reason: string;
+    releaseId: string;
+    revision: string;
+    startDate: string;
+    status: string;
+    submissionId: string;
+};
+export type PageResponseLeaveResponse = {
+    items: LeaveResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type LeaveTaskResponse = {
+    assignee?: string;
+    canHandle: boolean;
+    id: string;
+    key: string;
+    name?: string;
+};
+export type LeavePendingResponse = {
+    canHandle?: boolean;
+    leave: LeaveResponse;
+    task: LeaveTaskResponse;
+};
+export type PageResponseLeavePendingResponse = {
+    items: LeavePendingResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type LeaveEventResponse = {
+    action: string;
+    actorId: string;
+    comment: string;
+    createdAt: string;
+    taskId?: string;
+};
+export type LeaveDetailResponse = {
+    history: LeaveEventResponse[];
+    leave: LeaveResponse;
+    tasks: LeaveTaskResponse[];
+};
+export type LeaveCommandRequest = {
+    commandId: string;
+    comment: string;
+    expectedRevision: string;
+    taskId?: string;
+};
+export type LeaveDecisionRequest = {
+    approved: boolean;
+    command: LeaveCommandRequest;
+};
 export type WorkflowPackageSummary = {
     businessType?: string;
     id?: string;
@@ -2702,6 +2767,96 @@ export function activateWorkflowRelease(businessType: string, workflowActivation
         ...opts,
         method: "PUT",
         body: workflowActivationRequest
+    }));
+}
+export function submitWorkflowLeave(leaveSubmitRequest: LeaveSubmitRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: LeaveResponse;
+    }>("/api/v1/workflow/leaves", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: leaveSubmitRequest
+    }));
+}
+export function listHandledWorkflowLeaves({ page, pageSize }: {
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseLeaveResponse;
+    }>(`/api/v1/workflow/leaves/handled${QS.query(QS.explode({
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function listMyWorkflowLeaves({ page, pageSize }: {
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseLeaveResponse;
+    }>(`/api/v1/workflow/leaves/mine${QS.query(QS.explode({
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function listPendingWorkflowLeaves({ page, pageSize }: {
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseLeavePendingResponse;
+    }>(`/api/v1/workflow/leaves/pending${QS.query(QS.explode({
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function getWorkflowLeave(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: LeaveDetailResponse;
+    }>(`/api/v1/workflow/leaves/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function claimWorkflowLeaveTask(id: string, leaveCommandRequest: LeaveCommandRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: LeaveResponse;
+    }>(`/api/v1/workflow/leaves/${encodeURIComponent(id)}/claim`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: leaveCommandRequest
+    }));
+}
+export function decideWorkflowLeaveTask(id: string, leaveDecisionRequest: LeaveDecisionRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: LeaveResponse;
+    }>(`/api/v1/workflow/leaves/${encodeURIComponent(id)}/decision`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: leaveDecisionRequest
+    }));
+}
+export function withdrawWorkflowLeave(id: string, leaveCommandRequest: LeaveCommandRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: LeaveResponse;
+    }>(`/api/v1/workflow/leaves/${encodeURIComponent(id)}/withdrawal`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: leaveCommandRequest
     }));
 }
 export function listWorkflowPackages({ page, pageSize }: {

@@ -2,7 +2,7 @@
 
 ## Flowable iteration (2026-10-09)
 
-The user authorized implementation of the previously discussed Flowable integration. Track the full scope in [spec](../spec/flowable-integration.md) and [tasks](../tasks/flowable-integration.md). Optional official engine integration, explicit MySQL schema, transaction/security foundations and versioned package drafts have local evidence; exact cloud acceptance remains recorded separately in the tasks file. Drafts bind real rolled-back scenario proofs to their current revision and invalidate proofs on editing, with atomic audit and optimistic conflict protection. Publication, activation, approval business paths, shared pages and Agent maintenance are not yet complete. This iteration does not reactivate the deferred form builder.
+The user authorized implementation of the previously discussed Flowable integration. Track the full scope in [spec](../spec/flowable-integration.md) and [tasks](../tasks/flowable-integration.md). Optional official engine integration, explicit MySQL schema, transaction/security foundations, versioned drafts, immutable publication and explicit activation have stage evidence. Draft editing invalidates its scenario proof; activation affects only new applications. Management pages, transactional leave approvals and the Agent HTTP maintenance command are implemented and undergoing final acceptance, with exact local/cloud results recorded in the task file. Version comparison and failed-job operations remain outstanding; the full integration is not complete. This iteration does not reactivate the deferred form builder.
 
 ## Current scope adjustment (2026-10-06)
 

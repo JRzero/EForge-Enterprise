@@ -18,6 +18,10 @@
 
 ## 开发验证
 
+请假样例另需显式安装 [06 申请与审计](../sql/workflow/06-eforge-workflow-leave.sql)。菜单 V028 只声明页面及功能权限，不自动授权普通角色。申请权限为 `workflow:request:list/submit/withdraw`，审批权限为 `workflow:task:list/handle`；审批人同时必须满足已发布流程中的实际候选用户/角色。流程管理权限不等于任务处理资格。
+
+`-Leaves` 验证实际业务行锁、等待后身份、任务冲突及审计失败回滚。Agent 使用 [工作流维护命令](workflow-agent.md)，无额外数据库或内部管理通道。
+
 `mvn -B -ntp -f server/pom.xml test` 验证内存数据库与既有测试；`pwsh -File server/scripts/verify-workflow-engine.ps1` 在脚本独占的一次性 MySQL 中安装官方 SQL，关闭自动建表，验证与业务行共同提交、启动失败回滚、完成失败回滚。追加 `-LowerCaseTableNames 1` 验证大小写模式。
 
 追加 `-Packages` 验证草稿、真实场景、双 SQL 等待并发写入的 200/409 分离及审计失败整体回滚；两种大小写模式均由 CI 执行。并发断言读取 MySQL `performance_schema.data_lock_waits` 和 `data_locks`，不依赖可能滞后的 `INNODB_TRX` 快照。

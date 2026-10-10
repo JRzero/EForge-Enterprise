@@ -18,5 +18,7 @@
   {"id": "tool-openapi", "path": "/swagger", "permission": "tool:swagger:list"},
   {"id": "monitor-jobs", "path": "/job", "permission": "monitor:job:list"},
   {"id": "tool-generator", "path": "/gen", "permission": "tool:gen:list"},
-  {"id": "workflow-packages", "path": "/workflow/packages", "permission": "workflow:definition:list"}
+  {"id": "workflow-packages", "path": "/workflow/packages", "permission": "workflow:definition:list"},
+  {"id": "workflow-requests", "path": "/workflow/requests", "permission": "workflow:request:list"},
+  {"id": "workflow-tasks", "path": "/workflow/tasks", "permission": "workflow:task:list"}
 ]

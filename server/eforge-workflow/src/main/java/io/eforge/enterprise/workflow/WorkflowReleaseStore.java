@@ -48,6 +48,8 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
                 var stored=jdbc.queryForMap("select source_json,validation_json from ef_workflow_package where id=?",packageId);
                 var deployment=engine.getRepositoryService().createDeployment().name(draft.name()).addString(resource,checked.xml()).deploy();
                 var definition=engine.getRepositoryService().createProcessDefinitionQuery().deploymentId(deployment.getId()).singleResult();
+                // The only registered business binding is leave; reject unusable outcome mapping before publication commits.
+                WorkflowLeaveService.requireLeaveBinding(engine,definition.getId());
                 String id=UUID.randomUUID().toString();var now=Timestamp.from(Instant.now());
                 jdbc.update("insert into ef_workflow_release (id,package_id,package_revision,name,business_type,content_digest,source_json,validation_json,definition_id,deployment_id,published_by,published_at) values (?,?,?,?,?,?,?,?,?,?,?,?)",
                     id,packageId,expectedRevision,draft.name(),draft.businessType(),draft.contentDigest(),stored.get("source_json"),stored.get("validation_json"),definition.getId(),deployment.getId(),actor,now);

@@ -5,6 +5,14 @@ export class ApiError extends Error {
 }
 function messageFor(status: number, code: string): string {
   if(code==='WORKFLOW_DISABLED')return '工作流尚未启用，请联系管理员。';
+  if(code==='WORKFLOW_NOT_ACTIVATED')return '尚未启用请假审批流程，请联系流程管理员。';
+  if(code==='WORKFLOW_LEAVE_CONFLICT')return '申请内容或审批版本已变化，请重新读取后操作。';
+  if(code==='WORKFLOW_TASK_FORBIDDEN')return '当前账号已无权处理此任务，请刷新审批列表。';
+  if(code==='WORKFLOW_CLAIM_REQUIRED')return '请先领取当前审批任务。';
+  if(code==='WORKFLOW_LEAVE_NOT_FOUND')return '申请不存在或当前账号无权查看。';
+  if(code==='WORKFLOW_LEAVE_INVALID')return '请检查请假日期、事由和审批意见。';
+  if(code==='WORKFLOW_LEAVE_BINDING')return '流程的结束节点尚未绑定请假结果，请联系流程管理员。';
+  if(code==='WORKFLOW_ACTION_FAILED')return '审批暂未完成，请重新读取后重试。';
   if(code==='WORKFLOW_PACKAGE_CONFLICT'||code==='WORKFLOW_RELEASE_CONFLICT')return '流程版本已变化，请重新读取后操作，未保存的内容请先保留。';
   if(code==='WORKFLOW_PROOF_REQUIRED')return '请先校验当前版本，再发布流程。';
   if(code==='WORKFLOW_CANDIDATE_UNAVAILABLE')return '流程中存在无有效审批人的任务，请检查账号或角色。';

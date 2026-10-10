@@ -7,6 +7,11 @@ import {lazy} from 'react';
 const WorkflowPackagesPage = lazy(() => import('../features/workflow/WorkflowPackagesPage').then(module => ({default: module.WorkflowPackagesPage})));
 const workflowPackages = contracts.find(route => route.id === 'workflow-packages');
 if (!workflowPackages) throw new Error('Missing workflow route contract.');
+const WorkflowRequestsPage = lazy(() => import('../features/workflow/WorkflowLeavesPage').then(module => ({default: module.WorkflowRequestsPage})));
+const WorkflowTasksPage = lazy(() => import('../features/workflow/WorkflowLeavesPage').then(module => ({default: module.WorkflowTasksPage})));
+const workflowRequests = contracts.find(route => route.id === 'workflow-requests');
+const workflowTasks = contracts.find(route => route.id === 'workflow-tasks');
+if (!workflowRequests || !workflowTasks) throw new Error('Missing workflow approval route contracts.');
 const PostsPage = lazy(() => import('../features/posts/PostsPage').then(module => ({default: module.PostsPage})));
 const DepartmentsPage = lazy(() => import('../features/departments/DepartmentsPage').then(module => ({default: module.DepartmentsPage})));
 const UsersPage = lazy(() => import('../features/users/UsersPage').then(module => ({default: module.UsersPage})));
@@ -124,6 +129,10 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: generator.id, path: generator.path, title: '代码生成', access: {permission: generator.permission}, component: GeneratorPage
 }, {
   id: workflowPackages.id, path: workflowPackages.path, title: '流程管理', access: {permission: workflowPackages.permission}, component: WorkflowPackagesPage
+}, {
+  id: workflowRequests.id, path: workflowRequests.path, title: '我发起的审批', access: {permission: workflowRequests.permission}, component: WorkflowRequestsPage
+}, {
+  id: workflowTasks.id, path: workflowTasks.path, title: '审批任务', access: {permission: workflowTasks.permission}, component: WorkflowTasksPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

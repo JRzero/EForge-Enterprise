@@ -89,6 +89,19 @@ class WorkflowReleaseStoreTest {
             assertThat(releases.publish(draft.id(),1,"1")).isNotNull();
         });
     }
+    @Test void validEngineGraphWithUnregisteredLeaveOutcomeCannotBePublished() {
+        runner.run(context->{
+            var source=context.getBean(DataSource.class);prepare(source);var packages=context.getBean(WorkflowPackages.class);
+            var original=example();var request=original.source();
+            var draft=packages.create(new WorkflowPackages.Edit("不匹配的结果","leave",new WorkflowValidation.Request(
+                request.bpmnXml().replace("approvedEnd","unknownEnd"),request.scenarios().stream().map(scenario->new WorkflowValidation.Scenario(scenario.name(),scenario.decisions(),scenario.expectedEnd().replace("approvedEnd","unknownEnd"))).toList())),"1");
+            packages.validate(draft.id(),1,"1");var engine=context.getBean(ProcessEngine.class);
+            assertThatThrownBy(()->context.getBean(WorkflowReleases.class).publish(draft.id(),1,"1"))
+                .isInstanceOfSatisfying(ApiFailure.class,f->assertThat(f.code()).isEqualTo("WORKFLOW_LEAVE_BINDING"));
+            assertThat(engine.getRepositoryService().createDeploymentQuery().count()).isZero();
+            assertThat(((org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl)engine.getProcessEngineConfiguration()).getProcessDefinitionCache().size()).isZero();
+        });
+    }
 
     private static JdbcTemplate prepare(DataSource source) throws Exception {
         var jdbc=new JdbcTemplate(source);

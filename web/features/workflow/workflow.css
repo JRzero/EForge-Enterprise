@@ -2,3 +2,9 @@
 .post-dialog:has(#workflow-releases-title),.post-dialog:has(#workflow-editor-title) {width:960px;}
 .post-dialog:has(#workflow-releases-title) .post-table table {min-width:650px;}
 .post-dialog:has(#workflow-releases-title) > :is(p,details) {margin-block:12px;}
+.post-dialog:has(#workflow-leave-detail-title) {width:900px;}
+.workflow-history {display:grid;gap:12px;padding-inline-start:24px;margin-block:16px;}
+.workflow-history span {display:block;color:var(--ui-muted);}
+.workflow-history p,.workflow-confirm p {white-space:pre-wrap;overflow-wrap:anywhere;}
+.workflow-confirm {border-top:1px solid var(--ui-border);padding-block:16px;margin-block:16px;}
+.workflow-confirm .post-row-actions {margin-top:12px;}

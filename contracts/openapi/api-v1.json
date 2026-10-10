@@ -1739,6 +1739,225 @@
         },
         "type": "object"
       },
+      "LeaveCommandRequest": {
+        "properties": {
+          "commandId": {
+            "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "type": "string"
+          },
+          "comment": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "expectedRevision": {
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "taskId": {
+            "pattern": "[A-Za-z0-9_-]{1,64}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "commandId",
+          "comment",
+          "expectedRevision"
+        ],
+        "type": "object"
+      },
+      "LeaveDecisionRequest": {
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "command": {
+            "$ref": "#/components/schemas/LeaveCommandRequest"
+          }
+        },
+        "required": [
+          "approved",
+          "command"
+        ],
+        "type": "object"
+      },
+      "LeaveDetailResponse": {
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/LeaveEventResponse"
+            },
+            "type": "array"
+          },
+          "leave": {
+            "$ref": "#/components/schemas/LeaveResponse"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/LeaveTaskResponse"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "history",
+          "leave",
+          "tasks"
+        ],
+        "type": "object"
+      },
+      "LeaveEventResponse": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "actorId",
+          "comment",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "LeavePendingResponse": {
+        "properties": {
+          "canHandle": {
+            "type": "boolean"
+          },
+          "leave": {
+            "$ref": "#/components/schemas/LeaveResponse"
+          },
+          "task": {
+            "$ref": "#/components/schemas/LeaveTaskResponse"
+          }
+        },
+        "required": [
+          "leave",
+          "task"
+        ],
+        "type": "object"
+      },
+      "LeaveResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "initiatorId": {
+            "type": "string"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submissionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdAt",
+          "endDate",
+          "id",
+          "initiatorId",
+          "processId",
+          "reason",
+          "releaseId",
+          "revision",
+          "startDate",
+          "status",
+          "submissionId"
+        ],
+        "type": "object"
+      },
+      "LeaveSubmitRequest": {
+        "properties": {
+          "endDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "submissionId": {
+            "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "endDate",
+          "reason",
+          "startDate",
+          "submissionId"
+        ],
+        "type": "object"
+      },
+      "LeaveTaskResponse": {
+        "properties": {
+          "assignee": {
+            "type": "string"
+          },
+          "canHandle": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "canHandle",
+          "id",
+          "key"
+        ],
+        "type": "object"
+      },
       "LoginLogResponse": {
         "properties": {
           "browser": {
@@ -2625,6 +2844,64 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/JobResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
+      "PageResponseLeavePendingResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LeavePendingResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
+      "PageResponseLeaveResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LeaveResponse"
             },
             "type": "array"
           },
@@ -10218,6 +10495,328 @@
         },
         "tags": [
           "workflow-release-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves": {
+      "post": {
+        "operationId": "submitWorkflowLeave",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/handled": {
+      "get": {
+        "operationId": "listHandledWorkflowLeaves",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseLeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/mine": {
+      "get": {
+        "operationId": "listMyWorkflowLeaves",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseLeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/pending": {
+      "get": {
+        "operationId": "listPendingWorkflowLeaves",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseLeavePendingResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/{id}": {
+      "get": {
+        "operationId": "getWorkflowLeave",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveDetailResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/{id}/claim": {
+      "post": {
+        "operationId": "claimWorkflowLeaveTask",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/{id}/decision": {
+      "post": {
+        "operationId": "decideWorkflowLeaveTask",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/leaves/{id}/withdrawal": {
+      "post": {
+        "operationId": "withdrawWorkflowLeave",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaveCommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-leave-controller"
         ]
       }
     },
