@@ -2910,6 +2910,35 @@
         ],
         "type": "object"
       },
+      "PageResponseWorkflowPackageSummary": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowPackageSummary"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
       "PasswordStatus": {
         "properties": {
           "characterType": {
@@ -3965,6 +3994,127 @@
         "required": [
           "approved",
           "taskKey"
+        ],
+        "type": "object"
+      },
+      "WorkflowPackageRequest": {
+        "properties": {
+          "businessType": {
+            "pattern": "leave",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/WorkflowValidationRequest"
+          }
+        },
+        "required": [
+          "businessType",
+          "name",
+          "source"
+        ],
+        "type": "object"
+      },
+      "WorkflowPackageResponse": {
+        "properties": {
+          "businessType": {
+            "type": "string"
+          },
+          "contentDigest": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/WorkflowValidationRequest"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validatedRevision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowPackageSummary": {
+        "properties": {
+          "businessType": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validatedRevision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowPackageUpdateRequest": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/WorkflowPackageRequest"
+          },
+          "expectedRevision": {
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "expectedRevision"
+        ],
+        "type": "object"
+      },
+      "WorkflowPackageValidationResponse": {
+        "properties": {
+          "contentDigest": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "validatedRevision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowRevisionRequest": {
+        "properties": {
+          "expectedRevision": {
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedRevision"
         ],
         "type": "object"
       },
@@ -9896,6 +10046,191 @@
         },
         "tags": [
           "generator-synchronization-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/packages": {
+      "get": {
+        "operationId": "listWorkflowPackages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseWorkflowPackageSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-package-controller"
+        ]
+      },
+      "post": {
+        "operationId": "createWorkflowPackage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowPackageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPackageResponse"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "tags": [
+          "workflow-package-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/packages/{id}": {
+      "get": {
+        "operationId": "getWorkflowPackage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPackageResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-package-controller"
+        ]
+      },
+      "put": {
+        "operationId": "updateWorkflowPackage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowPackageUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPackageResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-package-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/packages/{id}/validation": {
+      "post": {
+        "operationId": "validateWorkflowPackage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRevisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowPackageValidationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-package-controller"
         ]
       }
     },

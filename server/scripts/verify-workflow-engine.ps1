@@ -1,5 +1,5 @@
 # Run only against this script's disposable MySQL; never a developer/production schema.
-param([ValidateSet(0,1)][int]$LowerCaseTableNames=0)
+param([ValidateSet(0,1)][int]$LowerCaseTableNames=0, [switch]$Packages)
 $ErrorActionPreference='Stop'
 $workflowRoot=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $workflowName='eforge-workflow-'+[guid]::NewGuid().ToString('N').Substring(0,12)
@@ -23,11 +23,17 @@ try {
             & docker exec -i --env "MYSQL_PWD=$workflowPassword" $workflowName mysql --default-character-set=utf8mb4 -uroot eforge_workflow
         if($LASTEXITCODE -ne 0){throw 'Explicit official workflow schema installation failed.'}
     }
+    if ($Packages) {
+        Get-Content -LiteralPath (Join-Path $workflowRoot 'sql/workflow/04-eforge-workflow.sql') -Raw |
+            & docker exec -i --env "MYSQL_PWD=$workflowPassword" $workflowName mysql --default-character-set=utf8mb4 -uroot eforge_workflow
+        if ($LASTEXITCODE -ne 0) { throw 'Workflow package schema installation failed.' }
+    }
     $workflowAddress=& docker port $workflowName 3306/tcp
     if($LASTEXITCODE -ne 0 -or $workflowAddress -notmatch '^127\.0\.0\.1:(\d+)$'){throw 'Unexpected workflow port binding.'}
     $env:EFORGE_WORKFLOW_TEST_JDBC_URL="jdbc:mysql://127.0.0.1:$($Matches[1])/eforge_workflow?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
     $env:EFORGE_WORKFLOW_TEST_JDBC_PASSWORD=$workflowPassword
-    & mvn -B -ntp -f (Join-Path $workflowRoot 'server/pom.xml') -pl eforge-workflow -am test '-Dtest=WorkflowEngineConfigurationTest#realEngineAndBusinessWritesShareCommitAndRollback' '-Dsurefire.failIfNoSpecifiedTests=false'
+    $workflowTest = if ($Packages) {'-Dtest=WorkflowPackageMysqlTest'} else {'-Dtest=WorkflowEngineConfigurationTest#realEngineAndBusinessWritesShareCommitAndRollback'}
+    & mvn -B -ntp -f (Join-Path $workflowRoot 'server/pom.xml') -pl eforge-workflow -am test $workflowTest '-Dsurefire.failIfNoSpecifiedTests=false'
     if($LASTEXITCODE -ne 0){throw 'Actual MySQL workflow transaction test failed.'}
 } finally {
     $env:EFORGE_WORKFLOW_TEST_JDBC_URL=$workflowPreviousUrl

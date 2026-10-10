@@ -13,6 +13,12 @@ import org.springframework.core.io.Resource;
 @ConditionalOnProperty(name = "flowable.process.enabled", havingValue = "true")
 public class WorkflowEngineConfiguration {
     @Bean
+    io.eforge.enterprise.workflow.api.WorkflowPackages workflowPackages(javax.sql.DataSource dataSource,
+        io.eforge.enterprise.workflow.api.WorkflowUnitOfWork transactions,
+        io.eforge.enterprise.workflow.api.WorkflowValidation validation) {
+        return new WorkflowPackageStore(dataSource, transactions, validation);
+    }
+    @Bean
     io.eforge.enterprise.workflow.api.WorkflowValidation workflowValidation(org.flowable.engine.ProcessEngine engine,
         io.eforge.enterprise.workflow.api.WorkflowUnitOfWork transactions) {
         return new WorkflowScenarioValidation(engine, transactions);

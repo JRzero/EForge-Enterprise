@@ -78,6 +78,9 @@ try {
                 & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
             if ($LASTEXITCODE -ne 0) { throw 'Explicit workflow schema initialization failed.' }
         }
+        Get-Content -LiteralPath (Join-Path $repoRoot 'sql/workflow/04-eforge-workflow.sql') -Raw |
+            & docker exec -i --env "MYSQL_PWD=$testPassword" $mysqlName mysql --default-character-set=utf8mb4 -uroot eforge_enterprise
+        if ($LASTEXITCODE -ne 0) { throw 'Workflow metadata schema initialization failed.' }
     }
     if ($VerifyWeb -or $VerifyGeneratedReact) {
         # Isolate unrelated browser modules from the original default-on reminder.
@@ -199,6 +202,7 @@ try {
         Assert-Check ([int]$workflowTables -eq 0) 'Disabled workflow must not create engine tables.'
     }
     . (Join-Path $PSScriptRoot 'verify-workflow-validation-integration.ps1')
+    . (Join-Path $PSScriptRoot 'verify-workflow-package-integration.ps1')
     if ($VerifyGeneratedBusiness) {
         . (Join-Path $PSScriptRoot 'verify-generated-business-integration.ps1')
     }

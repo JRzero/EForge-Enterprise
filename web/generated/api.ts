@@ -951,8 +951,19 @@ export type PreviewResponse = {
     generationDate?: string;
     tableId?: string;
 };
-export type WorkflowStatus = {
-    enabled?: boolean;
+export type WorkflowPackageSummary = {
+    businessType?: string;
+    id?: string;
+    name?: string;
+    revision?: string;
+    updatedAt?: string;
+    validatedRevision?: string;
+};
+export type PageResponseWorkflowPackageSummary = {
+    items: WorkflowPackageSummary[];
+    page: number;
+    pageSize: number;
+    total: number;
 };
 export type WorkflowDecisionRequest = {
     approved: boolean;
@@ -966,6 +977,37 @@ export type WorkflowScenarioRequest = {
 export type WorkflowValidationRequest = {
     bpmnXml: string;
     scenarios: WorkflowScenarioRequest[];
+};
+export type WorkflowPackageRequest = {
+    businessType: string;
+    name: string;
+    source: WorkflowValidationRequest;
+};
+export type WorkflowPackageResponse = {
+    businessType?: string;
+    contentDigest?: string;
+    id?: string;
+    name?: string;
+    revision?: string;
+    source?: WorkflowValidationRequest;
+    updatedAt?: string;
+    validatedRevision?: string;
+};
+export type WorkflowPackageUpdateRequest = {
+    content: WorkflowPackageRequest;
+    expectedRevision: string;
+};
+export type WorkflowRevisionRequest = {
+    expectedRevision: string;
+};
+export type WorkflowPackageValidationResponse = {
+    contentDigest?: string;
+    id?: string;
+    revision?: string;
+    validatedRevision?: string;
+};
+export type WorkflowStatus = {
+    enabled?: boolean;
 };
 export type WorkflowScenarioResponse = {
     completedTasks?: string[];
@@ -2615,6 +2657,58 @@ export function synchronizeGeneratorTable(id: string, opts?: Oazapfts.RequestOpt
         ...opts,
         method: "POST"
     });
+}
+export function listWorkflowPackages({ page, pageSize }: {
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponseWorkflowPackageSummary;
+    }>(`/api/v1/workflow/packages${QS.query(QS.explode({
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function createWorkflowPackage(workflowPackageRequest: WorkflowPackageRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: WorkflowPackageResponse;
+    }>("/api/v1/workflow/packages", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: workflowPackageRequest
+    }));
+}
+export function getWorkflowPackage(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowPackageResponse;
+    }>(`/api/v1/workflow/packages/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updateWorkflowPackage(id: string, workflowPackageUpdateRequest: WorkflowPackageUpdateRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowPackageResponse;
+    }>(`/api/v1/workflow/packages/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: workflowPackageUpdateRequest
+    }));
+}
+export function validateWorkflowPackage(id: string, workflowRevisionRequest: WorkflowRevisionRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowPackageValidationResponse;
+    }>(`/api/v1/workflow/packages/${encodeURIComponent(id)}/validation`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: workflowRevisionRequest
+    }));
 }
 export function getWorkflowStatus(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
