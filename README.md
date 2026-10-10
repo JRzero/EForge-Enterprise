@@ -30,6 +30,8 @@ Key documents:
 - [Architecture decisions](docs/adr/)
 - [Flowable scope and acceptance](tasks/flowable-integration.md)
 - [Workflow installation and operations](docs/workflow-operations.md)
+- [Visual workflow designer guide](docs/workflow-designer-guide.md)
+- [Visual designer acceptance](tasks/workflow-designer.md)
 - [Agent workflow maintenance](docs/workflow-agent.md)
 
 Optional workflow support uses the pinned official Flowable 7.2.0 Process Starter.

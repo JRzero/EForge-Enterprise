@@ -2,7 +2,7 @@
 
 ## Visual workflow designer (2026-10-10)
 
-The user authorized this extension after the baseline Flowable integration. The bounded bpmn-js canvas, node/connection editing, Flowable properties, XML import/export, existing layout preservation and draft protection are implemented. Final acceptance is tracked in [designer tasks](../tasks/workflow-designer.md); cloud and complete runtime verification are still pending. This supersedes the historical “future designer” classification below. Complex multi-approver orchestration, instance migration and the deferred form builder are unchanged.
+The bounded bpmn-js canvas, node/connection editing, Flowable properties, XML import/export, existing layout preservation and draft protection are complete. Exact implementation `a72e602b37c63f8127cdd136ddbfaa2ee8dd83bb` passed server `38054399126` (all four jobs), web `38054399118` and skills `38054399120`. Evidence includes 902 backend declarations with environment-dependent tests separately exercised, 130 units, 221 mocked browsers and each profile's 68 real browsers/full API/exact OpenAPI/generated-module regressions. See [final designer acceptance](../tasks/workflow-designer.md). This supersedes the historical “future designer” classification below. Source is pushed on `codex/flowable-integration`, not merged into main or deployed. Complex multi-approver orchestration, instance migration and the deferred form builder are unchanged.
 
 ## Flowable iteration (2026-10-09)
 
