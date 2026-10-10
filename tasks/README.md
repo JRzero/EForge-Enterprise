@@ -1,5 +1,7 @@
 # 迭代任务索引
 
+当前任务：[可视化流程设计器](workflow-designer.md)（in_progress），[规格](../spec/workflow-designer.md)。
+
 流程规则：[Agent 工作流](../docs/agent-workflow.md)。每轮使用一个 `tasks/<initiative>.md` 同时管理计划、依赖和执行状态，模板为 `_template.md`。
 
 已完成：[Flowable 集成](flowable-integration.md)（done，2026-10-10），[规格](../spec/flowable-integration.md)。精确实现 e7cfae4 的服务器四项及前端云端全部成功；后续扩展与生产部署不在本次完成声明内。

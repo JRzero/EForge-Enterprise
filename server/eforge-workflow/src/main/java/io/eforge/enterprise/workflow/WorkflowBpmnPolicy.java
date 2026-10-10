@@ -17,7 +17,7 @@ public final class WorkflowBpmnPolicy {
     private static final String BPMN = "http://www.omg.org/spec/BPMN/20100524/MODEL";
     private static final String FLOWABLE = "http://flowable.org/bpmn";
     private static final Map<String, Set<String>> ATTRIBUTES = Map.of(
-        "definitions", Set.of("id", "targetNamespace"), "process", Set.of("id", "name", "isExecutable"),
+        "definitions", Set.of("id", "targetNamespace", "exporter", "exporterVersion"), "process", Set.of("id", "name", "isExecutable"),
         "startEvent", Set.of("id", "name"), "endEvent", Set.of("id", "name"),
         "userTask", Set.of("id", "name"), "exclusiveGateway", Set.of("id", "name", "default"),
         "sequenceFlow", Set.of("id", "name", "sourceRef", "targetRef"), "conditionExpression", Set.of(),
@@ -42,6 +42,7 @@ public final class WorkflowBpmnPolicy {
             var process = (Element) processes.item(0);
             if (process.getParentNode() != document.getDocumentElement() || !"true".equals(process.getAttribute("isExecutable"))) throw invalid();
             validateGraph(process);
+            WorkflowDiagramPolicy.validate(document,process);
             return new ValidatedProcess(process.getAttribute("id"), xml,
                 HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(xml.getBytes(StandardCharsets.UTF_8))));
         } catch (ApiFailure failure) { throw failure; }
@@ -50,6 +51,12 @@ public final class WorkflowBpmnPolicy {
 
     private static void inspect(Element element, int depth) {
         String kind = element.getLocalName();
+        if(depth==1 && "http://www.omg.org/spec/BPMN/20100524/DI".equals(element.getNamespaceURI()) && kind.equals("BPMNDiagram"))return;
+        if(BPMN.equals(element.getNamespaceURI()) && Set.of("incoming","outgoing").contains(kind)){
+            if(element.getAttributes().getLength()!=0 || element.getChildNodes().getLength()!=1 || element.getFirstChild().getNodeType()!=Node.TEXT_NODE
+                || !element.getTextContent().matches("[A-Za-z][A-Za-z0-9_]{0,63}"))throw invalid();
+            return;
+        }
         if (depth > 8 || !BPMN.equals(element.getNamespaceURI()) || !ATTRIBUTES.containsKey(kind)) throw invalid();
         for (int i = 0; i < element.getAttributes().getLength(); i++) {
             var attribute = (Attr) element.getAttributes().item(i);
@@ -81,10 +88,11 @@ public final class WorkflowBpmnPolicy {
         for (Node child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child instanceof Element nested) {
                 boolean allowed = switch (kind) {
-                    case "definitions" -> nested.getLocalName().equals("process");
+                    case "definitions" -> Set.of("process","BPMNDiagram").contains(nested.getLocalName());
                     case "process" -> Set.of("startEvent", "endEvent", "userTask", "exclusiveGateway", "sequenceFlow", "documentation").contains(nested.getLocalName());
                     case "sequenceFlow" -> nested.getLocalName().equals("conditionExpression");
-                    default -> nested.getLocalName().equals("documentation") && !kind.equals("documentation") && !kind.equals("conditionExpression");
+                    default -> (nested.getLocalName().equals("documentation") && !kind.equals("documentation") && !kind.equals("conditionExpression"))
+                        || Set.of("startEvent","endEvent","userTask","exclusiveGateway").contains(kind) && Set.of("incoming","outgoing").contains(nested.getLocalName());
                 };
                 if (!allowed) throw invalid();
                 inspect(nested, depth + 1);

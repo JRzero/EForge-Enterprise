@@ -1,5 +1,4 @@
 import {test,expect,type Page} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
 
 async function login(page:Page,path:string,username='admin',password='admin123'){
   await page.goto(path);await page.getByLabel('账号',{exact:true}).fill(username);await page.getByLabel('密码',{exact:true}).fill(password);await page.getByRole('button',{name:'登录',exact:true}).click();
@@ -20,12 +19,22 @@ test('real leave request, separate approver, claim/approve/reject/withdraw and d
     const stamp=Date.now(),username=`leave${stamp}`;
     const role=await page.request.post('/api/v1/system/roles',{headers:auth,data:{name:`审批${stamp}`,key:`leave${stamp}`,sort:10,status:'0',remark:'',menuLinked:false,menuKeys:['workflow','workflow-tasks','workflow-task-handle']}});expect(role.status()).toBe(201);roleId=(await role.json()).id;
     const user=await page.request.post('/api/v1/system/users',{headers:auth,data:{user:{username,displayName:'审批人',departmentId:'103',sex:'2',status:'0',roleIds:['2',roleId],postIds:[]},password:'Workflow123'}});expect(user.status()).toBe(201);userId=(await user.json()).id;
-    const xml=await readFile('../workflows/leave-approval/process.bpmn20.xml','utf8');
-    const created=await page.request.post('/api/v1/workflow/packages',{headers:auth,data:{name:`浏览器审批${stamp}`,businessType:'leave',source:{bpmnXml:xml,scenarios:[{name:'同意',decisions:[{taskKey:'review',approved:true}],expectedEnd:'approvedEnd'},{name:'拒绝',decisions:[{taskKey:'review',approved:false}],expectedEnd:'rejectedEnd'}]}}});expect(created.status()).toBe(201);const packageId=(await created.json()).id;
+    await page.goto('/workflow/packages');await page.getByRole('button',{name:'新增流程包',exact:true}).click();
+    const packageEditor=page.getByRole('dialog',{name:'新增流程包',exact:true});
+    await packageEditor.getByLabel('流程名称',{exact:true}).fill(`浏览器审批${stamp}`);
+    await packageEditor.getByRole('button',{name:'可视化设计',exact:true}).click();
+    await expect(packageEditor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
+    await packageEditor.getByLabel('选择节点或连线').selectOption('review');
+    await packageEditor.getByLabel('节点名称',{exact:true}).fill('画布编辑后的审批');
+    await packageEditor.getByRole('button',{name:'应用属性',exact:true}).click();
+    const creation=page.waitForResponse(response=>response.url().endsWith('/api/v1/workflow/packages')&&response.request().method()==='POST');
+    await packageEditor.getByRole('button',{name:'保存草稿',exact:true}).click();
+    const created=await creation;expect(created.status()).toBe(201);const packageId=(await created.json()).id;
     expect((await page.request.post(`/api/v1/workflow/packages/${packageId}/validation`,{headers:auth,data:{expectedRevision:'1'}})).status()).toBe(200);
     const published=await page.request.post(`/api/v1/workflow/packages/${packageId}/releases`,{headers:auth,data:{expectedRevision:'1'}});expect(published.status()).toBe(200);const release=await published.json();
     const active=await page.request.get('/api/v1/workflow/activations/leave',{headers:auth});expect(active.status()).toBe(200);
     expect((await page.request.put('/api/v1/workflow/activations/leave',{headers:auth,data:{releaseId:release.id,expectedRevision:(await active.json()).revision}})).status()).toBe(200);
+    await page.goto('/workflow/requests');
     const approver=await approverContext.newPage();await login(approver,'/workflow/tasks',username,'Workflow123');
     for(const outcome of ['批准','拒绝','撤回']){
       const reason=`${outcome}申请${stamp}`;

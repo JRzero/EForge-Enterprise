@@ -19,8 +19,15 @@ test('real workflow editor, scenario proof, immutable publication and separate a
     const name=`浏览器审批${Date.now()}`;await page.getByRole('button',{name:'新增流程包',exact:true}).click();
     const editor=page.getByRole('dialog',{name:'新增流程包',exact:true});await editor.getByLabel('流程名称',{exact:true}).fill(name);
     await expect(editor.getByLabel('流程文件',{exact:true})).toContainText('candidateGroups="role:2"');
+    await editor.getByRole('button',{name:'可视化设计',exact:true}).click();
+    await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
+    await editor.getByLabel('选择节点或连线').selectOption('review');
+    await editor.getByLabel('节点名称',{exact:true}).fill('可视化主管审批');
+    await editor.getByRole('button',{name:'应用属性',exact:true}).click();
     const created=page.waitForResponse(response=>response.url().endsWith('/api/v1/workflow/packages')&&response.request().method()==='POST');
     await editor.getByRole('button',{name:'保存草稿',exact:true}).click();const reply=await created;expect(reply.status()).toBe(201);const draft=await reply.json();
+    const stored=await page.request.get(`/api/v1/workflow/packages/${draft.id}`,{headers:auth});
+    expect((await stored.json()).source.bpmnXml).toContain('BPMNDiagram');
     const row=page.getByRole('row').filter({has:page.getByRole('cell',{name,exact:true})});await expect(row).toBeVisible();
     await expect(row.getByRole('button',{name:'发布',exact:true})).toBeDisabled();
     await row.getByRole('button',{name:'校验',exact:true}).click();await expect(row.getByRole('cell',{name:'已通过',exact:true})).toBeVisible();

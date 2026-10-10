@@ -1,5 +1,9 @@
 # EForge Enterprise Roadmap
 
+## Visual workflow designer (2026-10-10)
+
+The user authorized this extension after the baseline Flowable integration. The bounded bpmn-js canvas, node/connection editing, Flowable properties, XML import/export, existing layout preservation and draft protection are implemented. Final acceptance is tracked in [designer tasks](../tasks/workflow-designer.md); cloud and complete runtime verification are still pending. This supersedes the historical “future designer” classification below. Complex multi-approver orchestration, instance migration and the deferred form builder are unchanged.
+
 ## Flowable iteration (2026-10-09)
 
 The authorized Flowable integration scope is complete; see [spec](../spec/flowable-integration.md) and [final evidence](../tasks/flowable-integration.md). Optional official engine integration, explicit MySQL schema, transaction/security foundations, drafts, immutable publication, activation, transactional leave approvals, management pages, version comparison, bounded failed-job recovery and Agent maintenance are implemented. Exact source `e7cfae4a1bd9bdedd2c8e7ee2372c42fe3e49e59` passed server `38039102287` (all four jobs) and web `38039102297`. Direct logs prove 900 backend declarations (11 conditional skips with actual MySQL tests executed separately in both modes), 128 frontend units, 220 mocked browsers, both profiles each 68 real browsers/full API/exact OpenAPI, and existing generated-module regressions. Engine and background execution remain independently disabled by default. Source is pushed on `codex/flowable-integration`, not merged into main or deployed to production. The visual BPMN designer, complex multi-approver orchestration and instance migration remain future extensions; the form builder stays deferred.

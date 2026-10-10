@@ -1,8 +1,10 @@
 import {test,expect} from './fixtures';
 import type {Page} from '@playwright/test';
+import {readFileSync} from 'node:fs';
 const id='00000000-0000-0000-0000-000000000001',revision='9007199254740993';
 const row={id,name:'审批 <plain>',businessType:'leave',revision,validatedRevision:revision,updatedAt:'2026-10-10T01:00:00Z'};
 const source={bpmnXml:'<process name="plain"/>',scenarios:[]};
+const designerSource=readFileSync(new URL('../../../workflows/leave-approval/process.bpmn20.xml',import.meta.url),'utf8');
 async function login(page:Page,permissions:string[],enabled=true){
   await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
@@ -11,6 +13,68 @@ async function login(page:Page,permissions:string[],enabled=true){
   await page.route('**/api/v1/workflow/status',route=>route.fulfill({json:{enabled}}));
   await page.goto('/workflow/packages');await page.getByLabel('账号',{exact:true}).fill('reader');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
 }
+
+test('visual workflow designer edits real shapes, preserves Flowable XML and protects conflicting drafts',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  let written='';
+  await page.route(`**/api/v1/workflow/packages/${id}`,route=>{
+    if(route.request().method()==='GET')return route.fulfill({json:{...row,source:{bpmnXml:designerSource,scenarios:[]}}});
+    written=route.request().postDataJSON().content.source.bpmnXml;return route.fulfill({status:409,json:{code:'WORKFLOW_PACKAGE_CONFLICT'}});
+  });
+  await login(page,['workflow:definition:list','workflow:definition:edit']);await page.getByRole('button',{name:'编辑',exact:true}).click();
+  const editor=page.getByRole('dialog',{name:'编辑流程包',exact:true});await editor.getByRole('button',{name:'可视化设计',exact:true}).click();
+  const designer=editor.getByRole('region',{name:'可视化流程设计器',exact:true});
+  await expect(designer.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
+  await expect(designer.locator('.djs-element[data-element-id="review"]')).toBeVisible();
+  await designer.locator('.workflow-designer-canvas').evaluate(async element=>{
+    element.setAttribute('style','display:none');await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
+    element.removeAttribute('style');await new Promise(requestAnimationFrame);
+  });
+  await designer.locator('.djs-element[data-element-id="approvedEnd_label"]').click();
+  await expect(designer.getByLabel('节点标识',{exact:true})).toHaveValue('approvedEnd');
+  await designer.getByLabel('节点名称',{exact:true}).fill('批准完成');await designer.getByRole('button',{name:'应用属性',exact:true}).click();
+  await expect(designer.locator('.djs-shape[data-element-id="approvedEnd"]')).toBeVisible();
+  await designer.getByLabel('选择节点或连线').selectOption('review');await designer.getByLabel('节点名称',{exact:true}).fill('主管复核 <安全文本>');
+  await editor.getByRole('button',{name:'返回 XML 源码'}).click();await expect(editor.getByRole('alert')).toContainText('应用属性');
+  await designer.getByLabel('选择节点或连线').selectOption('start');await expect(designer.getByLabel('节点名称',{exact:true})).toHaveValue('主管复核 <安全文本>');
+  await designer.getByRole('button',{name:'应用属性',exact:true}).click();
+  await designer.getByRole('button',{name:'撤销',exact:true}).click();await expect(designer.getByLabel('节点名称',{exact:true})).not.toHaveValue('主管复核 <安全文本>');
+  await designer.getByRole('button',{name:'重做',exact:true}).click();await expect(designer.getByLabel('节点名称',{exact:true})).toHaveValue('主管复核 <安全文本>');
+  const shape=designer.locator('.djs-shape[data-element-id="review"] .djs-visual');const bounds=await shape.boundingBox();expect(bounds).toBeTruthy();
+  await page.mouse.move(bounds!.x+bounds!.width/2,bounds!.y+bounds!.height/2);await page.mouse.down();await page.mouse.move(bounds!.x+bounds!.width/2+45,bounds!.y+bounds!.height/2+30,{steps:8});await page.mouse.up();
+  await editor.getByRole('button',{name:'保存草稿',exact:true}).click();await expect(editor.getByRole('alert')).toContainText('流程版本已变化');
+  expect(written).toContain('BPMNDiagram');expect(written).toContain('candidateGroups="role:2"');expect(written).toContain('主管复核');
+  await editor.getByRole('button',{name:'返回 XML 源码'}).click();await expect(editor.getByLabel('流程文件',{exact:true})).toHaveValue(written);
+  await editor.getByRole('button',{name:'可视化设计',exact:true}).click();await expect(designer.getByRole('button',{name:'添加人工审批'})).toBeEnabled();
+  await designer.getByRole('button',{name:'添加人工审批'}).click();
+  const added=await designer.getByLabel('节点标识',{exact:true}).inputValue();expect(added).not.toBe('review');
+  await designer.getByLabel('连接到').selectOption('review');await designer.getByRole('button',{name:'连接节点',exact:true}).click();
+  await designer.getByLabel('选择节点或连线').selectOption(added);await designer.getByRole('button',{name:'删除所选',exact:true}).click();
+  await expect(designer.locator(`.djs-shape[data-element-id="${added}"]`)).toHaveCount(0);
+  await designer.getByRole('button',{name:'撤销',exact:true}).click();await expect(designer.locator(`.djs-shape[data-element-id="${added}"]`)).toBeVisible();
+  await designer.getByRole('button',{name:'重做',exact:true}).click();await expect(designer.locator(`.djs-shape[data-element-id="${added}"]`)).toHaveCount(0);
+  for(const width of [1440,1024,768,320]){await page.setViewportSize({width,height:900});await designer.scrollIntoViewIfNeeded();expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);await page.screenshot({path:`test-results/designer-${width}.png`,fullPage:true});}
+  await page.setViewportSize({width:1440,height:900});
+  await editor.getByRole('button',{name:'返回 XML 源码'}).click();
+  const xml=await editor.getByLabel('流程文件',{exact:true}).inputValue();
+  const download=page.waitForEvent('download');await editor.getByRole('button',{name:'导出 BPMN',exact:true}).click();
+  expect(readFileSync((await (await download).path())!,'utf8')).toBe(xml);
+  await editor.getByLabel('导入 BPMN 文件').setInputFiles({name:'bad.xml',mimeType:'application/xml',buffer:Buffer.from('<broken>')});
+  await expect(editor.getByRole('alert')).toContainText('原草稿内容已保留');await expect(editor.getByLabel('流程文件',{exact:true})).toHaveValue(xml);
+  await editor.getByLabel('导入 BPMN 文件').setInputFiles({name:'workflow.bpmn',mimeType:'application/xml',buffer:Buffer.from(xml)});
+  await expect(editor.getByRole('alert')).toHaveCount(0);
+  await editor.getByLabel('流程文件',{exact:true}).fill(xml.replace('flowable:candidateGroups="role:2"','flowable:assignee="${approver}"'));
+  await editor.getByRole('button',{name:'可视化设计',exact:true}).click();await expect(designer.getByRole('button',{name:'添加人工审批'})).toBeEnabled();
+  await designer.getByLabel('选择节点或连线').selectOption('review');await designer.getByLabel('节点名称',{exact:true}).fill('动态审批人');
+  await designer.getByRole('button',{name:'应用属性',exact:true}).click();
+  await editor.getByRole('button',{name:'返回 XML 源码'}).click();
+  const dynamicXml=await editor.getByLabel('流程文件',{exact:true}).inputValue();expect(dynamicXml).toContain('flowable:assignee="${approver}"');
+  await editor.getByRole('button',{name:'取消',exact:true}).click();
+  await expect(page.getByRole('alertdialog',{name:'有未保存的修改'})).toBeVisible();
+  await page.getByRole('button',{name:'继续编辑',exact:true}).click();await expect(editor.getByLabel('流程文件',{exact:true})).toHaveValue(dynamicXml);
+  expect(errors).toEqual([]);
+});
 test('workflow disabled state does not request unavailable package storage',async({page})=>{
   let reads=0;await page.route('**/api/v1/workflow/packages?*',route=>{reads++;return route.fulfill({status:503,json:{}});});
   await login(page,['workflow:definition:list','workflow:definition:edit'],false);
