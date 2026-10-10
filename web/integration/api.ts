@@ -2,7 +2,7 @@ import {unlockScreen,type UnlockScreenRequestWrite} from '../generated/api';
 import {submitWorkflowLeave,listMyWorkflowLeaves,listHandledWorkflowLeaves,listPendingWorkflowLeaves,getWorkflowLeave,
   claimWorkflowLeaveTask,decideWorkflowLeaveTask,withdrawWorkflowLeave,type LeaveSubmitRequest,type LeaveCommandRequest,type LeaveDecisionRequest,
   getWorkflowStatus,listWorkflowPackages,getWorkflowPackage,createWorkflowPackage,updateWorkflowPackage,
-  validateWorkflowPackage,listWorkflowReleases,publishWorkflowPackage,getWorkflowActivation,activateWorkflowRelease,
+  validateWorkflowPackage,listWorkflowReleases,publishWorkflowPackage,getWorkflowActivation,activateWorkflowRelease,compareWorkflowPackage,
   type WorkflowPackageRequest,type WorkflowPackageUpdateRequest,type WorkflowActivationRequest} from '../generated/api';
 import {getRegistrationStatus, registerAccount, type RegistrationRequestWrite} from '../generated/api';
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
@@ -83,6 +83,7 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async publishWorkflowPackage(id:string,expectedRevision:string){return (await publishWorkflowPackage(id,{expectedRevision},{baseUrl:'',fetch:transport(true,60000)})).data;},
     async getWorkflowActivation(signal?:AbortSignal){return (await getWorkflowActivation('leave',{baseUrl:'',fetch:transport(true),signal})).data;},
     async activateWorkflowRelease(body:WorkflowActivationRequest){return (await activateWorkflowRelease('leave',body,{baseUrl:'',fetch:transport(true)})).data;},
+    async compareWorkflowPackage(id:string,baselineId:string,query:Parameters<typeof compareWorkflowPackage>[2],signal?:AbortSignal){return (await compareWorkflowPackage(id,baselineId,query,{baseUrl:'',fetch:transport(true),signal})).data;},
     async unlockScreen(request:UnlockScreenRequestWrite,signal?:AbortSignal){await unlockScreen(request,{baseUrl:'',fetch:transport(true),signal});},
     async authenticatedFetch(input: RequestInfo | URL, init?: RequestInit) {
       const origin = typeof window === 'undefined' ? 'http://eforge.local' : window.location.origin;

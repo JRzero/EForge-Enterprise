@@ -60,3 +60,30 @@ test('workflow publication and activation are separate confirmed actions',async(
   await expect.poll(async()=>{const bounds=await panel.boundingBox();return bounds?bounds.x>=0&&bounds.x+bounds.width<=320:false;}).toBe(true);
   await page.screenshot({path:'test-results/workflow-release-mobile.png',fullPage:true});
 });
+
+test('workflow comparison is read-only, keeps exact versions and safely retries at mobile width',async({page})=>{
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));
+  await page.route(`**/api/v1/workflow/packages/${id}`,route=>route.fulfill({json:{...row,source}}));
+  await page.route(`**/api/v1/workflow/packages/${id}/releases?*`,route=>route.fulfill({json:{items:[{id,name:row.name,packageRevision:revision}],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/workflow/activations/leave',route=>route.fulfill({json:{revision:'0'}}));
+  let failed=true;const queries:string[]=[];
+  await page.route(`**/api/v1/workflow/packages/${id}/comparison?*`,route=>{
+    expect(route.request().method()).toBe('GET');queries.push(route.request().url());
+    return route.fulfill(failed?{status:503,json:{code:'WORKFLOW_STORAGE_UNAVAILABLE'}}:{json:{packageId:id,baseline:{revision},target:{kind:'DRAFT',revision:'9007199254740994'},fields:[{name:'bpmnXml',before:'<script>window.injected=true</script>',after:'<next/>',changed:true}]}});
+  });
+  await login(page,['workflow:definition:list']);await page.getByRole('button',{name:'详情',exact:true}).click();
+  const panel=page.getByRole('dialog',{name:'流程详情与发布版本'});
+  await panel.getByRole('button',{name:`版本 ${revision} 设为基准`,exact:true}).click();
+  await panel.getByRole('button',{name:'与当前草稿对比',exact:true}).click();
+  const comparison=panel.getByRole('region',{name:'版本内容对比'});await expect(comparison.getByRole('alert')).toContainText('工作流存储暂不可用');
+  failed=false;await comparison.getByRole('button',{name:'重新读取对比'}).click();
+  await expect(comparison).toContainText('9007199254740994');await expect(comparison.locator('pre').first()).toHaveText('<script>window.injected=true</script>');
+  expect(await page.evaluate(()=>Object.hasOwn(window,'injected'))).toBe(false);
+  expect(new URL(queries[0]!).searchParams.has('targetReleaseId')).toBe(false);
+  await panel.getByRole('button',{name:`比较版本 ${revision}`,exact:true}).click();
+  await expect.poll(()=>new URL(queries.at(-1)!).searchParams.get('targetReleaseId')).toBe(id);
+  await page.setViewportSize({width:320,height:900});await expect(comparison).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await comparison.locator('pre').last().scrollIntoViewIfNeeded();
+  await page.screenshot({path:'test-results/workflow-comparison-mobile.png',fullPage:true});
+});

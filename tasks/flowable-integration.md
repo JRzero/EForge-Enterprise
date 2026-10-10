@@ -77,9 +77,12 @@
 - 最终顺序进程 98746 终态成功：`flowable-leave-final-enabled-runtime.log` / `flowable-leave-final-disabled-runtime.log` 均完整 API PASS，各 10 个真实浏览器通过。两实时 OpenAPI 与契约 SHA256 均为 `0BD127CEDC7B2FC0F599232D61DC374B26D788F9358D88156F98E9C94DC56DFC`。
 - `flowable-leave-all-browser.log` 全量 216 项通过；`flowable-leave-accepted-web.log` 最终 lint/typecheck/128 单元/build 通过，客户端复现另已通过。此阶段本地验收完成，精确提交云端仍待终态。
 - 流程差异与失败任务运维尚未交付，完整集成未完成。
+- 请假/Agent 精确实现 `19da992e7cfa6f1eb37e5708b5ce67eb0f26e2e6` 的 server `38035410035` 全四项、web `38035410023`、skills `38035410020` 终态成功。直接日志 `flowable-leave-cloud-accepted.log` 证明两配置各 67 真实浏览器与完整 API、真实审批/Agent 和精确 OpenAPI；此前缓存测试失败由 `38317ca` 修复，随该精确提交完整通过。
 
 ### 下一切片：发布内容对比
 
 - 只读 `GET /api/v1/workflow/packages/{id}/comparison`，复用 `workflow:definition:list`。明确指定基准发布 ID；目标是同包另一发布或当前草稿，跨包返回 404。
 - 返回双方精确字符串版本、摘要及名称/业务绑定/BPMN/场景的完整前后内容与变更标识；不以文本变化冒充流程语义等价证明。一个一致读取取得双方，差异请求不改校验证明、发布或激活。
 - 发布面板提供基准与目标选择、加载/失败/重新读取、安全文本对照；Agent `diff` 使用同一接口。覆盖同版无差异、草稿变化、不可变旧发布、跨包拒绝、SQL 故障和权限。
+- 该切片已实现；`flowable-comparison-verify.log` 完整 892 项 Maven（23 framework + 39 workflow + 830 boot）通过，Agent 6 项、前端 lint/typecheck/128 单元/build/生成复现通过，`flowable-comparison-all-browser.log` 全量 217 项通过。
+- `flowable-comparison-enabled-runtime.log` 完整真实 API PASS，实际 SQL 对比/证明不变/故障恢复/权限及 Agent diff 通过。最终页面脚本先后修复相对定位范围、组件加载 status 同名的测试错误；`flowable-comparison-verified-enabled-runtime.log` 的 3 项真实流程浏览器已通过，同一进程继续启用完整 API 后默认配置，尚未终态。详见 [对比安全审查](../docs/security-review-workflow-comparison.md)。

@@ -2,6 +2,7 @@
 $workflowActivationPath='/api/v1/workflow/activations/leave'
 if (!$EnableWorkflow) {
     Assert-Problem (Request $workflowActivationPath 'GET' '' $authorized) 503 'WORKFLOW_DISABLED'
+    Assert-Problem (Request '/api/v1/workflow/packages/00000000-0000-0000-0000-000000000001/comparison?baselineReleaseId=00000000-0000-0000-0000-000000000002' 'GET' '' $authorized) 503 'WORKFLOW_DISABLED'
 } else {
     $workflowPublicationPath=$workflowPackagePath+'/releases'
     Assert-Problem (Request $workflowPublicationPath 'POST' '{"expectedRevision":"3"}' $authorized) 409 'WORKFLOW_PROOF_REQUIRED'
@@ -36,5 +37,19 @@ if (!$EnableWorkflow) {
     $workflowReleasePage=(Request ($workflowPublicationPath+'?page=1&pageSize=1') 'GET' '' $authorized).Content | ConvertFrom-Json
     Assert-Check ($workflowReleasePage.total -eq 2 -and $workflowReleasePage.items.Count -eq 1 -and $workflowReleasePage.items[0].id -ceq $workflowReleaseNext.id) 'Release page must order immutable revisions before pagination.'
     Assert-Check ((Request ('/api/v1/workflow/releases/'+$workflowRelease.id) 'GET' '' $authorized).Content -ceq $workflowPublishedReply.Content) 'Old publication must remain exactly unchanged.'
+    $workflowComparisonPath=$workflowPackagePath+'/comparison?baselineReleaseId='+$workflowRelease.id
+    $workflowComparisonDraftBefore=(Request $workflowPackagePath 'GET' '' $authorized).Content
+    $workflowComparison=(Request $workflowComparisonPath 'GET' '' $authorized).Content | ConvertFrom-Json
+    Assert-Check ($workflowComparison.baseline.revision -ceq '3' -and $workflowComparison.target.revision -ceq '4' -and $workflowComparison.target.kind -ceq 'DRAFT') 'Comparison must preserve exact immutable and current draft versions.'
+    Assert-Check (@($workflowComparison.fields | Where-Object changed).Count -eq 1 -and @($workflowComparison.fields | Where-Object changed)[0].name -ceq 'name') 'Actual source comparison must identify only the changed name.'
+    $workflowComparisonSame=(Request ($workflowComparisonPath+'&targetReleaseId='+$workflowRelease.id) 'GET' '' $authorized).Content | ConvertFrom-Json
+    Assert-Check (@($workflowComparisonSame.fields | Where-Object changed).Count -eq 0 -and $workflowComparisonSame.target.kind -ceq 'RELEASE') 'Same release comparison must remain identical after draft editing.'
+    Assert-Check ((Request $workflowPackagePath 'GET' '' $authorized).Content -ceq $workflowComparisonDraftBefore) 'Comparison must not change draft content, proof or timestamps.'
+    Assert-Problem (Request ($workflowComparisonPath+'&targetReleaseId=00000000-0000-0000-0000-000000000000') 'GET' '' $authorized) 404 'WORKFLOW_RELEASE_NOT_FOUND'
+    Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e 'RENAME TABLE ef_workflow_release TO workflow_comparison_fault;' | Out-Null
+    try {Assert-Problem (Request $workflowComparisonPath 'GET' '' $authorized) 503 'WORKFLOW_STORAGE_UNAVAILABLE'}
+    finally {Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot eforge_enterprise -e 'RENAME TABLE workflow_comparison_fault TO ef_workflow_release;' | Out-Null}
+    Assert-Check ((Request $workflowComparisonPath 'GET' '' $authorized).StatusCode -eq 200) 'Comparison must recover after SQL failure.'
+    Write-Output 'PASS: actual workflow draft/release comparison, precise versions, unchanged proof/source, safe SQL fault/retry and permission boundary.'
 }
 Write-Output 'PASS: workflow publication/proof/idempotency, explicit CAS activation, immutable release paging, real deployment rollback and recovery.'

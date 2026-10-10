@@ -8,3 +8,8 @@
 .workflow-history p,.workflow-confirm p {white-space:pre-wrap;overflow-wrap:anywhere;}
 .workflow-confirm {border-top:1px solid var(--ui-border);padding-block:16px;margin-block:16px;}
 .workflow-confirm .post-row-actions {margin-top:12px;}
+.workflow-comparison {border-top:1px solid var(--ui-border);margin-block:16px;padding-block:16px;}
+.workflow-comparison p,.workflow-comparison details {margin-block:12px;}
+.workflow-comparison-columns {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-block:12px;}
+.workflow-comparison-columns > div {min-width:0;padding:12px;border:1px solid var(--ui-border);}
+@media(max-width:640px){.workflow-comparison-columns{grid-template-columns:minmax(0,1fr);}}

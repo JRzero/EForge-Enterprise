@@ -25,6 +25,6 @@
 - 最终生产源码 `flowable-leave-capability-verify.log` 889 项 Maven 通过；`flowable-leave-capability-mysql-0.log` / `-1.log` 两种真实 MySQL 模式通过，另加强旧实例在新版激活后仍按原定义完成的断言。
 - `flowable-leave-final-enabled-runtime.log` / `flowable-leave-final-disabled-runtime.log` 两配置完整 API 均终态 PASS，各 10 项真实浏览器通过（流程管理、请假审批与缓存统计）。前一轮浏览器通过后出现的连接失败没有被当作整体成功；新独立临时环境完整重验通过。
 - 两实时 OpenAPI 与契约 SHA256 均为 `0BD127CEDC7B2FC0F599232D61DC374B26D788F9358D88156F98E9C94DC56DFC`。最终前端 lint/typecheck/128 单元/build 与客户端复现通过；`flowable-leave-all-browser.log` 全量 216 项交互通过。
-- 精确提交云端仍待验收。独立审查未执行测试，其审查结果不冒充验证证据；详情资格问题已经修复并复核关闭。
+- 精确提交 `19da992e7cfa6f1eb37e5708b5ce67eb0f26e2e6`：server `38035410035` 四项、web `38035410023` 与技能检查 `38035410020` 全部终态成功。`flowable-leave-cloud-accepted.log` 直接证明两配置各 67 真实浏览器、完整 API、审批/Agent、新旧能力回归及实时 OpenAPI 一致。独立审查未执行测试，其审查结果不冒充验证证据；详情资格问题已经修复并复核关闭。
 
 测试容器及故障约束只存在于父脚本创建的一次性数据库，不触碰本地预览数据库。生产安装使用显式脚本，不自动初始化或删除引擎历史。

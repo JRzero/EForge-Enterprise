@@ -1071,6 +1071,24 @@ export type WorkflowPackageUpdateRequest = {
     content: WorkflowPackageRequest;
     expectedRevision: string;
 };
+export type WorkflowComparisonVersion = {
+    contentDigest?: string;
+    id?: string;
+    kind?: string;
+    revision?: string;
+};
+export type WorkflowComparisonField = {
+    after?: string;
+    before?: string;
+    changed?: boolean;
+    name?: string;
+};
+export type WorkflowComparisonResponse = {
+    baseline?: WorkflowComparisonVersion;
+    fields?: WorkflowComparisonField[];
+    packageId?: string;
+    target?: WorkflowComparisonVersion;
+};
 export type WorkflowReleaseResponse = {
     businessType?: string;
     contentDigest?: string;
@@ -2900,6 +2918,19 @@ export function updateWorkflowPackage(id: string, workflowPackageUpdateRequest: 
         method: "PUT",
         body: workflowPackageUpdateRequest
     }));
+}
+export function compareWorkflowPackage(id: string, baselineReleaseId: string, { targetReleaseId }: {
+    targetReleaseId?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WorkflowComparisonResponse;
+    }>(`/api/v1/workflow/packages/${encodeURIComponent(id)}/comparison${QS.query(QS.explode({
+        baselineReleaseId,
+        targetReleaseId
+    }))}`, {
+        ...opts
+    });
 }
 export function listWorkflowReleases(id: string, { page, pageSize }: {
     page?: number;

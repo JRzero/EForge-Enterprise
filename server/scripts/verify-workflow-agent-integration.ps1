@@ -28,6 +28,8 @@ if ($EnableWorkflow) {
         $workflowAgentPublished=(Invoke-WorkflowAgent @('publish','--id',$workflowAgentCreated.id,'--revision','2')).data
         $workflowAgentReplayed=(Invoke-WorkflowAgent @('publish','--id',$workflowAgentCreated.id,'--revision','2')).data
         Assert-Check ($workflowAgentReplayed.id -ceq $workflowAgentPublished.id) 'Agent publication retry must be idempotent.'
+        $workflowAgentComparison=(Invoke-WorkflowAgent @('diff','--id',$workflowAgentCreated.id,'--baseline',$workflowAgentPublished.id)).data
+        Assert-Check ($workflowAgentComparison.target.kind -ceq 'DRAFT' -and @($workflowAgentComparison.fields | Where-Object changed).Count -eq 0) 'Actual Agent diff must read the current identical draft without writes.'
         $workflowAgentBefore=(Invoke-WorkflowAgent @('activation')).data
         Assert-Check ($workflowAgentBefore.releaseId -cne $workflowAgentPublished.id) 'Agent publication must not implicitly activate.'
         $workflowAgentActive=(Invoke-WorkflowAgent @('activate','--id',$workflowAgentPublished.id,'--revision',$workflowAgentBefore.revision)).data

@@ -48,6 +48,7 @@ try {
     $workflowReaderHeaders=@{Authorization='Bearer '+(($workflowReaderLogin.Content | ConvertFrom-Json).accessToken)}
     Assert-Check ((Request '/api/v1/workflow/status' 'GET' '' $workflowReaderHeaders).StatusCode -eq 200) 'Authenticated status does not grant workflow maintenance.'
     Assert-Problem (Request '/api/v1/workflow/packages' 'GET' '' $workflowReaderHeaders) 403 'ACCESS_DENIED'
+    Assert-Problem (Request '/api/v1/workflow/packages/00000000-0000-0000-0000-000000000001/comparison?baselineReleaseId=00000000-0000-0000-0000-000000000002' 'GET' '' $workflowReaderHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/workflow/validation' 'POST' $workflowValidationBody $workflowReaderHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/workflow/activations/leave' 'GET' '' $workflowReaderHeaders) 403 'ACCESS_DENIED'
     Assert-Problem (Request '/api/v1/workflow/packages/00000000-0000-0000-0000-000000000001/releases' 'POST' '{"expectedRevision":"1"}' $workflowReaderHeaders) 403 'ACCESS_DENIED'

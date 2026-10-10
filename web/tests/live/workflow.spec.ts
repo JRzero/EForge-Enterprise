@@ -37,6 +37,16 @@ test('real workflow editor, scenario proof, immutable publication and separate a
     const versions=await page.request.get(`/api/v1/workflow/packages/${draft.id}/releases`,{headers:auth});expect(versions.status()).toBe(200);
     const releases=(await versions.json()).items;expect(releases).toHaveLength(1);expect(releases[0].name).toBe(name);expect(releases[0].packageRevision).toBe('1');
     const active=await page.request.get('/api/v1/workflow/activations/leave',{headers:auth});expect((await active.json()).releaseId).toBe(releases[0].id);
+    await updated.getByRole('button',{name:'详情',exact:true}).click();
+    await panel.getByRole('button',{name:'版本 1 设为基准',exact:true}).click();
+    await panel.getByRole('button',{name:'与当前草稿对比',exact:true}).click();
+    const comparison=panel.getByRole('region',{name:'版本内容对比'});
+    await expect(comparison).toContainText('目标：草稿 2');
+    const changedName=comparison.locator('details').filter({has:page.getByText('流程名称 · 已变更',{exact:true})});
+    await expect(changedName.locator('pre').first()).toHaveText(name);await expect(changedName.locator('pre').last()).toHaveText(name+'新版');
+    await panel.getByRole('button',{name:'比较版本 1',exact:true}).click();
+    await expect(comparison.getByText('两侧内容一致',{exact:true})).toBeVisible();
+    await page.screenshot({path:'test-results/live/workflow-comparison.png',fullPage:true});
     expect(errors).toEqual([]);
     // Immutable records belong to this runner's disposable database, removed by its owner.
   }finally{await page.request.post('/logout',{headers:auth});}
@@ -57,6 +67,7 @@ test('real workflow read-only grants and immediate backend revocation',async({pa
       expect((await page.request.post('/api/v1/workflow/packages',{headers:userAuth,data:{name:'无权创建',businessType:'leave',source:{bpmnXml:'<process/>',scenarios:[{name:'拒绝',decisions:[{taskKey:'review',approved:false}],expectedEnd:'end'}]}}})).status()).toBe(403);
       expect((await page.request.put(`/api/v1/system/roles/${roleId}`,{headers:auth,data:{...role,menuKeys:[]}})).status()).toBe(204);
       expect((await page.request.get('/api/v1/workflow/packages',{headers:userAuth})).status()).toBe(403);
+      expect((await page.request.get('/api/v1/workflow/packages/00000000-0000-0000-0000-000000000001/comparison?baselineReleaseId=00000000-0000-0000-0000-000000000002',{headers:userAuth})).status()).toBe(403);
       await page.getByRole('button',{name:'刷新列表',exact:true}).click();
       const status=await page.request.get('/api/v1/workflow/status',{headers:auth});
       if((await status.json()).enabled)await expect(page.getByRole('alert')).toBeVisible();

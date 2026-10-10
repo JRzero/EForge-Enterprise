@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={WorkflowReleaseController.class,PermissionService.class,ApiExceptionHandler.class,
+@ContextConfiguration(classes={WorkflowReleaseController.class,WorkflowComparisonController.class,PermissionService.class,ApiExceptionHandler.class,
     ApiRoutingExceptionResolver.class,SpringUtils.class,SecurityConfig.class,ApiSecurityProblemHandler.class,
     AuthenticationEntryPointImpl.class,JwtAuthenticationTokenFilter.class,WorkflowValidationControllerTest.Configuration.class})
 class WorkflowReleaseControllerTest {
@@ -33,6 +33,7 @@ class WorkflowReleaseControllerTest {
     static final String ROOT="/api/v1/workflow",PUBLISH=ROOT+"/packages/"+ID+"/releases",ACTIVE=ROOT+"/activations/leave";
     @Autowired MockMvc mvc;
     @MockitoBean WorkflowReleases releases;
+    @MockitoBean WorkflowComparisons comparisons;
     @MockitoBean TokenService tokens;
     @MockitoBean LogoutSuccessHandlerImpl logout;
     WorkflowReleases.Release release;
@@ -84,4 +85,18 @@ class WorkflowReleaseControllerTest {
         mvc.perform(get(ROOT+"/releases/"+ID)).andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.code").value("WORKFLOW_STORAGE_UNAVAILABLE"));
     }
     private static String activation(String revision){return "{\"releaseId\":\""+ID+"\",\"expectedRevision\":\""+revision+"\"}";}
+    @Test void comparisonPreservesPreciseVersionsAndReadOnlyPermissionBoundary() throws Exception {
+        var version=new WorkflowComparisons.Version("RELEASE",ID,9007199254740993L,"digest");
+        when(comparisons.compare(ID,ID,null)).thenReturn(new WorkflowComparisons.Comparison(ID,version,version,List.of(new WorkflowComparisons.Field("name","<script>","next",true))));
+        String path=ROOT+"/packages/"+ID+"/comparison";
+        actor(Set.of("workflow:definition:list"));
+        mvc.perform(get(path).param("baselineReleaseId",ID)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.baseline.revision").value("9007199254740993"))
+            .andExpect(jsonPath("$.fields[0].before").value("<script>"));
+        verify(comparisons).compare(ID,ID,null);clearInvocations(comparisons);
+        mvc.perform(get(path).param("baselineReleaseId","invalid")).andExpect(status().isBadRequest());
+        actor(Set.of("workflow:definition:publish"));
+        mvc.perform(get(path).param("baselineReleaseId",ID)).andExpect(status().isForbidden());
+        verifyNoInteractions(comparisons);
+    }
 }

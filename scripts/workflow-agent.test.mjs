@@ -4,6 +4,16 @@ import {createServer} from 'node:http';
 import {execute} from './workflow-agent.mjs';
 const id='00000000-0000-0000-0000-000000000001';
 const env={EFORGE_WORKFLOW_URL:'http://127.0.0.1:18081',EFORGE_WORKFLOW_TOKEN:'owned-fixture-token'};
+test('diff uses one read for current draft or an explicit released target',async()=>{
+  const requests=[];const fetchImpl=async(url,options)=>{requests.push({url,options});return new Response('{}');};
+  assert.equal((await execute(['diff','--id',id,'--baseline',id],{env,fetchImpl})).ok,true);
+  assert.equal(requests[0].options.method,'GET');assert.equal(requests[0].options.body,undefined);
+  assert.equal(new URL(requests[0].url).searchParams.has('targetReleaseId'),false);
+  assert.equal((await execute(['diff','--id',id,'--baseline',id,'--target',id],{env,fetchImpl})).ok,true);
+  assert.equal(new URL(requests[1].url).searchParams.get('targetReleaseId'),id);
+  assert.equal((await execute(['diff','--id',id,'--baseline','bad'],{env,fetchImpl})).ok,false);
+  assert.equal(requests.length,2);
+});
 test('exact versions and explicit activation use canonical API without implicit writes',async()=>{
   const requests=[];const fetchImpl=async(url,options)=>{requests.push({url,options});return new Response(JSON.stringify({revision:'9007199254740993'}),{status:200});};
   const result=await execute(['publish','--id',id,'--revision','9007199254740993'],{env,fetchImpl});

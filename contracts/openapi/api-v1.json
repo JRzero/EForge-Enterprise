@@ -4317,6 +4317,60 @@
         },
         "type": "object"
       },
+      "WorkflowComparisonField": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "before": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowComparisonResponse": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/WorkflowComparisonVersion"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowComparisonField"
+            },
+            "type": "array"
+          },
+          "packageId": {
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/WorkflowComparisonVersion"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowComparisonVersion": {
+        "properties": {
+          "contentDigest": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "WorkflowDecisionRequest": {
         "properties": {
           "approved": {
@@ -10961,6 +11015,55 @@
         },
         "tags": [
           "workflow-package-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/packages/{id}/comparison": {
+      "get": {
+        "operationId": "compareWorkflowPackage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "baselineReleaseId",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetReleaseId",
+            "required": false,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowComparisonResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-comparison-controller"
         ]
       }
     },

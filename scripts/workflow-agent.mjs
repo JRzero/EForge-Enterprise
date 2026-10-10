@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url';
 
 const uuid=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const commands={status:[],list:['page','page-size'],read:['id'],create:['file'],update:['id','revision','file'],
-  validate:['id','revision'],publish:['id','revision'],releases:['id','page','page-size'],release:['id'],activation:[],activate:['id','revision']};
+  validate:['id','revision'],publish:['id','revision'],releases:['id','page','page-size'],release:['id'],activation:[],activate:['id','revision'],diff:['id','baseline','target']};
 const failure=(code,status)=>({ok:false,...(status===undefined?{}:{status}),code});
 function requestPlan(args,env){
   const [command,...flags]=args,allowed=commands[command];if(!allowed)throw Error('INVALID_ARGUMENTS');
@@ -13,8 +13,9 @@ function requestPlan(args,env){
     if(!allowed.includes(key)||Object.hasOwn(options,key)||!flags[index+1]||flags[index+1].startsWith('--'))throw Error('INVALID_ARGUMENTS');
     options[key]=flags[index+1];
   }
-  for(const key of allowed.filter(key=>key!=='page'&&key!=='page-size'))if(!options[key])throw Error('INVALID_ARGUMENTS');
+  for(const key of allowed.filter(key=>!['page','page-size','target'].includes(key)))if(!options[key])throw Error('INVALID_ARGUMENTS');
   if(options.id&&!uuid.test(options.id))throw Error('INVALID_ARGUMENTS');
+  if(options.baseline&&!uuid.test(options.baseline)||options.target&&!uuid.test(options.target))throw Error('INVALID_ARGUMENTS');
   if(options.revision!==undefined&&(!/^(0|[1-9][0-9]{0,18})$/.test(options.revision)||BigInt(options.revision)>9223372036854775807n||(command!=='activate'&&options.revision==='0')))throw Error('INVALID_ARGUMENTS');
   if(options.page&&(!/^[1-9][0-9]*$/.test(options.page)||Number(options.page)>1000000))throw Error('INVALID_ARGUMENTS');
   if(options['page-size']&&(!/^[1-9][0-9]*$/.test(options['page-size'])||Number(options['page-size'])>100))throw Error('INVALID_ARGUMENTS');
@@ -25,7 +26,8 @@ function requestPlan(args,env){
   const root='/api/v1/workflow',query=new URLSearchParams({page:options.page??'1',pageSize:options['page-size']??'10'});
   const path={status:'/status',list:`/packages?${query}`,read:`/packages/${options.id}`,create:'/packages',update:`/packages/${options.id}`,
     validate:`/packages/${options.id}/validation`,publish:`/packages/${options.id}/releases`,releases:`/packages/${options.id}/releases?${query}`,
-    release:`/releases/${options.id}`,activation:'/activations/leave',activate:'/activations/leave'}[command];
+    release:`/releases/${options.id}`,activation:'/activations/leave',activate:'/activations/leave',
+    diff:`/packages/${options.id}/comparison?${new URLSearchParams({baselineReleaseId:options.baseline??'',...(options.target?{targetReleaseId:options.target}:{})})}`}[command];
   const method=['create','validate','publish'].includes(command)?'POST':['update','activate'].includes(command)?'PUT':'GET';
   return {command,options,url:base.origin+root+path,method};
 }
