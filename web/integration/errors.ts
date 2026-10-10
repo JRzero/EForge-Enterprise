@@ -4,6 +4,13 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if(code==='WORKFLOW_DISABLED')return '工作流尚未启用，请联系管理员。';
+  if(code==='WORKFLOW_PACKAGE_CONFLICT'||code==='WORKFLOW_RELEASE_CONFLICT')return '流程版本已变化，请重新读取后操作，未保存的内容请先保留。';
+  if(code==='WORKFLOW_PROOF_REQUIRED')return '请先校验当前版本，再发布流程。';
+  if(code==='WORKFLOW_CANDIDATE_UNAVAILABLE')return '流程中存在无有效审批人的任务，请检查账号或角色。';
+  if(code==='WORKFLOW_BINDING_REQUIRED')return '该流程的动态审批人尚未绑定，请配置指定用户或角色。';
+  if(code==='WORKFLOW_SCENARIO_FAILED')return '审批场景未通过，请核对任务和预期结果。';
+  if(code==='WORKFLOW_STORAGE_UNAVAILABLE')return '工作流存储暂不可用，请稍后重试。';
   if(code==='SCREEN_UNLOCK_PASSWORD_MISMATCH')return '密码不正确，请重新输入。';
   if(code==='SCREEN_UNLOCK_UNAVAILABLE')return '暂时无法验证密码，请稍后重试。';
   if (code === 'GENERATOR_CREATE_DDL_FAILED') return '部分数据库表创建失败，请查看建表结果；已创建的表仍然保留。';

@@ -4,6 +4,9 @@ import contracts from './route-contract.json';
 import internalContracts from './internal-route-contract.json';
 import {DashboardPage} from '../features/dashboard/DashboardPage';
 import {lazy} from 'react';
+const WorkflowPackagesPage = lazy(() => import('../features/workflow/WorkflowPackagesPage').then(module => ({default: module.WorkflowPackagesPage})));
+const workflowPackages = contracts.find(route => route.id === 'workflow-packages');
+if (!workflowPackages) throw new Error('Missing workflow route contract.');
 const PostsPage = lazy(() => import('../features/posts/PostsPage').then(module => ({default: module.PostsPage})));
 const DepartmentsPage = lazy(() => import('../features/departments/DepartmentsPage').then(module => ({default: module.DepartmentsPage})));
 const UsersPage = lazy(() => import('../features/users/UsersPage').then(module => ({default: module.UsersPage})));
@@ -119,6 +122,8 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: jobs.id, path: jobs.path, title: '定时任务', access: {permission: jobs.permission}, component: JobsPage
 }, {
   id: generator.id, path: generator.path, title: '代码生成', access: {permission: generator.permission}, component: GeneratorPage
+}, {
+  id: workflowPackages.id, path: workflowPackages.path, title: '流程管理', access: {permission: workflowPackages.permission}, component: WorkflowPackagesPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

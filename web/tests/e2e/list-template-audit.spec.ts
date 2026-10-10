@@ -22,6 +22,7 @@ for (const route of cases) test(`shared list layout: ${route.url}`, async ({page
       navigation: [{key: route.id, type: 'ROUTE', routeId: route.id, label: '验收页面', order: 0, children: []}],
     }});
     if (path.endsWith('/dictionaries/options')) return request.fulfill({json: [{id: '2', name: '验收字典', code: 'audit_dict', status: '0'}]});
+    if (path.endsWith('/workflow/status')) return request.fulfill({json: {enabled: true}});
     return request.fulfill({json: url.searchParams.has('page') ? {items: [], total: 0, page: 1, pageSize: 10} : []});
   });
   await page.goto(route.url);

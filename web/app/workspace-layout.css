@@ -32,6 +32,9 @@
 .enterprise-header { min-height: 50px; flex-wrap: nowrap; gap: 8px; }
 .enterprise-header > .enterprise-header-left { flex: 1 1 0; min-width: 0; justify-content: flex-start; flex-wrap: nowrap; gap: 12px; }
 .enterprise-header > .enterprise-header-actions { flex: 0 0 auto; flex-wrap: nowrap; gap: 2px; }
+@media (max-width:380px) {
+  .enterprise-header > .enterprise-header-actions { min-width: 0; flex-wrap: wrap; }
+}
 .enterprise-header .enterprise-breadcrumbs { margin: 0; min-width: 0; font-size: 14px; }
 .enterprise-breadcrumbs ol { flex-wrap: nowrap; overflow: hidden; }
 .enterprise-breadcrumbs li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }

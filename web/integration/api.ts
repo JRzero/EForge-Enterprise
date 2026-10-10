@@ -1,4 +1,7 @@
 import {unlockScreen,type UnlockScreenRequestWrite} from '../generated/api';
+import {getWorkflowStatus,listWorkflowPackages,getWorkflowPackage,createWorkflowPackage,updateWorkflowPackage,
+  validateWorkflowPackage,listWorkflowReleases,publishWorkflowPackage,getWorkflowActivation,activateWorkflowRelease,
+  type WorkflowPackageRequest,type WorkflowPackageUpdateRequest,type WorkflowActivationRequest} from '../generated/api';
 import {getRegistrationStatus, registerAccount, type RegistrationRequestWrite} from '../generated/api';
 import {bootstrap, login, listPosts, getPost, createPost, updatePost, deletePosts, exportPosts,
   listDepartments, getDepartment, createDepartment, updateDepartment, deleteDepartment, sortDepartments,
@@ -60,6 +63,16 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    async getWorkflowStatus(signal?:AbortSignal){return (await getWorkflowStatus({baseUrl:'',fetch:transport(true),signal})).data;},
+    async listWorkflowPackages(query:Parameters<typeof listWorkflowPackages>[0],signal?:AbortSignal){return (await listWorkflowPackages(query,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async getWorkflowPackage(id:string,signal?:AbortSignal){return (await getWorkflowPackage(id,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async createWorkflowPackage(body:WorkflowPackageRequest){return (await createWorkflowPackage(body,{baseUrl:'',fetch:transport(true)})).data;},
+    async updateWorkflowPackage(id:string,body:WorkflowPackageUpdateRequest){return (await updateWorkflowPackage(id,body,{baseUrl:'',fetch:transport(true)})).data;},
+    async validateWorkflowPackage(id:string,expectedRevision:string){return (await validateWorkflowPackage(id,{expectedRevision},{baseUrl:'',fetch:transport(true,60000)})).data;},
+    async listWorkflowReleases(id:string,query:Parameters<typeof listWorkflowReleases>[1],signal?:AbortSignal){return (await listWorkflowReleases(id,query,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async publishWorkflowPackage(id:string,expectedRevision:string){return (await publishWorkflowPackage(id,{expectedRevision},{baseUrl:'',fetch:transport(true,60000)})).data;},
+    async getWorkflowActivation(signal?:AbortSignal){return (await getWorkflowActivation('leave',{baseUrl:'',fetch:transport(true),signal})).data;},
+    async activateWorkflowRelease(body:WorkflowActivationRequest){return (await activateWorkflowRelease('leave',body,{baseUrl:'',fetch:transport(true)})).data;},
     async unlockScreen(request:UnlockScreenRequestWrite,signal?:AbortSignal){await unlockScreen(request,{baseUrl:'',fetch:transport(true),signal});},
     async authenticatedFetch(input: RequestInfo | URL, init?: RequestInit) {
       const origin = typeof window === 'undefined' ? 'http://eforge.local' : window.location.origin;

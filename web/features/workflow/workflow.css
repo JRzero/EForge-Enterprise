@@ -1,0 +1,4 @@
+.workflow-source {white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;font:inherit;}
+.post-dialog:has(#workflow-releases-title),.post-dialog:has(#workflow-editor-title) {width:960px;}
+.post-dialog:has(#workflow-releases-title) .post-table table {min-width:650px;}
+.post-dialog:has(#workflow-releases-title) > :is(p,details) {margin-block:12px;}

@@ -54,3 +54,13 @@
 - `flowable-release-final-verify.log`：全量 Maven 881 项（23 framework、33 workflow、825 boot），0 failures/errors，9 条件性跳过。之后仅加强真实 MySQL 测试的激活审计回滚断言，不改变生产 jar。
 - `flowable-release-audit-mysql-0.log` / `flowable-release-audit-mysql-1.log` 均终态成功：两个真实 SQL 请求等待同包锁后返回同发布记录，单 deployment/单 audit；激活双 SQL 等待后 200/409；发布及激活审计故障均完整回滚，缓存不残留，恢复可重试；角色停用拒绝激活，切换后旧实例仍按原定义实际完成。
 - `flowable-release-enabled-runtime.log` / `flowable-release-disabled-runtime.log` 两配置完整真实 HTTP 均终态 PASS；发布幂等、独立权限、激活冲突、审计故障回滚和恢复通过。两实时 OpenAPI 与契约 SHA256 为 `45080E03B5D8EBEF2824DA664997C883CE1AB9344E8059818F46562FF0C3E810`。`flowable-release-web.log` 生成复现、lint、typecheck、126 单元和 build 通过。精确云端仍待验收；此阶段不代表审批业务或流程管理页面完成。
+
+## 流程管理页面增量（2026-10-10）
+
+- 发布/激活精确提交 `7253ac32479129a8e7ef8be1559875a0ccab8fd9` 的 server `38031651604` 四项与 web `38031651581` 全部终态成功。
+- 新增流程管理路由、GROUP/ROUTE/F 菜单及独立编辑/校验/发布/激活权限，没有授予普通角色默认权限。页面复用列表、分页、表单、详情和弹窗；长版本保留字符串，编辑冲突保留草稿，发布不隐式激活。
+- `flowable-workflow-ui-maven.log` 全量 Maven verify 成功（本切片 881 项），保留旧预览服务；`flowable-workflow-ui-final-web.log` 客户端复现/lint/typecheck/128 单元/build 通过。
+- `flowable-workflow-ui-enabled-final-runtime.log` / `flowable-workflow-ui-disabled-runtime.log` 两配置均完整 API PASS、各 2 项新真实浏览器通过；实际新建/场景校验/发布/独立激活/编辑清除证明/旧发布不变、只读角色和即时撤权已验证。两 OpenAPI 与契约均为 `45080E03B5D8EBEF2824DA664997C883CE1AB9344E8059818F46562FF0C3E810`。
+- 首轮真实浏览器因宽泛 status 定位及空参数请求先触发 400 而失败，修正为具体反馈和合法权限夹具后通过。最终弹窗宽度/详情模板/显式主题按钮又由 `flowable-workflow-ui-buttons-final.log` 4 项浏览器与桌面/320px 截图验证；后端行为不变。
+- 全量模拟浏览器首轮 209 通过，新增路由的通用模板夹具缺少启用响应导致 1 失败；补充真实形状响应后 `flowable-workflow-ui-layout-final.log` 全部 21 项（所有列表模板+流程交互）通过，不排除新路由验收。窄屏头部溢出修复前失败，修后 320/768/1024/1440 通过。
+- 独立只读审查未发现确定阻断，审查者未执行测试。页面新增源码的精确云端尚待验收；请假业务服务、Agent 入口、差异及运维页面仍未作为本页面切片完成。
