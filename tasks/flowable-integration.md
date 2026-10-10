@@ -44,3 +44,13 @@
 - `flowable-package-final-verify-unrestricted.log` 全量 Maven 873 项（23 framework、29 workflow、821 boot），0 failures/errors，8 条件性跳过；其中 MySQL 测试另由上述两个真实模式实际执行。首次隔离环境停在 Mockito 附加工具初始化，仅终止已核实的本轮进程后重验成功，预览服务保持运行。
 - `flowable-package-enabled-runtime.log` / `flowable-package-disabled-runtime.log` 两配置完整真实 HTTP 回归均终态 PASS；流程包权限、源内容、版本冲突、校验、真实 SQL 审计故障回滚与恢复全部通过。两实时 OpenAPI 与契约 SHA256 都为 `049A1E54EBD6FF3B7A2BD3CFDEE71D5FDF72820A144501556681B7969F15E125`。生成复现、lint、typecheck、126 单元及 build 通过。
 - 基础最终提交 `1d3b493f35dcc01a838541c34e0a9d6a4c7000ab` 的 server `37953276346` 四项及 web `37953276312` 全部终态成功。草稿新增源码需等待自己的精确提交云端，不能沿用基础提交验收。草稿完成不代表不可变发布、激活、审批业务、Agent 或 UI 已完成。
+
+## 不可变发布与激活增量（2026-10-10，验收中）
+
+- 草稿实现已推送 `cf2c9ed2168073a1013fcb20d92323aa47fcf6f7`；精确 server `38030409259` 四项、web `38030409300` 及技能检查 `38030409250` 均终态成功。
+- 已实现当前证明绑定下的真实引擎部署、不可变发布记录、同包同版幂等（草稿升版后仍返回旧发布）、分页读取、独立权限的激活 CAS。每次发布/激活检查当前静态候选账号与角色；未注册动态绑定显式拒绝。发布不隐式激活，旧实例保留原 definitionId。
+- 独立审查发现嵌套事务返回不等于最终提交：`flowable-release-nested-red.log` 修前失败，入口拒绝已有实际事务后 `flowable-release-nested-green.log` 3 真实引擎测试通过；拒绝时无部署/缓存且独立重试成功。复核未发现新的确定阻断，审查者未执行测试。
+- `flowable-release-mvc.log`：真实引擎/上下文与 4 MVC 通过，发布、读取、激活权限独立，字符串版本保持精确，安全 ProblemDetail。
+- `flowable-release-final-verify.log`：全量 Maven 881 项（23 framework、33 workflow、825 boot），0 failures/errors，9 条件性跳过。之后仅加强真实 MySQL 测试的激活审计回滚断言，不改变生产 jar。
+- `flowable-release-audit-mysql-0.log` / `flowable-release-audit-mysql-1.log` 均终态成功：两个真实 SQL 请求等待同包锁后返回同发布记录，单 deployment/单 audit；激活双 SQL 等待后 200/409；发布及激活审计故障均完整回滚，缓存不残留，恢复可重试；角色停用拒绝激活，切换后旧实例仍按原定义实际完成。
+- `flowable-release-enabled-runtime.log` / `flowable-release-disabled-runtime.log` 两配置完整真实 HTTP 均终态 PASS；发布幂等、独立权限、激活冲突、审计故障回滚和恢复通过。两实时 OpenAPI 与契约 SHA256 为 `45080E03B5D8EBEF2824DA664997C883CE1AB9344E8059818F46562FF0C3E810`。`flowable-release-web.log` 生成复现、lint、typecheck、126 单元和 build 通过。精确云端仍待验收；此阶段不代表审批业务或流程管理页面完成。

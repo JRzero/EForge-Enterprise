@@ -14,6 +14,8 @@
 
 完整业务和管理接口尚未验收前，不应为生产开启此模块。
 
+不可变发布另需按顺序安装 [05 发布元数据](../sql/workflow/05-eforge-workflow-releases.sql)。它预置 `leave` 的未激活版本 0，发布不隐式激活。发布从独立主库事务入口执行，同一包的锁仅持续本次发布，部署、不可变记录与审计共同提交；已有外层事务会被拒绝，避免外层回滚留下引擎缓存。切换激活版本只用于后续申请，不迁移旧实例。`-Releases` 的两种 MySQL 模式验证并发发布、并发激活和真实部署回滚。
+
 ## 开发验证
 
 `mvn -B -ntp -f server/pom.xml test` 验证内存数据库与既有测试；`pwsh -File server/scripts/verify-workflow-engine.ps1` 在脚本独占的一次性 MySQL 中安装官方 SQL，关闭自动建表，验证与业务行共同提交、启动失败回滚、完成失败回滚。追加 `-LowerCaseTableNames 1` 验证大小写模式。

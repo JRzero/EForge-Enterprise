@@ -28,4 +28,12 @@
 
 创建内容为 `{name,businessType,source}`，当前静态注册业务为 `leave`；`source` 为上述场景请求。更新内容为 `{expectedRevision,content}`；校验内容为 `{expectedRevision}`。版本和已校验版本都是十进制字符串，不能转为 JavaScript Number。修改后版本递增且旧证明清除；校验期间若有并发修改，证明不落入新版本而返回 409。
 
-草稿可以保存尚未通过 BPMN 校验的内容。验证摘要覆盖精确内容，维护审计采用认证身份，不接受客户端提供操作者。校验响应只返回标识、版本和摘要，不能用校验权限读取源文件。工作流禁用时，具备权限的维护请求返回安全 503；未授权请求先返回 401/403。不可变发布、激活与 Agent 命令行仍待实现。
+草稿可以保存尚未通过 BPMN 校验的内容。验证摘要覆盖精确内容，维护审计采用认证身份，不接受客户端提供操作者。校验响应只返回标识、版本和摘要，不能用校验权限读取源文件。工作流禁用时，具备权限的维护请求返回安全 503；未授权请求先返回 401/403。
+
+## 不可变发布与激活（验收状态见任务清单）
+
+`POST /api/v1/workflow/packages/{id}/releases` 需要独立的 `workflow:definition:publish` 权限和 `{expectedRevision}`，当前版本必须已有服务端场景证明。同一已发布版本重复请求返回相同的 200 发布记录，即使草稿后来更新；新的版本生成独立定义。包锁覆盖部署、发布记录和审计的同库事务，失败不留下半个发布。响应只提供不可变摘要、版本及定义标识，不返回可绕过草稿读取权限的源文件。
+
+`GET /api/v1/workflow/packages/{id}/releases?page=1&pageSize=10` 和 `/api/v1/workflow/releases/{id}` 需要读取权限。`GET /api/v1/workflow/activations/leave` 读取当前选择；`PUT` 同路径需要 `workflow:definition:activate`，内容为 `{releaseId,expectedRevision}`。激活版本从字符串 `"0"` 开始，过期请求返回 409。发布权限不隐含激活权限，新的发布不会改变当前选择。
+
+发布和激活检查静态用户及角色的存在、可用状态与实际候选账号；`${approver}` 目前返回 `WORKFLOW_BINDING_REQUIRED`，等待业务侧明确绑定。检查不保证未来身份一直有效，申请提交和任务操作还必须重新检查当前身份。业务提交、任务 UI、差异界面及 Agent 命令行仍待完成；不能把发布接口验收当作整个工作流已交付。

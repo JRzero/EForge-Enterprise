@@ -2939,6 +2939,35 @@
         ],
         "type": "object"
       },
+      "PageResponseWorkflowReleaseResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowReleaseResponse"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object"
+      },
       "PasswordStatus": {
         "properties": {
           "characterType": {
@@ -3980,6 +4009,37 @@
         ],
         "type": "object"
       },
+      "WorkflowActivationRequest": {
+        "properties": {
+          "expectedRevision": {
+            "pattern": "0|[1-9][0-9]{0,18}",
+            "type": "string"
+          },
+          "releaseId": {
+            "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedRevision",
+          "releaseId"
+        ],
+        "type": "object"
+      },
+      "WorkflowActivationResponse": {
+        "properties": {
+          "businessType": {
+            "type": "string"
+          },
+          "releaseId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "WorkflowDecisionRequest": {
         "properties": {
           "approved": {
@@ -4101,6 +4161,48 @@
             "type": "string"
           },
           "validatedRevision": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkflowPublicationRequest": {
+        "properties": {
+          "expectedRevision": {
+            "pattern": "[1-9][0-9]{0,18}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "type": "object"
+      },
+      "WorkflowReleaseResponse": {
+        "properties": {
+          "businessType": {
+            "type": "string"
+          },
+          "contentDigest": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "packageId": {
+            "type": "string"
+          },
+          "packageRevision": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
             "type": "string"
           }
         },
@@ -10049,6 +10151,76 @@
         ]
       }
     },
+    "/api/v1/workflow/activations/{businessType}": {
+      "get": {
+        "operationId": "getWorkflowActivation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessType",
+            "required": true,
+            "schema": {
+              "pattern": "leave",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowActivationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-release-controller"
+        ]
+      },
+      "put": {
+        "operationId": "activateWorkflowRelease",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "businessType",
+            "required": true,
+            "schema": {
+              "pattern": "leave",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowActivationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowActivationResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-release-controller"
+        ]
+      }
+    },
     "/api/v1/workflow/packages": {
       "get": {
         "operationId": "listWorkflowPackages",
@@ -10193,6 +10365,100 @@
         ]
       }
     },
+    "/api/v1/workflow/packages/{id}/releases": {
+      "get": {
+        "operationId": "listWorkflowReleases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "format": "int32",
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseWorkflowReleaseResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-release-controller"
+        ]
+      },
+      "post": {
+        "operationId": "publishWorkflowPackage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowPublicationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowReleaseResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-release-controller"
+        ]
+      }
+    },
     "/api/v1/workflow/packages/{id}/validation": {
       "post": {
         "operationId": "validateWorkflowPackage",
@@ -10231,6 +10497,37 @@
         },
         "tags": [
           "workflow-package-controller"
+        ]
+      }
+    },
+    "/api/v1/workflow/releases/{id}": {
+      "get": {
+        "operationId": "getWorkflowRelease",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowReleaseResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "workflow-release-controller"
         ]
       }
     },
