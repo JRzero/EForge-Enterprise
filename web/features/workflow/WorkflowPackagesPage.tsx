@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import type {PageResponseWorkflowPackageSummary,WorkflowPackageSummary,WorkflowPackageResponse} from '../../generated/api';
-import {useApi} from '../../app/context';
+import {useApi,useApplicationControls} from '../../app/context';
+import {useWorkflowPackageRevision} from './workflow-package-refresh';
 import {useRetainedRead} from '../../app/useRetainedRead';
 import {ListPage,ListToolbar} from '../../app/components/ListPage';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -14,7 +15,7 @@ import {WorkflowReleasePanel} from './WorkflowReleasePanel';
 import './workflow.css';
 
 export function WorkflowPackagesPage(){
-  const api=useApi(),read=useRetainedRead();
+  const api=useApi(),read=useRetainedRead(),{navigate}=useApplicationControls(),packageRevision=useWorkflowPackageRevision();
   const [page,setPage]=useState(1),[pageSize,setPageSize]=useState(10),[version,setVersion]=useState(0);
   const [data,setData]=useState<PageResponseWorkflowPackageSummary|null>(null),[loading,setLoading]=useState(true),[disabled,setDisabled]=useState(false);
   const [error,setError]=useState(''),[feedback,setFeedback]=useState(''),[busy,setBusy]=useState(false);
@@ -25,7 +26,7 @@ export function WorkflowPackagesPage(){
     return()=>detailRead.current?.abort();
   },[]);
   useEffect(()=>{
-    const complete=read([api,page,pageSize,version]);if(!complete)return;
+    const complete=read([api,page,pageSize,version,packageRevision]);if(!complete)return;
     const controller=new AbortController();setLoading(true);setError('');setData(null);setDisabled(false);
     api.getWorkflowStatus(controller.signal).then(async status=>{
       if(controller.signal.aborted)return;
@@ -34,7 +35,7 @@ export function WorkflowPackagesPage(){
       if(!controller.signal.aborted){setData(rows);setLoading(false);complete();}
     }).catch(cause=>{if(!controller.signal.aborted){setError(errorMessage(cause));setLoading(false);complete();}});
     return()=>controller.abort();
-  },[api,page,pageSize,version,read]);
+  },[api,page,pageSize,version,packageRevision,read]);
   const open=useCallback(async(row:WorkflowPackageSummary,edit:boolean)=>{
     if(!row.id)return;detailRead.current?.abort();const controller=new AbortController();detailRead.current=controller;
     setBusy(true);setError('');
@@ -63,7 +64,7 @@ export function WorkflowPackagesPage(){
     catch(cause){setError(errorMessage(cause));}finally{setBusy(false);}
   }
   return <ListPage title="流程管理">
-    <ListToolbar><PermissionGate permission="workflow:definition:edit"><Button label="新增流程包" variant="primary" isDisabled={busy||loading||disabled} onClick={()=>setEditor({draft:null})}/></PermissionGate><Button label="刷新列表" variant="ghost" isDisabled={busy||loading} onClick={()=>setVersion(value=>value+1)}/></ListToolbar>
+    <ListToolbar><PermissionGate permission="workflow:definition:edit"><Button label="新增流程包" variant="primary" isDisabled={busy||loading||disabled} onClick={()=>navigate('/workflow/packages/new')}/></PermissionGate><Button label="刷新列表" variant="ghost" isDisabled={busy||loading} onClick={()=>setVersion(value=>value+1)}/></ListToolbar>
     {disabled?<p role="status">工作流尚未启用，请联系管理员。</p>:null}
     {feedback?<p role="status">{feedback}</p>:null}
     {error&&!publishing?<div role="alert"><p>{error}</p><Button variant="secondary" label="重试列表" isDisabled={busy} onClick={()=>setVersion(value=>value+1)}/></div>:null}

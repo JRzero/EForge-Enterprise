@@ -1,15 +1,17 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import type Modeler from 'bpmn-js/lib/Modeler';
 import type Modeling from 'bpmn-js/lib/features/modeling/Modeling';
 import type {Element} from 'bpmn-js/lib/model/Types';
 import {Button,Input} from '../../ui/controls';
 import {Select,NativeInput} from '../../ui/native';
 
-export function WorkflowNodeProperties({modeler,element,onError,onPending}:{modeler:Modeler;element:Element;onError:(error:string)=>void;onPending:(pending:boolean)=>void}){
+export interface NodePropertyDraft {id:string;name:string;binding:string;candidate:string;async:boolean;condition:string}
+export function WorkflowNodeProperties({modeler,element,onError,onPending,initialDraft,onDraft}:{modeler:Modeler;element:Element;onError:(error:string)=>void;onPending:(pending:boolean)=>void;initialDraft?:NodePropertyDraft;onDraft:(draft:NodePropertyDraft)=>void}){
   const bo=element.businessObject;
-  const [id,setId]=useState(element.id),[name,setName]=useState<string>(bo.name??''),[binding,setBinding]=useState(bo.get('flowable:assignee')?'assignee':bo.get('flowable:candidateUsers')?'candidateUsers':'candidateGroups');
-  const [candidate,setCandidate]=useState<string>(bo.get('flowable:assignee')??bo.get('flowable:candidateUsers')??bo.get('flowable:candidateGroups')??''),[async,setAsync]=useState(bo.get('flowable:async')==='true');
-  const [condition,setCondition]=useState<string>(bo.conditionExpression?.body?.includes('false')?'false':bo.conditionExpression?'true':'');
+  const [id,setId]=useState(initialDraft?.id??element.id),[name,setName]=useState<string>(initialDraft?.name??bo.name??''),[binding,setBinding]=useState(initialDraft?.binding??(bo.get('flowable:assignee')?'assignee':bo.get('flowable:candidateUsers')?'candidateUsers':'candidateGroups'));
+  const [candidate,setCandidate]=useState<string>(initialDraft?.candidate??bo.get('flowable:assignee')??bo.get('flowable:candidateUsers')??bo.get('flowable:candidateGroups')??''),[async,setAsync]=useState(initialDraft?.async??(bo.get('flowable:async')==='true'));
+  const [condition,setCondition]=useState<string>(initialDraft?.condition??(bo.conditionExpression?.body?.includes('false')?'false':bo.conditionExpression?'true':''));
+  useEffect(()=>onDraft({id,name,binding,candidate,async,condition}),[id,name,binding,candidate,async,condition,onDraft]);
   const task=element.type==='bpmn:UserTask',flow=element.type==='bpmn:SequenceFlow';
   function apply(){
     if(!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(id)){onError('标识以字母开头，仅使用字母、数字和下划线，最多 64 字符。');return;}

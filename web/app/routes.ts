@@ -5,6 +5,9 @@ import internalContracts from './internal-route-contract.json';
 import {DashboardPage} from '../features/dashboard/DashboardPage';
 import {lazy} from 'react';
 const WorkflowPackagesPage = lazy(() => import('../features/workflow/WorkflowPackagesPage').then(module => ({default: module.WorkflowPackagesPage})));
+const WorkflowPackageCreatePage = lazy(() => import('../features/workflow/WorkflowPackageCreatePage').then(module => ({default: module.WorkflowPackageCreatePage})));
+const workflowPackageCreate=internalContracts.find(route=>route.id==='workflow-package-create');
+if(!workflowPackageCreate)throw new Error('Missing workflow create route contract.');
 const workflowPackages = contracts.find(route => route.id === 'workflow-packages');
 if (!workflowPackages) throw new Error('Missing workflow route contract.');
 const WorkflowRequestsPage = lazy(() => import('../features/workflow/WorkflowLeavesPage').then(module => ({default: module.WorkflowRequestsPage})));
@@ -135,6 +138,8 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: workflowTasks.id, path: workflowTasks.path, title: '审批任务', access: {permission: workflowTasks.permission}, component: WorkflowTasksPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
+}, {
+  id: workflowPackageCreate.id, path: workflowPackageCreate.path, parentId: workflowPackages.id, title: '新增流程包', access: {permission: workflowPackageCreate.permission}, component: WorkflowPackageCreatePage
 }, {
   id: roleUsers.id, path: roleUsers.path, parentId: rolesContract.id, title: '用户授权',
   access: {permission: roleUsers.permission}, component: RoleUsersPage

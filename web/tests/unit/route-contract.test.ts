@@ -11,6 +11,12 @@ it('allows authenticated self-service without inventing a backend menu permissio
   const profile = routes.find(route => route.id === 'account-profile');
   expect(profile).toBeDefined(); expect(canAccessRoute(profile!, [])).toBe(true);
 });
+it('protects the workflow create page with edit permission even on a direct URL',()=>{
+  const match=matchAppRoute(routes,'/workflow/packages/new');
+  expect(match?.route.id).toBe('workflow-package-create');
+  expect(canAccessRoute(match!.route,['workflow:definition:list'])).toBe(false);
+  expect(canAccessRoute(match!.route,['workflow:definition:edit'])).toBe(true);
+});
 it('matches explicit role user parameters and enforces the original list permission', () => {
   const matched = matchAppRoute(routes, '/role/users/9007199254740993');
   expect(matched?.route.id).toBe('role-users'); expect(matched?.params.roleId).toBe('9007199254740993');

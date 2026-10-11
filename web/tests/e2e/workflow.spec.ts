@@ -14,6 +14,41 @@ async function login(page:Page,permissions:string[],enabled=true){
   await page.goto('/workflow/packages');await page.getByLabel('账号',{exact:true}).fill('reader');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
 }
 
+test('new workflow opens a retained page tab and returns to a refreshed list after saving',async({page})=>{
+  let saved=false,xml='';
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:saved?[{...row,name:'页签草稿'}]:[],total:saved?1:0,page:1,pageSize:10}}));
+  await page.route('**/api/v1/workflow/packages',route=>{saved=true;xml=route.request().postDataJSON().source.bpmnXml;return route.fulfill({status:201,json:{...row,name:'页签草稿'}});});
+  await login(page,['workflow:definition:list','workflow:definition:edit']);
+  await page.getByRole('button',{name:'新增流程包',exact:true}).click();
+  await expect(page).toHaveURL(/\/workflow\/packages\/new$/);
+  const editor=page.getByRole('region',{name:'新增流程包',exact:true});
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'页面标签：流程管理',exact:true})).toBeVisible();
+  await editor.getByLabel('流程名称',{exact:true}).fill('页签草稿');
+  await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
+  await editor.getByLabel('选择节点或连线').selectOption('review');
+  await editor.getByLabel('节点名称',{exact:true}).fill('已应用的名称');
+  await editor.getByRole('button',{name:'应用属性',exact:true}).click();
+  await editor.getByLabel('节点名称',{exact:true}).fill('切换后保留的输入');
+  await page.getByRole('link',{name:'页面标签：流程管理',exact:true}).click();
+  await page.getByRole('button',{name:'新增流程包',exact:true}).click();
+  await expect(page.getByRole('link',{name:'页面标签：新增流程包',exact:true})).toHaveCount(1);
+  await expect(editor.getByLabel('流程名称',{exact:true})).toHaveValue('页签草稿');
+  await expect(editor.getByLabel('节点名称',{exact:true})).toHaveValue('切换后保留的输入');
+  await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
+  await editor.getByRole('button',{name:'应用属性',exact:true}).click();
+  await page.setViewportSize({width:1440,height:1100});
+  await page.screenshot({path:'test-results/workflow-create-tab.png',fullPage:true});
+  await page.getByRole('button',{name:'关闭标签 新增流程包',exact:true}).click();
+  await expect(page.getByRole('alertdialog')).toBeVisible();
+  await page.getByRole('button',{name:'继续编辑',exact:true}).click();
+  await editor.getByRole('button',{name:'保存草稿',exact:true}).click();
+  await expect(page).toHaveURL(/\/workflow\/packages$/);
+  await expect(page.getByRole('cell',{name:'页签草稿',exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'页面标签：新增流程包',exact:true})).toHaveCount(0);
+  expect(xml).toContain('切换后保留的输入');
+});
+
 test('visual workflow designer edits real shapes, preserves Flowable XML and protects conflicting drafts',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[row],total:1,page:1,pageSize:10}}));

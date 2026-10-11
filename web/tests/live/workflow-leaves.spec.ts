@@ -20,7 +20,7 @@ test('real leave request, separate approver, claim/approve/reject/withdraw and d
     const role=await page.request.post('/api/v1/system/roles',{headers:auth,data:{name:`审批${stamp}`,key:`leave${stamp}`,sort:10,status:'0',remark:'',menuLinked:false,menuKeys:['workflow','workflow-tasks','workflow-task-handle']}});expect(role.status()).toBe(201);roleId=(await role.json()).id;
     const user=await page.request.post('/api/v1/system/users',{headers:auth,data:{user:{username,displayName:'审批人',departmentId:'103',sex:'2',status:'0',roleIds:['2',roleId],postIds:[]},password:'Workflow123'}});expect(user.status()).toBe(201);userId=(await user.json()).id;
     await page.goto('/workflow/packages');await page.getByRole('button',{name:'新增流程包',exact:true}).click();
-    const packageEditor=page.getByRole('dialog',{name:'新增流程包',exact:true});
+    const packageEditor=page.getByRole('region',{name:'新增流程包',exact:true});
     await packageEditor.getByLabel('流程名称',{exact:true}).fill(`浏览器审批${stamp}`);
     await expect(packageEditor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
     await expect(packageEditor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();

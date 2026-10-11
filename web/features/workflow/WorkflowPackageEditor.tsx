@@ -16,7 +16,7 @@ const exampleScenarios:WorkflowScenarioRequest[]=[
   {name:'拒绝',decisions:[{taskKey:'review',approved:false}],expectedEnd:'rejectedEnd'}
 ];
 const Designer=lazy(()=>import('./WorkflowDesigner').then(module=>({default:module.WorkflowDesigner})));
-export function WorkflowPackageEditor({draft,onClose,onSaved}:{draft:WorkflowPackageResponse|null;onClose:()=>void;onSaved:()=>void}){
+export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draft:WorkflowPackageResponse|null;onClose:()=>void;onSaved:()=>void;asPage?:boolean}){
   const api=useApi();
   const [initial]=useState(()=>({name:draft?.name??'请假审批',xml:draft?.source?.bpmnXml??exampleXml,
     scenarios:JSON.stringify(draft?.source?.scenarios??exampleScenarios,null,2)}));
@@ -53,10 +53,10 @@ export function WorkflowPackageEditor({draft,onClose,onSaved}:{draft:WorkflowPac
       const content={name:form.name,businessType:'leave',source:{bpmnXml:xml,scenarios}};
       if(draft){if(!draft.id||!draft.revision)throw new Error('流程版本缺失，请重新打开。');await api.updateWorkflowPackage(draft.id,{expectedRevision:draft.revision,content});}
       else await api.createWorkflowPackage(content);
-      pageDraft.setDirty(false);onSaved();
+      pageDraft.setDirty(false);finishSave();onSaved();
     }catch(cause){setError(errorMessage(cause));}finally{finishSave();setBusy(false);}
   }
-  return <><ResourceDialog titleId="workflow-editor-title" busy={busy} onCancel={()=>discard.confirm(close)}>
+  const content=<>
     <h2 id="workflow-editor-title">{draft?'编辑流程包':'新增流程包'}</h2>
     <p className="workflow-editor-intro">先设计审批流程，再保存草稿。校验与发布在流程列表中完成。</p>
     <PageForm onSubmit={event=>{void save(event);}} actions={<><Button type="submit" variant="primary" label={busy?'正在保存…':'保存草稿'} isDisabled={busy||visual&&!ready}/><Button label="取消" variant="secondary" isDisabled={busy} onClick={()=>discard.confirm(close)}/></>}>
@@ -76,6 +76,6 @@ export function WorkflowPackageEditor({draft,onClose,onSaved}:{draft:WorkflowPac
       </details>
       <p className="workflow-editor-intro">保存不会发布流程，也不会改变正在运行的审批。</p>
       {error?<p role="alert">{error}</p>:null}
-    </PageForm>
-  </ResourceDialog>{discard.dialog}</>;
+    </PageForm></>;
+  return <>{asPage?<section className="workflow-editor-page" aria-labelledby="workflow-editor-title">{content}</section>:<ResourceDialog titleId="workflow-editor-title" busy={busy} onCancel={()=>discard.confirm(close)}>{content}</ResourceDialog>}{discard.dialog}</>;
 }

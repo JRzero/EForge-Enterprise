@@ -17,7 +17,7 @@ test('real workflow editor, scenario proof, immutable publication and separate a
       await expect(page.getByRole('button',{name:'新增流程包',exact:true})).toBeDisabled();return;
     }
     const name=`浏览器审批${Date.now()}`;await page.getByRole('button',{name:'新增流程包',exact:true}).click();
-    const editor=page.getByRole('dialog',{name:'新增流程包',exact:true});await editor.getByLabel('流程名称',{exact:true}).fill(name);
+    const editor=page.getByRole('region',{name:'新增流程包',exact:true});await editor.getByLabel('流程名称',{exact:true}).fill(name);
     await expect(editor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
     await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
     await editor.getByLabel('选择节点或连线').selectOption('review');
