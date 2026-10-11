@@ -1,6 +1,6 @@
 # 迭代任务索引
 
-已完成：[可视化流程设计器](workflow-designer.md)（done，2026-10-10），[规格](../spec/workflow-designer.md)。精确实现 a72e602 的服务器四项、前端和技能检查全部成功。
+已完成：[可视化流程设计器](workflow-designer.md)（done，2026-10-11），[规格](../spec/workflow-designer.md)。包含界面优化与新增独立页签；精确实现 7235812 的服务器四项、前端和技能检查全部成功，已获用户授权合并 main。
 
 流程规则：[Agent 工作流](../docs/agent-workflow.md)。每轮使用一个 `tasks/<initiative>.md` 同时管理计划、依赖和执行状态，模板为 `_template.md`。
 

@@ -37,3 +37,11 @@
 Activity 暂停时捕获 XML、选中节点与未应用属性，恢复后重建画布。导入阶段必须忽略临时 selection.changed，否则旧选中对象与新模型互相恢复导致递归；新增实际浏览器测试先红后绿验证修复。跨页签保留模型而非撤销栈，重新进入后撤销历史重新记录。
 
 本地验证通过：lint/typecheck、131 单元（含导航契约与新增路由权限）、10 项工作流模拟 API 浏览器回归和构建。独立新增测试覆盖无弹窗、URL/标签、重复打开、切换保留、关闭保护、保存后列表刷新。无后端/API变更，未重跑 Maven/MySQL/Redis 全量；真实环境测试选择器已调整但未在本轮执行。云端状态另验。
+
+## 合并前完整验收（2026-10-11）
+
+以上“云端待验”记录已由本节最终证据补齐。精确实现 `723581201ada9b40f5437cbd33db2f4383fe1cc0` 的 [server 38103739728](https://github.com/JRzero/EForge-Enterprise/actions/runs/38103739728) 四项终态 SUCCESS，[web 38103739649](https://github.com/JRzero/EForge-Enterprise/actions/runs/38103739649) 与 skills 38103739635 终态 SUCCESS。没有跳过失败检查或使用旧提交结果替代。
+
+直接日志 `flowable-main-merge-server.log` / `flowable-main-merge-web.log`：Maven verify 全模块无 failures/errors，环境条件用例由独立真实数据库步骤覆盖；131 前端单元、222 模拟接口浏览器全部通过；默认/启用各 68 真实环境浏览器、完整 MySQL/Redis/API/OpenAPI、Flowable 两模式数据库事务/审批/发布/恢复、Agent 命令，以及生成 CRUD/tree/sub 编译启动与页面回归全部通过。运行器/编译器提示与既有分包提示不等于测试失败，未修改官方原样 SQL 去消除空白提示。
+
+合并前复核原架构与安全审查、内部路由权限、草稿/保存/关闭保护，未发现阻断项。用户授权完整验证后合并 main；origin/main 为本分支祖先，可以快进合并，无冲突。此验收提交仅补充文档，不改变通过验证的运行代码。不包含 MCP Server、复杂会签、实例迁移或暂缓的表单构建器。
