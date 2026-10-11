@@ -22,7 +22,7 @@ test('real leave request, separate approver, claim/approve/reject/withdraw and d
     await page.goto('/workflow/packages');await page.getByRole('button',{name:'新增流程包',exact:true}).click();
     const packageEditor=page.getByRole('dialog',{name:'新增流程包',exact:true});
     await packageEditor.getByLabel('流程名称',{exact:true}).fill(`浏览器审批${stamp}`);
-    await packageEditor.getByRole('button',{name:'可视化设计',exact:true}).click();
+    await expect(packageEditor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
     await expect(packageEditor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
     await packageEditor.getByLabel('选择节点或连线').selectOption('review');
     await packageEditor.getByLabel('节点名称',{exact:true}).fill('画布编辑后的审批');

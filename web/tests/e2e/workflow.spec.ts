@@ -23,10 +23,19 @@ test('visual workflow designer edits real shapes, preserves Flowable XML and pro
     written=route.request().postDataJSON().content.source.bpmnXml;return route.fulfill({status:409,json:{code:'WORKFLOW_PACKAGE_CONFLICT'}});
   });
   await login(page,['workflow:definition:list','workflow:definition:edit']);await page.getByRole('button',{name:'编辑',exact:true}).click();
-  const editor=page.getByRole('dialog',{name:'编辑流程包',exact:true});await editor.getByRole('button',{name:'可视化设计',exact:true}).click();
+  const editor=page.getByRole('dialog',{name:'编辑流程包',exact:true});
+  await expect(editor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
+  await expect(editor.getByLabel('审批场景',{exact:true})).not.toBeVisible();
   const designer=editor.getByRole('region',{name:'可视化流程设计器',exact:true});
   await expect(designer.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
   await expect(designer.locator('.djs-element[data-element-id="review"]')).toBeVisible();
+  await editor.getByText('高级配置 · 审批验证场景',{exact:true}).click();
+  await expect(editor.getByLabel('审批场景',{exact:true})).toHaveValue('[]');
+  await editor.getByText('高级配置 · 审批验证场景',{exact:true}).click();
+  await designer.getByLabel('选择节点或连线').selectOption('review');
+  await page.setViewportSize({width:1440,height:1100});
+  await designer.scrollIntoViewIfNeeded();
+  await page.screenshot({path:'test-results/designer-guided.png',fullPage:true});
   await designer.locator('.workflow-designer-canvas').evaluate(async element=>{
     element.setAttribute('style','display:none');await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);
     element.removeAttribute('style');await new Promise(requestAnimationFrame);

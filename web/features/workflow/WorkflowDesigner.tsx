@@ -65,7 +65,7 @@ export function WorkflowDesigner({initialXml,onDirty,onReady,disabled,ref}:{init
   const stack=instance.current?.get<CommandStack>('commandStack');
   return <section className="workflow-designer" aria-label="可视化流程设计器" aria-busy={!ready&&!error}>
     <div className="workflow-designer-toolbar">
-      {nodeTypes.map((type,i)=><Button key={type} label={`添加${nodeNames[i]}`} variant="secondary" isDisabled={!ready||disabled} onClick={()=>add(type)}/>)}
+      <span className="workflow-toolbar-title">画布视图</span>
       <Button label="撤销" variant="ghost" isDisabled={disabled||!ready||!stack?.canUndo()} onClick={()=>act(m=>m.get<CommandStack>('commandStack').undo())}/>
       <Button label="重做" variant="ghost" isDisabled={disabled||!ready||!stack?.canRedo()} onClick={()=>act(m=>m.get<CommandStack>('commandStack').redo())}/>
       <Button label="适配画布" variant="ghost" isDisabled={!ready} onClick={()=>act(m=>m.get<Canvas>('canvas').zoom('fit-viewport'))}/>
@@ -73,15 +73,21 @@ export function WorkflowDesigner({initialXml,onDirty,onReady,disabled,ref}:{init
     </div>
     {!ready&&!error?<p role="status">正在加载流程画布…</p>:null}{error?<p role="alert">{error}</p>:null}
     <div className="workflow-designer-layout" inert={disabled||!ready}>
+      <aside className="workflow-node-palette" aria-label="流程节点工具">
+        <h3>添加节点</h3><p>点击添加，再拖动排列</p>
+        {nodeTypes.map((type,i)=><Button key={type} label={`添加${nodeNames[i]}`} variant="secondary" isDisabled={!ready||disabled} onClick={()=>add(type)}/>)}
+        <p>选中节点后，在右侧设置审批对象与下一步。</p>
+      </aside>
       <div ref={container} className="workflow-designer-canvas" tabIndex={0} role="region" aria-label="流程画布" onKeyDown={event=>{
         if(event.target!==event.currentTarget)return;
         if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='z'){event.preventDefault();act(m=>{const commands=m.get<CommandStack>('commandStack');if(event.shiftKey)commands.redo();else commands.undo();});}
       }}/>
       <aside className="workflow-designer-properties" aria-label="节点属性">
+        <h3>{selected?'配置所选节点':'节点设置'}</h3>
         <label>选择节点或连线<Select value={selected?.id??''} onChange={event=>act(m=>{const element=m.get<ElementRegistry>('elementRegistry').get(event.target.value);m.get<Selection>('selection').select(element??[]);})}><option value="">请选择</option>{elements.map(e=><option key={e.id} value={e.id}>{e.businessObject.name||e.id} · {e.id}</option>)}</Select></label>
         {selected&&instance.current?<WorkflowNodeProperties key={`${selected.id}-${revision}`} modeler={instance.current} element={selected} onError={setError} onPending={value=>{pending.current=value;if(value)onDirty();}}/>:<p>点击画布节点编辑属性，也可使用上方选择框。</p>}
         {selected&&nodeTypes.some(t=>t===selected.type)?<><label>连接到<Select value={target} onChange={event=>setTarget(event.target.value)}><option value="">请选择目标</option>{elements.filter(e=>nodeTypes.some(t=>t===e.type)&&e.id!==selected.id).map(e=><option key={e.id} value={e.id}>{e.businessObject.name||e.id} · {e.id}</option>)}</Select></label><Button label="连接节点" variant="secondary" isDisabled={!target} onClick={()=>act(m=>{const to=m.get<ElementRegistry>('elementRegistry').get(target);if(to)m.get<Modeling>('modeling').connect(selected,to as Element);})}/></>:null}
-        <Button label="删除所选" variant="secondary" isDisabled={!selected} onClick={()=>act(m=>{if(selected)m.get<Modeling>('modeling').removeElements([selected]);})}/>
+        {selected?<Button label="删除所选" variant="secondary" onClick={()=>act(m=>m.get<Modeling>('modeling').removeElements([selected]))}/>:null}
       </aside>
     </div>
     <p className="workflow-designer-help">拖动节点调整布局；选中连线可调整路径。通过属性栏设置审批人和分支条件。保存草稿后仍需服务端场景校验。</p>

@@ -18,8 +18,7 @@ test('real workflow editor, scenario proof, immutable publication and separate a
     }
     const name=`浏览器审批${Date.now()}`;await page.getByRole('button',{name:'新增流程包',exact:true}).click();
     const editor=page.getByRole('dialog',{name:'新增流程包',exact:true});await editor.getByLabel('流程名称',{exact:true}).fill(name);
-    await expect(editor.getByLabel('流程文件',{exact:true})).toContainText('candidateGroups="role:2"');
-    await editor.getByRole('button',{name:'可视化设计',exact:true}).click();
+    await expect(editor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
     await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
     await editor.getByLabel('选择节点或连线').selectOption('review');
     await editor.getByLabel('节点名称',{exact:true}).fill('可视化主管审批');
