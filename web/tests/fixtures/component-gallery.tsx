@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Button,EForgeProvider,Input} from '@eforge/ui';
+import {Button,EForgeProvider,Input,Selector} from '@eforge/ui';
 import '@eforge/tokens/styles.css';
 import '@eforge/ui/styles.css';
 import '@eforge/patterns/styles.css';
@@ -10,15 +10,19 @@ import {UploadEntries} from '../../app/components/UploadEntries';
 import {GrantTree} from '../../features/roles/GrantTree';
 import {IconPicker} from '../../features/menus/IconPicker';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
-import {Select,TextareaControl} from '../../ui/native';
+import {NativeButton,Select,TextareaControl} from '../../ui/native';
 import '../../ui/theme.css';
 
 // Browser-only presentation fixture. Uses the real shared components, without
 // auth bootstrap, production routes, network uploads or business writes.
 function Gallery(){
+  const [tab,setTab]=useState(0),[assignee,setAssignee]=useState<string|null>('admin');
   const [text,setText]=useState('admin'),[paths,setPaths]=useState(['合同.pdf','需求文档.docx']),[icon,setIcon]=useState('user'),[selected,setSelected]=useState(['read']),[linked,setLinked]=useState(true),[visibility,setVisibility]=useState({});
   return <EForgeProvider><main className="enterprise-layout" style={{padding:20}}>
     <section className="posts-page" style={{maxWidth:900,margin:'auto'}}><h1>共享组件样式验收</h1>
+      <div role="tablist" aria-label="详情页签">{['基本信息','费用明细','财务信息','文件信息','回款信息','审批记录'].map((label,index)=><NativeButton key={label} id={`detail-tab-${index}`} role="tab" aria-selected={tab===index} aria-controls="detail-panel" tabIndex={tab===index?0:-1} onClick={()=>setTab(index)} onKeyDown={event=>{const next=event.key==='ArrowRight'?(index+1)%6:event.key==='ArrowLeft'?(index+5)%6:event.key==='Home'?0:event.key==='End'?5:null;if(next===null)return;event.preventDefault();setTab(next);event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role=tab]')[next]?.focus();}}>{label}</NativeButton>)}</div>
+      <div role="tabpanel" id="detail-panel" aria-labelledby={`detail-tab-${tab}`}>当前详情：{['基本信息','费用明细','财务信息','文件信息','回款信息','审批记录'][tab]}</div>
+      <Selector label="审批人员" options={[{value:'admin',label:'Admin'},{value:'cindy',label:'Cindy'},{value:'sales',label:'业务人员2'},{value:'disabled',label:'停用人员',disabled:true}]} value={assignee} onChange={setAssignee} hasClear hasSearch/>
       <form className="post-filters" onSubmit={event=>event.preventDefault()}>
         <Input label="账号" value={text} onChange={setText}/><Input label="禁用账号" value="readonly" isDisabled/>
         <Input label="错误账号" value="" status={{type:'error',message:'请输入账号'}} onChange={()=>{}}/>

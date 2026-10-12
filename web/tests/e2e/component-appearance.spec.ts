@@ -40,3 +40,38 @@ test('shared component details retain focus, mixed grants, file ordering and ima
   await page.keyboard.press('Escape');await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('button',{name:'预览图片 样式示例',exact:true})).toBeFocused();
 });
+
+test('detail tabs and searchable selector expose clear states without nested borders at desktop and phone sizes',async({page},info)=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto('/tests/fixtures/component-gallery.html');
+  const first=page.getByRole('tab',{name:'基本信息',exact:true});
+  await expect(first).toHaveAttribute('aria-selected','true');
+  await expect(first).toHaveCSS('font-weight','600');
+  await first.focus();await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('tab',{name:'费用明细',exact:true})).toBeFocused();
+  await expect(page.getByRole('tabpanel')).toContainText('费用明细');
+  await page.keyboard.press('End');await expect(page.getByRole('tab',{name:'审批记录'})).toBeFocused();
+  const trigger=page.getByRole('button',{name:'审批人员',exact:true});
+  await trigger.click();
+  const search=page.getByRole('combobox',{name:'Search options'});
+  await expect(search).toHaveCSS('border-top-width','0px');
+  await expect(search).toHaveCSS('outline-style','none');
+  await expect(page.getByRole('option',{name:'Admin',exact:true})).toHaveAttribute('aria-selected','true');
+  await expect(page.getByRole('option',{name:'停用人员'})).toHaveAttribute('aria-disabled','true');
+  for(const width of [1440,390]){
+    await page.setViewportSize({width,height:900});
+    const option=page.getByRole('option',{name:'Cindy'});
+    await expect(option).toHaveCSS('padding-left','12px');
+    await expect.poll(async()=>(await option.boundingBox())!.height).toBeGreaterThanOrEqual(width===390?44:36);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.screenshot({path:info.outputPath('tabs-selector-'+width+'.png'),fullPage:true});
+  }
+  await search.fill('Cindy');await expect(page.locator('.astryx-selector-option-row')).toHaveCount(1);
+  await search.press('ArrowDown');await search.press('Enter');
+  await expect(trigger).toContainText('Cindy');
+  await page.getByRole('button',{name:'Clear 审批人员',exact:true}).click();
+  await expect(trigger).not.toContainText('Cindy');await expect(trigger).toBeFocused();
+  await trigger.click();await page.getByRole('combobox',{name:'Search options'}).fill('不存在');
+  await expect(page.locator('.astryx-selector-option-row')).toHaveCount(0);
+  await page.keyboard.press('Escape');await expect(trigger).toBeFocused();
+});

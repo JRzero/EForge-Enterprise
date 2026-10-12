@@ -1,0 +1,57 @@
+/* Stable theme targets emitted by the pinned EForge dependency. No vendor code
+   or generated StyleX classes are copied. Portal options need document scope. */
+.enterprise-layout [role=tablist] {
+  display: flex; align-items: stretch; gap: 4px; max-width: 100%;
+  flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+  border-bottom: 1px solid var(--ui-border); margin-bottom: 16px;
+}
+.enterprise-layout [role=tablist]::-webkit-scrollbar { display: none; }
+.enterprise-layout [role=tab] {
+  flex: 0 0 auto; min-height: 40px; padding: 8px 16px;
+  border: 0; border-radius: 4px 4px 0 0; white-space: nowrap;
+  background: transparent; color: var(--ui-muted); font-size: 14px; line-height: 24px;
+}
+.enterprise-layout [role=tab]:hover:not(:disabled):not([aria-disabled=true]) { background: var(--ui-primary-soft); color: var(--ui-primary); }
+.enterprise-layout [role=tab][aria-selected=true] {
+  color: var(--ui-primary); background: var(--ui-primary-soft);
+  box-shadow: inset 0 -2px var(--ui-primary); font-weight: 600;
+}
+.enterprise-layout [role=tab]:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: -3px; }
+.enterprise-layout [role=tab]:is(:disabled,[aria-disabled=true]) { color: #a8afb9; background: transparent; cursor: not-allowed; }
+
+.astryx-selector {
+  min-height: var(--ui-control-height, 36px); gap: 8px;
+  border: 1px solid var(--ui-border); border-radius: 4px;
+  background: #fff; color: var(--ui-text); box-shadow: none;
+}
+.astryx-selector:hover:not([data-disabled]) { border-color: #aab5c2; }
+.astryx-selector:focus-within:not([data-disabled]) { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+.astryx-selector[data-disabled] { background: #f5f7fa; color: #a8afb9; cursor: not-allowed; }
+.astryx-selector[data-status=error] { border-color: #dc3545; }
+.astryx-selector[data-status=error]:focus-within { box-shadow: 0 0 0 1px #dc3545; }
+.astryx-selector > button { font-size: var(--ui-control-font, 14px); min-width: 24px; min-height: 28px; }
+.astryx-selector-indicator-icon, .astryx-selector-clear-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--ui-muted); }
+[role=listbox]:has(.astryx-selector-option-row) {
+  padding: 4px; border: 1px solid var(--ui-border); border-radius: 6px;
+  background: #fff; color: var(--ui-text); box-shadow: 0 6px 20px #172b4d1a;
+  max-height: 280px; overflow-y: auto; overscroll-behavior: contain;
+}
+.astryx-selector-option-row {
+  min-height: 36px; padding: 8px 12px; gap: 8px; border-radius: 4px;
+  font-size: 14px; line-height: 20px; color: var(--ui-text);
+}
+.astryx-selector-option-row:hover:not([aria-disabled=true]) { background: var(--ui-primary-soft); }
+.astryx-selector-option-row[aria-selected=true] { color: var(--ui-primary); background: var(--ui-primary-soft); font-weight: 600; }
+.astryx-selector-option-row[aria-disabled=true] { color: #a8afb9; background: transparent; cursor: not-allowed; }
+.astryx-selector-empty-state { padding: 16px; color: var(--ui-muted); font-size: 14px; }
+/* Search has one focus ring around icon + text, never an inset input box. */
+.astryx-selector-search { padding: 8px; }
+.astryx-selector-search > div { border: 1px solid var(--ui-border); border-radius: 4px; padding: 4px 8px; background: #fff; }
+.astryx-selector-search > div:focus-within { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+:is(body,.enterprise-layout) .astryx-selector-search input[type=text][role=combobox] {
+  min-width: 0; min-height: 28px; border: 0; padding: 0; outline: none;
+  box-shadow: none; background: transparent; font-size: 14px; line-height: 24px;
+}
+@media (max-width: 640px) {
+  .enterprise-layout [role=tab], .astryx-selector-option-row { min-height: 44px; }
+}
