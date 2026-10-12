@@ -31,7 +31,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   await page.getByRole('button', {name: '确认删除', exact: true}).click(); await expect(page.getByRole('alertdialog').getByRole('alert')).toContainText('不能删除当前登录用户');
   await page.getByRole('button', {name: '取消', exact: true}).click(); await page.getByLabel('选择用户 admin', {exact: true}).uncheck();
   const username = `b${Date.now()}`; await query(page, username);
-  await page.getByLabel('开始日期', {exact: true}).fill('2000-01-01'); await page.getByLabel('结束日期', {exact: true}).fill('2099-12-31'); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期', {exact: true}).fill('2000-01-01'); await page.getByLabel('结束日期', {exact: true}).fill('2099-12-31'); await page.getByRole('button', {name: '查询', exact: true}).click();
   await page.getByRole('button', {name: '新增用户', exact: true}).click(); let dialog = page.getByRole('dialog');
   await dialog.getByRole('button', {name: '保存用户', exact: true}).click(); await expect(dialog.getByRole('alert')).toContainText('请检查账号');
   await dialog.getByLabel('登录账号', {exact: true}).fill(username); await dialog.getByLabel('用户昵称', {exact: true}).fill('浏览器用户');

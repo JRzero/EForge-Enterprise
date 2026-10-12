@@ -48,7 +48,7 @@ for (const route of cases) test(`shared list layout: ${route.url}`, async ({page
         expect(Math.abs(first.y + first.height / 2 - last.y - last.height / 2)).toBeLessThanOrEqual(2);
         expect(last.x - first.x - first.width).toBeGreaterThanOrEqual(8);
         if (width === 390) {
-          const field = (await form.locator('.list-filter-field').last().boundingBox())!;
+          const field = (await form.locator('.list-filter-field:visible').last().boundingBox())!;
           expect(group.y - field.y - field.height).toBeGreaterThanOrEqual(12);
         }
       }

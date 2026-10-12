@@ -39,7 +39,7 @@ test('generator list retry, server filters, inert values and original permission
   await expect(page.getByRole('button',{name:'导入表',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'创建表',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'编辑 ef_test',exact:true})).toHaveCount(0);
   await page.locator('.list-filters').getByLabel('表名称',{exact:true}).fill('x & 中文');await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('name')).toBe('x & 中文');
   await page.getByLabel('排序字段',{exact:true}).selectOption('name');await expect.poll(()=>queries.at(-1)?.get('sort')).toBe('name');
-  await page.getByLabel('开始日期',{exact:true}).fill('2026-10-01');await page.getByLabel('结束日期',{exact:true}).fill('2026-10-07');await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('from')).toBe('2026-10-01');expect(queries.at(-1)?.get('to')).toBe('2026-10-07');await page.getByRole('button',{name:'重置',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('name')).toBe('');
+  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期',{exact:true}).fill('2026-10-01');await page.getByLabel('结束日期',{exact:true}).fill('2026-10-07');await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('from')).toBe('2026-10-01');expect(queries.at(-1)?.get('to')).toBe('2026-10-07');await page.getByRole('button',{name:'重置',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('name')).toBe('');
 });
 test('generator import selection and metadata deletion send exact identities after confirmation',async({page})=>{
   let imported:unknown,deleted:unknown;

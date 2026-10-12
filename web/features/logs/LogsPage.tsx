@@ -95,7 +95,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   }
   return <ListPage className="logs-page" title={title} description={operation ? '查看系统操作记录和执行详情。' : '查看登录记录并管理账号解锁。'}>
     <DictionaryNotice dictionary={statuses} />{types && <DictionaryNotice dictionary={types} />}
-    {showFilters && <ListFilters actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
+    {showFilters && <ListFilters primaryCount={3} advancedCount={[...(operation ? [draft.businessType, draft.status] : []), draft.from, draft.to].filter(Boolean).length} actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
       {operation && <label>操作类型<Select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></Select></label>}
       <label>{operation ? '操作状态' : '登录状态'}<Select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>

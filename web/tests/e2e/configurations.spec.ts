@@ -40,7 +40,7 @@ test('configuration filters and exports retain applied dates, false builtin and 
   await page.route('**/api/v1/system/configurations/export?*', route => {exported = new URL(route.request().url()).searchParams; return route.fulfill({body: Buffer.from([80, 75, 3, 4]), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});});
   await login(page, ['system:config:list', 'system:config:export']);
   await page.locator('.list-filters').getByLabel('参数名称').fill('中文 & 名称'); await page.locator('.list-filters').getByLabel('参数键名').fill(row.key); await page.locator('.list-filters').getByLabel('系统内置').selectOption('N');
-  await page.getByLabel('开始日期').fill('2026-10-04'); await page.getByLabel('结束日期').fill('2026-10-05'); await page.getByRole('button', {name: '查询', exact: true}).click();
+  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-04'); await page.getByLabel('结束日期').fill('2026-10-05'); await page.getByRole('button', {name: '查询', exact: true}).click();
   await expect.poll(() => queries.at(-1)?.get('builtin')).toBe('false'); expect(queries.at(-1)?.get('key')).toBe(row.key); expect(queries.at(-1)?.get('from')).toBe('2026-10-04');
   await page.locator('.list-filters').getByLabel('参数名称').fill('尚未应用');
   const pending = page.waitForEvent('download'); await page.getByRole('button', {name: '导出参数'}).click(); expect((await pending).suggestedFilename()).toBe('参数数据.xlsx');

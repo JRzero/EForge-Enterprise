@@ -98,7 +98,7 @@ export function ConfigurationsPage() {
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
   return <ListPage className="posts-page" title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理">
     <DictionaryNotice dictionary={dictionary} />
-    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
+    <ListFilters primaryCount={3} advancedCount={[draft.from, draft.to].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
       <Input label="参数名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名" value={draft.key} onChange={key => setDraft({...draft, key})} />
       <label>系统内置<Select aria-label="系统内置" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>

@@ -40,11 +40,11 @@ test('dictionary search fields align independently across desktop wrapping and m
   for (const width of [1920, 1280, 390]) {
     await page.setViewportSize({width, height: 1000});
     await expect(filters).toBeVisible();
-    const boxes = await filters.locator('input, select').evaluateAll(nodes => nodes.map(node => {
+    const boxes = await filters.locator('input:visible, select:visible').evaluateAll(nodes => nodes.map(node => {
       const box = (node.closest('[data-pressable-container]') ?? node).getBoundingClientRect();
       return {x: box.x, y: box.y, right: box.right, bottom: box.bottom};
     }));
-    const labelOffsets = await filters.locator('label').evaluateAll(labels => labels.map(label => {
+    const labelOffsets = await filters.locator('label:visible').evaluateAll(labels => labels.map(label => {
       const control = label instanceof HTMLLabelElement ? label.control : null;
       if (!control) return 0;
       const text = Array.from(label.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim());
@@ -54,7 +54,7 @@ test('dictionary search fields align independently across desktop wrapping and m
       return {text: text.textContent, offset: Math.abs(a.y + a.height / 2 - b.y - b.height / 2)};
     }));
     for (const item of labelOffsets) if (item) expect(item.offset, JSON.stringify(item)).toBeLessThanOrEqual(3);
-    expect(boxes).toHaveLength(5);
+    expect(boxes).toHaveLength(3);
     for (const box of boxes) {expect(box.x).toBeGreaterThanOrEqual(0); expect(box.right).toBeLessThanOrEqual(width);}
     if (width === 1920) expect(Math.max(...boxes.map(box => box.y)) - Math.min(...boxes.map(box => box.y))).toBeLessThanOrEqual(2);
     if (width === 390) {
@@ -155,7 +155,7 @@ test('metadata failure disables editing until retry and inconsistent preview sup
     return route.fulfill({json: {items, page: current, pageSize: 100, total: current === 2 && drift ? 102 : 101}});
   });
   await page.getByRole('button', {name: '预览字典 测试字典'}).click(); const dialog = page.getByRole('dialog'); await expect(dialog.getByRole('alert')).toContainText('字典数据已变化'); drift = false; await dialog.getByRole('button', {name: '重试预览'}).click(); await expect(dialog.locator('p[role=status]')).toHaveText('共计 101 条，正常 101 条，停用 0 条'); await expect(dialog.getByText('预览100', {exact: true})).toBeAttached(); await page.keyboard.press('Escape');
-  await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期');
+  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期');
 });
 
 test('a cached dictionary page recovers an editor read cancelled by tab navigation',async({page})=>{

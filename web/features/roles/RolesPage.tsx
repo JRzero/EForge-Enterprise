@@ -97,7 +97,7 @@ export function RolesPage() {
     setActionError(''); setPage(1); setFilters({...draft}); setVersion(previous => previous + 1);
   }
   return <ListPage className="posts-page roles-page" title="角色管理" description="管理角色、菜单权限、数据范围与用户授权。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} />
-    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh(); }} /></>} onSubmit={query}><Input label="角色名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
+    <ListFilters primaryCount={3} advancedCount={[draft.beginDate, draft.endDate].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh(); }} /></>} onSubmit={query}><Input label="角色名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="权限字符" value={draft.key} onChange={key => setDraft({...draft, key})} /><label>状态<Select aria-label="状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
       <label>开始日期<NativeInput type="date" aria-label="开始日期" value={draft.beginDate} onChange={event => setDraft({...draft, beginDate: event.target.value})} /></label><label>结束日期<NativeInput type="date" aria-label="结束日期" value={draft.endDate} onChange={event => setDraft({...draft, endDate: event.target.value})} /></label>
 

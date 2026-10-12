@@ -18,12 +18,12 @@ test('object-model list template aligns mixed filters without a visible heading 
   await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
   await expect(page.locator('.list-page > header')).toHaveCount(0);
   await page.screenshot({path:info.outputPath('list-desktop.png'),fullPage:true});
-  for(const field of await page.locator('.list-filter-field').all()) {
+  for(const field of await page.locator('.list-filter-field:visible').all()) {
     const metrics=await field.evaluate(el=>{const label=el.querySelector('label')!,control=el.querySelector('input,select')!;const a=label.getBoundingClientRect(),b=control.getBoundingClientRect();return {labelX:a.x,controlX:b.x,labelY:a.y,labelHeight:a.height,controlY:b.y,controlHeight:b.height};});
     expect(metrics.controlX).toBeGreaterThan(metrics.labelX+8);
     expect(Math.abs(metrics.labelY+metrics.labelHeight/2-metrics.controlY-metrics.controlHeight/2)).toBeLessThanOrEqual(3);
   }
-  const fields=await page.locator('.list-filter-field').all();
+  const fields=await page.locator('.list-filter-field:visible').all();
   for(let i=1;i<fields.length;i++) {
     const previous=(await fields[i-1]!.boundingBox())!,current=(await fields[i]!.boundingBox())!;
     if(Math.abs(previous.y-current.y)<3)expect(current.x-previous.x-previous.width).toBeGreaterThanOrEqual(12);
@@ -63,7 +63,7 @@ test('operation filters, two-way server sort, applied export, columns and retrya
   await page.route('**/api/v1/monitor/operation-logs/clear', route => {clearCalls++; return route.fulfill({status: 204});});
   await page.route('**/api/v1/monitor/operation-logs/export?*', route => {exported = new URL(route.request().url()).searchParams; return route.fulfill({body: Buffer.from([80, 75, 3, 4]), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});});
   await login(page, '/operlog', ['monitor:operlog:list', 'monitor:operlog:remove', 'monitor:operlog:export']); await expect(page.getByRole('cell', {name: id, exact: true})).toBeVisible();
-  const initialQueries = queries.length; await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-01'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于'); expect(queries).toHaveLength(initialQueries);
+  const initialQueries = queries.length; await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-01'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于'); expect(queries).toHaveLength(initialQueries);
   await page.getByLabel('开始日期').fill('2026-10-01'); await page.getByLabel('结束日期').fill('2026-10-05'); await page.getByRole('textbox', {name: '系统模块', exact: true}).fill('模块 & /'); await page.getByRole('textbox', {name: '操作人员', exact: true}).fill('张 & /'); await page.getByRole('textbox', {name: '操作地址', exact: true}).fill('127.'); await page.getByRole('combobox', {name: '操作类型', exact: true}).selectOption('2'); await page.getByRole('combobox', {name: '操作状态', exact: true}).selectOption('0'); await page.getByRole('button', {name: '搜索', exact: true}).click();
   await expect.poll(() => queries.at(-1)?.get('title')).toBe('模块 & /'); expect(queries.at(-1)?.get('status')).toBe('0'); expect(queries.at(-1)?.get('from')).toBe('2026-10-01');
   await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('sort')).toBe('duration'); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('desc'); await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('asc'); await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('desc');
@@ -83,4 +83,42 @@ test('login log search, sorting, paging and unlock permission/failure/cancel pre
   await page.getByRole('textbox', {name: '用户名称', exact: true}).fill('账号 & /'); await page.getByRole('textbox', {name: '登录地址', exact: true}).fill('127.'); await page.getByRole('combobox', {name: '登录状态', exact: true}).selectOption('1'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('username')).toBe('账号 & /'); expect(queries.at(-1)?.get('status')).toBe('1');
   await page.getByRole('button', {name: '用户名称', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('sort')).toBe('username'); await page.getByRole('button', {name: '下一页'}).click(); await expect.poll(() => queries.at(-1)?.get('page')).toBe('2'); await page.getByLabel('每页条数').selectOption('20'); await expect.poll(() => queries.at(-1)?.get('page')).toBe('1'); expect(queries.at(-1)?.get('pageSize')).toBe('20');
   await page.setViewportSize({width: 390, height: 844}); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+
+test('advanced filters retain values and applied query when collapsed, reset clears them, keyboard and responsive layout work', async ({page}, info) => {
+  const queries: URLSearchParams[] = [];
+  await page.route('**/api/v1/monitor/operation-logs?*', route => {queries.push(new URL(route.request().url()).searchParams); return route.fulfill({json:{items:[operation],total:1,page:1,pageSize:10}});});
+  await page.setViewportSize({width:1440,height:900});
+  await login(page, '/operlog', ['monitor:operlog:list']);
+  await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
+  const filters=page.locator('.list-filters'), toggle=filters.getByRole('button',{name:/更多筛选|收起筛选/});
+  await expect(toggle).toHaveAttribute('aria-expanded','false');
+  await expect(page.getByLabel('开始日期')).toBeHidden();
+  const compactHeight=(await filters.boundingBox())!.height;
+  expect(compactHeight).toBeLessThanOrEqual(44);
+  await toggle.focus(); await toggle.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-expanded','true');
+  await page.getByLabel('开始日期').fill('2026-10-01');
+  await page.getByLabel('结束日期').fill('2026-10-05');
+  await page.getByRole('combobox',{name:'操作状态',exact:true}).selectOption('0');
+  await toggle.click();
+  await expect(toggle).toContainText('3 项已填写');
+  await expect(page.getByLabel('开始日期')).toBeHidden();
+  await filters.getByRole('button',{name:'搜索',exact:true}).click();
+  await expect.poll(()=>queries.at(-1)?.get('from')).toBe('2026-10-01');
+  expect(queries.at(-1)?.get('status')).toBe('0');
+  await toggle.click(); await expect(page.getByLabel('开始日期')).toHaveValue('2026-10-01');
+  for(const width of [1440,1024,768,390,320]) {
+    await page.setViewportSize({width,height:900});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    const boxes=await filters.locator('input:visible,select:visible').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right};}));
+    for(const box of boxes){expect(box.left).toBeGreaterThanOrEqual(0);expect(box.right).toBeLessThanOrEqual(width);}
+  }
+  await toggle.click(); await filters.getByRole('button',{name:'重置',exact:true}).click();
+  await expect(toggle).not.toContainText('已填写');
+  await expect.poll(()=>queries.at(-1)?.get('from')).toBe(null);
+  await toggle.click(); await expect(page.getByLabel('开始日期')).toHaveValue('');
+  await toggle.click(); await page.setViewportSize({width:1440,height:900});
+  await page.screenshot({path:info.outputPath('compact-list.png'),fullPage:true});
 });

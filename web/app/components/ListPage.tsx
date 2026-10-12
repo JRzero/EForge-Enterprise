@@ -1,5 +1,6 @@
-import {Children, Fragment, isValidElement, type ComponentPropsWithoutRef, type ReactNode} from 'react';
+import {Children, Fragment, isValidElement, useId, useState, type ComponentPropsWithoutRef, type ReactNode} from 'react';
 import {PageHeader} from '../../ui/patterns';
+import {NativeButton} from '../../ui/native';
 
 /** Product list layout matching the spcore object-model lists. */
 export function ListPage({title, description, eyebrow, showHeader = false, className = '', children}: {
@@ -21,10 +22,19 @@ function filterFields(children: ReactNode, parentKey = ''): ReactNode[] {
   });
 }
 
-export function ListFilters({children, actions, className = '', ...props}: ComponentPropsWithoutRef<'form'> & {actions?: ReactNode}) {
+export function ListFilters({children, actions, primaryCount = Infinity, advancedCount = 0, className = '', ...props}: ComponentPropsWithoutRef<'form'> & {
+  actions?: ReactNode; primaryCount?: number; advancedCount?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const advancedId = useId();
+  const fields = filterFields(children);
+  const hasAdvanced = fields.length > primaryCount;
   return <form {...props} className={`post-filters list-filters ${className}`}>
-    {filterFields(children)}
-    {actions && <div className="list-filter-actions">{actions}</div>}
+    {fields.slice(0, primaryCount)}
+    <div className="list-filter-actions">{actions}{hasAdvanced && <NativeButton type="button" className="list-filter-toggle" aria-expanded={expanded} aria-controls={advancedId} onClick={() => setExpanded(value => !value)}>
+      {expanded ? '收起筛选' : '更多筛选'}{advancedCount > 0 && <span>（{advancedCount} 项已填写）</span>}<span aria-hidden="true">{expanded ? '⌃' : '⌄'}</span>
+    </NativeButton>}</div>
+    {hasAdvanced && <div id={advancedId} className="list-filter-advanced" hidden={!expanded} onInvalidCapture={() => setExpanded(true)}>{fields.slice(primaryCount)}</div>}
   </form>;
 }
 

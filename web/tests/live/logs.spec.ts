@@ -31,7 +31,7 @@ test('real operation audit details, inert JSON, clipboard, XLSX, paging recovery
     await expect.poll(async () => {const response = await page.request.get('/api/v1/monitor/operation-logs?title=岗位管理&businessType=1&status=0&pageSize=100', {headers}); expect(response.status()).toBe(200); rows = (await response.json()).items; return rows.length;}, {timeout: 15000}).toBe(12);
     await page.getByRole('textbox', {name: '系统模块', exact: true}).fill('岗位管理');
     await page.getByRole('textbox', {name: '操作人员', exact: true}).fill('admin');
-    await page.getByRole('combobox', {name: '操作类型', exact: true}).selectOption('1');
+    await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByRole('combobox', {name: '操作类型', exact: true}).selectOption('1');
     await page.getByRole('combobox', {name: '操作状态', exact: true}).selectOption('0');
     const today = new Date().toISOString().slice(0, 10);
     await page.getByLabel('开始日期', {exact: true}).fill(today); await page.getByLabel('结束日期', {exact: true}).fill(today);
