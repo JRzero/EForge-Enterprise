@@ -55,3 +55,23 @@
 @media (max-width: 640px) {
   .enterprise-layout [role=tab], .astryx-selector-option-row { min-height: 44px; }
 }
+
+/* Boolean fields and choice groups share the dialog's label/control columns. */
+.post-dialog form > label.form-checkbox-field {
+  display: flex; flex-direction: row; align-items: center; gap: 8px;
+  min-height: 32px; margin: 0; color: #606266;
+}
+.form-checkbox-field input[type=checkbox] { margin: 0; width: 16px; height: 16px; flex-shrink: 0; }
+.post-dialog .user-editor-form > .user-choices {
+  position: relative; min-width: 0; margin: 0; border: 0; border-radius: 0;
+  padding: 0; gap: 8px 16px;
+}
+.post-dialog .user-editor-form > .user-choices legend { padding: 0; margin-bottom: 8px; color: #606266; font-size: 14px; }
+.post-dialog .user-editor-form > .user-choices label { min-height: 32px; margin: 0; gap: 8px; overflow-wrap: anywhere; }
+.post-dialog .user-editor-form > .user-choices input { margin: 0; width: 16px; height: 16px; flex-shrink: 0; }
+@media (min-width: 992px) {
+  .post-dialog form > label.form-checkbox-field { display: grid; grid-template-columns: 110px minmax(0,1fr); }
+  .form-checkbox-field > span { text-align: right; }
+  .post-dialog .user-editor-form > .user-choices { grid-column: 1 / -1; padding-left: 118px; min-height: 32px; }
+  .post-dialog .user-editor-form > .user-choices legend { position: absolute; left: 0; top: 5px; width: 110px; margin: 0; text-align: right; }
+}

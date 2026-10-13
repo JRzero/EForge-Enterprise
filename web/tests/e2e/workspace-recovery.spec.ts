@@ -85,12 +85,17 @@ test('a failed lazy page keeps shell navigation usable and a manual application 
   }
 });
 
-test('user editor escape and cancel preserve changes until explicit discard; clean cancellation stays immediate', async ({page}) => {
+test('user editor escape and cancel preserve changes until explicit discard; clean cancellation stays immediate', async ({page}, info) => {
   await fixtures(page);
   await login(page);
   await openUsers(page);
   await page.getByRole('button', {name: '新增用户', exact: true}).click();
   const editor = page.getByRole('dialog', {name: '新增用户', exact: true});
+  await page.screenshot({path:info.outputPath('user-choice-fields-desktop.png')});
+  await page.setViewportSize({width:390,height:844});
+  await expect(editor.getByRole('group',{name:'角色',exact:true})).toBeVisible();
+  await page.screenshot({path:info.outputPath('user-choice-fields-mobile.png'),fullPage:true});
+  await page.setViewportSize({width:1280,height:900});
   await editor.getByLabel('用户昵称', {exact: true}).fill('未保存用户');
   await page.keyboard.press('Escape');
   await expect(editor.getByText('有未保存的修改，是否放弃？')).toBeVisible();

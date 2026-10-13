@@ -36,7 +36,7 @@ export function DictionaryEditor({initial, statusOptions, code, onClose, onSaved
       <Input label="样式属性" value={state.form.cssClass ?? ''} isDisabled={busy} onChange={cssClass => setState({...state, form: {...state.form, cssClass}})} />
       <label>显示顺序<NativeInput type="number" min={0} max={2147483647} step={1} value={state.form.sort} disabled={busy} onChange={event => setState({...state, form: {...state.form, sort: Number(event.target.value)}})} /></label>
       <label>回显样式<Select aria-label="回显样式" value={state.form.style} disabled={busy} onChange={event => setState({...state, form: {...state.form, style: event.target.value as EntryRequest['style']}})}>{Object.entries({DEFAULT: '默认', PRIMARY: '主要', SUCCESS: '成功', INFO: '信息', WARNING: '警告', DANGER: '危险'}).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></label>
-      <label><NativeInput type="checkbox" checked={state.form.defaultEntry} disabled={busy} onChange={event => setState({...state, form: {...state.form, defaultEntry: event.target.checked}})} />默认项</label>
+      <label className="form-checkbox-field"><span>默认项</span><NativeInput type="checkbox" checked={state.form.defaultEntry} disabled={busy} onChange={event => setState({...state, form: {...state.form, defaultEntry: event.target.checked}})} /></label>
     </>}
     <label>字典状态<Select aria-label="字典状态" value={state.form.status} disabled={busy} onChange={event => shared({status: event.target.value})}>
       {!statusOptions.some(option => option.value === state.form.status) ? <option value={state.form.status}>{state.form.status}</option> : null}{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</Select></label>
