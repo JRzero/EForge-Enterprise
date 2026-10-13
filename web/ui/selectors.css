@@ -50,3 +50,9 @@ body .ui-multi-select .ui-multi-values input[type=text][role=combobox] { min-wid
 .enterprise-form .ui-tree-select > label { width:100px; text-align:right; padding-top:6px; margin:0; }
 .enterprise-form .ui-tree-select > .ui-tree-panel { grid-column:2; margin:0; }
 @media(max-width:600px) { .enterprise-form .ui-tree-select { grid-template-columns:minmax(0,1fr); gap:6px; } .enterprise-form .ui-tree-select > label { text-align:left; padding:0; } .enterprise-form .ui-tree-select > .ui-tree-panel { grid-column:1; } }
+
+.ui-reference-select { min-width:0; }
+.ui-reference-select > [role=alert], .ui-reference-select > [role=status] { margin:6px 0 0; font-size:13px; overflow-wrap:anywhere; }
+.template-page .form-section > .ui-reference-select > div:has(> label) { display:grid; grid-template-columns:100px minmax(0,1fr); gap:12px; align-items:start; }
+.template-page .form-section > .ui-reference-select > div > label { width:100px; text-align:right; margin:0; padding-top:6px; }
+@media(max-width:600px) { .template-page .form-section > .ui-reference-select > div:has(> label) { grid-template-columns:minmax(0,1fr); gap:6px; } .template-page .form-section > .ui-reference-select > div > label { text-align:left; padding:0; } }

@@ -1,3 +1,4 @@
+import {ReferenceSelect} from '../../ui/ReferenceSelect';
 import {PageTabs} from '../../ui/PageTabs';
 import {NativeButton, Select, TextareaControl, Table, NativeInput} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
@@ -107,9 +108,7 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
               <td>{([['required','必填'],['insertable','插入'],['editable','编辑'],['listed','列表'],['queryable','查询']] as const).map(([key,label])=><label key={key}><NativeInput type="checkbox" disabled={busy} aria-label={label+' '+physical?.name} checked={field[key]} onChange={event=>fieldChange(index,{[key]:event.target.checked})}/>{label}</label>)}</td>
               <td><ChoiceSelect label={'查询方式 '+physical?.name} value={field.queryType} values={queries} disabled={busy} onChange={queryType=>fieldChange(index,{queryType})}/></td>
               <td><ChoiceSelect label={'显示控件 '+physical?.name} value={field.controlType} values={controls} disabled={busy} onChange={controlType=>fieldChange(index,{controlType})}/></td>
-              <td><label>字典类型<Select aria-label={'字典类型 '+physical?.name} value={field.dictionaryType ?? ''} disabled={busy||optionLoading} onChange={event=>fieldChange(index,{dictionaryType:event.target.value})}>
-                <option value="">无字典</option>{field.dictionaryType&&!dictionaries.some(item=>item.code===field.dictionaryType)?<option value={field.dictionaryType}>{field.dictionaryType}（当前配置）</option>:null}
-                {dictionaries.map(item=><option key={item.id} value={item.code}>{item.name} · {item.code}{item.status==='1'?'（停用）':''}</option>)}</Select></label></td>
+              <td><ReferenceSelect label={'字典类型 '+physical?.name} value={field.dictionaryType||null} placeholder="无字典" disabled={busy} loading={optionLoading} error={dictionaryError} onRetry={()=>setOptionVersion(value=>value+1)} options={dictionaries.map(item=>({value:item.code,label:item.name+' · '+item.code+(item.status==='1'?'（停用）':'')}))} onChange={dictionaryType=>fieldChange(index,{dictionaryType:dictionaryType??''})}/></td>
               <td><NativeButton type="button" draggable={!busy} disabled={busy} aria-label={'拖动排序 '+physical?.name} onDragStart={event=>{dragging.current=field.id;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',field.id);}} onDragEnd={()=>{dragging.current=null;}}>拖动排序</NativeButton><NativeInput type="number" aria-label={'排序 '+physical?.name} min={0} max={1000000} required value={field.order} disabled={busy} onChange={event=>fieldChange(index,{order:Number(event.target.value)})}/>
                 <Button label={'上移 '+physical?.name} isDisabled={busy||index===0} onClick={()=>move(index,-1)}/><Button label={'下移 '+physical?.name} isDisabled={busy||index===form.columns.length-1} onClick={()=>move(index,1)}/></td>
             </tr>;

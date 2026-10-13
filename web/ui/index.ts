@@ -39,3 +39,6 @@ export {ResourceFileLinks} from '../app/components/ResourceFileLinks';
 export {AccountAvatar} from '../app/components/AccountAvatar';
 export {PaginationNavigation} from '../app/components/PaginationNavigation';
 export {DictionaryTag} from '../app/components/DictionaryTag';
+
+export {ReferenceSelect} from './ReferenceSelect';
+export type {ReferenceSelectProps} from './ReferenceSelect';

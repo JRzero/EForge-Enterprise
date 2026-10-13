@@ -20,7 +20,7 @@ test('multi selection handles unavailable options, loading, disabled and readonl
   await page.goto('/tests/fixtures/component-gallery.html');
   await expect(page.getByRole('combobox',{name:'禁用多选',exact:true})).toBeDisabled();
   const readonly=page.getByRole('combobox',{name:'只读多选',exact:true});await readonly.click();await expect(readonly).toHaveAttribute('aria-expanded','false');
-  await page.getByRole('combobox',{name:'加载多选',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'正在加载'})).toBeVisible();await expect(page.getByRole('option',{name:'可选人员'})).toHaveCount(0);
+  await page.getByRole('combobox',{name:'加载多选',exact:true}).click();await expect(page.locator('.ui-multi-select').getByRole('status').filter({hasText:'正在加载'})).toBeVisible();await expect(page.getByRole('option',{name:'可选人员'})).toHaveCount(0);
   const failure=page.getByRole('combobox',{name:'失败多选',exact:true});await failure.click();await expect(failure).toHaveAttribute('aria-invalid','true');
   await expect(page.getByRole('button',{name:'移除 旧人员（old）',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'重试失败多选',exact:true}).click();await expect(failure).not.toHaveAttribute('aria-invalid','true');
@@ -115,4 +115,23 @@ test('user editor department tree submits scoped long IDs and excludes other ina
  const picker=dialog.getByRole('button',{name:/^归属部门 /});await expect(picker).toContainText('原停用部门（停用）');await picker.click();
  await expect(dialog.getByRole('button',{name:'其他停用部门（停用）',exact:true})).toHaveCount(0);await dialog.getByRole('button',{name:'范围内部门',exact:true}).click();
  await dialog.getByRole('button',{name:'保存用户',exact:true}).click();await expect(dialog).toHaveCount(0);expect(submitted?.departmentId).toBe('9007199254740993');
+});
+
+test('reference selection preserves unavailable records and searches labeled records',async({page})=>{
+ await page.goto('/showcase.html#form');const picker=page.getByRole('button',{name:'关联客户',exact:true});
+ await expect(picker).toContainText('原关联客户');await picker.click();await page.getByPlaceholder('搜索关联客户',{exact:true}).fill('KH001');
+ await page.getByRole('option',{name:'星河科技 · KH001',exact:true}).click();await expect(picker).toContainText('星河科技');
+ await picker.click();await page.getByPlaceholder('搜索关联客户',{exact:true}).fill('停用');await expect(page.getByRole('option',{name:'停用客户',exact:true})).toHaveAttribute('aria-disabled','true');
+ await page.keyboard.press('Escape');await expect(picker).toBeFocused();
+ await picker.click();await page.getByPlaceholder('搜索关联客户',{exact:true}).fill('不存在');await expect(page.getByRole('listbox',{name:'关联客户',exact:true}).getByText('没有匹配记录',{exact:true})).toBeVisible();
+});
+
+test('reference loading, retry and readonly keep the stored record',async({page},info)=>{
+ await page.goto('/tests/fixtures/component-gallery.html');
+ const failure=page.getByRole('button',{name:'失败关联',exact:true});await expect(failure).toBeDisabled();await expect(failure).toContainText('9007199254740993');
+ await expect(page.getByRole('button',{name:'加载关联',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'禁用关联',exact:true})).toBeDisabled();
+ const readonly=page.getByRole('combobox',{name:'只读关联',exact:true});await expect(readonly).toHaveAttribute('aria-readonly','true');await readonly.click();await expect(page.getByRole('listbox',{name:'只读关联',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'重试失败关联',exact:true}).click();await failure.click();await page.getByRole('option',{name:'恢复的记录',exact:true}).click();await expect(failure).toContainText('恢复的记录');
+ await page.getByRole('button',{name:'Clear 失败关联',exact:true}).click();await expect(failure).toContainText('请选择');
+ await page.setViewportSize({width:390,height:844});await failure.click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('reference-mobile.png'),fullPage:true});
 });

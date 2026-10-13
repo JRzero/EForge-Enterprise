@@ -7,7 +7,7 @@
 | FormField + CheckboxGroup/RadioGroup | in_progress | 字典默认项、用户角色岗位、个人中心性别、showcase 已迁移；完整字段状态审计待补 |
 | 页内 Tabs | in_progress | 个人中心、Cron、生成器和组件夹具已迁移；showcase 综合模板待接 |
 | 搜索多选 | in_progress | 已实现并接入用户分配角色及 showcase；本地功能验证通过，最终真实环境回归待统一执行 |
-| TreeSelect / 关联选择 | in_progress | TreeSelect 已接入用户部门与示例；关联选择及最终真实环境回归待补 |
+| TreeSelect / 关联选择 | in_progress | TreeSelect 接入用户部门；ReferenceSelect 接入生成器字典关联与示例；最终真实环境回归待补 |
 | 日期范围 | in_progress | DateRangeField 已接入日志/配置/示例，17 项相关浏览器通过；最终统一回归待执行 |
 | 可编辑明细表 | pending | 生成主子表与展示 |
 | 操作确认 / 异步状态 | pending | 复用 ResourceDialog/Feedback |
@@ -33,3 +33,7 @@ TreeListLayout 从用户页提取左右槽位，原部门树算法/权限/请求
 树选择切片：TreeSelect 受控精确 string ID，支持范围内孤立根、祖先搜索、折叠、方向/Home/End/Enter/Escape、选后回焦点、未知已选值、清空及加载/错误重试/禁用/只读。已迁移用户编辑部门，保留原授权选项来源及仅当前停用部门可保留规则，移除重复外置搜索。实际浏览器揭示搜索展开后右键沿用旧折叠状态误选父节点，修复后通过。用户 HTTP 夹具已证明 9007199254740993 原样提交与其他停用部门排除；夹具最初详情 envelope/非数字 ID 不符合真实契约已更正，没有改生产算法规避。
 
 本地证据：11 项用户/示例/选择器通过，补充状态及用户提交后 7 项选择器通过（集合重叠不累计）；131 单元、lint/typecheck/build 通过，既有 chunk 提示；手机 tree-select-mobile.png 已目检。真实环境用户脚本已适配新控件，尚未执行；后端及 API 未变，本阶段不宣称全目标或真实 SQL 回归完成。
+
+关联选择切片：ReferenceSelect 组合固定 EForge Selector 公共接口，受控 string/null，支持搜索、缺失已选记录回显、加载/失败重试/禁用/只读/清空；选项及授权、请求均由调用方提供。已迁移生成器字段字典关联并加入示例客户关联，真实环境生成器脚本适配后尚未执行。没有新增动态表单引擎或复制上游源码。
+
+证据：生成器8项浏览器通过、示例5项通过、最终选择器9项通过（集合独立报告不作为全量验收）；131单元及构建通过，lint/typecheck通过。最初测试错把 EForge 可编辑 Selector 的 button 当 combobox、空结果同时匹配读屏公告，均按实际公开控件语义收紧定位；新增状态夹具后旧多选加载定位限定自身组件，未降低断言。其余模板及完整消费者审计继续 pending。
