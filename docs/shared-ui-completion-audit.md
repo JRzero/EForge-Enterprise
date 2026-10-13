@@ -1,6 +1,6 @@
 # 公共组件与页面模板验收
 
-范围依据：`spec/shared-ui-abstraction.md`。状态：最终验收进行中，不代表已合并 main。
+范围依据：`spec/shared-ui-abstraction.md`。状态：done（2026-10-13），尚未合并 main。
 
 | 要求 | 实际消费者 | 展示与交互证据 |
 |---|---|---|
@@ -30,5 +30,17 @@
 - 此后单选旧值修复：个人中心4项通过，新增 shared-form-states 通过；只读/禁用/空、说明错误关联、未知项移除和busy明细均实际验证。初版夹具的required标签隐藏星号、uncheck等待已卸载元素问题已按可访问名称和移除语义修正。
 - 最终 typecheck/lint、131单元、build通过（session87673）；生成客户端复现通过（session43837）。构建保留既有大chunk提示。
 - session26516 默认真实浏览器65/68通过，三个用户测试共用创建步骤仍调用原生selectOption('103')，与已迁移的TreeSelect不符。已改为点击归属部门树和精确data-value=103的研发部门节点；其余SQL/HTTP断言保留，启用配置未运行。
-- 待终态：session59753 顺序运行默认/启用完整框架API与真实浏览器；对应 `shared-ui-framework-verified-disabled-runtime.log` / `shared-ui-framework-verified-enabled-runtime.log`。实时OpenAPI还需与固定契约精确核对。
-- 待交付：核对以上终态及最终差异，更新任务状态、精确提交推送。没有完成证据的门槛不标为done。
+- 当前实现已推送 `46da40a8e6be964e484dd365c5c42aad3915680c`，分支 `codex/compact-list-layout`。默认配置68项真实浏览器及后续实际SQL/API全部通过，顺序命令已进入启用配置。默认实时OpenAPI与固定契约deepStrictEqual，统一CRLF/LF后字节也一致。
+- 精确提交web-ci38387687845已success，直接日志 `shared-ui-cloud-web.log` 证明完整242浏览器、131单元、生成复现、lint/typecheck/build通过；agent-skills-ci38387687883已success。
+- 精确提交 server-ci38387687803 四项均终态 success；直接日志 shared-ui-cloud-server.log 证明默认/启用各68真实浏览器、两套实际生成页面、完整SQL/API及OpenAPI通过。两份本地实时OpenAPI也已核对，统一CRLF/LF后与固定契约字节一致。本地session59753随后也已整体终态0。
+- 最终本地验收：session59753终态0；shared-ui-framework-verified-disabled/enabled-runtime.log两套各68真实浏览器及完整后续API/SQL最终PASS，本次临时环境已清理。两实时OpenAPI统一换行后与契约字节一致。上述历史失败已修复或通过独立验证环境重新验收，不存在本次规格未完成项。
+
+## 最终云端记录
+
+实现提交：`46da40a8e6be964e484dd365c5c42aad3915680c`，分支 `codex/compact-list-layout`。
+
+- [server-ci 38387687803](https://github.com/JRzero/EForge-Enterprise/actions/runs/38387687803)：四项成功，默认/启用各68真实浏览器、两套生成消费者及完整运行验证通过。
+- [web-ci 38387687845](https://github.com/JRzero/EForge-Enterprise/actions/runs/38387687845)：242模拟浏览器、131单元、生成复现、lint/typecheck/build成功。
+- [agent-skills-ci 38387687883](https://github.com/JRzero/EForge-Enterprise/actions/runs/38387687883)：成功。
+
+完成范围限定本规格；未合并main、未发布生产。构建既有大chunk提示保留，表单构建器继续暂缓。

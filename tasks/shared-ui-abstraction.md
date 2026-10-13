@@ -1,22 +1,24 @@
 # 公共组件与页面模板抽象
 
-状态：in_progress。规格：[shared-ui-abstraction](../spec/shared-ui-abstraction.md)。
+状态：done（2026-10-13）。规格：[shared-ui-abstraction](../spec/shared-ui-abstraction.md)。完整验收：[逐项审计](../docs/shared-ui-completion-audit.md)。实现已推送 codex/compact-list-layout，尚未合并 main。
 
 | 切片 | 状态 | 迁移/证据 |
 |---|---|---|
-| FormField + CheckboxGroup/RadioGroup | in_progress | 字典默认项、用户角色岗位、个人中心性别、showcase 已迁移；完整字段状态审计待补 |
-| 页内 Tabs | in_progress | 个人中心、Cron、生成器、组件夹具、详情与审批示例已迁移；最终统一验收待完成 |
-| 搜索多选 | in_progress | 已实现并接入用户分配角色及 showcase；本地功能验证通过，最终真实环境回归待统一执行 |
-| TreeSelect / 关联选择 | in_progress | TreeSelect 接入用户部门；ReferenceSelect 接入生成器字典关联与示例；最终真实环境回归待补 |
-| 日期范围 | in_progress | DateRangeField 已接入日志/配置/示例，17 项相关浏览器通过；最终统一回归待执行 |
-| 可编辑明细表 | in_progress | EditableDetailTable 接入示例和 React 生成模板；生成页面真实验收待完成 |
-| 操作确认 / 异步状态 | in_progress | ConfirmActionDialog/AsyncContent 已迁移岗位删除、任务上下文及示例；最终统一回归待执行 |
-| 树列表模板 | in_progress | TreeListLayout 已迁移用户管理与示例，手机侧栏折叠/选择保留及12项相关浏览器通过 |
-| 标准编辑页 / 弹窗 | in_progress | EditorForm/Dialog/Page 已接入字典、请假及示例；最终统一回归待执行 |
-| 多页签详情模板 | in_progress | DetailTabs/TabbedDetailPage 已用于详情示例及真实审批布局 |
-| 主子表编辑模板 | in_progress | MasterDetailLayout 接入生成模板及采购示例，待实际生成部署回归 |
-| 审批详情模板 | in_progress | ApprovalDetailLayout 保持 workflow 局部并接入请假详情；最终审计待补 |
-| 示例、全量验证、完成审计 | pending | 不以局部检查声称全部完成 |
+| FormField + CheckboxGroup/RadioGroup | done | 字典默认项、用户角色岗位、个人中心、示例；必填/错误关联、未知旧值和禁用/只读通过 |
+| 页内 Tabs | done | 个人中心、Cron、生成器、详情/审批；键盘、面板关联和草稿保留通过 |
+| 搜索多选 | done | 用户分配角色及示例；搜索/移除/清空、状态、精确ID请求通过 |
+| TreeSelect / 关联选择 | done | 用户部门、生成器字典关联及示例；真实业务浏览器通过 |
+| 日期范围 | done | 日志/配置/示例；原日期语义、清空、错误/只读/禁用通过 |
+| 可编辑明细表 | done | 实际 React 子表生成与示例；稳定行、增删焦点、busy和真实生成数据通过 |
+| 操作确认 / 异步状态 | done | 岗位删除、任务上下文及示例；409/204重试、等待保护与状态切换通过 |
+| 树列表模板 | done | 用户管理与示例；手机折叠保留选择、桌面恢复通过 |
+| 标准编辑页 / 弹窗 | done | 字典、请假及示例；草稿保留/放弃确认、只读、错误通过 |
+| 多页签详情模板 | done | 详情示例及实际审批共享DetailTabs；键盘与挂载保留通过 |
+| 主子表编辑模板 | done | 实际生成模板及采购示例；一个form、滚动明细、业务DTO隔离通过 |
+| 审批详情模板 | done | workflow局部模板、请假详情和审批示例；操作/记录/状态通过 |
+| 示例、全量验证、完成审计 | done | 精确46da40a云端全部成功；本地默认/启用完整回归exit0；见逐项审计 |
+
+以下为历史实施记录，阶段待验收描述不覆盖上述最终状态。
 
 首批证据：lint/typecheck、131 单元、build 通过（既有大 chunk 提示）；字典/showcase/workspace 18 项、Cron/生成器/个人中心 15 项，以及最终组件/showcase 6 项浏览器通过。覆盖字段描述关联、选项禁用、原生 radio 键盘、实际默认值提交、Tab 键盘切换和草稿保护。此处集合有重叠，不累计成全量数量。
 
@@ -64,3 +66,9 @@ DetailTabs 组合共享 PageTabs，稳定自动关联 id、键盘焦点和隐藏
 接续更新：60392已终态1；生成七类真实页面及全部生成SQL/HTTP/浏览器检查全部PASS，随后原框架导航数量断言因已安装测试生成菜单失败。保留导航断言，改为独立不安装生成模块的框架环境；不能称60392整体成功。单选组审计发现未知旧值未回显，RadioGroup补unknownLabel与旧值条目，不改变值或自动提交；profile4项及新增shared-form-states通过（必填/错误描述、只读/禁用/空、未知值保留和移除、日期保护、busy明细），手机状态截图已查看。session87673最终typecheck/lint、131单元和build均成功。新增逐项审计 docs/shared-ui-completion-audit.md。
 
 框架默认session26516终态1：65/68真实浏览器通过，三个用户测试共用创建步骤遗留 selectOption('103')。已与其他部门编辑步骤统一为点击树及精确103研发部门；没有改产品或业务断言。未启动其顺序启用段。当前唯一进程session59753正在同独立端口顺序运行默认及启用完整API/VerifyWeb，日志 shared-ui-framework-verified-disabled/enabled-runtime.log，契约同名前缀-openapi.json。源码保持固定，不重启、不并行抢端口、不运行app时打包。终态后核对OpenAPI/审计、精确提交推送；目标保持进行中。
+
+最新交付/验证：实现27文件已精确提交推送46da40a8e6be964e484dd365c5c42aad3915680c到codex/compact-list-layout。普通无关root JSON保留；web/generated/api.ts确认diff为空后仅刷新索引，未包含内容噪音。session59753默认阶段已经68真实浏览器与全部SQL/API终态成功，并已开始启用consoles/custom-output/workflow/async阶段。默认OpenAPI与contracts/openapi/api-v1.json结构严格相等、换行规范化后字节一致；原hash差异仅CRLF。
+
+精确46da40a云端web38387687845终态success，shared-ui-cloud-web.log直接确认242浏览器、131单元、生成复现、lint/typecheck/build全部成功；agent-skills38387687883成功；server38387687803尚in_progress。不要重复启动session59753，当前启用日志shared-ui-framework-verified-enabled-runtime.log正在工作流API验证；完成后核对其68浏览器/全部API/契约，以及server精确终态，再更新全表状态和最终验收文档提交推送。当前仅两份验收文档有后续未提交更新，全部实现已推送，整体goal仍active。
+
+最终验收（2026-10-13）：session59753顺序默认及启用完整真实API/浏览器均终态0，两套各68浏览器成功，最后导航/登录/Redis/验证码/OpenAPI总PASS；本次临时环境已清理。两实时OpenAPI统一换行后与契约字节一致。精确实现46da40a的server38387687803四项、web38387687845、agent-skills38387687883全部success；直接云端日志包括两套实际生成页面验证、完整Maven、131单元和242模拟浏览器。所有规格条目已完成，表单构建器仍暂缓；未合并main或部署生产。

@@ -1,6 +1,6 @@
 # 迭代任务索引
 
-进行中：[公共组件与页面模板抽象](shared-ui-abstraction.md)，[规格](../spec/shared-ui-abstraction.md)。保留完整组件及五类模板范围。
+已完成：[公共组件与页面模板抽象](shared-ui-abstraction.md)（done，2026-10-13），[规格](../spec/shared-ui-abstraction.md)、[验收](../docs/shared-ui-completion-audit.md)。完整组件及五类模板已接入实际消费者和示例；精确46da40a云端全绿，本地两配置各68真实浏览器及完整API通过，尚未合并main。
 
 组件样式：[页签与下拉细节](component-details.md)，已完成公共页签与单选下拉的本地验证；截图多选组件未覆盖，详见范围说明。
 
