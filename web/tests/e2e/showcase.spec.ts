@@ -1,6 +1,21 @@
 import {test,expect} from './fixtures';
 
 const sections=['overview','list','form','detail','account','controls','feedback','workspace','shell','advanced','editors','charts','files'];
+
+test('shared form field and choice groups keep labels, keyboard and disabled choices',async({page})=>{
+  await page.goto('/showcase.html#form');
+  await expect(page.getByLabel('客户编码',{exact:true})).toHaveAccessibleDescription('用于内部识别客户');
+  const channels=page.getByRole('group',{name:'通知渠道',exact:true});
+  await expect(channels.getByRole('checkbox',{name:'邮件',exact:true})).toBeChecked();
+  await channels.getByRole('checkbox',{name:'短信',exact:true}).check();
+  await expect(channels.getByRole('checkbox',{name:'邮件',exact:true})).toBeChecked();
+  await expect(channels.getByRole('checkbox',{name:'传真（停用）',exact:true})).toBeDisabled();
+  const normal=page.getByRole('radio',{name:'标准',exact:true});
+  await normal.focus();await normal.press('ArrowRight');
+  await expect(page.getByRole('radio',{name:'优先',exact:true})).toBeChecked();
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
 test('showcase sections render on desktop and mobile without business API calls',async({page},info)=>{
   const errors:string[]=[],api:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));

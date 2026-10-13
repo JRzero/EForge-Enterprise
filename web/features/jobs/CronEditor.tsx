@@ -1,5 +1,6 @@
-import {NativeButton, TextareaControl, NativeInput, Select} from '../../ui/native';
-import {useEffect, useState, type KeyboardEvent} from 'react';
+import {PageTabs} from '../../ui/PageTabs';
+import {TextareaControl, NativeInput, Select} from '../../ui/native';
+import {useEffect, useState} from 'react';
 import {Button, Input} from '../../ui/controls';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useApi} from '../../app/context';
@@ -34,14 +35,10 @@ export function CronEditor({value, onConfirm, onCancel}: {value: string; onConfi
     try {setExpression(cronExpression(updated)); setLocalError(''); setVersion(value => value + 1);} catch (cause) {setLocalError(cause instanceof Error ? cause.message : '字段值无效。');}
   }
   function reset() {setFields(parseCron(defaultCron)!); setActive(0); setExpression(defaultCron); setLocalError(''); setPreview(null); setVersion(value => value + 1);}
-  function tabKey(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    const target = event.key === 'ArrowRight' ? (index + 1) % 7 : event.key === 'ArrowLeft' ? (index + 6) % 7 : event.key === 'Home' ? 0 : event.key === 'End' ? 6 : null;
-    if (target === null) return; event.preventDefault(); setActive(target); (event.currentTarget.parentElement?.children[target] as HTMLButtonElement | undefined)?.focus();
-  }
   const valid = !loading && !localError && preview?.expression === normalized;
   return <ResourceDialog titleId="cron-editor-title" busy={false} onCancel={onCancel}><div className="cron-editor"><h2 id="cron-editor-title">Cron表达式编辑</h2><p>确认后返回表达式，不修改任务计划。</p>
     <label>Cron表达式<TextareaControl aria-label="Cron表达式" maxLength={255} value={expression} onChange={event => editText(event.target.value)} /></label><Button label="回填字段" variant="ghost" onClick={fill} />
-    <div role="tablist" aria-label="Cron字段">{cronFields.map((field, index) => <NativeButton key={field.label} type="button" role="tab" id={`cron-tab-${index}`} aria-controls="cron-field-panel" aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={event => tabKey(event, index)}>{field.label}</NativeButton>)}</div>
+    <PageTabs label="Cron字段" items={cronFields.map((field,index)=>({value:String(index),label:field.label,id:`cron-tab-${index}`,panelId:"cron-field-panel"}))} value={String(active)} onChange={value=>setActive(Number(value))}/>
     <section role="tabpanel" id="cron-field-panel" aria-labelledby={`cron-tab-${active}`}><CronFieldControls index={active} field={fields[active]!} onChange={editField} /></section>
     <dl className="cron-summary">{cronFields.map((field, index) => <div key={field.label}><dt>{field.label}</dt><dd>{fieldToken(fields[index]!, index)}</dd></div>)}</dl>
     {localError && <p role="alert">{localError}</p>}{error && !localError && <><p role="alert">{error}</p><Button label="重试预览" onClick={() => setVersion(value => value + 1)} /></>}

@@ -1,4 +1,10 @@
 export * from './controls';
+export {FormField} from './FormField';
+export type {FieldControlProps} from './FormField';
+export {CheckboxGroup, RadioGroup} from './ChoiceGroup';
+export type {ChoiceOption} from './ChoiceGroup';
+export {PageTabs} from './PageTabs';
+export type {PageTab} from './PageTabs';
 export {Feedback} from './Feedback';
 export {Tag} from './Tag';
 export type {TagTone} from './Tag';

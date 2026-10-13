@@ -1,3 +1,4 @@
+import {FormField, CheckboxGroup, RadioGroup} from '../ui';
 import {useEffect, useRef, useState, type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {EForgeProvider, Button, Input, Checkbox, Switch, Badge, Avatar, Card, Divider, Tooltip, Popover, EmptyState, Skeleton, Spinner, TextArea, Heading, Text, HStack, VStack, FormLayout, FileInput, Dialog, DropdownMenu, Toast, Pagination, Selector, Field, Stack} from '../ui/controls';
@@ -45,10 +46,11 @@ function ListDemo(){
   </ListPage>;
 }
 function FormDemo(){
+  const [channels,setChannels]=useState<string[]>(['email']),[priority,setPriority]=useState<string|null>('normal');
   const [name,setName]=useState(''),[email,setEmail]=useState(''),[remark,setRemark]=useState(''),[enabled,setEnabled]=useState(true),[message,setMessage]=useState('');
   return <FormPage title="新增客户" description="本地演示，保存不会发送网络请求。"><PageForm onSubmit={e=>{e.preventDefault();setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}} actions={<><Button label="清空表单" variant="secondary" onClick={()=>{setName('');setEmail('');setRemark('');setMessage('');}}/><Button label="保存客户" type="submit" variant="primary"/></>}>
     <FormSection title="基本信息"><Input label="客户名称" value={name} onChange={setName} isRequired/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/></FormSection>
-    <FormSection title="业务设置"><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
+    <FormSection title="业务设置"><FormField label="客户编码" hint="用于内部识别客户">{control=><NativeInput {...control} placeholder="例如 KH001"/>}</FormField><CheckboxGroup label="通知渠道" value={channels} onChange={setChannels} options={[{value:"email",label:"邮件"},{value:"sms",label:"短信"},{value:"fax",label:"传真（停用）",disabled:true}]}/><RadioGroup label="服务等级" value={priority} onChange={setPriority} options={[{value:"normal",label:"标准"},{value:"priority",label:"优先"}]}/><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
     {message&&<Feedback tone="success">{message}</Feedback>}
   </PageForm></FormPage>;
 }

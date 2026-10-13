@@ -1,0 +1,17 @@
+.ui-form-field { display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 12px; align-items: start; min-width: 0; }
+.ui-form-field[data-span=full] { grid-column: 1 / -1; }
+.ui-form-field > label { text-align: right; padding-top: 6px; color: var(--ui-muted); }
+.ui-form-field-control { min-width: 0; min-height: var(--ui-control-height,36px); display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.ui-form-field-control > input[type=checkbox] { align-self: flex-start; margin: 0; width: 16px; height: 16px; }
+.ui-field-hint { font-size: 12px; color: var(--ui-muted); }
+.ui-field-error,.ui-required { color: #dc3545; }
+.ui-required { margin-right: 4px; }
+.ui-choice-group { min-width: 0; margin: 0; padding: 0; border: 0; }
+.ui-choice-group > legend { color: var(--ui-muted); margin-bottom: 8px; padding: 0; }
+.ui-choice-options { display: flex; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }
+.ui-choice-options > label { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; margin: 0; overflow-wrap: anywhere; }
+.ui-choice-options input { width: 16px; height: 16px; margin: 0; flex-shrink: 0; }
+.ui-choice-options > p { margin: 0; line-height: 32px; }
+@media (min-width:992px) { .post-dialog .ui-form-field { grid-template-columns: 110px minmax(0,1fr); gap: 8px; } }
+@media (max-width:991px) { .post-dialog .ui-form-field { grid-template-columns: minmax(0,1fr); gap: 6px; } .post-dialog .ui-form-field > label { text-align: left; padding-top: 0; } }
+@media (max-width:600px) { .ui-form-field { grid-template-columns: minmax(0,1fr); gap: 6px; } .ui-form-field > label { text-align: left; padding-top: 0; } .ui-choice-options > label { min-height: 40px; } }

@@ -1,3 +1,5 @@
+import {PageTabs} from '../../ui/PageTabs';
+import {RadioGroup} from '../../ui/ChoiceGroup';
 import {NativeButton, NativeInput} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
 import {useRetainedRead} from '../../app/useRetainedRead';
@@ -61,18 +63,13 @@ export function ProfilePage() {
     <div className="profile-layout"><aside className="profile-summary"><h2>个人信息</h2>
       <NativeButton className="profile-avatar" onClick={() => setAvatar(true)} aria-label="修改头像" disabled={busy}>{profile.avatarUrl ? <img src={profile.avatarUrl} alt="当前头像" /> : <span aria-hidden="true">{profile.displayName.slice(0,1)}</span>}</NativeButton>
       <dl>{[['登录账号',profile.username],['用户昵称',profile.displayName],['手机号码',profile.phone],['邮箱',profile.email],['所属部门',profile.departmentName],['所属角色',profile.roleNames],['所属岗位',profile.postNames],['创建日期',profile.createdAt ? new Date(profile.createdAt).toLocaleString('zh-CN') : '']].map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value || '暂无'}</dd></div>)}</dl>
-    </aside><div className="profile-editor"><div role="tablist" aria-label="个人中心设置" onKeyDown={event => {
-      if (busy || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-      event.preventDefault(); const next = event.key==='Home' ? 'profile' : event.key==='End' ? 'password' : tab==='profile' ? 'password' : 'profile';
-      setTab(next); setError(''); setFeedback(''); event.currentTarget.querySelector<HTMLButtonElement>(`#${next}-tab`)?.focus();
-    }}><NativeButton role="tab" id="profile-tab" aria-controls="profile-panel" aria-selected={tab==='profile'} tabIndex={tab==='profile' ? 0 : -1} disabled={busy} onClick={() => { setTab('profile');setError('');setFeedback(''); }}>基本资料</NativeButton>
-      <NativeButton role="tab" id="password-tab" aria-controls="password-panel" aria-selected={tab==='password'} tabIndex={tab==='password' ? 0 : -1} disabled={busy} onClick={() => { setTab('password');setError('');setFeedback(''); }}>修改密码</NativeButton></div>
+    </aside><div className="profile-editor"><PageTabs label="个人中心设置" value={tab} disabled={busy} onChange={value=>{setTab(value as 'profile'|'password');setError('');setFeedback('');}} items={[{value:'profile',label:'基本资料',id:'profile-tab',panelId:'profile-panel'},{value:'password',label:'修改密码',id:'password-tab',panelId:'password-panel'}]}/>
       {error ? <p role="alert">{error}</p> : null}{feedback ? <p role="status">{feedback}</p> : null}
       {tab==='profile' ? <PageForm role="tabpanel" id="profile-panel" aria-labelledby="profile-tab" onSubmit={event => { void saveProfile(event); }} noValidate>
         <Input label="用户昵称" value={form.displayName} onChange={value => setForm({...form,displayName:value})} isDisabled={busy} />
         <Input label="手机号码" value={form.phone} onChange={value => setForm({...form,phone:value})} isDisabled={busy} />
         <Input label="邮箱" type="email" value={form.email} onChange={value => setForm({...form,email:value})} isDisabled={busy} />
-        <fieldset disabled={busy}><legend>性别</legend>{sexDictionary.options.map(({value, label}, index) => <label key={`${value}-${index}`}><NativeInput type="radio" name="profile-sex" value={value} checked={form.sex===value} onChange={() => setForm({...form,sex:value})} />{label}</label>)}</fieldset>
+        <RadioGroup label="性别" disabled={busy} value={form.sex} onChange={sex=>setForm({...form,sex})} options={sexDictionary.options.map(({value,label})=>({value,label}))}/>
         <div className="post-row-actions"><Button label={busy ? '正在保存资料…' : '保存资料'} type="submit" isDisabled={busy} /><Button label="关闭个人中心" variant="ghost" isDisabled={busy} onClick={() => (controls.closePage ?? controls.navigate)('/dashboard')} /></div>
       </PageForm> : <PageForm role="tabpanel" id="password-panel" aria-labelledby="password-tab" onSubmit={event => { void savePassword(event); }} noValidate>
         {(['oldPassword','newPassword','confirmPassword'] as const).map((key,index) => <PasswordField key={key} label={['旧密码','新密码','确认新密码'][index]!} autoComplete={key==='oldPassword'?'current-password':'new-password'} visible={showPasswords || revealedPasswords[key]} onToggle={()=>togglePassword(key)} value={passwords[key]} onChange={value => setPasswords({...passwords,[key]:value})} isDisabled={busy} />)}

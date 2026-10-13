@@ -1,3 +1,4 @@
+import {CheckboxGroup} from '../../ui/ChoiceGroup';
 import {NativeButton, NativeInput, Select, TextareaControl, Table} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
@@ -25,13 +26,9 @@ type Editor = {id?: string; form: UserWriteRequest; password: string; initial: s
 type Action = {kind: 'delete'; ids: string[]} | {kind: 'status'; user: UserResponse} | {kind: 'password'; user: UserResponse; password: string} | {kind: 'roles'; user: UserResponse; ids: string[]; options: UserOption[]};
 
 function Choices({label, options, selected, disabled, onChange}: {label: string; options: UserOption[]; selected: string[]; disabled: boolean; onChange: (ids: string[]) => void}) {
-  const known = new Set(options.map(option => option.id));
-  return <fieldset className="user-choices" disabled={disabled}><legend>{label}</legend>
-    {options.length === 0 && selected.length === 0 ? <p>暂无可分配的{label}。</p> : null}
-    {options.map(option => <label key={option.id}><NativeInput type="checkbox" checked={selected.includes(option.id)} disabled={disabled || (option.status === '1' && !selected.includes(option.id))}
-      onChange={event => onChange(event.target.checked ? [...selected, option.id] : selected.filter(id => id !== option.id))} />{option.name}{option.status === '1' ? '（停用）' : ''}</label>)}
-    {selected.filter(id => !known.has(id)).map(id => <label key={id}><NativeInput type="checkbox" checked onChange={() => onChange(selected.filter(value => value !== id))} />当前已分配的{label}（{id}）</label>)}
-  </fieldset>;
+  return <CheckboxGroup className="user-choices" label={label} disabled={disabled} value={selected} onChange={onChange}
+    emptyText={`暂无可分配的${label}。`} unknownLabel={id => `当前已分配的${label}（${id}）`}
+    options={options.map(option => ({value: option.id, label: option.name + (option.status === '1' ? '（停用）' : ''), disabled: option.status === '1' && !selected.includes(option.id)}))}/>;
 }
 
 export function UsersPage() {

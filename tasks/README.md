@@ -1,5 +1,7 @@
 # 迭代任务索引
 
+进行中：[公共组件与页面模板抽象](shared-ui-abstraction.md)，[规格](../spec/shared-ui-abstraction.md)。保留完整组件及五类模板范围。
+
 组件样式：[页签与下拉细节](component-details.md)，已完成公共页签与单选下拉的本地验证；截图多选组件未覆盖，详见范围说明。
 
 已完成：[紧凑列表布局](compact-list-layout.md)（done，2026-10-12），[规格](../spec/compact-list-layout.md)。共享筛选折叠、间距与分页布局优化；131 项单元和最终 34 项相关浏览器复验通过，完整验证边界见任务记录。
