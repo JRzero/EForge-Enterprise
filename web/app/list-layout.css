@@ -48,8 +48,12 @@
 /* Keep advanced conditions mounted: collapsing never discards query drafts. */
 .post-filters.list-filters > .list-filter-advanced { display: flex; flex: 1 0 100%; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding-top: 12px; border-top: 1px solid var(--ui-border, #e8e9eb); }
 .post-filters.list-filters > .list-filter-advanced[hidden] { display: none; }
-.list-filter-toggle { display: inline-flex; align-items: center; gap: 4px; min-height: var(--ui-control-height, 32px); padding: 4px 8px; border: 0; border-radius: 4px; background: transparent; color: var(--ui-primary); font: inherit; white-space: nowrap; cursor: pointer; }
-.list-filter-toggle:hover { background: var(--ui-hover, #f5f7fa); }
+.list-filter-actions .list-filter-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--ui-control-height, 32px); padding: 5px 10px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: var(--ui-primary); font: inherit; line-height: 22px; white-space: nowrap; cursor: pointer; }
+.list-filter-actions .list-filter-toggle:hover, .list-filter-actions .list-filter-toggle[aria-expanded=true] { background: var(--ui-primary-soft, #ecf3ff); }
+.list-filter-chevron { display: block; flex: 0 0 16px; transition: transform 160ms ease; }
+.list-filter-toggle[aria-expanded=true] .list-filter-chevron { transform: rotate(180deg); }
+.list-filter-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding-inline: 4px; border-radius: 9px; background: var(--ui-primary-soft, #ecf3ff); font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .list-filter-chevron { transition: none; } }
 .list-filter-toggle:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 2px; }
 .list-page-body .post-pagination { padding-block: 12px 0; margin-top: 0; }
 .list-page-body .post-pagination > span:first-child { margin-inline-end: auto; }
