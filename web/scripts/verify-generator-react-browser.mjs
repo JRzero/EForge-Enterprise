@@ -92,7 +92,7 @@ async function verifyUploadEditing(page,category,id,model) {
     const imageControl=dialog.locator('label').filter({hasText:/^imagePaths/}).first();await imageControl.getByRole('button',{name:'预览图片 imagePaths 文件 1',exact:true}).click();await page.keyboard.press('Escape');await expect(dialog).toBeVisible();
     if(category==='sub') {
       await dialog.getByLabel('childEditOnly',{exact:true}).fill('子表上传编辑验证值');
-      const childSection=dialog.getByRole('region',{name:'子表明细',exact:true});
+      const childSection=dialog.getByRole('region',{name:'子表明细表格',exact:true});
       assert(await childSection.evaluate(element=>element.scrollWidth>element.clientWidth),'All child fields must remain in the owned horizontal scroll region');
       const rootBounds=await control.boundingBox(),dialogBounds=await dialog.boundingBox();assert(rootBounds&&dialogBounds&&rootBounds.width<=dialogBounds.width,'Child columns must not widen root upload controls');
       const childControl=dialog.locator('label').filter({hasText:/^childFilePaths/}).first(),childEntries=childControl.locator('.generated-upload-entry');
@@ -226,7 +226,7 @@ async function verifyAutomaticKey(page, noRoleUser, category) {
     await editor.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox').first().check();
     if(category === 'autosub') {
       await editor.getByRole('button', {name:'新增子表行'}).click();
-      const children=editor.locator('section[aria-label="子表明细"]');
+      const children=editor.getByRole('region',{name:'子表明细',exact:true});
       await expect(children.getByLabel('childId', {exact:true})).toHaveCount(0);
       await expect(children.getByLabel('ownerReference', {exact:true})).toHaveCount(0);
       await children.getByLabel('label', {exact:true}).fill('自动子表-'+index);
@@ -254,7 +254,7 @@ async function verifyAutomaticKey(page, noRoleUser, category) {
   await editor.getByLabel('editOnly', {exact:true}).fill('自动修改值');
   if(category === 'autosub') {
     await editor.getByRole('button', {name:'新增子表行'}).click();
-    const children=editor.locator('section[aria-label="子表明细"]');
+    const children=editor.getByRole('region',{name:'子表明细',exact:true});
     await expect(children.getByLabel('childId', {exact:true})).toHaveCount(0);
     await children.getByLabel('label', {exact:true}).last().fill('自动子表-追加');
   }
@@ -343,8 +343,9 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       await page.setViewportSize(viewport);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
       if(state==='editor') {
-        const richBounds=await page.locator('.post-dialog form > label:has(.rich-text-editor) .ql-container').first().boundingBox();
-        const nextBounds=await page.locator('.post-dialog form > label').filter({has:page.getByLabel('quantity',{exact:true})}).boundingBox();
+        const fields=page.locator(category==='sub'?'.post-dialog .master-detail-fields':'.post-dialog form');
+        const richBounds=await fields.locator(':scope > label:has(.rich-text-editor) .ql-container').first().boundingBox();
+        const nextBounds=await fields.locator(':scope > label').filter({has:page.getByLabel('quantity',{exact:true})}).boundingBox();
         assert(richBounds && nextBounds && richBounds.y+richBounds.height<=nextBounds.y+1,'Rich editor must not overlap the following generated field');
       }
       if(appearanceDirectory) await page.screenshot({path:join(appearanceDirectory,category+'-'+state+'-'+size+'.png'),fullPage:true});
@@ -424,7 +425,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         if (category === 'sub') {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
           await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表');
-          await fillChildControls(dialog.locator('section[aria-label="子表明细"]'),root,page,category);
+          await fillChildControls(dialog.getByRole('region',{name:'子表明细',exact:true}),root,page,category);
         }
         {
           await dialog.getByLabel('notes', {exact:true}).fill('多行中文\n<script>保持文本</script>');
@@ -479,7 +480,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await dialog.getByLabel('eventTime',{exact:true}).fill(editedDate);
         await dialog.getByLabel('label', {exact:true}).first().fill(label + '-修改');
         await expect(dialog.getByLabel('insertOnly',{exact:true})).toHaveCount(0);await dialog.getByLabel('editOnly',{exact:true}).fill('修改专用值');
-        if(category==='sub') {await dialog.getByLabel('label',{exact:true}).last().fill('浏览器子表-修改');await clearChildControls(dialog.locator('section[aria-label="子表明细"]'));}
+        if(category==='sub') {await dialog.getByLabel('label',{exact:true}).last().fill('浏览器子表-修改');await clearChildControls(dialog.getByRole('region',{name:'子表明细',exact:true}));}
         {
           await dialog.locator('label').filter({hasText:/^notes/}).locator('textarea').fill('');
           await dialog.getByLabel('__proto__',{exact:true}).fill('');
@@ -509,7 +510,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await updated.getByRole('button', {name:'详情', exact:true}).click();
         await expect(dialog).toContainText(label + '-修改');
         await expect(dialog.getByRole('button', {name:'保存', exact:true})).toHaveCount(0);
-        if(category==='sub') {const childTable=dialog.locator('section[aria-label="子表明细"] table');const names=await childTable.getByRole('columnheader').allTextContents();for(const key of ['childBoolSelected','childBoolRadio']) {const index=names.findIndex(name=>name.trim()===key);assert(index>=0);await expect(childTable.locator('tbody tr').first().getByRole('cell').nth(index)).toHaveText(key+'成功');}}
+        if(category==='sub') {const childTable=dialog.getByRole('region',{name:'子表明细',exact:true}).locator('table');const names=await childTable.getByRole('columnheader').allTextContents();for(const key of ['childBoolSelected','childBoolRadio']) {const index=names.findIndex(name=>name.trim()===key);assert(index>=0);await expect(childTable.locator('tbody tr').first().getByRole('cell').nth(index)).toHaveText(key+'成功');}}
         await dialog.getByRole('button', {name:'取消', exact:true}).click();
         if (category === 'sub') {
           const saved = await readDetail(page,id);

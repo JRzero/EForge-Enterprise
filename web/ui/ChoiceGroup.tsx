@@ -17,12 +17,13 @@ export function CheckboxGroup({label, options, value, onChange, disabled = false
   </fieldset>;
 }
 
-export function RadioGroup({label, options, value, onChange, disabled = false, readOnly = false, emptyText = '暂无选项', className = ''}: CommonProps & {
-  value: string | null; onChange: (value: string) => void;
+export function RadioGroup({label, options, value, onChange, disabled = false, readOnly = false, emptyText = '暂无选项', unknownLabel = id => id, className = ''}: CommonProps & {
+  value: string | null; onChange: (value: string) => void; unknownLabel?: (value:string)=>string;
 }) {
   const name = useId();
+  const entries=value!==null&&!options.some(option=>option.value===value)?[...options,{value,label:unknownLabel(value)}]:options;
   return <fieldset className={`ui-choice-group ${className}`} disabled={disabled}><legend>{label}</legend>
-    <div className="ui-choice-options">{options.length === 0 ? <p>{emptyText}</p> : options.map(option => <label key={option.value}>
+    <div className="ui-choice-options">{entries.length === 0 ? <p>{emptyText}</p> : entries.map(option => <label key={option.value}>
       <NativeInput type="radio" name={name} value={option.value} checked={value === option.value} disabled={readOnly || option.disabled} onChange={() => onChange(option.value)}/>{option.label}
     </label>)}</div>
   </fieldset>;

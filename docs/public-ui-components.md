@@ -344,3 +344,19 @@ Seven theme/workspace browser checks pass, including a 320 px overflow case
 that reaches both ends using the buttons and focuses tabs using Home/End.
 Lint/typecheck and build pass (`web/tag-scrollbar-check.log`,
 `web/tag-scrollbar-build.log`).
+
+### Shared editing and detail compositions (2026-10-13)
+
+- `FormField` passes stable id and required/error/hint ARIA attributes to its render child. Callers own validation and values. `CheckboxGroup/RadioGroup` share compact option layout.
+- `MultiSelect`, `TreeSelect` and `ReferenceSelect` consume caller-authorized records and controlled string IDs; they never fetch broader records or infer permissions. Keep exact long IDs as strings and preserve unavailable selected values.
+- `EditorForm`, `EditorDialog` and `EditorPage` compose common error, busy, submit and cancel UI. Callers retain draft hooks and render their discard dialog. A read-only editor suppresses submission; consumers must also mark individual controls read-only.
+- `DetailTabs/TabbedDetailPage` retain mounted panels while hiding inactive content; query lifetimes stay in the consumer. `ApprovalDetailLayout` lives inside the workflow module and accepts summary/tasks/history/actions slots.
+- `MasterDetailLayout` composes inside one form. `EditableDetailTable<T>` takes controlled rows, stable `getRowKey`, rendering columns, add/remove callbacks, row errors and an optional footer. Its row keys must remain stable through edits and deletions. Generated subtable pages keep UI UUIDs separately from request DTOs. Calculation, validation, permissions and API submission remain caller-owned.
+
+Examples: `/showcase.html#form`, `#detail`, `#tree-list` and `#master-detail`. Completion and verification boundaries are tracked in `tasks/shared-ui-abstraction.md`; an exported component alone does not imply all consumers have completed acceptance.
+
+- `ConfirmActionDialog` composes ResourceDialog's modal focus/escape behavior with a controlled confirmation, busy lock and safe text error. The caller owns authorization, captured identities, network operations and retry. Posts deletion uses it without changing request semantics.
+- `AsyncContent` displays exclusive loading/error/empty/content states, with an optional retry callback. It intentionally unmounts content outside the ready state; use the existing table loading layer when stale rows or editor state must remain mounted during background refresh. Jobs context loading uses it; the data table retains its original separate loading behavior.
+- `/showcase.html#feedback` demonstrates these states and a simulated failed confirmation followed by a successful retry. No business request is sent.
+
+`RadioGroup`, like `CheckboxGroup`, preserves a saved value missing from the available options; callers may supply `unknownLabel`. Selecting a valid replacement removes the old synthetic entry. `/showcase.html#approval` demonstrates the workflow-local approval layout. Requirement-by-requirement verification is tracked in `docs/shared-ui-completion-audit.md`.

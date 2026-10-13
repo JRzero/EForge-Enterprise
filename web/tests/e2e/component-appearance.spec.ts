@@ -66,12 +66,12 @@ test('detail tabs and searchable selector expose clear states without nested bor
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.screenshot({path:info.outputPath('tabs-selector-'+width+'.png'),fullPage:true});
   }
-  await search.fill('Cindy');await expect(page.locator('.astryx-selector-option-row')).toHaveCount(1);
+  await search.fill('Cindy');await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(1);
   await search.press('ArrowDown');await search.press('Enter');
   await expect(trigger).toContainText('Cindy');
   await page.getByRole('button',{name:'Clear 审批人员',exact:true}).click();
   await expect(trigger).not.toContainText('Cindy');await expect(trigger).toBeFocused();
   await trigger.click();await page.getByRole('combobox',{name:'Search options'}).fill('不存在');
-  await expect(page.locator('.astryx-selector-option-row')).toHaveCount(0);
+  await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(0);
   await page.keyboard.press('Escape');await expect(trigger).toBeFocused();
 });

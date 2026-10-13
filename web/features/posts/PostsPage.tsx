@@ -1,4 +1,5 @@
 import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {ConfirmActionDialog} from '../../ui/ConfirmActionDialog';
 import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
@@ -148,9 +149,9 @@ export function PostsPage() {
         {actionError ? <p role="alert">{actionError}</p> : null}
         <div className="post-row-actions"><Button label={busy ? '正在保存…' : '保存岗位'} type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(closeEditor)} /></div>
       </PageForm></PostDialog> : null}
-    {deleting ? <PostDialog titleId="post-delete-title" alert busy={busy} onCancel={() => { setDeleting(null); setActionError(''); }}><h2 id="post-delete-title">确认删除岗位</h2><p>将删除所选的 {deleting.length} 个岗位。已分配给用户的岗位无法删除。</p>
-      {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label="确认删除" isDisabled={busy} onClick={() => { void remove(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => { setDeleting(null); setActionError(''); }} /></div>
-    </PostDialog> : null}
+    {deleting ? <ConfirmActionDialog title="确认删除岗位" busy={busy} error={actionError} confirmLabel="确认删除" onConfirm={() => {void remove();}} onCancel={() => {setDeleting(null);setActionError('');}}>
+      <p>将删除所选的 {deleting.length} 个岗位。已分配给用户的岗位无法删除。</p>
+    </ConfirmActionDialog> : null}
     {discard.dialog}
   </ListPage>;
 }

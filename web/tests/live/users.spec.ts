@@ -17,7 +17,7 @@ async function create(page: Page, username: string) {
   await dialog.getByLabel('用户密码', {exact: true}).fill('Browser123');
   await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');
   await dialog.getByRole('button',{name:'显示用户密码',exact:true}).click();await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','text');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveValue('Browser123');await expect(dialog.getByLabel('用户密码',{exact:true})).toBeFocused();
-  await dialog.getByRole('button',{name:'隐藏用户密码',exact:true}).focus();await page.keyboard.press('Space');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');await expect(dialog.getByRole('button',{name:'显示用户密码',exact:true})).toBeFocused(); await dialog.getByLabel('归属部门', {exact: true}).selectOption('103');
+  await dialog.getByRole('button',{name:'隐藏用户密码',exact:true}).focus();await page.keyboard.press('Space');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');await expect(dialog.getByRole('button',{name:'显示用户密码',exact:true})).toBeFocused(); await dialog.getByRole('button', {name: /^归属部门 /}).click(); await dialog.locator('[role=treeitem][data-value="103"]') .getByRole('button', {name: '研发部门', exact: true}).click();
   await dialog.getByRole('button', {name: '保存用户', exact: true}).click(); await expect(dialog).toHaveCount(0);
 }
 async function authenticate(page: Page, username: string, password: string) {
@@ -38,7 +38,7 @@ test('real user CRUD, uniqueness, departments, contact clearing, role allocation
   await dialog.getByLabel('用户密码', {exact: true}).fill('Browser123');
   await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');
   await dialog.getByRole('button',{name:'显示用户密码',exact:true}).click();await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','text');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveValue('Browser123');await expect(dialog.getByLabel('用户密码',{exact:true})).toBeFocused();
-  await dialog.getByRole('button',{name:'隐藏用户密码',exact:true}).focus();await page.keyboard.press('Space');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');await expect(dialog.getByRole('button',{name:'显示用户密码',exact:true})).toBeFocused(); await dialog.getByLabel('归属部门', {exact: true}).selectOption('103');
+  await dialog.getByRole('button',{name:'隐藏用户密码',exact:true}).focus();await page.keyboard.press('Space');await expect(dialog.getByLabel('用户密码',{exact:true})).toHaveAttribute('type','password');await expect(dialog.getByRole('button',{name:'显示用户密码',exact:true})).toBeFocused(); await dialog.getByRole('button', {name: /^归属部门 /}).click(); await dialog.locator('[role=treeitem][data-value="103"]') .getByRole('button', {name: '研发部门', exact: true}).click();
   await dialog.getByLabel('手机号码', {exact: true}).fill('13900000005'); await dialog.getByLabel('邮箱', {exact: true}).fill(`${username}@example.com`);
   await dialog.getByLabel('备注', {exact: true}).fill('待清空'); await dialog.getByRole('group', {name: '角色', exact: true}).getByLabel('普通角色', {exact: true}).check();
   await dialog.getByRole('group', {name: '岗位', exact: true}).getByLabel('项目经理', {exact: true}).check();

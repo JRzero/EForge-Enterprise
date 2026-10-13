@@ -1,4 +1,8 @@
 export * from './controls';
+export {ConfirmActionDialog} from './ConfirmActionDialog';
+export type {ConfirmActionDialogProps} from './ConfirmActionDialog';
+export {AsyncContent} from './AsyncContent';
+export type {AsyncContentProps} from './AsyncContent';
 export {FormField} from './FormField';
 export type {FieldControlProps} from './FormField';
 export {CheckboxGroup, RadioGroup} from './ChoiceGroup';
@@ -48,3 +52,7 @@ export type {EditorFormProps} from './EditorTemplate';
 
 export {DetailTabs,TabbedDetailPage} from './TabbedDetailPage';
 export type {DetailTab,DetailTabsProps} from './TabbedDetailPage';
+
+export {EditableDetailTable} from './EditableDetailTable';
+export type {EditableDetailTableProps,DetailColumn} from './EditableDetailTable';
+export {MasterDetailLayout} from './MasterDetailLayout';

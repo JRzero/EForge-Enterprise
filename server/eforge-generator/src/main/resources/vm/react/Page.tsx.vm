@@ -1,6 +1,6 @@
 import {NativeInput, Select, TextareaControl} from '../../../ui/native';
 #if($table.sub)
-import {Table} from '../../../ui/native';
+import {EditableDetailTable, MasterDetailLayout} from '../../../ui';
 #end
 import {ListPage, ListFilters, ListToolbar, PageForm} from '../../../ui/pages';
 import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent} from 'react';
@@ -176,7 +176,7 @@ export function GeneratedPage() {
   const [page, setPage] = useState(1), [size#if(!$table.tree), setSize#end] = useState(10), [version, setVersion] = useState(0), [showFilters, setShowFilters] = useState(true);
   const [rows, setRows] = useState<Model[]>([]), [total, setTotal] = useState(0), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
-  const [editor, setEditor] = useState<{id?: Id; form: Write; model?: Model; viewing: boolean} | null>(null);
+  const [editor, setEditor] = useState<{id?: Id; form: Write; model?: Model; viewing: boolean; childRowKeys?: string[]} | null>(null);
   const [uploadCount, setUploadCount] = useState(0);
   const changeUploads = useCallback((delta: number) => setUploadCount(value => Math.max(0, value + delta)), []);
   const [deleting, setDeleting] = useState<Id[] | null>(null), [operationBusy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
@@ -240,7 +240,7 @@ export function GeneratedPage() {
 #if($table.sub)
       form[$outputText.jsonLiteral("${subclassName}List")] = row[$outputText.jsonLiteral("${subclassName}List")] ?? [];
 #end
-      setEditor({id, form, model: row, viewing});
+      setEditor({id, form, model: row, viewing#if($table.sub), childRowKeys: (form[childKey] ?? []).map(() => crypto.randomUUID())#end});
     } catch (cause) {setActionError(errorMessage(cause));} finally {setBusy(false);}
   }, [busy, options]);
   const columns = useMemo<ColumnDef<Model>[]>(() => [
@@ -324,6 +324,9 @@ export function GeneratedPage() {
 #end
     {editor ? <UploadContext.Provider value={changeUploads}><ResourceDialog titleId="generated-editor-title" busy={busy} onCancel={() => setEditor(null)}>
       <PageForm onSubmit={save}><h2 id="generated-editor-title">{editor.viewing ? '详情' : editor.id === undefined ? '新增' : '修改'}{title}</h2>
+#if($table.sub)
+        <MasterDetailLayout master={<>
+#end
         {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <label key={field.key}>{field.label}
           {editor.viewing ? <FieldDisplay field={field} value={fieldValue(editor.model, field.key)} /> :
 #if($table.tree)
@@ -333,17 +336,13 @@ export function GeneratedPage() {
           <FieldControl field={field} value={fieldValue(editor.form, field.key)} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
         </label>)}
 #if($table.sub)
-        <section aria-label="子表明细" tabIndex={0}><h3>子表明细</h3>
-          {!editor.viewing ? <Button label="新增子表行" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: [...current.form[childKey], {}]}}))} /> : null}
-          <Table><thead><tr>{childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <th key={field.key}>{field.label}</th>)}{!editor.viewing ? <th>操作</th> : null}</tr></thead>
-            <tbody>{(editor.form[childKey] ?? []).map((row, index) => <tr key={index}>
-              {childFields.filter(field => field.key !== childForeignKey && (!field.pk || !field.auto) && (field.insert || field.edit || field.list)).map(field => <td key={field.key}><label>{field.label}
-                {editor.viewing ? <FieldDisplay field={field} value={fieldValue(row, field.key)} /> : <FieldControl field={field} value={fieldValue(row, field.key)} disabled={operationBusy || !(editor.id === undefined ? field.insert || field.pk && !field.auto : field.edit || field.pk && !field.auto)} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].map((item, ordinal) => ordinal === index ? {...item, [field.key]: value} : item)}}))} />}
-              </label></td>)}
-              {!editor.viewing ? <td><Button label="删除子表行" variant="ghost" isDisabled={busy} onClick={() => setEditor(current => current && ({...current, form: {...current.form, [childKey]: current.form[childKey].filter((_, ordinal) => ordinal !== index)}}))} /></td> : null}
-            </tr>)}</tbody>
-          </Table>
-        </section>
+        </>}>
+        <EditableDetailTable<ChildWrite> title="子表明细" rows={editor.form[childKey] ?? []} getRowKey={(_,index)=>editor.childRowKeys?.[index] ?? String(index)} busy={busy} readOnly={editor.viewing} addLabel="新增子表行" removeLabel="删除子表行"
+          onAdd={()=>setEditor(current=>current&&({...current,childRowKeys:[...(current.childRowKeys??[]),crypto.randomUUID()],form:{...current.form,[childKey]:[...current.form[childKey],{}]}}))}
+          onRemove={(_,index)=>setEditor(current=>current&&({...current,childRowKeys:current.childRowKeys?.filter((_,ordinal)=>ordinal!==index),form:{...current.form,[childKey]:current.form[childKey].filter((_,ordinal)=>ordinal!==index)}}))}
+          columns={childFields.filter(field=>field.key!==childForeignKey&&(!field.pk||!field.auto)&&(field.insert||field.edit||field.list)).map(field=>({key:field.key,label:field.label,render:(row,index,state)=><label>{field.label}
+            {state.readOnly?<FieldDisplay field={field} value={fieldValue(row,field.key)}/>:<FieldControl field={field} value={fieldValue(row,field.key)} disabled={operationBusy||!(editor.id===undefined?field.insert||field.pk&&!field.auto:field.edit||field.pk&&!field.auto)} onChange={value=>setEditor(current=>current&&({...current,form:{...current.form,[childKey]:current.form[childKey].map((item,ordinal)=>ordinal===index?{...item,[field.key]:value}:item)}}))}/>}</label>}))}/>
+        </MasterDetailLayout>
 #end
         {actionError ? <p role="alert">{actionError}</p> : null}
         {!editor.viewing ? <Button label="保存" type="submit" isDisabled={busy} /> : null}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setEditor(null)} />

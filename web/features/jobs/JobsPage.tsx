@@ -1,4 +1,5 @@
 import {Select, NativeInput} from '../../ui/native';
+import {AsyncContent} from '../../ui/AsyncContent';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
@@ -107,7 +108,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
   }
   return <ListPage className="posts-page" title={logs ? '调度日志' : '定时任务'} eyebrow="系统监控" description={logs ? '查询任务执行结果和异常信息。' : '查看任务计划与执行记录。'}>
     <DictionaryNotice dictionary={groups} /><DictionaryNotice dictionary={statuses} />
-    {contextError ? <><p role="alert">{contextError}</p><Button label="重试任务信息" onClick={() => setContextVersion(value => value + 1)} /></> : !ready ? <p role="status">正在加载任务信息…</p> : <>
+    <AsyncContent loading={!ready&&!contextError} error={contextError} loadingText="正在加载任务信息…" retryLabel="重试任务信息" onRetry={() => setContextVersion(value => value + 1)}>
     <ListFilters primaryCount={4} advancedCount={[draft.from, draft.to].filter(Boolean).length} actions={<><Button label="搜索" type="submit" isDisabled={busy} /><Button label="重置" variant="ghost" isDisabled={busy} onClick={reset} /></>} hidden={!showSearch} onSubmit={search}><Input label="任务名称" value={draft.name} onChange={name => setDraft({...draft, name})} isDisabled={busy} />
       <label>任务组名<Select aria-label="任务组名" value={draft.group} disabled={busy} onChange={event => setDraft({...draft, group: event.target.value})}><option value="">全部组名</option><DictionaryOptions options={groups.options} current={draft.group} /></Select></label>
       <Input label="调用目标" value={draft.target} onChange={target => setDraft({...draft, target})} isDisabled={busy} />
@@ -123,7 +124,7 @@ function JobsWorkspace({jobId}: {jobId?: string}) {
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && !taskConfirmation && <p role="alert">{actionError}</p>}
     {error ? <><p role="alert">{error}</p><Button label="重试" onClick={() => setVersion(value => value + 1)} /></> : <div className="post-table"><DataTable columns={columns} data={data?.items ?? []} loading={loading} pagination={false} emptyText="暂无记录" getRowId={row => row.id} selectable rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row => `选择${logs?'日志':'任务'} ${row.id}`} sortable manualSorting sorting={sorting} onSortingChange={updater => {setSorting(current => {const next = typeof updater === 'function' ? updater(current) : updater; return next.length ? [next[0]!] : [{id: logs ? 'createdAt' : 'id', desc: logs}];}); setPage(1);}} columnVisibility={visibility} showColumnVisibility={false} /></div>}
     <Pagination page={page} pageSize={size} total={data?.total} loading={loading} busy={busy} onPage={setPage} onSize={setSize} />
-    </>}
+    </AsyncContent>
     {logs && <Button label="关闭调度日志" variant="ghost" onClick={() => (controls.closePage ?? controls.navigate)('/job')} />}
     {confirmation && <ResourceDialog titleId="job-log-confirm" alert busy={busy} onCancel={() => setConfirmation(null)}><h2 id="job-log-confirm">{confirmation.clear ? '确认清空调度日志' : '确认删除调度日志'}</h2><p>{confirmation.clear ? '将清空全部调度日志，此操作无法撤销。' : `将删除所选的 ${confirmation.ids.length} 条日志。`}</p>{actionError && <p role="alert">{actionError}</p>}<Button label="取消" variant="ghost" isDisabled={busy} onClick={() => setConfirmation(null)} /><Button label={confirmation.clear ? '确认清空' : '确认删除'} isDisabled={busy} onClick={() => {void mutate();}} /></ResourceDialog>}
     {detail && <JobDetailDialog id={detail} logs={logs} onClose={() => setDetail(null)} onEditCron={expression => {cronReturnFocus.current = detailFocus.current; setDetail(null); setCron(expression);}} />}

@@ -1,3 +1,6 @@
+import {MasterDetailDemo} from './MasterDetailDemo';
+import {ActionFeedbackDemo} from './ActionFeedbackDemo';
+import {ApprovalDemo} from './ApprovalDemo';
 import {TabbedDetailPage} from '../ui/TabbedDetailPage';
 import {ReferenceSelect} from '../ui/ReferenceSelect';
 import {TreeSelect} from '../ui/TreeSelect';
@@ -20,7 +23,9 @@ const sections = [
   ['overview','应用概览','页面模板与公共组件的可交互展示'],
   ['list','列表模板','查询、列显示、分页与详情弹窗'],
   ['form','表单模板','分组、校验和保存反馈'],
+  ['master-detail','主子表模板','主表与明细编辑、合计和只读展示'],
   ['detail','详情模板','业务详情、状态和操作记录'],
+  ['approval','审批详情模板','申请信息、当前任务和处理记录'],
   ['account','账户模板','登录、注册与密码输入'],
   ['tree-list','树列表模板','左侧分类筛选、右侧列表与手机折叠'],
   ['controls','基础组件','按钮、输入、选择、标签与排版'],
@@ -82,6 +87,7 @@ function ControlsDemo(){const [value,setValue]=useState(''),[check,setCheck]=use
   <Block title="图标"><div className="showcase-row">{(['menu','settings','search','fullscreen','code','help','bell','lock','logout','chevron'] as const).map(name=><span key={name} title={name}><UiIcon name={name}/></span>)}</div></Block>
 </>;}
 function FeedbackDemo(){const [dialog,setDialog]=useState(false),[loaded,setLoaded]=useState(false);return <>
+  <ActionFeedbackDemo/>
   <Block title="提示反馈">{tones.map(t=><Feedback tone={t} key={t}>{({primary:'操作提示',success:'保存成功',warning:'请检查必填信息',danger:'请求失败，可以重试',info:'此处展示说明信息'})[t]}</Feedback>)}</Block>
   <Block title="空状态与加载"><EmptyState title="暂无数据" description="添加第一条记录开始使用。" actions={<Button label={loaded?'重新加载演示':'完成加载演示'} onClick={()=>setLoaded(!loaded)}/>}/>{loaded?<Feedback tone="success">演示数据已加载</Feedback>:<><Spinner/><Skeleton/></>}</Block>
   <Block title="弹窗与浮层"><div className="showcase-row"><Button label="打开示例弹窗" onClick={()=>setDialog(true)}/><Popover content={<p>这是一段补充说明。</p>} label="说明浮层"><Button label="打开说明" variant="secondary"/></Popover></div>{dialog&&<ResourceDialog titleId="demo-dialog" busy={false} onCancel={()=>setDialog(false)}><h2 id="demo-dialog">示例弹窗</h2><p>支持 Esc 关闭、焦点返回、拖动和调整大小。</p><div className="post-dialog-actions"><Button label="取消" variant="secondary" onClick={()=>setDialog(false)}/><Button label="确认" variant="primary" onClick={()=>setDialog(false)}/></div></ResourceDialog>}</Block>
@@ -111,7 +117,7 @@ function Showcase(){const initial=()=>sections.some(s=>s[0]===location.hash.slic
   return <EForgeProvider><FrontendLayout brand={<a href="#overview"><BrandMark/>EForge 示例应用</a>} navigation={[{id:'overview',title:'展示中心',href:'#overview'},{id:'frontend',title:'前台模板',href:'/frontend-template.html'}]} activeHref="#overview" onNavigate={href=>href==='#overview'?navigate('overview'):location.assign(href)} footer="EForge Enterprise · 本地示例数据，不连接业务数据库">
     <div className="showcase-layout"><aside className="showcase-sidebar"><Input label="查找示例" value={search} onChange={setSearch} placeholder="模板、按钮、图表…"/><nav aria-label="示例分类">{sections.filter(s=>(s[1]+s[2]).includes(search)).map(([id,title])=><a key={id} href={`#${id}`} aria-current={section===id?'page':undefined}>{title}</a>)}</nav>{!sections.some(s=>(s[1]+s[2]).includes(search))&&<p>没有匹配的示例</p>}</aside>
     <div className="showcase-main" key={section}><header className="showcase-heading"><span>EFORGE / SHOWCASE</span><h1>{current[1]}</h1><p>{current[2]}</p></header>
-    {section==='overview'?<><div className="showcase-hero"><BrandMark/><div><h2>从一个页面，开始你的应用</h2><p>浏览模板、操作组件，再将同一套公共组件用于业务页面。</p><Button label="体验列表模板" variant="primary" onClick={()=>navigate('list')}/></div></div><div className="showcase-grid">{sections.slice(1).map(([id,title,note])=><a className="showcase-tile" href={`#${id}`} key={id}><h2>{title}<span>↗</span></h2><p>{note}</p></a>)}</div></>:section==='tree-list'?<TreeListDemo/>:section==='list'?<ListDemo/>:section==='form'?<FormDemo/>:section==='detail'?<DetailDemo/>:section==='account'?<AccountDemo/>:section==='controls'?<ControlsDemo/>:section==='feedback'?<FeedbackDemo/>:section==='workspace'?<WorkspaceDemo/>:section==='shell'?<ShellDemo/>:section==='advanced'?<AdvancedDemo/>:section==='editors'?<EditorsDemo/>:section==='charts'?<DashboardPage title='业务看板' description='图表与指标模板'><ChartsDemo/></DashboardPage>:<FilesDemo/>}
+    {section==='overview'?<><div className="showcase-hero"><BrandMark/><div><h2>从一个页面，开始你的应用</h2><p>浏览模板、操作组件，再将同一套公共组件用于业务页面。</p><Button label="体验列表模板" variant="primary" onClick={()=>navigate('list')}/></div></div><div className="showcase-grid">{sections.slice(1).map(([id,title,note])=><a className="showcase-tile" href={`#${id}`} key={id}><h2>{title}<span>↗</span></h2><p>{note}</p></a>)}</div></>:section==='tree-list'?<TreeListDemo/>:section==='list'?<ListDemo/>:section==='form'?<FormDemo/>:section==='master-detail'?<MasterDetailDemo/>:section==='detail'?<DetailDemo/>:section==='approval'?<ApprovalDemo/>:section==='account'?<AccountDemo/>:section==='controls'?<ControlsDemo/>:section==='feedback'?<FeedbackDemo/>:section==='workspace'?<WorkspaceDemo/>:section==='shell'?<ShellDemo/>:section==='advanced'?<AdvancedDemo/>:section==='editors'?<EditorsDemo/>:section==='charts'?<DashboardPage title='业务看板' description='图表与指标模板'><ChartsDemo/></DashboardPage>:<FilesDemo/>}
     </div></div>
   </FrontendLayout></EForgeProvider>;
 }

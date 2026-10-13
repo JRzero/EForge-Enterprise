@@ -1,5 +1,26 @@
 import {test, expect} from './fixtures';
 
+test('shared delete confirmation preserves exact IDs on failure and prevents pending duplicate writes',async({page})=>{
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'2',username:'editor',displayName:'操作员'},roles:[],permissions:['system:post:list','system:post:remove'],navigation:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}}));
+  await page.route('**/api/v1/system/posts?*',route=>route.fulfill({json:{items:[{id:'9007199254740993',code:'keep',name:'精确岗位',sort:0,status:'0'}],total:1,page:1,pageSize:10}}));
+  let release:()=>void=()=>{};const gate=new Promise<void>(resolve=>{release=resolve;});const writes:unknown[]=[];
+  await page.route('**/api/v1/system/posts',async route=>{
+    if(route.request().method()!=='DELETE')return route.fallback();
+    writes.push(route.request().postDataJSON());
+    if(writes.length===1){await gate;return route.fulfill({status:409,json:{detail:'岗位仍被使用',code:'POST_IN_USE'}});}
+    return route.fulfill({status:204});
+  });
+  await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
+  const trigger=page.getByRole('button',{name:'删除 精确岗位',exact:true});await trigger.click();
+  const dialog=page.getByRole('alertdialog',{name:'确认删除岗位',exact:true});await dialog.getByRole('button',{name:'确认删除',exact:true}).click();
+  await expect.poll(()=>writes.length).toBe(1);await expect(dialog.getByRole('button',{name:'确认删除',exact:true})).toBeDisabled();
+  await page.keyboard.press('Escape');await expect(dialog).toBeVisible();release();
+  await expect(dialog.getByRole('alert')).toBeVisible();await dialog.getByRole('button',{name:'确认删除',exact:true}).click();
+  await expect(dialog).toBeHidden();expect(writes).toEqual([{ids:['9007199254740993']},{ids:['9007199254740993']}]);
+});
+
 test('successful shrinking totals normalize the page while failed refresh preserves retry page and filters', async ({page}) => {
   await page.route('**/captchaImage', route => route.fulfill({json:{code:200,captchaEnabled:false}}));
   await page.route('**/api/v1/auth/login', route => route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));

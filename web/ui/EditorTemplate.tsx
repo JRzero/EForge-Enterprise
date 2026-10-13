@@ -9,6 +9,7 @@ export type EditorFormProps = {
   /** Caller applies its draft/discard policy before closing. */
   onCancel: () => void;
   busy: boolean;
+  readOnly?: boolean;
   error?: string;
   saveLabel?: string;
   busyLabel?: string;
@@ -17,10 +18,10 @@ export type EditorFormProps = {
   className?: string;
 };
 
-export function EditorForm({children, onSubmit, onCancel, busy, error, saveLabel='保存', busyLabel='正在保存…', cancelLabel='取消', noValidate, className}: EditorFormProps) {
+export function EditorForm({children, onSubmit, onCancel, busy, readOnly, error, saveLabel='保存', busyLabel='正在保存…', cancelLabel='取消', noValidate, className}: EditorFormProps) {
   return <PageForm className={className} noValidate={noValidate} aria-busy={busy}
-    onSubmit={event=>{event.preventDefault();if(!busy)onSubmit(event);}}
-    actions={<><Button type="submit" variant="primary" label={busy?busyLabel:saveLabel} isDisabled={busy}/><Button type="button" variant="secondary" label={cancelLabel} isDisabled={busy} onClick={onCancel}/></>}>
+    onSubmit={event=>{event.preventDefault();if(!busy&&!readOnly)onSubmit(event);}}
+    actions={<>{!readOnly?<Button type="submit" variant="primary" label={busy?busyLabel:saveLabel} isDisabled={busy}/>:null}<Button type="button" variant="secondary" label={cancelLabel} isDisabled={busy} onClick={onCancel}/></>}>
     {children}{error?<p className="editor-error" role="alert">{error}</p>:null}
   </PageForm>;
 }

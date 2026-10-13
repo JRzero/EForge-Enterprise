@@ -1,6 +1,37 @@
 import {test,expect} from './fixtures';
 
-const sections=['overview','list','tree-list','form','detail','account','controls','feedback','workspace','shell','advanced','editors','charts','files'];
+const sections=['overview','list','tree-list','master-detail','form','detail','approval','account','controls','feedback','workspace','shell','advanced','editors','charts','files'];
+
+test('workflow local approval template keeps actions and history consistent across tabs',async({page})=>{
+  await page.goto('/showcase.html#approval');
+  await page.getByRole('tab',{name:'处理记录',exact:true}).click();
+  await expect(page.getByText('林小禾提交申请',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'模拟批准',exact:true}).click();
+  await expect(page.getByText('主管批准申请',{exact:true})).toBeVisible();
+  await page.getByRole('tab',{name:'申请与任务',exact:true}).click();
+  await expect(page.getByText('已批准',{exact:true})).toBeVisible();
+  await expect(page.getByText('流程已结束',{exact:true})).toBeVisible();
+});
+
+test('shared async states and confirmation keep retry, busy protection and return focus',async({page})=>{
+  await page.goto('/showcase.html#feedback');
+  const block=page.locator('section').filter({has:page.getByRole('heading',{name:'异步内容与操作确认',exact:true})});
+  await block.getByRole('button',{name:'演示加载',exact:true}).click();
+  await expect(block.locator('.ui-feedback[role=status]')).toHaveText('正在加载…');
+  await block.getByRole('button',{name:'演示空数据',exact:true}).click();
+  await expect(block.locator('.ui-feedback[role=status]')).toHaveText('暂无数据');
+  await block.getByRole('button',{name:'演示失败',exact:true}).click();
+  await expect(block.getByRole('alert')).toContainText('示例加载失败');
+  await block.getByRole('button',{name:'重试',exact:true}).click();
+  const trigger=block.getByRole('button',{name:'打开操作确认',exact:true});await trigger.click();
+  const dialog=page.getByRole('alertdialog',{name:'确认示例操作',exact:true});
+  await dialog.getByRole('button',{name:'确认操作',exact:true}).click();
+  await expect(dialog.getByRole('button',{name:'取消',exact:true})).toBeDisabled();
+  await page.keyboard.press('Escape');await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('alert')).toHaveText('示例操作失败，请重试');
+  await dialog.getByRole('button',{name:'确认操作',exact:true}).click();
+  await expect(dialog).toBeHidden();await expect(trigger).toBeFocused();
+});
 
 test('tree list template preserves selection while the phone sidebar is collapsed',async({page})=>{
   await page.setViewportSize({width:390,height:844});await page.goto('/showcase.html#tree-list');
@@ -121,4 +152,15 @@ test('detail template links tabs and preserves mounted panel contents',async({pa
  await page.goto('/showcase.html#detail');const first=page.getByRole('tab',{name:'基本信息',exact:true});await first.focus();await first.press('End');
  const history=page.getByRole('tab',{name:'业务与记录',exact:true});await expect(history).toBeFocused();await expect(page.getByRole('tabpanel',{name:'业务与记录',exact:true})).toBeVisible();await expect(page.getByText('2026-10-09 · 界面验收中',{exact:true})).toBeVisible();
  await history.press('Home');await expect(first).toBeFocused();await expect(page.getByRole('tabpanel',{name:'基本信息',exact:true})).toContainText('EF-2026-001');await expect(page.locator('.detail-tab-panel')).toHaveCount(2);
+});
+
+test('master detail template keeps row identity when deleting, validates and supports readonly',async({page},info)=>{
+ await page.goto('/showcase.html#master-detail');await expect(page.getByText('暂无明细',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'保存采购单',exact:true}).click();await expect(page.locator('.enterprise-form > p[role=status]')).toHaveText('请填写采购单名称及有效明细。');
+ await page.getByRole('button',{name:'新增明细',exact:true}).click();await expect(page.getByLabel('商品名称 1',{exact:true})).toBeFocused();await page.getByLabel('商品名称 1',{exact:true}).fill('产品甲');
+ await page.getByRole('button',{name:'新增明细',exact:true}).click();await page.getByLabel('商品名称 2',{exact:true}).fill('产品乙');await page.getByLabel('数量 2',{exact:true}).fill('3');await page.getByLabel('单价 2',{exact:true}).fill('12.50');
+ const key=await page.locator('tr[data-detail-row]').nth(1).getAttribute('data-detail-row');await page.getByRole('button',{name:'删除明细',exact:true}).first().click();await expect(page.locator('tr[data-detail-row]').first()).toHaveAttribute('data-detail-row',key!);await expect(page.getByLabel('商品名称 1',{exact:true})).toHaveValue('产品乙');await expect(page.getByLabel('商品名称 1',{exact:true})).toBeFocused();await expect(page.getByText('合计：37.50 元',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'保存采购单',exact:true}).click();await expect(page.locator('.enterprise-form > p[role=status]')).toContainText('已保存 1 行明细');
+ await page.getByLabel('只读展示',{exact:true}).check();await expect(page.getByRole('button',{name:'新增明细',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'删除明细',exact:true})).toHaveCount(0);await expect(page.getByRole('cell',{name:'产品乙',exact:true})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('master-detail-mobile.png'),fullPage:true});
 });
