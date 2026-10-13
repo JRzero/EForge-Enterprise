@@ -1,3 +1,5 @@
+import {TreeListLayout} from '../ui/TreeListLayout';
+import {DateRangeField} from '../ui/DateRangeField';
 import {MultiSelect} from '../ui/MultiSelect';
 import {FormField, CheckboxGroup, RadioGroup} from '../ui';
 import {useEffect, useRef, useState, type ReactNode} from 'react';
@@ -17,6 +19,7 @@ const sections = [
   ['form','表单模板','分组、校验和保存反馈'],
   ['detail','详情模板','业务详情、状态和操作记录'],
   ['account','账户模板','登录、注册与密码输入'],
+  ['tree-list','树列表模板','左侧分类筛选、右侧列表与手机折叠'],
   ['controls','基础组件','按钮、输入、选择、标签与排版'],
   ['feedback','反馈与弹层','空状态、加载、提示与弹窗'],
   ['workspace','导航与页签','溢出滚动、关闭与菜单'],
@@ -31,6 +34,11 @@ const tones: TagTone[]=['primary','success','warning','danger','info'];
 const sampleRows=Array.from({length:24},(_,i)=>({id:String(i+1),name:['星河科技','远山设计','青禾服务'][i%3]+` ${i+1}`,email:`contact${i+1}@example.com`,status:i%3?'正常':'停用'}));
 function Block({title,note,children}:{title:string;note?:string;children:ReactNode}){return <section className="showcase-block"><h2>{title}</h2>{note&&<p className="showcase-note">{note}</p>}{children}</section>;}
 
+function TreeListDemo(){
+  const [category,setCategory]=useState('全部客户');
+  const rows=sampleRows.filter(row=>category==='全部客户'||row.status===category);
+  return <ListPage title="按分类查看客户"><TreeListLayout sidebarLabel="客户分类" selectionLabel={category} sidebar={<ul>{['全部客户','正常','停用'].map(label=><li key={label}><Button label={label} variant="ghost" onClick={()=>setCategory(label)} aria-pressed={category===label}/></li>)}</ul>}><DataTable data={rows} columns={[{accessorKey:'name',header:'客户名称'},{accessorKey:'status',header:'状态'}]} getRowId={row=>row.id} pagination={false}/></TreeListLayout></ListPage>;
+}
 function ListDemo(){
   const [draft,setDraft]=useState(''),[query,setQuery]=useState(''),[page,setPage]=useState(1),[size,setSize]=useState(10),[visibility,setVisibility]=useState<VisibilityState>({}),[detail,setDetail]=useState<typeof sampleRows[number]|null>(null);
   const rows=sampleRows.filter(row=>row.name.includes(query));
@@ -47,12 +55,13 @@ function ListDemo(){
   </ListPage>;
 }
 function FormDemo(){
+  const [period,setPeriod]=useState({from:'',to:''});
   const [collaborators,setCollaborators]=useState<string[]>(['admin','9007199254740993']);
   const [channels,setChannels]=useState<string[]>(['email']),[priority,setPriority]=useState<string|null>('normal');
   const [name,setName]=useState(''),[email,setEmail]=useState(''),[remark,setRemark]=useState(''),[enabled,setEnabled]=useState(true),[message,setMessage]=useState('');
   return <FormPage title="新增客户" description="本地演示，保存不会发送网络请求。"><PageForm onSubmit={e=>{e.preventDefault();setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}} actions={<><Button label="清空表单" variant="secondary" onClick={()=>{setName('');setEmail('');setRemark('');setMessage('');}}/><Button label="保存客户" type="submit" variant="primary"/></>}>
     <FormSection title="基本信息"><Input label="客户名称" value={name} onChange={setName} isRequired/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/></FormSection>
-    <FormSection title="业务设置"><MultiSelect label="协作人员" value={collaborators} onChange={setCollaborators} unknownLabel={id=>`已分配人员（${id}）`} options={[{value:"admin",label:"Admin"},{value:"cindy",label:"Cindy"},{value:"disabled",label:"停用人员",disabled:true}]}/><FormField label="客户编码" hint="用于内部识别客户">{control=><NativeInput {...control} placeholder="例如 KH001"/>}</FormField><CheckboxGroup label="通知渠道" value={channels} onChange={setChannels} options={[{value:"email",label:"邮件"},{value:"sms",label:"短信"},{value:"fax",label:"传真（停用）",disabled:true}]}/><RadioGroup label="服务等级" value={priority} onChange={setPriority} options={[{value:"normal",label:"标准"},{value:"priority",label:"优先"}]}/><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
+    <FormSection title="业务设置"><DateRangeField label="服务周期" value={period} onChange={setPeriod} error={period.from&&period.to&&period.from>period.to?'开始日期不能晚于结束日期':undefined}/><MultiSelect label="协作人员" value={collaborators} onChange={setCollaborators} unknownLabel={id=>`已分配人员（${id}）`} options={[{value:"admin",label:"Admin"},{value:"cindy",label:"Cindy"},{value:"disabled",label:"停用人员",disabled:true}]}/><FormField label="客户编码" hint="用于内部识别客户">{control=><NativeInput {...control} placeholder="例如 KH001"/>}</FormField><CheckboxGroup label="通知渠道" value={channels} onChange={setChannels} options={[{value:"email",label:"邮件"},{value:"sms",label:"短信"},{value:"fax",label:"传真（停用）",disabled:true}]}/><RadioGroup label="服务等级" value={priority} onChange={setPriority} options={[{value:"normal",label:"标准"},{value:"priority",label:"优先"}]}/><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
     {message&&<Feedback tone="success">{message}</Feedback>}
   </PageForm></FormPage>;
 }
@@ -97,7 +106,7 @@ function Showcase(){const initial=()=>sections.some(s=>s[0]===location.hash.slic
   return <EForgeProvider><FrontendLayout brand={<a href="#overview"><BrandMark/>EForge 示例应用</a>} navigation={[{id:'overview',title:'展示中心',href:'#overview'},{id:'frontend',title:'前台模板',href:'/frontend-template.html'}]} activeHref="#overview" onNavigate={href=>href==='#overview'?navigate('overview'):location.assign(href)} footer="EForge Enterprise · 本地示例数据，不连接业务数据库">
     <div className="showcase-layout"><aside className="showcase-sidebar"><Input label="查找示例" value={search} onChange={setSearch} placeholder="模板、按钮、图表…"/><nav aria-label="示例分类">{sections.filter(s=>(s[1]+s[2]).includes(search)).map(([id,title])=><a key={id} href={`#${id}`} aria-current={section===id?'page':undefined}>{title}</a>)}</nav>{!sections.some(s=>(s[1]+s[2]).includes(search))&&<p>没有匹配的示例</p>}</aside>
     <div className="showcase-main" key={section}><header className="showcase-heading"><span>EFORGE / SHOWCASE</span><h1>{current[1]}</h1><p>{current[2]}</p></header>
-    {section==='overview'?<><div className="showcase-hero"><BrandMark/><div><h2>从一个页面，开始你的应用</h2><p>浏览模板、操作组件，再将同一套公共组件用于业务页面。</p><Button label="体验列表模板" variant="primary" onClick={()=>navigate('list')}/></div></div><div className="showcase-grid">{sections.slice(1).map(([id,title,note])=><a className="showcase-tile" href={`#${id}`} key={id}><h2>{title}<span>↗</span></h2><p>{note}</p></a>)}</div></>:section==='list'?<ListDemo/>:section==='form'?<FormDemo/>:section==='detail'?<DetailDemo/>:section==='account'?<AccountDemo/>:section==='controls'?<ControlsDemo/>:section==='feedback'?<FeedbackDemo/>:section==='workspace'?<WorkspaceDemo/>:section==='shell'?<ShellDemo/>:section==='advanced'?<AdvancedDemo/>:section==='editors'?<EditorsDemo/>:section==='charts'?<DashboardPage title='业务看板' description='图表与指标模板'><ChartsDemo/></DashboardPage>:<FilesDemo/>}
+    {section==='overview'?<><div className="showcase-hero"><BrandMark/><div><h2>从一个页面，开始你的应用</h2><p>浏览模板、操作组件，再将同一套公共组件用于业务页面。</p><Button label="体验列表模板" variant="primary" onClick={()=>navigate('list')}/></div></div><div className="showcase-grid">{sections.slice(1).map(([id,title,note])=><a className="showcase-tile" href={`#${id}`} key={id}><h2>{title}<span>↗</span></h2><p>{note}</p></a>)}</div></>:section==='tree-list'?<TreeListDemo/>:section==='list'?<ListDemo/>:section==='form'?<FormDemo/>:section==='detail'?<DetailDemo/>:section==='account'?<AccountDemo/>:section==='controls'?<ControlsDemo/>:section==='feedback'?<FeedbackDemo/>:section==='workspace'?<WorkspaceDemo/>:section==='shell'?<ShellDemo/>:section==='advanced'?<AdvancedDemo/>:section==='editors'?<EditorsDemo/>:section==='charts'?<DashboardPage title='业务看板' description='图表与指标模板'><ChartsDemo/></DashboardPage>:<FilesDemo/>}
     </div></div>
   </FrontendLayout></EForgeProvider>;
 }

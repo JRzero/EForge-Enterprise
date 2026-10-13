@@ -1,5 +1,21 @@
 import {test,expect} from './fixtures';
 
+test('date range keeps date-only values and clears both bounds without submitting the form',async({page})=>{
+  await page.goto('/showcase.html#form');
+  const range=page.getByRole('group',{name:'服务周期',exact:true});
+  await range.getByLabel('开始日期',{exact:true}).fill('2026-10-13');
+  await range.getByLabel('结束日期',{exact:true}).fill('2026-10-12');
+  await expect(range.getByRole('alert')).toHaveText('开始日期不能晚于结束日期');
+  await expect(range.getByLabel('开始日期',{exact:true})).toHaveAttribute('aria-invalid','true');
+  await range.getByLabel('结束日期',{exact:true}).fill('2026-10-14');
+  await expect(range.getByRole('alert')).toHaveCount(0);
+  await expect(range.getByLabel('开始日期',{exact:true})).toHaveValue('2026-10-13');
+  await range.getByRole('button',{name:'清空服务周期',exact:true}).click();
+  await expect(range.getByLabel('开始日期',{exact:true})).toHaveValue('');
+  await expect(range.getByLabel('结束日期',{exact:true})).toHaveValue('');
+  await expect(page.getByText('请填写客户名称',{exact:true})).toHaveCount(0);
+});
+
 test('multi selection handles unavailable options, loading, disabled and readonly states',async({page},info)=>{
   await page.goto('/tests/fixtures/component-gallery.html');
   await expect(page.getByRole('combobox',{name:'禁用多选',exact:true})).toBeDisabled();

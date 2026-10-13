@@ -1,6 +1,18 @@
 import {test,expect} from './fixtures';
 
-const sections=['overview','list','form','detail','account','controls','feedback','workspace','shell','advanced','editors','charts','files'];
+const sections=['overview','list','tree-list','form','detail','account','controls','feedback','workspace','shell','advanced','editors','charts','files'];
+
+test('tree list template preserves selection while the phone sidebar is collapsed',async({page})=>{
+  await page.setViewportSize({width:390,height:844});await page.goto('/showcase.html#tree-list');
+  await page.getByRole('button',{name:'停用',exact:true}).click();
+  await expect(page.getByRole('row')).toHaveCount(9);
+  await page.getByRole('button',{name:'收起客户分类 · 停用',exact:true}).click();
+  await expect(page.getByRole('complementary',{name:'客户分类',exact:true})).toBeHidden();
+  await expect(page.getByRole('row')).toHaveCount(9);
+  await page.setViewportSize({width:1440,height:900});
+  await expect(page.getByRole('complementary',{name:'客户分类',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'停用',exact:true})).toHaveAttribute('aria-pressed','true');
+});
 
 test('shared form field and choice groups keep labels, keyboard and disabled choices',async({page})=>{
   await page.goto('/showcase.html#form');

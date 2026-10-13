@@ -1,4 +1,5 @@
-import {Select, NativeInput, TextareaControl} from '../../ui/native';
+import {DateRangeField} from '../../ui/DateRangeField';
+import {Select, TextareaControl} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
@@ -102,8 +103,7 @@ export function ConfigurationsPage() {
       <Input label="参数名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名" value={draft.key} onChange={key => setDraft({...draft, key})} />
       <label>系统内置<Select aria-label="系统内置" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>
-      <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label>
-      <label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
+      <DateRangeField value={{from:draft.from,to:draft.to}} onChange={range=>setDraft({...draft,...range})}/>
 
     </ListFilters>
     <ListToolbar >

@@ -1,4 +1,5 @@
-import {Select, NativeInput} from '../../ui/native';
+import {DateRangeField} from '../../ui/DateRangeField';
+import {Select} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
@@ -99,7 +100,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
       {operation && <label>操作类型<Select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></Select></label>}
       <label>{operation ? '操作状态' : '登录状态'}<Select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>
-      <label>开始日期<NativeInput aria-label="开始日期" type="date" value={draft.from} onChange={event => setDraft({...draft, from: event.target.value})} /></label><label>结束日期<NativeInput aria-label="结束日期" type="date" value={draft.to} onChange={event => setDraft({...draft, to: event.target.value})} /></label>
+      <DateRangeField value={{from:draft.from,to:draft.to}} onChange={range=>setDraft({...draft,...range})}/>
       </ListFilters>}
     <ListToolbar ><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}

@@ -1,3 +1,4 @@
+import {TreeListLayout} from '../../ui/TreeListLayout';
 import {MultiSelect} from '../../ui/MultiSelect';
 import {CheckboxGroup} from '../../ui/ChoiceGroup';
 import {NativeButton, NativeInput, Select, TextareaControl, Table} from '../../ui/native';
@@ -170,7 +171,7 @@ export function UsersPage() {
   const parentOptions = editor ? departmentTree(editor.options.departments).filter(row =>
     (row.department.status === '0' || row.department.id === editor.form.departmentId) && (row.path.toLowerCase().includes(parentSearch.trim().toLowerCase()) || row.department.id === editor.form.departmentId)) : [];
   return <ListPage className="posts-page users-page" title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={sexDictionary} />
-    <div className="user-layout"><aside className="user-departments" aria-label="用户部门筛选">
+    <TreeListLayout sidebarLabel="用户部门筛选" selectionLabel={departments.find(row=>row.id===filters.departmentId)?.name} sidebar={<>
       <Input label="搜索部门" value={departmentSearch} onChange={setDepartmentSearch} />
       <Button label="全部部门" variant="ghost" onClick={() => { setDraft({...draft, departmentId: undefined}); setFilters({...filters, departmentId: undefined}); setPage(1); }} />
       {departmentError ? <div role="alert">{departmentError}<Button label="重试部门" onClick={() => setDepartmentVersion(value => value + 1)} /></div> : null}
@@ -178,7 +179,7 @@ export function UsersPage() {
         {row.hasChildren ? <NativeButton aria-label={`${collapsed.has(row.department.id) ? '展开' : '折叠'}筛选部门 ${row.department.name}`} aria-expanded={!collapsed.has(row.department.id)} onClick={() => setCollapsed(previous => { const next = new Set(previous); if (next.has(row.department.id)) next.delete(row.department.id); else next.add(row.department.id); return next; })}>{collapsed.has(row.department.id) ? '▸' : '▾'}</NativeButton> : null}
         <NativeButton aria-label={`筛选部门 ${row.path}`} aria-pressed={filters.departmentId === row.department.id} onClick={() => { setDraft({...draft, departmentId: row.department.id}); setFilters({...filters, departmentId: row.department.id}); setPage(1); }}>{row.department.name}</NativeButton>
       </li>)}</ul>
-    </aside><div className="user-content">
+    </>}>
       <ListFilters primaryCount={3} advancedCount={[draft.beginDate, draft.endDate].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setDepartmentSearch(''); setPage(1); refresh(); }} /></>} onSubmit={event => { event.preventDefault(); if (draft.beginDate && draft.endDate && draft.beginDate > draft.endDate) { setActionError('开始日期不能晚于结束日期。'); return; } setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
         <Input label="登录账号" value={draft.username} onChange={username => setDraft({...draft, username})} /><Input label="手机号码" value={draft.phone} onChange={phone => setDraft({...draft, phone})} />
         <label>用户状态<Select aria-label="用户状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
@@ -198,7 +199,7 @@ export function UsersPage() {
       {feedback ? <p role="status">{feedback}</p> : null}{error ? <div role="alert">{error}<Button label="重试列表" onClick={() => refresh()} /></div> : null}{actionError && !editor && !action && !importing ? <p role="alert">{actionError}</p> : null}
       <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无用户" pagination={false} sortable={false} showColumnVisibility={false} rowSelection={selection} columnVisibility={visibility} getRowId={row => row.id} /></div>
       <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
-    </div></div>
+    </TreeListLayout>
     {editor ? <ResourceDialog titleId="user-editor-title" busy={busy} onCancel={cancelEditor}><h2 id="user-editor-title">{editor.id ? '修改用户' : '新增用户'}</h2>
       {discardEditor ? <div role="alert"><p>有未保存的修改，是否放弃？</p>
         <Button label="继续编辑" isDisabled={busy} onClick={()=>setDiscardEditor(false)} />
