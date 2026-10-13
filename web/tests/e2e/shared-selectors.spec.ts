@@ -69,3 +69,50 @@ test('role assignment uses shared multi selector and submits retained long IDs u
   await dialog.getByRole('button',{name:'确认保存',exact:true}).click();
   await expect(dialog).toHaveCount(0);expect(submitted).toEqual({roleIds:['9007199254740993']});
 });
+
+ test('tree selection searches ancestors, preserves unknown values and supports keyboard navigation',async({page},info)=>{
+  await page.goto('/showcase.html#form');
+  const trigger=page.getByRole('button',{name:/^负责部门 /});
+  await expect(trigger).toContainText('9007199254740993');await trigger.click();
+  const tree=page.getByRole('tree',{name:'负责部门选项'});
+  await tree.getByRole('button',{name:'折叠总部',exact:true}).click();
+  await expect(tree.getByRole('button',{name:'销售部',exact:true})).toHaveCount(0);
+  const search=page.getByRole('searchbox',{name:'搜索负责部门'});await search.fill('销售');
+  await expect(tree.getByRole('button',{name:'总部',exact:true})).toBeVisible();
+  await expect(tree.getByRole('button',{name:'销售部',exact:true})).toBeVisible();
+  await search.press('ArrowDown');await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');
+  await expect(trigger).toContainText('销售部');await expect(trigger).toBeFocused();
+  await trigger.click();await search.fill('停用');await search.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+  await expect(trigger).toContainText('销售部');await expect(tree).toBeVisible();
+  await search.fill('不存在');await expect(page.getByText('没有匹配项',{exact:true})).toBeVisible();
+  await search.press('Escape');await expect(trigger).toBeFocused();
+  await page.getByRole('button',{name:'清空负责部门',exact:true}).click();await expect(trigger).toContainText('请选择');
+  await page.setViewportSize({width:390,height:844});await trigger.click();await search.fill('');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('tree-select-mobile.png'),fullPage:true});
+ });
+
+test('tree selector handles retry, scoped roots, readonly and loading',async({page})=>{
+ await page.goto('/tests/fixtures/component-gallery.html');
+ await expect(page.getByRole('button',{name:/^只读树 /})).toBeDisabled();await expect(page.getByRole('button',{name:/^禁用树 /})).toBeDisabled();
+ await page.getByRole('button',{name:/^加载树 /}).click();await expect(page.getByRole('button',{name:'不可提前选择',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:/^失败树 /}).click();await expect(page.getByRole('alert').filter({hasText:'树加载失败'})).toBeVisible();
+ await page.getByRole('button',{name:'重试失败树',exact:true}).click();
+ const root=page.getByRole('treeitem').filter({has:page.getByRole('button',{name:'范围内部门',exact:true})});await expect(root).toHaveAttribute('aria-level','1');
+ await root.getByRole('button',{name:'范围内部门',exact:true}).click();await expect(page.getByRole('button',{name:/^失败树 /})).toContainText('范围内部门');
+});
+
+test('user editor department tree submits scoped long IDs and excludes other inactive departments',async({page})=>{
+ await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+ await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
+ await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'2',username:'editor',displayName:'编辑'},roles:['editor'],permissions:['system:user:list','system:user:edit'],navigation:[{key:'users',type:'ROUTE',routeId:'system-users',label:'用户管理',order:0,children:[]}]}}));
+ await page.route('**/api/v1/system/users/departments',route=>route.fulfill({json:[]}));
+ const user={id:'3',username:'sample',displayName:'示例',status:'0',departmentId:'101',roleIds:[],postIds:[]};
+ await page.route('**/api/v1/system/users?*',route=>route.fulfill({json:{items:[user],total:1,page:1,pageSize:10}}));
+ await page.route('**/api/v1/system/users/options',route=>route.fulfill({json:{departments:[{id:'101',name:'原停用部门',status:'1',sort:0},{id:'102',name:'其他停用部门',status:'1',sort:0},{id:'9007199254740993',parentId:'100',name:'范围内部门',status:'0',sort:1}],posts:[],roles:[]}}));
+ let submitted:Record<string,unknown>|undefined;await page.route('**/api/v1/system/users/3',route=>{if(route.request().method()==='GET')return route.fulfill({json:{user,roleIds:[],postIds:[]}});submitted=route.request().postDataJSON();return route.fulfill({status:204});});
+ await page.goto('/user');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
+ await page.getByRole('button',{name:'修改用户 sample',exact:true}).click();const dialog=page.getByRole('dialog');
+ const picker=dialog.getByRole('button',{name:/^归属部门 /});await expect(picker).toContainText('原停用部门（停用）');await picker.click();
+ await expect(dialog.getByRole('button',{name:'其他停用部门（停用）',exact:true})).toHaveCount(0);await dialog.getByRole('button',{name:'范围内部门',exact:true}).click();
+ await dialog.getByRole('button',{name:'保存用户',exact:true}).click();await expect(dialog).toHaveCount(0);expect(submitted?.departmentId).toBe('9007199254740993');
+});

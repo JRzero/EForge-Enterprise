@@ -1,3 +1,4 @@
+import {TreeSelect} from '../../ui/TreeSelect';
 import {TreeListLayout} from '../../ui/TreeListLayout';
 import {MultiSelect} from '../../ui/MultiSelect';
 import {CheckboxGroup} from '../../ui/ChoiceGroup';
@@ -46,7 +47,7 @@ export function UsersPage() {
   const [selection, setSelection] = useState<RowSelectionState>({}); const [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<Editor | null>(null); const [action, setAction] = useState<Action | null>(null);
   const [discardEditor, setDiscardEditor] = useState(false);
-  const [busy, setBusy] = useState(false); const [actionError, setActionError] = useState(''); const [parentSearch, setParentSearch] = useState('');
+  const [busy, setBusy] = useState(false); const [actionError, setActionError] = useState('');
   const [importing, setImporting] = useState<{file: File | null; updateExisting: boolean; result: UserImportResponse | null} | null>(null);
   const editorDirty = !!editor && editor.initial !== JSON.stringify([editor.form, editor.password]);
   const pageDraft = usePageDraft(editorDirty);
@@ -68,7 +69,7 @@ export function UsersPage() {
   }, [api, departmentVersion]);
 
   const openEditor = useCallback(async (id?: string) => {
-    setBusy(true); setActionError(''); setParentSearch('');
+    setBusy(true); setActionError('');
     try {
       const [options, detail] = await Promise.all([api.getUserOptions(), id ? api.getUser(id) : Promise.resolve(null)]);
       const form: UserWriteRequest = detail ? {username: detail.user.username, displayName: detail.user.displayName,
@@ -168,8 +169,7 @@ export function UsersPage() {
   }
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
   const tree = useMemo(() => searchedDepartmentTree(departments, departmentSearch, collapsed), [departments, departmentSearch, collapsed]);
-  const parentOptions = editor ? departmentTree(editor.options.departments).filter(row =>
-    (row.department.status === '0' || row.department.id === editor.form.departmentId) && (row.path.toLowerCase().includes(parentSearch.trim().toLowerCase()) || row.department.id === editor.form.departmentId)) : [];
+  const parentOptions = editor ? departmentTree(editor.options.departments).filter(row => row.department.status==='0'||row.department.id===editor.form.departmentId) : [];
   return <ListPage className="posts-page users-page" title="用户管理" description="管理账号、部门归属与角色岗位分配。" eyebrow="系统管理"><DictionaryNotice dictionary={statusDictionary} /><DictionaryNotice dictionary={sexDictionary} />
     <TreeListLayout sidebarLabel="用户部门筛选" selectionLabel={departments.find(row=>row.id===filters.departmentId)?.name} sidebar={<>
       <Input label="搜索部门" value={departmentSearch} onChange={setDepartmentSearch} />
@@ -208,8 +208,7 @@ export function UsersPage() {
       <Input label="登录账号" value={editor.form.username} isDisabled={busy || !!editor.id} aria-required="true" onChange={username => setEditor({...editor, form: {...editor.form, username}})} />
       <Input label="用户昵称" value={editor.form.displayName} isDisabled={busy} aria-required="true" onChange={displayName => setEditor({...editor, form: {...editor.form, displayName}})} />
       {!editor.id ? <PasswordField label="用户密码" autoComplete="new-password" value={editor.password} isDisabled={busy} aria-required="true" onChange={password => setEditor({...editor, password})} /> : null}
-      <Input label="搜索归属部门" value={parentSearch} onChange={setParentSearch} />
-      <label>归属部门<Select aria-label="归属部门" value={editor.form.departmentId ?? ''} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, departmentId: event.target.value || undefined}})}><option value="">未指定部门</option>{editor.form.departmentId && !parentOptions.some(row => row.department.id === editor.form.departmentId) ? <option value={editor.form.departmentId}>当前归属部门</option> : null}{parentOptions.map(row => <option key={row.department.id} value={row.department.id}>{row.path}{row.department.status === '1' ? '（停用）' : ''}</option>)}</Select></label>
+      <TreeSelect label="归属部门" placeholder="未指定部门" value={editor.form.departmentId??null} disabled={busy} nodes={parentOptions.map(({department})=>({value:department.id,parentValue:department.parentId,label:department.name+(department.status==='1'?'（停用）':'')}))} onChange={departmentId=>setEditor({...editor,form:{...editor.form,departmentId:departmentId??undefined}})}/>
       <Input label="手机号码" value={editor.form.phone ?? ''} isDisabled={busy} onChange={phone => setEditor({...editor, form: {...editor.form, phone}})} /><Input label="邮箱" value={editor.form.email ?? ''} isDisabled={busy} onChange={email => setEditor({...editor, form: {...editor.form, email}})} />
       <label>用户性别<Select aria-label="用户性别" value={editor.form.sex} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, sex: event.target.value}})}><DictionaryOptions options={sexDictionary.options} current={editor.form.sex} /></Select></label>
       <label>用户状态<Select aria-label="用户状态" value={editor.form.status} disabled={busy} onChange={event => setEditor({...editor, form: {...editor.form, status: event.target.value}})}><DictionaryOptions options={statusDictionary.options} current={editor.form.status} /></Select></label>

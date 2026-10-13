@@ -10,6 +10,8 @@ export type {MultiSelectProps} from './MultiSelect';
 export {DateRangeField} from './DateRangeField';
 export type {DateRangeValue} from './DateRangeField';
 export {TreeListLayout} from './TreeListLayout';
+export {TreeSelect} from './TreeSelect';
+export type {TreeSelectNode} from './TreeSelect';
 export {Feedback} from './Feedback';
 export {Tag} from './Tag';
 export type {TagTone} from './Tag';

@@ -1,3 +1,4 @@
+import {TreeSelect} from '../ui/TreeSelect';
 import {TreeListLayout} from '../ui/TreeListLayout';
 import {DateRangeField} from '../ui/DateRangeField';
 import {MultiSelect} from '../ui/MultiSelect';
@@ -55,13 +56,14 @@ function ListDemo(){
   </ListPage>;
 }
 function FormDemo(){
+  const [department,setDepartment]=useState<string|null>('9007199254740993');
   const [period,setPeriod]=useState({from:'',to:''});
   const [collaborators,setCollaborators]=useState<string[]>(['admin','9007199254740993']);
   const [channels,setChannels]=useState<string[]>(['email']),[priority,setPriority]=useState<string|null>('normal');
   const [name,setName]=useState(''),[email,setEmail]=useState(''),[remark,setRemark]=useState(''),[enabled,setEnabled]=useState(true),[message,setMessage]=useState('');
   return <FormPage title="新增客户" description="本地演示，保存不会发送网络请求。"><PageForm onSubmit={e=>{e.preventDefault();setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}} actions={<><Button label="清空表单" variant="secondary" onClick={()=>{setName('');setEmail('');setRemark('');setMessage('');}}/><Button label="保存客户" type="submit" variant="primary"/></>}>
     <FormSection title="基本信息"><Input label="客户名称" value={name} onChange={setName} isRequired/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/></FormSection>
-    <FormSection title="业务设置"><DateRangeField label="服务周期" value={period} onChange={setPeriod} error={period.from&&period.to&&period.from>period.to?'开始日期不能晚于结束日期':undefined}/><MultiSelect label="协作人员" value={collaborators} onChange={setCollaborators} unknownLabel={id=>`已分配人员（${id}）`} options={[{value:"admin",label:"Admin"},{value:"cindy",label:"Cindy"},{value:"disabled",label:"停用人员",disabled:true}]}/><FormField label="客户编码" hint="用于内部识别客户">{control=><NativeInput {...control} placeholder="例如 KH001"/>}</FormField><CheckboxGroup label="通知渠道" value={channels} onChange={setChannels} options={[{value:"email",label:"邮件"},{value:"sms",label:"短信"},{value:"fax",label:"传真（停用）",disabled:true}]}/><RadioGroup label="服务等级" value={priority} onChange={setPriority} options={[{value:"normal",label:"标准"},{value:"priority",label:"优先"}]}/><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
+    <FormSection title="业务设置"><TreeSelect label="负责部门" value={department} onChange={setDepartment} nodes={[{value:"root",label:"总部"},{value:"sales",parentValue:"root",label:"销售部"},{value:"support",parentValue:"root",label:"服务部"},{value:"disabled",parentValue:"root",label:"停用部门",disabled:true}]}/><DateRangeField label="服务周期" value={period} onChange={setPeriod} error={period.from&&period.to&&period.from>period.to?'开始日期不能晚于结束日期':undefined}/><MultiSelect label="协作人员" value={collaborators} onChange={setCollaborators} unknownLabel={id=>`已分配人员（${id}）`} options={[{value:"admin",label:"Admin"},{value:"cindy",label:"Cindy"},{value:"disabled",label:"停用人员",disabled:true}]}/><FormField label="客户编码" hint="用于内部识别客户">{control=><NativeInput {...control} placeholder="例如 KH001"/>}</FormField><CheckboxGroup label="通知渠道" value={channels} onChange={setChannels} options={[{value:"email",label:"邮件"},{value:"sms",label:"短信"},{value:"fax",label:"传真（停用）",disabled:true}]}/><RadioGroup label="服务等级" value={priority} onChange={setPriority} options={[{value:"normal",label:"标准"},{value:"priority",label:"优先"}]}/><div className="form-control-offset"><Switch label="启用客户" value={enabled} onChange={setEnabled}/></div><TextArea label="备注" value={remark} onChange={setRemark}/></FormSection>
     {message&&<Feedback tone="success">{message}</Feedback>}
   </PageForm></FormPage>;
 }

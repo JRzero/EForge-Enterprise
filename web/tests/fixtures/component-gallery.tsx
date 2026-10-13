@@ -1,3 +1,4 @@
+import {TreeSelect} from '../../ui/TreeSelect';
 import {MultiSelect} from '../../ui/MultiSelect';
 import {PageTabs} from '../../ui/PageTabs';
 import {useState} from 'react';
@@ -18,12 +19,13 @@ import '../../ui/theme.css';
 // Browser-only presentation fixture. Uses the real shared components, without
 // auth bootstrap, production routes, network uploads or business writes.
 function Gallery(){
+ const [treeValue,setTreeValue]=useState<string|null>('old'),[treeError,setTreeError]=useState('树加载失败');
   const [people,setPeople]=useState(['old']),[peopleError,setPeopleError]=useState('选项加载失败');
   const [tab,setTab]=useState(0),[assignee,setAssignee]=useState<string|null>('admin');
   const [text,setText]=useState('admin'),[paths,setPaths]=useState(['合同.pdf','需求文档.docx']),[icon,setIcon]=useState('user'),[selected,setSelected]=useState(['read']),[linked,setLinked]=useState(true),[visibility,setVisibility]=useState({});
   return <EForgeProvider><main className="enterprise-layout" style={{padding:20}}>
     <section className="posts-page" style={{maxWidth:900,margin:'auto'}}><h1>共享组件样式验收</h1>
-      <MultiSelect label="失败多选" value={people} onChange={setPeople} options={[{value:'active',label:'可选人员'}]} error={peopleError} onRetry={()=>setPeopleError('')} unknownLabel={id=>`旧人员（${id}）`}/>
+      <TreeSelect label="失败树" value={treeValue} onChange={setTreeValue} nodes={[{value:'orphan',parentValue:'hidden',label:'范围内部门'}]} error={treeError} onRetry={()=>setTreeError('')}/><TreeSelect label="只读树" value="old" nodes={[]} readOnly onChange={()=>{throw Error('readonly changed');}}/><TreeSelect label="禁用树" value="old" nodes={[]} disabled onChange={()=>{throw Error('disabled changed');}}/><TreeSelect label="加载树" value={null} nodes={[{value:'active',label:'不可提前选择'}]} loading onChange={()=>{throw Error('loading changed');}}/><MultiSelect label="失败多选" value={people} onChange={setPeople} options={[{value:'active',label:'可选人员'}]} error={peopleError} onRetry={()=>setPeopleError('')} unknownLabel={id=>`旧人员（${id}）`}/>
       <MultiSelect label="只读多选" value={['old']} onChange={()=>{throw Error('readonly changed');}} options={[]} readOnly/>
       <MultiSelect label="禁用多选" value={['old']} onChange={()=>{throw Error('disabled changed');}} options={[]} disabled/>
       <MultiSelect label="加载多选" value={[]} onChange={()=>{throw Error('loading changed');}} options={[{value:'active',label:'可选人员'}]} loading/>
