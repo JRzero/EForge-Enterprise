@@ -1,3 +1,4 @@
+import {MultiSelect} from '../../ui/MultiSelect';
 import {CheckboxGroup} from '../../ui/ChoiceGroup';
 import {NativeButton, NativeInput, Select, TextareaControl, Table} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
@@ -217,7 +218,7 @@ export function UsersPage() {
     {action ? <ResourceDialog titleId="user-action-title" alert={action.kind === 'delete' || action.kind === 'status'} busy={busy} onCancel={close}><h2 id="user-action-title">{action.kind === 'delete' ? '确认删除用户' : action.kind === 'status' ? `确认${action.user.status === '0' ? '停用' : '启用'}用户` : action.kind === 'password' ? '重置用户密码' : '分配用户角色'}</h2>
       {action.kind === 'delete' ? <p>将删除所选的 {action.ids.length} 个用户。超级管理员和当前登录用户不能删除。</p> : <p>登录账号：{action.user.username}</p>}
       {action.kind === 'password' ? <Input label="新密码" type="password" value={action.password} isDisabled={busy} onChange={password => setAction({...action, password})} /> : null}
-      {action.kind === 'roles' ? <Choices label="角色" options={action.options} selected={action.ids} disabled={busy} onChange={ids => setAction({...action, ids})} /> : null}
+      {action.kind === 'roles' ? <MultiSelect label="角色" options={action.options.map(option=>({value:option.id,label:option.name,disabled:option.status==='1'&&!action.ids.includes(option.id)}))} value={action.ids} disabled={busy} unknownLabel={id=>`当前已分配的角色（${id}）`} onChange={ids => setAction({...action, ids})} /> : null}
       {actionError ? <p role="alert">{actionError}</p> : null}<div className="post-row-actions"><Button label={action.kind === 'delete' ? '确认删除' : '确认保存'} isDisabled={busy} onClick={() => { void confirmAction(); }} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={close} /></div>
     </ResourceDialog> : null}
     {importing ? <ResourceDialog titleId="user-import-title" busy={busy} onCancel={close}><h2 id="user-import-title">导入用户</h2>

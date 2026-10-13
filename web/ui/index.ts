@@ -5,6 +5,8 @@ export {CheckboxGroup, RadioGroup} from './ChoiceGroup';
 export type {ChoiceOption} from './ChoiceGroup';
 export {PageTabs} from './PageTabs';
 export type {PageTab} from './PageTabs';
+export {MultiSelect} from './MultiSelect';
+export type {MultiSelectProps} from './MultiSelect';
 export {Feedback} from './Feedback';
 export {Tag} from './Tag';
 export type {TagTone} from './Tag';

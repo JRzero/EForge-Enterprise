@@ -1,0 +1,31 @@
+.ui-multi-select { position: relative; min-width: 0; }
+.ui-multi-select > label { display: block; margin-bottom: 6px; color: var(--ui-muted); }
+.ui-multi-control { display: flex; align-items: center; gap: 4px; min-height: 36px; border: 1px solid var(--ui-border); border-radius: 4px; padding: 4px 6px; background: white; }
+.ui-multi-control:focus-within { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+.ui-multi-values { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
+.ui-multi-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 6px; border-radius: 3px; background: var(--ui-primary-soft); color: var(--ui-primary); font-size: 13px; }
+.ui-multi-chip > span { overflow-wrap: anywhere; min-width: 0; }
+.ui-multi-select button { display: inline-flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--ui-muted); padding: 2px; min-width: 24px; min-height: 24px; cursor: pointer; flex-shrink: 0; }
+.ui-multi-select button:disabled { cursor: not-allowed; opacity: .5; }
+.ui-multi-select button:hover:not(:disabled) { color: var(--ui-primary); background: var(--ui-primary-soft); }
+body .ui-multi-select .ui-multi-values input[type=text][role=combobox] { min-width: 64px; width: 80px; flex: 1; min-height: 28px; border: 0; background: transparent; padding: 0 4px; outline: none; box-shadow: none; font-size: 14px; }
+.ui-multi-select[data-disabled] .ui-multi-control { background: #f5f7fa; color: var(--ui-muted); }
+.ui-multi-popup { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; z-index: 5; background: white; border: 1px solid var(--ui-border); border-radius: 4px; padding: 4px; box-shadow: 0 6px 20px #172b4d1a; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; }
+.ui-multi-popup p { padding: 8px 12px; margin: 0; color: var(--ui-muted); }
+.ui-multi-popup [role=option] { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; min-height: 36px; border-radius: 3px; cursor: pointer; overflow-wrap: anywhere; }
+.ui-multi-popup [role=option]:is(:hover,[data-active],[aria-selected=true]) { background: var(--ui-primary-soft); color: var(--ui-primary); }
+.ui-multi-popup [role=option][data-active] { outline: 1px solid var(--ui-primary); outline-offset: -1px; }
+.ui-multi-popup [role=option][aria-disabled=true] { color: #a8afb9; background: transparent; cursor: not-allowed; }
+/* A short dialog must grow with the menu instead of covering its save/cancel row. */
+.post-dialog .ui-multi-popup { position: relative; top: auto; left: auto; right: auto; }
+@media(max-width:600px) { .ui-multi-popup [role=option] { min-height: 44px; } }
+.template-page .form-section > .ui-multi-select { display: grid; grid-template-columns: 100px minmax(0,1fr); gap: 12px; align-items: start; }
+.template-page .form-section > .ui-multi-select > label { width: 100px; text-align: right; padding-top: 6px; margin: 0; }
+.template-page .form-section > .ui-multi-select > .ui-field-error { grid-column: 2; }
+.template-page .form-section > .ui-multi-select .ui-multi-popup { left: 112px; }
+@media(max-width:600px) {
+  .template-page .form-section > .ui-multi-select { grid-template-columns: minmax(0,1fr); gap: 6px; }
+  .template-page .form-section > .ui-multi-select > label { text-align: left; padding-top: 0; }
+  .template-page .form-section > .ui-multi-select > .ui-field-error { grid-column: 1; }
+  .template-page .form-section > .ui-multi-select .ui-multi-popup { left: 0; }
+}
