@@ -30,7 +30,7 @@ test('approval confirmation keeps exact revision and same command on a failed re
   await page.route(`**/api/v1/workflow/leaves/${id}`,route=>route.fulfill({json:{leave,tasks:[{...task,canHandle}],history:[{action:'SUBMIT',actorId:'2',comment:'',createdAt:leave.createdAt}]}}));
   const commands:Record<string,unknown>[]=[];await page.route(`**/api/v1/workflow/leaves/${id}/decision`,route=>{commands.push(route.request().postDataJSON());return route.fulfill({status:409,json:{code:'WORKFLOW_LEAVE_CONFLICT'}});});
   await login(page,'workflow-tasks',['workflow:task:list','workflow:task:handle']);await page.getByRole('button',{name:'详情',exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'请假审批详情'});await dialog.getByRole('button',{name:'批准',exact:true}).click();expect(commands).toHaveLength(0);
+  const dialog=page.getByRole('dialog',{name:'请假审批详情'});await dialog.getByRole('tab',{name:'处理记录',exact:true}).click();await expect(dialog.getByRole('region',{name:'处理记录',exact:true})).toContainText('提交');await dialog.getByRole('tab',{name:'申请与任务',exact:true}).click();await dialog.getByRole('button',{name:'批准',exact:true}).click();expect(commands).toHaveLength(0);
   await dialog.getByLabel('处理意见').fill('同意');await dialog.getByRole('button',{name:'确认批准'}).click();await expect(dialog.getByRole('alert')).toContainText('审批版本已变化');
   await expect(dialog.getByLabel('处理意见')).toBeDisabled();await dialog.getByRole('button',{name:'确认批准'}).click();await expect.poll(()=>commands.length).toBe(2);
   expect(commands[0]).toEqual(commands[1]);expect(commands[0]).toMatchObject({approved:true,command:{expectedRevision:revision,taskId:'task-1',comment:'同意'}});
@@ -45,4 +45,13 @@ test('read-only task details omit all mutation controls and read errors can retr
   await login(page,'workflow-tasks',['workflow:task:list']);await expect(page.getByRole('alert')).toBeVisible();failed=false;await page.getByRole('button',{name:'重试列表'}).click();await page.getByRole('button',{name:'详情',exact:true}).click();
   for(const label of ['领取','批准','拒绝','撤回申请'])await expect(page.getByRole('button',{name:label,exact:true})).toHaveCount(0);
   await expect(page.getByRole('dialog').getByText(leave.reason,{exact:true})).toBeVisible();
+});
+
+test('leave editor cancellation prompts and preserves draft until explicitly discarded',async({page})=>{
+ await page.route('**/api/v1/workflow/leaves/mine?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
+ await login(page,'workflow-requests',['workflow:request:list','workflow:request:submit']);
+ const opener=page.getByRole('button',{name:'发起请假',exact:true});await opener.click();const editor=page.getByRole('dialog',{name:'发起请假',exact:true});
+ await editor.getByLabel('请假事由').fill('保留草稿');await editor.getByRole('button',{name:'取消',exact:true}).click();
+ const prompt=page.getByRole('alertdialog');await expect(prompt).toBeVisible();await prompt.getByRole('button',{name:'继续编辑',exact:true}).click();await expect(editor.getByLabel('请假事由')).toHaveValue('保留草稿');
+ await page.keyboard.press('Escape');await prompt.getByRole('button',{name:'放弃修改',exact:true}).click();await expect(editor).toHaveCount(0);await expect(opener).toBeFocused();
 });

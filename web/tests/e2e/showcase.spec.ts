@@ -51,7 +51,8 @@ test('showcase sections render on desktop and mobile without business API calls'
     }
     if(section==='detail'){
       await expect(page.locator('.detail-field')).toHaveCount(8);
-      for(const label of await page.locator('.detail-field dt').all())expect((await label.boundingBox())!.width).toBe(100);
+      for(const name of ['基本信息','业务与记录']) { await page.getByRole('tab',{name,exact:true}).click();for(const label of await page.locator('.detail-field dt:visible').all())expect((await label.boundingBox())!.width).toBe(100); }
+      await page.getByRole('tab',{name:'基本信息',exact:true}).click();
       await expect(page.locator('.detail-page aside')).toHaveCount(0);
     }
     await page.screenshot({path:info.outputPath(`${section}-desktop.png`),fullPage:true});
@@ -114,4 +115,10 @@ test('showcase editors, permissions and secondary interactions remain usable',as
   await legend.click();await expect(legend).toHaveAttribute('aria-pressed','false');
   await legend.click();await expect(legend).toHaveAttribute('aria-pressed','true');
   await page.goBack();await expect(page).toHaveURL(/#list$/);
+});
+
+test('detail template links tabs and preserves mounted panel contents',async({page})=>{
+ await page.goto('/showcase.html#detail');const first=page.getByRole('tab',{name:'基本信息',exact:true});await first.focus();await first.press('End');
+ const history=page.getByRole('tab',{name:'业务与记录',exact:true});await expect(history).toBeFocused();await expect(page.getByRole('tabpanel',{name:'业务与记录',exact:true})).toBeVisible();await expect(page.getByText('2026-10-09 · 界面验收中',{exact:true})).toBeVisible();
+ await history.press('Home');await expect(first).toBeFocused();await expect(page.getByRole('tabpanel',{name:'基本信息',exact:true})).toContainText('EF-2026-001');await expect(page.locator('.detail-tab-panel')).toHaveCount(2);
 });

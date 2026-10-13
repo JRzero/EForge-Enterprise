@@ -12,10 +12,10 @@
 | 可编辑明细表 | pending | 生成主子表与展示 |
 | 操作确认 / 异步状态 | pending | 复用 ResourceDialog/Feedback |
 | 树列表模板 | in_progress | TreeListLayout 已迁移用户管理与示例，手机侧栏折叠/选择保留及12项相关浏览器通过 |
-| 标准编辑页 / 弹窗 | pending | 共享字段、操作、草稿接口 |
-| 多页签详情模板 | pending | DetailPage 扩展 |
+| 标准编辑页 / 弹窗 | in_progress | EditorForm/Dialog/Page 已接入字典、请假及示例；最终统一回归待执行 |
+| 多页签详情模板 | in_progress | DetailTabs/TabbedDetailPage 已用于详情示例及真实审批布局 |
 | 主子表编辑模板 | pending | 生成器输出适配 |
-| 审批详情模板 | pending | 保持 workflow 局部 |
+| 审批详情模板 | in_progress | ApprovalDetailLayout 保持 workflow 局部并接入请假详情；最终审计待补 |
 | 示例、全量验证、完成审计 | pending | 不以局部检查声称全部完成 |
 
 首批证据：lint/typecheck、131 单元、build 通过（既有大 chunk 提示）；字典/showcase/workspace 18 项、Cron/生成器/个人中心 15 项，以及最终组件/showcase 6 项浏览器通过。覆盖字段描述关联、选项禁用、原生 radio 键盘、实际默认值提交、Tab 键盘切换和草稿保护。此处集合有重叠，不累计成全量数量。
@@ -37,3 +37,8 @@ TreeListLayout 从用户页提取左右槽位，原部门树算法/权限/请求
 关联选择切片：ReferenceSelect 组合固定 EForge Selector 公共接口，受控 string/null，支持搜索、缺失已选记录回显、加载/失败重试/禁用/只读/清空；选项及授权、请求均由调用方提供。已迁移生成器字段字典关联并加入示例客户关联，真实环境生成器脚本适配后尚未执行。没有新增动态表单引擎或复制上游源码。
 
 证据：生成器8项浏览器通过、示例5项通过、最终选择器9项通过（集合独立报告不作为全量验收）；131单元及构建通过，lint/typecheck通过。最初测试错把 EForge 可编辑 Selector 的 button 当 combobox、空结果同时匹配读屏公告，均按实际公开控件语义收紧定位；新增状态夹具后旧多选加载定位限定自身组件，未降低断言。其余模板及完整消费者审计继续 pending。
+
+编辑/详情模板切片：EditorForm 统一提交阻止重复、busy/error及按钮，EditorDialog 组合原 ResourceDialog 焦点/几何/关闭行为，EditorPage 组合 FormPage。业务校验、请求、幂等标识和草稿 hook 留在调用方；字典与请假已迁移，示例表单采用标准编辑页且清空覆盖新增字段。迁移时发现原请假 cancel 调用 discard.confirm 却未渲染 discard.dialog：针对性测试真实失败后补齐挂载，继续编辑保持草稿、明确放弃与焦点返回通过。
+
+DetailTabs 组合共享 PageTabs，稳定自动关联 id、键盘焦点和隐藏但保留挂载的面板；TabbedDetailPage 提供标题/内容/操作框架。详情示例覆盖两页签所有8字段标签。workflow-local ApprovalDetailLayout 通过 summary/tasks/history/actions 槽位接入实际审批，原命令修订号/重复请求/权限判断保持业务端。25 项字典/请假/示例/工作区浏览器通过，详情补充后11项示例/请假通过（有重叠不累计）；不代表真实 SQL 最终验收。
+本轮最终 lint/typecheck、131单元及生产构建全部通过（既有 chunk 提示）；详情桌面截图已目检，页签下划线/信息标签/操作区统一。生成客户端、后端、真实环境最终回归尚未执行，完整目标保持进行中。

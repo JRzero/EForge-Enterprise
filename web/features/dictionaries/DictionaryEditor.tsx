@@ -1,10 +1,9 @@
 import {FormField} from '../../ui/FormField';
 import {NativeInput, Select, TextareaControl} from '../../ui/native';
-import {PageForm} from '../../ui/FormPage';
+import {EditorDialog} from '../../ui/EditorTemplate';
 import {useState, type FormEvent} from 'react';
-import {Button, Input} from '../../ui/controls';
+import {Input} from '../../ui/controls';
 import {useApi} from '../../app/context';
-import {ResourceDialog} from '../../app/components/ResourceDialog';
 import type {DictionaryRequest, EntryRequest, DictionaryValueOption} from '../../generated/api';
 import {errorMessage} from '../../integration/errors';
 import {useDiscardChanges, usePageDraft} from '../../app/useDraftProtection';
@@ -29,7 +28,7 @@ export function DictionaryEditor({initial, statusOptions, code, onClose, onSaved
       close(); onSaved();
     } catch (cause) {setError(errorMessage(cause));} finally {finishSave(); setBusy(false);}
   }
-  return <><ResourceDialog titleId="dictionary-editor-title" busy={busy} onCancel={() => discard.confirm(close)}><h2 id="dictionary-editor-title">{state.id ? '修改' : '新增'}字典{state.kind === 'type' ? '类型' : '数据'}</h2><PageForm noValidate onSubmit={event => {void save(event);}}>
+  return <><EditorDialog title={(state.id?'修改':'新增')+'字典'+(state.kind==='type'?'类型':'数据')} busy={busy} onCancel={()=>discard.confirm(close)} noValidate onSubmit={event=>{void save(event);}} error={error} saveLabel="保存字典">
     {state.kind === 'type' ? <><Input label="字典名称" value={state.form.name} isDisabled={busy} aria-required="true" onChange={name => setState({...state, form: {...state.form, name}})} />
       <Input label="字典类型标识" value={state.form.code} isDisabled={busy} aria-required="true" onChange={code => setState({...state, form: {...state.form, code}})} /></> : <>
       <p>字典类型：{code}</p><Input label="数据标签" value={state.form.label} isDisabled={busy} aria-required="true" onChange={label => setState({...state, form: {...state.form, label}})} />
@@ -42,6 +41,5 @@ export function DictionaryEditor({initial, statusOptions, code, onClose, onSaved
     <label>字典状态<Select aria-label="字典状态" value={state.form.status} disabled={busy} onChange={event => shared({status: event.target.value})}>
       {!statusOptions.some(option => option.value === state.form.status) ? <option value={state.form.status}>{state.form.status}</option> : null}{statusOptions.map((option, index) => <option key={`${option.value}-${index}`} value={option.value}>{option.label}</option>)}</Select></label>
     <label>备注<TextareaControl aria-label="备注" value={state.form.remark ?? ''} maxLength={500} disabled={busy} onChange={event => shared({remark: event.target.value})} /></label>
-    {error ? <p role="alert">{error}</p> : null}<div className="post-row-actions"><Button label="保存字典" type="submit" isDisabled={busy} /><Button label="取消" variant="secondary" isDisabled={busy} onClick={() => discard.confirm(close)} /></div>
-  </PageForm></ResourceDialog>{discard.dialog}</>;
+  </EditorDialog>{discard.dialog}</>;
 }

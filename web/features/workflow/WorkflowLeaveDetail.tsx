@@ -1,3 +1,4 @@
+import {ApprovalDetailLayout} from './ApprovalDetailLayout';
 import {useEffect,useState} from 'react';
 import type {LeaveDetailResponse,LeaveCommandRequest} from '../../generated/api';
 import {useApi,useBootstrap} from '../../app/context';
@@ -40,24 +41,20 @@ export function WorkflowLeaveDetail({id,onClose,onChanged}:{id:string;onClose:()
     <h2 id="workflow-leave-detail-title">请假审批详情</h2>
     {loading?<p role="status">正在读取审批…</p>:null}
     {feedback?<p role="status">{feedback}</p>:null}
-    {data?<>
-      <DetailSection title="申请信息">
+    {data?<ApprovalDetailLayout key={id} summary={<DetailSection title="申请信息">
         <DetailField label="申请编号">{data.leave.id}</DetailField><DetailField label="状态">{leaveStatus(data.leave.status)}</DetailField>
         <DetailField label="申请人编号">{data.leave.initiatorId}</DetailField><DetailField label="开始日期">{data.leave.startDate}</DetailField>
         <DetailField label="结束日期">{data.leave.endDate}</DetailField><DetailField label="请假事由">{data.leave.reason}</DetailField>
         <DetailField label="提交时间">{new Date(data.leave.createdAt).toLocaleString('zh-CN')}</DetailField><DetailField label="流程版本标识">{data.leave.releaseId}</DetailField>
-      </DetailSection>
-      <DetailSection title="当前任务">
+      </DetailSection>} tasks={<DetailSection title="当前任务">
         {data.tasks.length?data.tasks.map(task=><DetailField label={task.name||task.key} key={task.id}>{task.assignee?`已领取 · 账号 ${task.assignee}`:'待领取'}
           {pending&&task.canHandle?<PermissionGate permission="workflow:task:handle"><div className="post-row-actions">
             {!task.assignee?<Button label="领取" variant="primary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('CLAIM',task.id)}/>:null}
             {task.assignee===bootstrap.user.id?<><Button label="批准" variant="primary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('APPROVE',task.id)}/><Button label="拒绝" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('REJECT',task.id)}/></>:null}
           </div></PermissionGate>:null}
         </DetailField>):<DetailField label="任务">流程已结束</DetailField>}
-      </DetailSection>
-      <section aria-label="处理记录"><h2>处理记录</h2><ol className="workflow-history">{data.history.map((event,index)=><li key={index}><strong>{event.action==='SUBMIT'?'提交':actionLabels[event.action as Action]??event.action}</strong><span>账号 {event.actorId} · {new Date(event.createdAt).toLocaleString('zh-CN')}</span>{event.comment?<p>{event.comment}</p>:null}</li>)}</ol></section>
-      {pending&&data.leave.initiatorId===bootstrap.user.id?<PermissionGate permission="workflow:request:withdraw"><Button label="撤回申请" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('WITHDRAW')}/></PermissionGate>:null}
-    </>:null}
+      </DetailSection>} history={<section aria-label="处理记录"><h2>处理记录</h2><ol className="workflow-history">{data.history.map((event,index)=><li key={index}><strong>{event.action==='SUBMIT'?'提交':actionLabels[event.action as Action]??event.action}</strong><span>账号 {event.actorId} · {new Date(event.createdAt).toLocaleString('zh-CN')}</span>{event.comment?<p>{event.comment}</p>:null}</li>)}</ol></section>} actions={pending&&data.leave.initiatorId===bootstrap.user.id?<PermissionGate permission="workflow:request:withdraw"><Button label="撤回申请" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('WITHDRAW')}/></PermissionGate>:null}
+    />:null}
     {selected?<section className="workflow-confirm" aria-label="确认审批操作"><h2>确认{actionLabels[selected.action]}</h2>
       <p>{selected.action==='WITHDRAW'?'撤回后将结束此申请的当前流程。':`将${actionLabels[selected.action]}当前审批任务。`}</p>
       <label>处理意见<TextareaControl aria-label="处理意见" rows={3} maxLength={500} value={selected.command.comment} disabled={busy||selected.attempted} onChange={event=>setSelected({...selected,command:{...selected.command,comment:event.target.value}})}/></label>

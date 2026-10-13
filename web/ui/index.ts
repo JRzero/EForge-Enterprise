@@ -42,3 +42,9 @@ export {DictionaryTag} from '../app/components/DictionaryTag';
 
 export {ReferenceSelect} from './ReferenceSelect';
 export type {ReferenceSelectProps} from './ReferenceSelect';
+
+export {EditorForm,EditorDialog,EditorPage} from './EditorTemplate';
+export type {EditorFormProps} from './EditorTemplate';
+
+export {DetailTabs,TabbedDetailPage} from './TabbedDetailPage';
+export type {DetailTab,DetailTabsProps} from './TabbedDetailPage';
