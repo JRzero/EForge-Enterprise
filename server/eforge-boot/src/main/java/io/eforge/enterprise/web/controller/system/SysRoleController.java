@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -105,12 +106,10 @@ public class SysRoleController extends BaseController
     @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @PostMapping
     @Transactional
-    public AjaxResult add(@Validated @RequestBody SysRole role)
+    public AjaxResult add(@Validated @RequestBody SysRole input)
     {
         lockIdentityMutations();
-        // Create never accepts another role's identity or existing grant allowance.
-        role.setRoleId(null);
-        role.setMenuIds(validateMenuGrants(role.getMenuIds(), null));
+        SysRole role = compatibleRole(() -> roleAssignments.legacyWrite(input, true));
         if (!roleService.checkRoleNameUnique(role))
         {
             return error("新增角色'" + role.getRoleName() + "'失败，角色名称已存在");
@@ -131,11 +130,10 @@ public class SysRoleController extends BaseController
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping
     @Transactional
-    public AjaxResult edit(@Validated @RequestBody SysRole role)
+    public AjaxResult edit(@Validated @RequestBody SysRole input)
     {
         lockIdentityMutations();
-        if (role.getRoleId() == null || role.getRoleId() < 1) throw new ServiceException("角色编号无效", 400);
-        role.setMenuIds(validateMenuGrants(role.getMenuIds(), role.getRoleId()));
+        SysRole role = compatibleRole(() -> roleAssignments.legacyWrite(input, false));
         if (!roleService.checkRoleNameUnique(role))
         {
             return error("修改角色'" + role.getRoleName() + "'失败，角色名称已存在");
@@ -162,11 +160,11 @@ public class SysRoleController extends BaseController
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/dataScope")
     @Transactional
-    public AjaxResult dataScope(@RequestBody SysRole role)
+    public AjaxResult dataScope(@RequestBody SysRole input)
     {
         lockIdentityMutations();
-        roleService.checkRoleAllowed(role);
-        roleService.checkRoleDataScope(role.getRoleId());
+        SysRole role = compatibleRole(() -> roleAssignments.legacyScope(input));
+        role.setUpdateBy(getUsername());
         int rows = roleService.authDataScope(role);
         if (rows > 0) sessions.refreshAfterCommit(Set.copyOf(selections.userIds(role.getRoleId())));
         return toAjax(rows);
@@ -179,11 +177,10 @@ public class SysRoleController extends BaseController
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
     @Transactional
-    public AjaxResult changeStatus(@RequestBody SysRole role)
+    public AjaxResult changeStatus(@RequestBody SysRole input)
     {
         lockIdentityMutations();
-        roleService.checkRoleAllowed(role);
-        roleService.checkRoleDataScope(role.getRoleId());
+        SysRole role = compatibleRole(() -> roleAssignments.legacyStatus(input));
         role.setUpdateBy(getUsername());
         int rows = roleService.updateRoleStatus(role);
         if (rows > 0) sessions.refreshAfterCommit(Set.copyOf(selections.userIds(role.getRoleId())));
@@ -298,11 +295,11 @@ public class SysRoleController extends BaseController
         if (mutations.lockRoot() == null) throw new ServiceException("根部门不存在", 409);
     }
 
-    private Long[] validateMenuGrants(Long[] menuIds, Long roleId)
+    private SysRole compatibleRole(Supplier<SysRole> action)
     {
         try
         {
-            return roleAssignments.validateLegacyMenuGrants(menuIds, roleId);
+            return action.get();
         }
         catch (ApiFailure failure)
         {

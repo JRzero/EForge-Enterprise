@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.CredentialsExpiredException;
+import io.eforge.enterprise.common.exception.ApiFailure;
+import io.eforge.enterprise.framework.web.service.AuthorizationSnapshotService;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.domain.entity.SysRole;
 import io.eforge.enterprise.common.core.domain.model.LoginUser;
@@ -34,7 +35,8 @@ class BootstrapServiceTest
     @BeforeEach void setup()
     {
         when(transactions.getTransaction(any())).thenAnswer(invocation -> new org.springframework.transaction.support.SimpleTransactionStatus());
-        service = new BootstrapService(users, menus, permissions, tokens, new NavigationProjection(), passwords, transactions);
+        service = new BootstrapService(new AuthorizationSnapshotService(users, menus, permissions, transactions),
+                menus, tokens, new NavigationProjection(), passwords);
         user = new SysUser();
         user.setUserId(2L); user.setDeptId(105L); user.setUserName("ry"); user.setNickName("Display name");
         user.setStatus("0"); user.setDelFlag("0");
@@ -70,7 +72,7 @@ class BootstrapServiceTest
         for (String status : List.of("1", "0"))
         {
             user.setStatus(status); user.setDelFlag(status.equals("0") ? "2" : "0");
-            assertThrows(CredentialsExpiredException.class, () -> service.bootstrap(session));
+            assertEquals(401, assertThrows(ApiFailure.class, () -> service.bootstrap(session)).status());
         }
         verify(tokens, times(2)).delLoginUser("session-id");
         verifyNoInteractions(menus, permissions); verify(tokens, never()).setLoginUser(any());
@@ -78,12 +80,13 @@ class BootstrapServiceTest
     @Test void missingAccountInvalidatesSession()
     {
         when(users.selectUserById(2L)).thenReturn(null);
-        assertThrows(CredentialsExpiredException.class, () -> service.bootstrap(session));
+        assertEquals(401, assertThrows(ApiFailure.class, () -> service.bootstrap(session)).status());
         verify(tokens).delLoginUser("session-id");
     }
     @Test void administratorKeepsUpstreamWildcardAndDisplayNameFallback()
     {
         user.setUserId(1L); user.setNickName("");
+        reset(users); session.setUserId(1L); when(users.selectUserById(1L)).thenReturn(user);
         when(menus.selectActiveRoles(1L)).thenReturn(List.of());
         when(menus.selectGrantedMenus(1L, true)).thenReturn(List.of());
         when(permissions.getMenuPermission(user)).thenReturn(Set.of("*:*:*"));
@@ -101,7 +104,7 @@ class BootstrapServiceTest
     }
     @Test void consoleReadsStillInvalidateDisabledAccountsWithoutRecreatingSessions()
     {
-        user.setStatus("1");assertThrows(CredentialsExpiredException.class,()->service.refreshConsoleAuthorization(session));
+        user.setStatus("1");assertEquals(401,assertThrows(ApiFailure.class,()->service.refreshConsoleAuthorization(session)).status());
         verify(tokens).delLoginUser("session-id");verify(tokens,never()).setLoginUser(any());verifyNoInteractions(menus,permissions);
     }
     @Test void avatarUsesFreshAccountAndRejectsUnsafeStoredPaths()
@@ -136,9 +139,23 @@ class BootstrapServiceTest
     {
         when(menus.selectActiveRoles(2L)).thenReturn(List.of());when(menus.selectGrantedMenus(2L,false)).thenReturn(List.of());
         service.bootstrap(session);
-        var sequence=inOrder(transactions,passwords);
+        var sequence=inOrder(transactions,tokens,passwords);
         sequence.verify(transactions).getTransaction(argThat(definition->definition.isReadOnly() && definition.getIsolationLevel()==org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ));
-        sequence.verify(transactions).commit(any());sequence.verify(passwords).read(null);
+        sequence.verify(transactions).commit(any());sequence.verify(tokens).setLoginUser(session);sequence.verify(passwords).read(null);
         clearInvocations(passwords);service.refreshConsoleAuthorization(session);verifyNoInteractions(passwords);
+    }
+
+    @Test void failedNavigationReadOrReadCommitCannotPublishPartialSessionOrRedisContent()
+    {
+        when(menus.selectActiveRoles(2L)).thenReturn(List.of());
+        when(menus.selectGrantedMenus(2L,false)).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("private SQL"));
+        assertEquals(503,assertThrows(ApiFailure.class,()->service.bootstrap(session)).status());
+        assertEquals(103L,session.getDeptId());assertEquals(Set.of("stale:permission"),session.getPermissions());
+        verifyNoInteractions(tokens,passwords);
+        doReturn(List.of()).when(menus).selectGrantedMenus(2L,false);
+        doThrow(new org.springframework.transaction.TransactionSystemException("private driver")).when(transactions).commit(any());
+        assertEquals(503,assertThrows(ApiFailure.class,()->service.bootstrap(session)).status());
+        assertEquals(103L,session.getDeptId());assertEquals(Set.of("stale:permission"),session.getPermissions());
+        verifyNoInteractions(tokens,passwords);
     }
 }

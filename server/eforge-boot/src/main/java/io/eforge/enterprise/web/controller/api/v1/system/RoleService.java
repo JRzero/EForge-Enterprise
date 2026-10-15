@@ -84,16 +84,8 @@ public class RoleService
     {
         Set<Long> affected=new HashSet<>();mutate(()-> {
             SysRole existing=require(identifier(id),true);affected.addAll(selections.userIds(existing.getRoleId()));
-            Long[] ids=identifiers(request.departmentIds());
-            if(!"2".equals(request.mode()) && ids.length>0) throw invalid();
-            for(Long departmentId:ids)
-            {
-                try { departments.checkDeptDataScope(departmentId); } catch(ServiceException exception) { throw denied(); }
-                SysDept filter=new SysDept();filter.setDeptId(departmentId);
-                if(departments.selectDeptList(filter).isEmpty()) throw new ApiFailure(404,"ROLE_DEPARTMENT_NOT_FOUND","Department does not exist.");
-            }
-            SysRole patch=new SysRole(existing.getRoleId());patch.setDataScope(request.mode());patch.setDeptIds(ids);
-            patch.setMenuCheckStrictly(existing.isMenuCheckStrictly());patch.setDeptCheckStrictly(request.departmentLinked());patch.setUpdateBy(SecurityUtils.getUsername());
+            SysRole patch=scopePatch(existing,request.mode(),request.departmentLinked(),identifiers(request.departmentIds()));
+            patch.setUpdateBy(SecurityUtils.getUsername());
             roles.authDataScope(patch);return null;
         },affected);
     }
@@ -148,6 +140,56 @@ public class RoleService
         return validateMenuGrants(menuIds,existing,selections.menus());
     }
 
+    /** Compatibility writers call these projections only after taking the shared root lock. */
+    public SysRole legacyWrite(SysRole input,boolean create)
+    {
+        SysRole existing=create ? null : legacyTarget(input);
+        Long[] menuIds=validateMenuGrants(input.getMenuIds(),existing,selections.menus());
+        SysRole patch=new SysRole(existing==null ? null : existing.getRoleId());
+        patch.setRoleName(input.getRoleName());patch.setRoleKey(input.getRoleKey());patch.setRoleSort(input.getRoleSort());
+        patch.setStatus(input.getStatus());patch.setRemark(input.getRemark());patch.setMenuCheckStrictly(input.isMenuCheckStrictly());
+        patch.setMenuIds(menuIds);patch.setDataScope(existing==null ? "1" : existing.getDataScope());
+        patch.setDeptCheckStrictly(existing==null || existing.isDeptCheckStrictly());
+        return patch;
+    }
+
+    public SysRole legacyStatus(SysRole input)
+    {
+        SysRole existing=legacyTarget(input);
+        if(!Set.of("0","1").contains(Objects.toString(input.getStatus(),""))) throw invalid();
+        SysRole patch=new SysRole(existing.getRoleId());patch.setStatus(input.getStatus());preserveFlags(patch,existing);
+        return patch;
+    }
+
+    public SysRole legacyScope(SysRole input)
+    {
+        return scopePatch(legacyTarget(input),input.getDataScope(),input.isDeptCheckStrictly(),input.getDeptIds());
+    }
+
+    private SysRole legacyTarget(SysRole input)
+    {
+        if(input.getRoleId()==null || input.getRoleId()<1) throw invalid();
+        return require(input.getRoleId(),true);
+    }
+
+    private SysRole scopePatch(SysRole existing,String mode,boolean departmentLinked,Long[] requested)
+    {
+        if(mode==null || !mode.matches("[1-5]") || requested==null || requested.length>1000) throw invalid();
+        Long[] ids=requested.clone();
+        if(Arrays.stream(ids).anyMatch(id->id==null || id<1) || new HashSet<>(Arrays.asList(ids)).size()!=ids.length
+                || (!"2".equals(mode) && ids.length>0)) throw invalid();
+        // Check the entire selection before authDataScope can delete any previous links.
+        for(Long departmentId:ids)
+        {
+            try { departments.checkDeptDataScope(departmentId); } catch(ServiceException exception) { throw denied(); }
+            SysDept filter=new SysDept();filter.setDeptId(departmentId);
+            if(departments.selectDeptList(filter).isEmpty()) throw new ApiFailure(404,"ROLE_DEPARTMENT_NOT_FOUND","Department does not exist.");
+        }
+        SysRole patch=new SysRole(existing.getRoleId());patch.setDataScope(mode);patch.setDeptIds(ids);
+        patch.setMenuCheckStrictly(existing.isMenuCheckStrictly());patch.setDeptCheckStrictly(departmentLinked);
+        return patch;
+    }
+
     private Long[] validateMenuGrants(Long[] menuIds,SysRole existing,List<NavigationMenu> all)
     {
         if(menuIds==null || menuIds.length>2000
@@ -194,7 +236,7 @@ public class RoleService
         T result;
         try { result=transaction.execute(status->{if(mutations.lockRoot()==null) throw conflict("DEPARTMENT_ROOT_MISSING");return action.get();}); }
         catch(DuplicateKeyException exception) { throw conflict("ROLE_CONFLICT"); }
-        sessions.refresh(affected);return result;
+        sessions.refreshAfterCommit(affected);return result;
     }
     private static List<String> keys(List<Long> ids,List<NavigationMenu> rows) { Set<Long> selected=new HashSet<>(ids);return rows.stream().filter(row->selected.contains(row.menuId())).map(NavigationMenu::menuKey).toList(); }
     private static List<String> strings(List<Long> ids) { return ids.stream().map(Object::toString).toList(); }

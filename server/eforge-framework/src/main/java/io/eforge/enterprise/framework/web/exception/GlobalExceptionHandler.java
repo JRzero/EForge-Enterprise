@@ -3,7 +3,9 @@ package io.eforge.enterprise.framework.web.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.TransactionException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +30,33 @@ import io.eforge.enterprise.common.utils.html.EscapeUtil;
 public class GlobalExceptionHandler
 {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /** Explicit canonical-service failure at a compatibility HTTP boundary. */
+    @ExceptionHandler(io.eforge.enterprise.common.exception.ApiFailure.class)
+    public org.springframework.http.ResponseEntity<AjaxResult> handleApiFailure(
+            io.eforge.enterprise.common.exception.ApiFailure failure, HttpServletRequest request)
+    {
+        ApiDiagnostics.reportServerError(log, failure, failure.status(), request);
+        var body = AjaxResult.error(failure.status(), failure.getMessage());
+        body.put("requestId", ApiDiagnostics.requestId(request));
+        return org.springframework.http.ResponseEntity.status(failure.status() == 401 ? 200 : failure.status())
+                .header("Cache-Control", "no-store").header(ApiDiagnostics.REQUEST_ID_HEADER, ApiDiagnostics.requestId(request))
+                .body(body);
+    }
+
+    /** Preserve the legacy error envelope without exposing SQL or transaction diagnostics. */
+    @ExceptionHandler({DataAccessException.class, TransactionException.class})
+    public org.springframework.http.ResponseEntity<AjaxResult> handleStorageFailure(
+            RuntimeException failure, HttpServletRequest request)
+    {
+        ApiDiagnostics.reportServerError(log, failure, HttpStatus.ERROR, request);
+        String requestId = ApiDiagnostics.requestId(request);
+        AjaxResult body = AjaxResult.error(HttpStatus.ERROR, "The request could not be completed.");
+        body.put("requestId", requestId);
+        return org.springframework.http.ResponseEntity.ok()
+                .header("Cache-Control", "no-store").header(ApiDiagnostics.REQUEST_ID_HEADER, requestId)
+                .body(body);
+    }
 
     /**
      * 权限校验异常

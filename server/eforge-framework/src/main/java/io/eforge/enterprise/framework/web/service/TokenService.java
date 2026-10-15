@@ -19,6 +19,8 @@ import io.eforge.enterprise.common.utils.ip.AddressUtils;
 import io.eforge.enterprise.common.utils.ip.IpUtils;
 import io.eforge.enterprise.common.utils.uuid.IdUtils;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.eforge.enterprise.common.exception.ApiFailure;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +56,9 @@ public class TokenService
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private AuthorizationSnapshotService authorization;
+
     /**
      * 获取用户身份信息
      * 
@@ -65,19 +70,44 @@ public class TokenService
         String token = getToken(request);
         if (StringUtils.isNotEmpty(token))
         {
+            String uuid;
             try
             {
                 Claims claims = parseToken(token);
-                // 解析对应的权限以及用户信息
-                String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                return getLoginUserByToken(uuid);
+                Object identity = claims.get(Constants.LOGIN_USER_KEY);
+                if (!(identity instanceof String value) || value.isBlank()) return null;
+                uuid = value;
             }
-            catch (Exception e)
+            catch (JwtException | IllegalArgumentException invalidCredential)
             {
-                log.error("获取用户信息异常'{}'", e.getMessage());
+                return null;
             }
+            // A storage outage is not an invalid JWT. Keep this locator free of
+            // SQL so logout can remove a valid session during an IAM SQL outage.
+            try { return getLoginUserByToken(uuid); }
+            catch (RuntimeException failure) { throw unavailable(failure); }
         }
         return null;
+    }
+
+    /** Required before a located session becomes a protected-request principal. */
+    public void refreshAuthorization(LoginUser session)
+    {
+        try { authorization.refresh(session); }
+        catch (ApiFailure failure)
+        {
+            // Successful invalidation stays revoked after re-enable. A Redis
+            // failure propagates as 503; it must never be reported as successful revocation.
+            if (failure.status() == 401 && session != null) delLoginUser(session.getToken());
+            throw failure;
+        }
+    }
+
+    private static ApiFailure unavailable(RuntimeException failure)
+    {
+        ApiFailure safe = new ApiFailure(503, "SESSION_STORE_UNAVAILABLE", "The login session could not be verified.");
+        safe.initCause(failure);
+        return safe;
     }
 
     /**
@@ -141,7 +171,8 @@ public class TokenService
         if (StringUtils.isNotEmpty(token))
         {
             String userKey = getTokenKey(token);
-            redisCache.deleteObject(userKey);
+            try { redisCache.deleteObject(userKey); }
+            catch (RuntimeException failure) { throw unavailable(failure); }
         }
     }
 
@@ -153,6 +184,7 @@ public class TokenService
      */
     public String createToken(LoginUser loginUser)
     {
+        authorization.confirmLogin(loginUser);
         String token = IdUtils.fastUUID();
         loginUser.setToken(token);
         setUserAgent(loginUser);
@@ -164,7 +196,10 @@ public class TokenService
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
         String jwt = createToken(claims);
         byte[] value = redisCache.serializeCacheObject(loginUser);
-        if (!redisCache.createExpiringCacheObject(getTokenKey(token), value, expireTime * MILLIS_MINUTE))
+        boolean created;
+        try { created = redisCache.createExpiringCacheObject(getTokenKey(token), value, expireTime * MILLIS_MINUTE); }
+        catch (RuntimeException failure) { throw unavailable(failure); }
+        if (!created)
         {
             throw new IllegalStateException("Could not create a unique login session");
         }
@@ -205,8 +240,10 @@ public class TokenService
         {
             return;
         }
-        long ttl = redisCache.renewExpiringCacheObject(getTokenKey(loginUser.getToken()),
-                expireTime * MILLIS_MINUTE, thresholdMillis);
+        long ttl;
+        try { ttl = redisCache.renewExpiringCacheObject(getTokenKey(loginUser.getToken()),
+                expireTime * MILLIS_MINUTE, thresholdMillis); }
+        catch (RuntimeException failure) { throw unavailable(failure); }
         if (ttl > 0)
         {
             loginUser.setExpireTime(System.currentTimeMillis() + ttl);

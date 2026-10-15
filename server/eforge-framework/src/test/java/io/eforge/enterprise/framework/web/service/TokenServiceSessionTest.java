@@ -45,6 +45,8 @@ class TokenServiceSessionTest
             }
         };
         ReflectionTestUtils.setField(tokens, "redisCache", cache);
+        // This fixture isolates Redis CAS; actual SQL proof checks have their own reader tests/probe.
+        ReflectionTestUtils.setField(tokens, "authorization", org.mockito.Mockito.mock(AuthorizationSnapshotService.class));
         ReflectionTestUtils.setField(tokens, "header", "Authorization");
         ReflectionTestUtils.setField(tokens, "secret", "dGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQ=");
         ReflectionTestUtils.setField(tokens, "expireTime", 30);

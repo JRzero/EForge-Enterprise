@@ -81,13 +81,13 @@ class MenuControllerTest
     @Test void invalidFiltersAndLongOverflowReturnProblems() throws Exception
     {mvc.perform(get(PATH+"?status=2")).andExpect(status().isBadRequest());mvc.perform(get(PATH+"/9223372036854775808")).andExpect(status().isBadRequest());mvc.perform(get(PATH+"/999")).andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("MENU_NOT_FOUND"));}
     @Test void updateClearsOptionalFieldsAndRefreshesOnlyAfterCommit() throws Exception
-    {mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(editBody())).andExpect(status().isNoContent());var order=inOrder(mapper,transactions,sessions);order.verify(mapper).update(eq(2L),eq(1L),eq("system-users"),eq("system-users"),eq("Users"),eq(2),eq("C"),eq("0"),eq("0"),eq("system:user:list"),eq("1"),eq("user"),eq(""),eq(""),eq(""),eq("0"),eq("operator"));order.verify(transactions).commit(any());order.verify(sessions).refresh(Set.of(2L,3L));}
+    {mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(editBody())).andExpect(status().isNoContent());var order=inOrder(mapper,transactions,sessions);order.verify(mapper).update(eq(2L),eq(1L),eq("system-users"),eq("system-users"),eq("Users"),eq(2),eq("C"),eq("0"),eq("0"),eq("system:user:list"),eq("1"),eq("user"),eq(""),eq(""),eq(""),eq("0"),eq("operator"));order.verify(transactions).commit(any());order.verify(sessions).refreshAfterCommit(Set.of(2L,3L));}
     @Test void stableKeysCyclesAndLeafTypeConversionAreRejected() throws Exception
     {
         mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(editBody().replace("system-users","renamed"))).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("MENU_KEY_IMMUTABLE"));
         mvc.perform(put(PATH+"/1").contentType(MediaType.APPLICATION_JSON).content(BODY.replace("new-group","system").replace("\"0\",\"sort\"","\"2\",\"sort\""))).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("MENU_CYCLE"));
         mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(editBody().replace("ROUTE","FUNCTION").replace("\"routeId\":\"system-users\",",""))).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("MENU_HAS_CHILDREN"));
-        verify(mapper,never()).update(any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any());verify(sessions,never()).refresh(any());
+        verify(mapper,never()).update(any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any(),any());verify(sessions,never()).refreshAfterCommit(any());
     }
     @Test void registeredRoutesMustMatchPermissionsAndNeverUseInternalRoutes() throws Exception
     {

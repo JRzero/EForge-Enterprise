@@ -40,21 +40,32 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException
     {
-        LoginUser loginUser = tokenService.getLoginUser(request);
         var console = consoleAuthenticator.getIfAvailable();
         boolean consoleRequest = console != null && console.matches(request);
-        if (consoleRequest)
+        if (consoleRequest) response = new DiagnosticResponse(response);
+        try
         {
-            response = new DiagnosticResponse(response);
-            try { loginUser = console.authenticate(request, loginUser); }
-            catch (ApiFailure failure) { apiProblems.getObject().reject(request, response, failure); return; }
+            LoginUser loginUser = tokenService.getLoginUser(request);
+            if (consoleRequest) loginUser = console.authenticate(request, loginUser);
+            if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
+            {
+                if (!consoleRequest)
+                {
+                    tokenService.refreshAuthorization(loginUser);
+                    tokenService.verifyToken(loginUser);
+                }
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
         }
-        if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
+        catch (ApiFailure failure)
         {
-            if (!consoleRequest) tokenService.verifyToken(loginUser);
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            SecurityContextHolder.clearContext();
+            if (consoleRequest || ApiSecurityProblemHandler.isApiRequest(request))
+                apiProblems.getObject().reject(request, response, failure);
+            else apiProblems.getObject().rejectLegacy(request, response, failure);
+            return;
         }
         chain.doFilter(request, response);
     }

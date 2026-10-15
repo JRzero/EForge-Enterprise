@@ -19,8 +19,6 @@ import io.eforge.enterprise.common.utils.DateUtils;
 import io.eforge.enterprise.common.utils.SecurityUtils;
 import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.framework.web.service.SysLoginService;
-import io.eforge.enterprise.framework.web.service.SysPermissionService;
-import io.eforge.enterprise.framework.web.service.TokenService;
 import io.eforge.enterprise.system.service.ISysConfigService;
 import io.eforge.enterprise.system.service.ISysMenuService;
 
@@ -37,12 +35,6 @@ public class SysLoginController
 
     @Autowired
     private ISysMenuService menuService;
-
-    @Autowired
-    private SysPermissionService permissionService;
-
-    @Autowired
-    private TokenService tokenService;
 
     @Autowired
     private ISysConfigService configService;
@@ -75,14 +67,14 @@ public class SysLoginController
         LoginUser loginUser = SecurityUtils.getLoginUser();
         SysUser user = loginUser.getUser();
         // 角色集合
-        Set<String> roles = permissionService.getRolePermission(user);
+        Set<String> roles = new java.util.TreeSet<>();
+        if (user.isAdmin()) roles.add(Constants.SUPER_ADMIN);
+        else if (user.getRoles() != null) user.getRoles().stream()
+                .map(role -> role.getRoleKey()).filter(java.util.Objects::nonNull)
+                .flatMap(key -> java.util.Arrays.stream(key.trim().split(","))).forEach(roles::add);
         // 权限集合
-        Set<String> permissions = permissionService.getMenuPermission(user);
-        if (!loginUser.getPermissions().equals(permissions))
-        {
-            loginUser.setPermissions(permissions);
-            tokenService.setLoginUser(loginUser);
-        }
+        // The JWT boundary already read roles/permissions/department in one primary snapshot.
+        Set<String> permissions = loginUser.getPermissions();
         AjaxResult ajax = AjaxResult.success();
         ajax.put("user", user);
         ajax.put("roles", roles);

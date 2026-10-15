@@ -1,8 +1,8 @@
 # 持久授权版本与会话一致性方案
 
-状态：**设计待实现**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H01。本文依据当前源码只读核查，不代表实现、故障复现或验收已经完成；H01 应独立于诊断和组件切片交付。
+状态：**历史候选方案，未采用全局 revision 实现**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H01。实际采用的主库授权快照方案见 [ADR 0020](adr/0020-primary-authorization-snapshots.md)，验证状态见 [安全审查](security-review-authorization-snapshots.md)。本文保留设计时的代码问题和候选测试矩阵，文中“当前”指设计时基线，不代表修复后的源码。
 
-本文保留全局 revision 的初始候选设计与完整测试矩阵，便于比较和追溯。独立审查后的下一验证方向是每次受保护请求读取短事务 MASTER 完整授权快照，详见末尾“独立审查与待决策”；全局 revision 仅作为成本证据支持后的备选，当前没有运行实现或真实故障证据。
+本文保留全局 revision 的初始候选设计与完整测试矩阵，便于比较和追溯。独立审查后已选择每次受保护请求读取短事务 MASTER 完整授权快照，并完成首轮真实故障红绿验证。全局 revision 仅作为成本证据支持后的备选，未增加版本表或版本字段；完整交付仍以任务清单的最终本地与精确云端证据为准。
 
 ## 问题与保证范围
 

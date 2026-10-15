@@ -245,7 +245,7 @@ class LegacyIdentitySecurityTest
         verify(roles).insertAuthUsers(eq(2L), aryEq(new Long[] {3L, 4L}));
         var order = inOrder(transactions, sessions);
         order.verify(transactions).commit(any());
-        order.verify(sessions).refresh(Set.of(3L, 4L));
+        order.verify(sessions).refreshAfterCommit(Set.of(3L, 4L));
         mvc.perform(allocation("cancel", "2", "2")).andExpect(jsonPath("$.code").value(200));
         verify(roles).deleteAuthUsers(eq(2L), aryEq(new Long[] {2L}));
         verify(roles, never()).deleteAuthUser(any());

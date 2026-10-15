@@ -102,7 +102,7 @@ class RoleControllerTest
     {
         mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(BODY)).andExpect(status().isNoContent());
         verify(roles).updateRole(argThat(role->"2".equals(role.getDataScope()) && role.isDeptCheckStrictly() && "".equals(role.getRemark())));
-        var order=inOrder(transactions,sessions);order.verify(transactions).commit(any());order.verify(sessions).refresh(Set.of(2L));
+        var order=inOrder(transactions,sessions);order.verify(transactions).commit(any());order.verify(sessions).refreshAfterCommit(Set.of(2L));
         mvc.perform(put(PATH+"/2/status").contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"1\"}")).andExpect(status().isNoContent());
         verify(roles).updateRoleStatus(argThat(role->role.isMenuCheckStrictly() && role.isDeptCheckStrictly()));
     }
@@ -131,7 +131,7 @@ class RoleControllerTest
     @Test void contactlessDuplicateFailureNeverRefreshesSessionsOrLeaksSql() throws Exception
     {
         when(roles.updateRole(any())).thenThrow(new org.springframework.dao.DuplicateKeyException("private sql"));
-        mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(BODY)).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("ROLE_CONFLICT"));verify(sessions,never()).refresh(any());verify(transactions).rollback(any());
+        mvc.perform(put(PATH+"/2").contentType(MediaType.APPLICATION_JSON).content(BODY)).andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("ROLE_CONFLICT"));verify(sessions,never()).refreshAfterCommit(any());verify(transactions).rollback(any());
     }
     @Test void scopeMutationChecksEveryDepartmentAndPreservesMenuFlag() throws Exception
     {

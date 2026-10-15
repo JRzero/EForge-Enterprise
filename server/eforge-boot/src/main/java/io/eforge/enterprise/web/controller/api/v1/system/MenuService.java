@@ -85,6 +85,34 @@ public class MenuService
             legacy.updateMenuSort(request.items().stream().map(MenuSortItem::id).toArray(String[]::new),request.items().stream().map(item->item.sort().toString()).toArray(String[]::new));return null;
         },new HashSet<>());
     }
+
+    /** Compatibility writers call this after acquiring the shared root-lock transaction. */
+    public void validateLegacyWrite(SysMenu menu,boolean create)
+    {
+        var rows=mapper.rows();var available=available();
+        var old=create ? null : require(identifier(Objects.toString(menu.getMenuId(),"")),rows,available);
+        Long parent=menu.getParentId()==null ? (old==null ? 0L : old.parentId()) : menu.getParentId();
+        if(parent!=0) {
+            // An unchanged parent may be outside the actor's grants, as on the canonical boundary.
+            if(old!=null && old.parentId().equals(parent)) {
+                if(rows.stream().noneMatch(row->row.id().equals(parent))) throw invalid();
+            } else require(parent,rows,available);
+        }
+        // The legacy controller retains its original direct-self validation message.
+        if(old==null || !old.id().equals(parent)) validateHierarchy(parent,old,rows);
+        // Legacy mapper null means no assignment, while an empty string explicitly clears the grant.
+        String next=menu.getPerms()==null && old!=null ? clean(old.permission()) : clean(menu.getPerms());
+        validatePermissionGrant(next,old);
+    }
+
+    /** Validate the whole compatibility delete/sort selection before any mapper write. */
+    public void validateLegacyTargets(String[] ids)
+    {
+        if(ids==null || ids.length==0) throw invalid();
+        var rows=mapper.rows();var available=available();
+        for(String id:ids) require(identifier(id),rows,available);
+    }
+
     private void validate(MenuWriteRequest request,MenuMutationMapper.Row old,List<MenuMutationMapper.Row> rows,Set<Long> available)
     {
         Long parent=identifier(request.parentId());
@@ -94,9 +122,7 @@ public class MenuService
             var owner=old!=null && old.parentId().equals(parent) ? rows.stream().filter(row->row.id().equals(parent)).findFirst().orElseThrow(()->invalid()) : require(parent,rows,available);
             if(type(owner)==Type.FUNCTION || type(owner)==Type.EXTERNAL) throw invalid();
         }
-        Map<Long,Long> parents=new HashMap<>();rows.forEach(row->parents.put(row.id(),row.parentId()));
-        parents.put(old==null ? -1L : old.id(),parent);
-        for(Long id:parents.keySet()) {Set<Long> seen=new HashSet<>();Long cursor=id;while(parents.containsKey(cursor)) {if(!seen.add(cursor) || seen.size()>64) throw conflict("MENU_CYCLE");cursor=parents.get(cursor);} }
+        validateHierarchy(parent,old,rows);
         boolean children=old!=null && rows.stream().anyMatch(row->row.parentId().equals(old.id()));
         if(children && (request.type()==Type.FUNCTION || request.type()==Type.EXTERNAL)) throw conflict("MENU_HAS_CHILDREN");
         if(rows.stream().anyMatch(row->(old==null || !row.id().equals(old.id())) && request.key().equals(row.key()))) throw conflict("MENU_KEY_EXISTS");
@@ -115,7 +141,16 @@ public class MenuService
         if(request.type()!=Type.GROUP && nullable(request.groupPath())!=null) throw invalid();
         if(request.type()==Type.GROUP && (request.groupPath()==null || !request.groupPath().matches("[a-zA-Z0-9_-]{1,200}"))) throw invalid();
         if(request.type()==Type.GROUP && rows.stream().anyMatch(row->(old==null || !row.id().equals(old.id())) && type(row)!=Type.FUNCTION && type(row)!=Type.EXTERNAL && request.groupPath().equalsIgnoreCase(row.path()))) throw conflict("MENU_PATH_EXISTS");
-        String nextPermission=clean(request.permission());
+        validatePermissionGrant(clean(request.permission()),old);
+    }
+    private static void validateHierarchy(Long parent,MenuMutationMapper.Row old,List<MenuMutationMapper.Row> rows)
+    {
+        Map<Long,Long> parents=new HashMap<>();rows.forEach(row->parents.put(row.id(),row.parentId()));
+        parents.put(old==null ? -1L : old.id(),parent);
+        for(Long id:parents.keySet()) {Set<Long> seen=new HashSet<>();Long cursor=id;while(parents.containsKey(cursor)) {if(!seen.add(cursor) || seen.size()>64) throw conflict("MENU_CYCLE");cursor=parents.get(cursor);} }
+    }
+    private void validatePermissionGrant(String nextPermission,MenuMutationMapper.Row old)
+    {
         if(!SecurityUtils.isAdmin(SecurityUtils.getUserId()) && (old==null || !nextPermission.equals(clean(old.permission())))) {
             var actor=users.selectUserById(SecurityUtils.getUserId());if(actor==null) throw denied();actor.setRoles(navigation.selectActiveRoles(actor.getUserId()));
             Set<String> grants=actor.getRoles().isEmpty()?Set.of():permissions.getMenuPermission(actor);
@@ -134,7 +169,7 @@ public class MenuService
     private String path(MenuWriteRequest request,MenuMutationMapper.Row old)
     {return switch(request.type()) {case EXTERNAL -> request.externalUrl();case GROUP -> request.groupPath();case FUNCTION -> "";case ROUTE -> nullable(request.routeId())==null ? old.path() : java.net.URI.create(routes.options().stream().filter(route->route.id().equals(request.routeId())).findFirst().orElseThrow(MenuService::invalid).path()).getPath().replaceFirst("^/","");};}
     private <T>T mutate(Supplier<T> work,Set<Long> affected)
-    {try {T result=transaction.execute(status->{if(mutex.lockRoot()==null) throw conflict("DEPARTMENT_ROOT_MISSING");return work.get();});sessions.refresh(affected);return result;}catch(DuplicateKeyException failure){throw conflict("MENU_IDENTITY_EXISTS");}}
+    {try {T result=transaction.execute(status->{if(mutex.lockRoot()==null) throw conflict("DEPARTMENT_ROOT_MISSING");return work.get();});sessions.refreshAfterCommit(affected);return result;}catch(DuplicateKeyException failure){throw conflict("MENU_IDENTITY_EXISTS");}}
     private static Type type(MenuMutationMapper.Row row) {return "F".equals(row.menuType())?Type.FUNCTION:"0".equals(row.isFrame()) || row.path()!=null && row.path().matches("(?i)^https?://.*")?Type.EXTERNAL:"M".equals(row.menuType())?Type.GROUP:Type.ROUTE;}
     private static String menuType(Type type) {return type==Type.GROUP?"M":type==Type.FUNCTION?"F":"C";}
     private static boolean safeExternal(String value) {try {URI uri=URI.create(value);return ("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme())) && uri.getHost()!=null && uri.getUserInfo()==null;}catch(IllegalArgumentException|NullPointerException failure){return false;}}

@@ -1,9 +1,12 @@
 # PowerShell 7; owns only uniquely named disposable containers created by this run.
 param([int]$MysqlPort = 13306, [int]$RedisPort = 16380, [int]$AppPort = 18081,
     [string]$OpenApiOutputPath = '', [switch]$VerifyWeb, [switch]$EnableConsoles, [switch]$EnableCustomOutput, [string]$WebTestPattern = '', [switch]$VerifyGeneratedBusiness, [switch]$VerifyGeneratedReact, [switch]$VerifyGeneratedReactOnly,
-    [string]$JarPath = '', [switch]$EnableWorkflow, [switch]$EnableWorkflowAsync)
+    [string]$JarPath = '', [switch]$EnableWorkflow, [switch]$EnableWorkflowAsync, [switch]$VerifyAuthorizationRecoveryOnly)
 $ErrorActionPreference = 'Stop'
 if($EnableWorkflowAsync -and !$EnableWorkflow){throw 'Async workflow verification requires the workflow engine.'}
+if ($VerifyAuthorizationRecoveryOnly -and ($VerifyWeb -or $VerifyGeneratedBusiness -or $VerifyGeneratedReact -or $VerifyGeneratedReactOnly -or $WebTestPattern -or $OpenApiOutputPath)) {
+    throw 'Focused authorization recovery cannot be combined with browser/generated/OpenAPI output verification flags.'
+}
 if ($VerifyGeneratedReactOnly -and $VerifyWeb) {throw 'Focused generated mode cannot be combined with the complete framework browser flag.'}
 if ($VerifyGeneratedReactOnly) { $VerifyGeneratedReact = $true }
 if ($VerifyGeneratedReact) { $VerifyGeneratedBusiness = $true }
@@ -19,6 +22,7 @@ $previousEnv = @{}
 $appProcess = $null
 $diagnosticResponses = [System.Collections.Generic.List[object]]::new()
 $logDirectory = Join-Path $repoRoot 'server/eforge-boot/target/auth-integration'
+if ($VerifyAuthorizationRecoveryOnly) { $logDirectory = Join-Path $logDirectory "authorization-recovery-$runId" }
 $uploadDirectory = Join-Path $logDirectory "uploads-$runId"
 $customOutputDirectory = Join-Path $logDirectory "custom-output-$runId"
 $generatedBusinessDirectory = Join-Path $logDirectory "generated-business-$runId"
@@ -209,6 +213,11 @@ try {
     Assert-Check ($sessions.Count -eq 1) 'Expected exactly one Redis login session.'
     $ttl = Invoke-Docker exec $redisName redis-cli ttl $sessions[0]
     Assert-Check ([int]$ttl -gt 0) 'Login session must expire.'
+    if ($VerifyAuthorizationRecoveryOnly) {
+        . (Join-Path $PSScriptRoot 'verify-authorization-recovery.ps1')
+        Write-Output 'PASS: focused authorization recovery verification completed.'
+        return
+    }
     if ($EnableWorkflow) {
         $workflowDeployments = Invoke-Docker exec --env "MYSQL_PWD=$testPassword" $mysqlName mysql -uroot -N -s eforge_enterprise -e 'SELECT COUNT(*) FROM ACT_RE_DEPLOYMENT;'
         Assert-Check ([int]$workflowDeployments -eq 0) 'Workflow must not automatically deploy processes on startup.'

@@ -53,6 +53,8 @@ class TokenServiceRedisIntegrationTest
             }
         };
         ReflectionTestUtils.setField(tokens, "redisCache", cache);
+        // SQL authority is covered by the real MySQL probe; this suite owns only Redis.
+        ReflectionTestUtils.setField(tokens, "authorization", org.mockito.Mockito.mock(AuthorizationSnapshotService.class));
         ReflectionTestUtils.setField(tokens, "header", "Authorization");
         ReflectionTestUtils.setField(tokens, "secret", "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
         ReflectionTestUtils.setField(tokens, "expireTime", 30);

@@ -66,4 +66,17 @@ public class ApiSecurityProblemHandler implements AuthenticationEntryPoint, Acce
         if (failure.status() == 401) response.setHeader("WWW-Authenticate", "Bearer");
         write(request, response, HttpStatus.valueOf(failure.status()), failure.code(), failure.getMessage());
     }
+
+    /** Preserve the compatibility JSON shape without disclosing storage errors. */
+    public void rejectLegacy(HttpServletRequest request, HttpServletResponse response,
+            io.eforge.enterprise.common.exception.ApiFailure failure) throws IOException
+    {
+        ApiDiagnostics.reportServerError(LOG, failure, failure.status(), request);
+        response.setStatus(failure.status() == 401 ? 200 : failure.status());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader(ApiDiagnostics.REQUEST_ID_HEADER, ApiDiagnostics.requestId(request));
+        objectMapper.writeValue(response.getOutputStream(), java.util.Map.of(
+                "code", failure.status(), "msg", failure.getMessage(), "requestId", ApiDiagnostics.requestId(request)));
+    }
 }
