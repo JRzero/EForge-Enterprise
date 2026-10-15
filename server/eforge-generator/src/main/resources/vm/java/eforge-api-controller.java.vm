@@ -2,6 +2,9 @@ package ${packageName}.api;
 
 import java.util.List;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +12,8 @@ import org.springframework.dao.DataAccessException;
 import org.springdoc.core.annotations.ParameterObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.eforge.enterprise.common.exception.ApiFailure;
+import io.eforge.enterprise.framework.web.exception.ApiDiagnostics;
+import io.eforge.enterprise.framework.web.exception.ApiProblems;
 import io.eforge.enterprise.web.controller.api.v1.PageResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -18,6 +23,7 @@ import ${packageName}.service.I${ClassName}Service;
 @RestController
 @RequestMapping($outputText.javaLiteral("/api/v1/business/${moduleName}/${businessName}"))
 public class ${ClassName}ApiController {
+    private static final Logger LOG=LoggerFactory.getLogger(${ClassName}ApiController.class);
     private final I${ClassName}Service service;
     public ${ClassName}ApiController(I${ClassName}Service service){this.service=service;}
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:list"))
@@ -29,7 +35,7 @@ public class ${ClassName}ApiController {
         try {
             var result=service.select${ClassName}List(query.domain()).stream().map(${ClassName}ApiModel::from).toList();
             return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result);
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
     }
 #else
     public ResponseEntity<PageResponse<${ClassName}ApiModel>> list(@Valid @ModelAttribute @ParameterObject ${ClassName}ApiModel.Query query) {
@@ -40,7 +46,7 @@ public class ${ClassName}ApiController {
             long total=new PageInfo<>(rows).getTotal();
             var result=new PageResponse<>(rows.stream().map(${ClassName}ApiModel::from).toList(),total,page,size);
             return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(result);
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
         finally {PageHelper.clearPage();}
     }
 #end
@@ -56,7 +62,7 @@ public class ${ClassName}ApiController {
             var row=service.select${ClassName}By${pkColumn.capJavaField}(id);
             if(row==null)throw new ApiFailure(404,"RESOURCE_NOT_FOUND","The requested record was not found.");
             return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(row));
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
     }
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:add"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
@@ -73,7 +79,7 @@ public class ${ClassName}ApiController {
             var result=service.select${ClassName}By${pkColumn.capJavaField}(row.get${pkJavaAccessor}());
             if(result==null)throw conflict();
             return ResponseEntity.status(201).cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(result));
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
     }
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:edit"))
     @PreAuthorize($outputText.javaLiteral("@ss.hasPermi(${permissionArgument})"))
@@ -95,7 +101,7 @@ public class ${ClassName}ApiController {
             var result=service.select${ClassName}By${pkColumn.capJavaField}(id);
             if(result==null)throw conflict();
             return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(${ClassName}ApiModel.from(result));
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
     }
     @io.swagger.v3.oas.annotations.media.Schema(name=$outputText.javaLiteral("${moduleName}_${ClassName}DeleteRequest"))
     public record DeleteRequest(
@@ -115,7 +121,7 @@ public class ${ClassName}ApiController {
         try {
             service.delete${ClassName}By${pkColumn.capJavaField}s(input.ids().toArray(${pkColumn.javaType}[]::new));
             return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
     }
     private static ApiFailure conflict(){return new ApiFailure(409,"RESOURCE_CHANGED","The requested record could not be saved. Reload before retrying.");}
 #set($permissionArgument=$outputText.spelLiteral("${permissionPrefix}:export"))
@@ -132,22 +138,45 @@ public class ${ClassName}ApiController {
             response.setHeader("Cache-Control","no-store");
             new io.eforge.enterprise.common.utils.poi.CanonicalExcelUtil<>(${packageName}.domain.${ClassName}.class)
                 .exportExcel(response,rows,$outputText.javaLiteral("${ClassName}"));
-        } catch(DataAccessException failure){throw unavailable();}
+        } catch(DataAccessException failure){throw unavailable(failure);}
         finally {PageHelper.clearPage();}
     }
     @ExceptionHandler(ApiFailure.class)
-    public ResponseEntity<ProblemDetail> apiFailure(ApiFailure failure) {
-        var problem=ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(failure.status()),failure.getMessage());
-        problem.setProperty("code",failure.code());
-        return ResponseEntity.status(failure.status()).contentType(MediaType.APPLICATION_PROBLEM_JSON).cacheControl(CacheControl.noStore()).body(problem);
+    public ResponseEntity<ProblemDetail> apiFailure(ApiFailure failure,HttpServletRequest request) {
+        ApiDiagnostics.reportServerError(LOG,failure,failure.status(),request);
+        return problem(HttpStatus.valueOf(failure.status()),failure.code(),failure.getMessage(),request,new HttpHeaders());
     }
     @ExceptionHandler({org.springframework.validation.BindException.class,org.springframework.beans.TypeMismatchException.class,org.springframework.http.converter.HttpMessageNotReadableException.class})
-    public ResponseEntity<ProblemDetail> invalidInput(Exception ignored) {
-        return apiFailure(new ApiFailure(400,"VALIDATION_ERROR","The request contains invalid fields."));
+    public ResponseEntity<ProblemDetail> invalidInput(Exception ignored,HttpServletRequest request) {
+        return apiFailure(new ApiFailure(400,"VALIDATION_ERROR","The request contains invalid fields."),request);
     }
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<ProblemDetail> denied(org.springframework.security.access.AccessDeniedException ignored) {
-        return apiFailure(new ApiFailure(403,"ACCESS_DENIED","Access to this resource is denied."));
+    public ResponseEntity<ProblemDetail> denied(org.springframework.security.access.AccessDeniedException ignored,HttpServletRequest request) {
+        return apiFailure(new ApiFailure(403,"ACCESS_DENIED","Access to this resource is denied."),request);
     }
-    private static ApiFailure unavailable(){return new ApiFailure(503,"RESOURCE_UNAVAILABLE","The requested data is temporarily unavailable.");}
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> unexpected(Exception failure,HttpServletRequest request) {
+        HttpStatus status=HttpStatus.INTERNAL_SERVER_ERROR;
+        String code="INTERNAL_ERROR",detail="The request could not be completed.";
+        var headers=new HttpHeaders();
+        // Preserve framework HTTP semantics (for example 415), never its rejected values or detail.
+        if(failure instanceof org.springframework.web.ErrorResponse framework) {
+            status=HttpStatus.valueOf(framework.getStatusCode().value());
+            code=status.value()==400?"VALIDATION_ERROR":"HTTP_"+status.value();
+            detail=status.value()==400?"The request contains invalid fields.":status.getReasonPhrase();
+            headers.putAll(framework.getHeaders());
+        }
+        ApiDiagnostics.reportServerError(LOG,failure,status.value(),request);
+        return problem(status,code,detail,request,headers);
+    }
+    private static ResponseEntity<ProblemDetail> problem(HttpStatus status,String code,String detail,HttpServletRequest request,HttpHeaders headers) {
+        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        headers.setCacheControl("no-store");
+        headers.set(ApiDiagnostics.REQUEST_ID_HEADER,ApiDiagnostics.requestId(request));
+        return new ResponseEntity<>(ApiProblems.create(status,code,detail,request),headers,status);
+    }
+    private static ApiFailure unavailable(DataAccessException cause) {
+        var failure=new ApiFailure(503,"RESOURCE_UNAVAILABLE","The requested data is temporarily unavailable.");
+        failure.initCause(cause);return failure;
+    }
 }

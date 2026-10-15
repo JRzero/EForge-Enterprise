@@ -75,7 +75,9 @@ public final class ApiDiagnostics
         {
             String code = exception instanceof ApiFailure failure && failure.code() != null
                     && failure.code().matches("[A-Z0-9_]{1,80}") ? failure.code() : "HTTP_" + status;
-            return JSON.writeValueAsString(Map.of("event", "api_server_error", "entryPoint", "canonical_http",
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            String entryPoint = path.equals("/api/v1") || path.startsWith("/api/v1/") ? "canonical_http" : "compatibility_http";
+            return JSON.writeValueAsString(Map.of("event", "api_server_error", "entryPoint", entryPoint,
                     "status", status, "code", code, "requestId", requestId(request), "errors", errors));
         }
         catch (JsonProcessingException failure)

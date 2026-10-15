@@ -1,12 +1,12 @@
 # 规范 API 故障诊断审查
 
-状态：实现、完整Maven及两配置真实运行验收通过，精确提交云端待核验。2026-10-15，框架加固 H03。
+状态：原实现完整本地通过；精确7e411bb云端发现实际生成接口的遗漏，修复及审计异常隐私补充已通过针对验证，最终全量与新精确云端待验收。2026-10-15，框架加固 H03。
 
 ## 运维问题与边界
 
 本切片回答：用户报告的错误对应哪一次请求？错误来自哪种异常、哪个应用位置？同类服务器故障是否重复发生？
 
-规范 ProblemDetail 增加 `requestId` 扩展，同时返回 `X-Request-ID`；同一请求的错误处理共享一个服务端随机 UUID。请求头、查询和正文无法选择该编号。成功响应、JWT、操作审计、兼容 AjaxResult 语义不变。该编号只用于诊断，不用于身份、授权或幂等。
+规范 ProblemDetail 增加 `requestId` 扩展，同时返回 `X-Request-ID`；同一请求的错误处理共享一个服务端随机 UUID。请求头、查询和正文无法选择该编号。该编号只用于诊断，不用于身份、授权或幂等。补充修复将失败操作审计的任意异常文本替换为安全说明和同一编号；正常审计字段、参数排除与业务结果保持。
 
 控制器 advice、Spring 框架异常、路由错误、认证过滤器拒绝和生成器部分成功的专用 ProblemDetail 均使用同一关联规则。生成器保留原 `creation` / `output` 全部结果；错误编号不能代替部分 DDL/文件结果的人工核验。
 
@@ -38,3 +38,14 @@
 - 两实时OpenAPI与已提交契约逐字符一致（统一Git文本行尾）；规范化UTF-8 SHA256为`3D7FC784F8576A602E8965C07A0CD0C1B6215C0E93750FE07B5E29238AE15F0C`。工作区契约采用CRLF，磁盘原始字节hash不同不表示内容漂移。
 - 前端生成复现、lint、typecheck、131单元、build、248完整模拟浏览器通过；本切片没有改变生成客户端签名。
 - 独立原生MySQL probes及实际生成CRUD/tree/sub完整安装浏览器留在精确CI验证；本地两配置运行没有冒称执行这些独立probe。最终云端终态另行补证。
+
+## 精确云端发现与补充修复
+
+`7e411bbd16fe9af18dba34f864bd110aa57388c6` 的 web-ci `38710412483`、agent-skills-ci `38710412512` 成功。server-ci `38710412542` 的两配置 auth-runtime-integration 与 runtime-integration 成功，但 verify 在真实生成模块/React安装验证中失败：生成控制器自己的 ProblemDetail handler 未带 requestId。观察命令的 TLS 超时不作为工作流结果；上述来自GitHub最终任务状态。
+
+- `framework-generated-diagnostics-red-2.log`：动态生成并编译CRUD/tree/sub的7测试中6失败；`framework-generated-diagnostics-green-final.log`：7全通过。模板全部SQL错误使用安全ApiFailure保留cause供受控诊断，补unexpected500，框架502/415及响应头保持。
+- 补查 `LogAspect` 发现AfterThrowing先于HTTP handler，原始异常message会先写入操作审计，参数序列化/调度失败还会打印原始参数和堆栈。`framework-audit-privacy-red.log` 7测试6失败；`framework-audit-privacy-green.log` 7全通过，使用真实AOP/MVC证明审计与HTTP编号一致。
+- 普通失败审计只存固定摘要+编号；显式ApiFailure保留其公开safe code/detail，仍按2000字符限制并保留完整编号。内部捕获失败记录独立 `audit_recording_failed`，只含固定stage、编号和受限异常类型，不把业务成功误记为HTTP500。
+- 异步持久化机制未改变；提交到队列成功不等于最终SQL审计必达。本切片没有宣称可靠投递或全框架旧日志已完成隐私审计。
+
+上述新改动尚待最终完整Maven、真实生成模块/React与实际审计SQL回归、新精确提交云端终态。不能用旧提交成功任务替代新源码验收。

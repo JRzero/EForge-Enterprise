@@ -15,22 +15,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson2.JSON;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.domain.model.LoginUser;
-import io.eforge.enterprise.common.core.text.Convert;
 import io.eforge.enterprise.common.enums.BusinessStatus;
 import io.eforge.enterprise.common.enums.HttpMethod;
+import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.common.filter.PropertyPreExcludeFilter;
-import io.eforge.enterprise.common.utils.ExceptionUtil;
 import io.eforge.enterprise.common.utils.SecurityUtils;
 import io.eforge.enterprise.common.utils.ServletUtils;
 import io.eforge.enterprise.common.utils.StringUtils;
 import io.eforge.enterprise.common.utils.ip.IpUtils;
 import io.eforge.enterprise.framework.manager.AsyncManager;
 import io.eforge.enterprise.framework.manager.factory.AsyncFactory;
+import io.eforge.enterprise.framework.web.exception.ApiDiagnostics;
 import io.eforge.enterprise.system.domain.SysOperLog;
 
 /**
@@ -87,6 +89,7 @@ public class LogAspect
 
     protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult)
     {
+        HttpServletRequest request = currentRequest();
         try
         {
             // 获取当前的用户
@@ -112,7 +115,7 @@ public class LogAspect
             if (e != null)
             {
                 operLog.setStatus(BusinessStatus.FAIL.ordinal());
-                operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+                operLog.setErrorMsg(safeErrorSummary(e, request));
             }
             // 设置方法名称
             String className = joinPoint.getTarget().getClass().getName();
@@ -125,18 +128,56 @@ public class LogAspect
             // 设置消耗时间
             operLog.setCostTime(System.currentTimeMillis() - TIME_THREADLOCAL.get());
             // 保存数据库
-            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+            publish(operLog);
         }
         catch (Exception exp)
         {
-            // 记录本地异常日志
-            log.error("异常信息:{}", exp.getMessage());
-            exp.printStackTrace();
+            reportAuditFailure("capture-or-publish", exp, request);
         }
         finally
         {
             TIME_THREADLOCAL.remove();
         }
+    }
+
+    /** Keep the asynchronous persistence boundary separate from audit capture. */
+    protected void publish(SysOperLog operLog)
+    {
+        AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+    }
+
+    private static String safeErrorSummary(Exception failure, HttpServletRequest request)
+    {
+        String summary = "The operation could not be completed.";
+        // ApiFailure explicitly carries caller-safe public details. Other exception
+        // messages and cause text are not an audit-data contract.
+        if (failure instanceof ApiFailure safe)
+        {
+            if (StringUtils.isNotEmpty(safe.getMessage())) summary = safe.getMessage();
+            if (safe.code() != null && safe.code().matches("[A-Z0-9_]{1,80}")) summary = safe.code() + ": " + summary;
+        }
+        String correlation = " [requestId=" + requestId(request) + "]";
+        return StringUtils.substring(summary, 0, PARAM_MAX_LENGTH - correlation.length()) + correlation;
+    }
+
+    private static HttpServletRequest currentRequest()
+    {
+        return RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes
+                ? attributes.getRequest() : null;
+    }
+
+    private static String requestId(HttpServletRequest request)
+    {
+        return request == null ? "unavailable" : ApiDiagnostics.requestId(request);
+    }
+
+    private static void reportAuditFailure(String stage, Exception failure, HttpServletRequest request)
+    {
+        String type = failure.getClass().getName();
+        if (!type.matches("[a-zA-Z0-9_.$<>]{1,200}")) type = "unavailable";
+        // Audit capture can fail after a successful operation. Do not describe it
+        // as an HTTP 500 or attach raw Throwable/argument data to this event.
+        log.error("event=audit_recording_failed stage={} requestId={} failureType={}", stage, requestId(request), type);
     }
 
     /**
@@ -211,7 +252,7 @@ public class LogAspect
                     }
                     catch (Exception e)
                     {
-                        log.error("请求参数拼装异常 msg:{}, 参数:{}", e.getMessage(), paramsArray, e);
+                        reportAuditFailure("request-serialization", e, currentRequest());
                     }
                 }
             }

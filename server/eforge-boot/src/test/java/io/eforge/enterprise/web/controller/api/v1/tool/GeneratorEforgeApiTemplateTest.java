@@ -65,8 +65,7 @@ class GeneratorEforgeApiTemplateTest {
         var diagnostics=new java.io.ByteArrayOutputStream();
         assertEquals(0,ToolProvider.getSystemJavaCompiler().run(null,diagnostics,diagnostics,args.toArray(String[]::new)),diagnostics.toString(StandardCharsets.UTF_8));
     }
-    @ParameterizedTest @ValueSource(strings={"crud","tree","sub"})
-    void actualGeneratedSourcesCompileAndServeCanonicalReadModels(String category)throws Exception {
+    URLClassLoader compileFixture(String category)throws Exception {
         var table=fixture(category);var bundle=GeneratorRenderedBundle.render(GeneratorRenderingSnapshot.capture(table));
         var sourceFiles=new ArrayList<String>();
         for(var file:bundle.files()) if(file.path().endsWith(".java")) {
@@ -84,7 +83,11 @@ class GeneratorEforgeApiTemplateTest {
         assertEquals(2,apiSources.size());
         compile(backendSources,backendClasspath);
         compile(apiSources,fullClasspath+java.io.File.pathSeparator+directory);
-        try(var classes=new URLClassLoader(new java.net.URL[]{directory.toUri().toURL()},getClass().getClassLoader())) {
+        return new URLClassLoader(new java.net.URL[]{directory.toUri().toURL()},getClass().getClassLoader());
+    }
+    @ParameterizedTest @ValueSource(strings={"crud","tree","sub"})
+    void actualGeneratedSourcesCompileAndServeCanonicalReadModels(String category)throws Exception {
+        try(var classes=compileFixture(category)) {
             var domainType=classes.loadClass("generated.domain.ApiRoot");var row=domainType.getConstructor().newInstance();
             domainType.getMethod("setoRderKey",Long.class).invoke(row,9007199254740993L);
             domainType.getMethod("setLabel",String.class).invoke(row,GeneratorDomainTextTest.ATTACK);
@@ -145,6 +148,7 @@ class GeneratorEforgeApiTemplateTest {
                     var denied=securedMvc.perform(MockMvcRequestBuilders.get("/api/v1/business/test/entry")).andReturn().getResponse();
                     assertEquals(403,denied.getStatus(),denied.getContentAsString());assertEquals(calls,captured.size());
                     assertEquals("ACCESS_DENIED",mapper.readTree(denied.getContentAsString()).get("code").textValue());
+                    assertSafeProblem(denied,403,"ACCESS_DENIED","/api/v1/business/test/entry");
                     login.setPermissions(Set.of("test:entry:list"));
                     var allowed=securedMvc.perform(MockMvcRequestBuilders.get("/api/v1/business/test/entry").param("q_label","allowed")).andReturn().getResponse();
                     assertEquals(200,allowed.getStatus(),allowed.getContentAsString());assertEquals(calls+1,captured.size());
@@ -189,5 +193,104 @@ class GeneratorEforgeApiTemplateTest {
                 } finally {org.springframework.security.core.context.SecurityContextHolder.clearContext();}
             }
         }
+    }
+
+    @ParameterizedTest @ValueSource(strings={"crud","tree","sub"})
+    void actualCompiledControllersKeepCanonicalErrorsCorrelatedPrivateAndDiagnosable(String category)throws Exception {
+        try(var classes=compileFixture(category)) {
+            var serviceType=classes.loadClass("generated.service.IApiRootService");
+            var injected=new java.util.concurrent.atomic.AtomicReference<RuntimeException>();
+            var service=Proxy.newProxyInstance(classes,new Class<?>[]{serviceType},(proxy,method,values)->{
+                if(injected.get()!=null)throw injected.get();
+                if(method.getName().equals("selectApiRootByORderKey"))return null;
+                throw new AssertionError(method.getName());
+            });
+            var controllerType=classes.loadClass("generated.api.ApiRootApiController");
+            var controller=controllerType.getConstructor(serviceType).newInstance(service);
+            // Generated packages are outside ApiExceptionHandler's package selector.
+            // The real legacy advice must not capture a canonical unexpected failure.
+            var mvc=MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new io.eforge.enterprise.framework.web.exception.GlobalExceptionHandler()).build();
+            var logger=(ch.qos.logback.classic.Logger)org.slf4j.LoggerFactory.getLogger(controllerType);
+            var events=new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();events.start();logger.addAppender(events);
+            var user=new io.eforge.enterprise.common.core.domain.entity.SysUser();user.setUserId(42L);user.setUserName("generated-reader");
+            var login=new io.eforge.enterprise.common.core.domain.model.LoginUser(user,Set.of());
+            var context=org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(login,null,List.of()));
+            org.springframework.security.core.context.SecurityContextHolder.setContext(context);
+            try {
+                String root="/api/v1/business/test/entry";
+                String input="{\"oRderKey\":\"9007199254740993\",\"label\":\"valid\",\"amount\":\"1.25\""
+                    +(category.equals("sub")?",\"apiLineList\":[]":"")+"}";
+                var faults=List.of(
+                    MockMvcRequestBuilders.get(root),
+                    MockMvcRequestBuilders.get(root+"/9007199254740993"),
+                    MockMvcRequestBuilders.post(root).contentType("application/json").content(input),
+                    MockMvcRequestBuilders.put(root+"/9007199254740993").contentType("application/json").content(input),
+                    MockMvcRequestBuilders.delete(root).contentType("application/json").content("{\"ids\":[\"9007199254740993\"]}"),
+                    MockMvcRequestBuilders.post(root+"/export"));
+                injected.set(new org.springframework.dao.DataAccessResourceFailureException("private JDBC password=secret SELECT * FROM secret_table"));
+                for(var request:faults) {
+                    int before=events.list.size();
+                    var result=mvc.perform(request.header("X-Request-ID","client-controlled-id")).andReturn();
+                    assertSafeProblem(result.getResponse(),503,"RESOURCE_UNAVAILABLE",result.getRequest().getRequestURI());
+                    assertDiagnostic(events.list,before,result.getResponse(),503,"org.springframework.dao.DataAccessResourceFailureException");
+                }
+                injected.set(new IllegalStateException("private JDBC password=secret SELECT * FROM secret_table"));
+                int before=events.list.size();
+                var unexpected=mvc.perform(MockMvcRequestBuilders.get(root).header("X-Request-ID","client-controlled-id")).andReturn().getResponse();
+                assertSafeProblem(unexpected,500,"INTERNAL_ERROR",root);
+                assertDiagnostic(events.list,before,unexpected,500,"java.lang.IllegalStateException");
+                injected.set(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_GATEWAY,"private upstream credential"));
+                before=events.list.size();
+                var frameworkFailure=mvc.perform(MockMvcRequestBuilders.get(root)).andReturn().getResponse();
+                assertSafeProblem(frameworkFailure,502,"HTTP_502",root);
+                assertDiagnostic(events.list,before,frameworkFailure,502,"org.springframework.web.server.ResponseStatusException");
+
+                injected.set(null);before=events.list.size();
+                assertSafeProblem(mvc.perform(MockMvcRequestBuilders.get(root+"/2")).andReturn().getResponse(),404,"RESOURCE_NOT_FOUND",root+"/2");
+                assertSafeProblem(mvc.perform(MockMvcRequestBuilders.get(root).param("pageSize","101")).andReturn().getResponse(),400,"VALIDATION_ERROR",root);
+                assertSafeProblem(mvc.perform(MockMvcRequestBuilders.get(root+"/not-a-number")).andReturn().getResponse(),400,"VALIDATION_ERROR",root+"/not-a-number");
+                assertSafeProblem(mvc.perform(MockMvcRequestBuilders.post(root).contentType("application/json").content("{private"))
+                    .andReturn().getResponse(),400,"VALIDATION_ERROR",root);
+                var unsupported=mvc.perform(MockMvcRequestBuilders.post(root).contentType("text/plain").content("private"))
+                    .andReturn().getResponse();
+                assertSafeProblem(unsupported,415,"HTTP_415",root);
+                assertTrue(unsupported.getHeader("Accept").contains("application/json"));
+                injected.set(new org.springframework.security.access.AccessDeniedException("private denied details"));
+                assertSafeProblem(mvc.perform(MockMvcRequestBuilders.get(root)).andReturn().getResponse(),403,"ACCESS_DENIED",root);
+                assertEquals(before,events.list.size(),"Expected client/permission errors must not emit server-error diagnostics.");
+                assertNull(com.github.pagehelper.PageHelper.getLocalPage());
+            } finally {
+                org.springframework.security.core.context.SecurityContextHolder.clearContext();logger.detachAppender(events);events.stop();
+            }
+        }
+    }
+
+    private static void assertSafeProblem(org.springframework.mock.web.MockHttpServletResponse response,int status,String code,String path)throws Exception {
+        assertEquals(status,response.getStatus(),response.getContentAsString());
+        assertTrue(response.getContentType().startsWith("application/problem+json"));
+        assertEquals("no-store",response.getHeader("Cache-Control"));
+        var body=new ObjectMapper().readTree(response.getContentAsString());
+        assertEquals(status,body.path("status").asInt());assertEquals(code,body.path("code").asText());
+        String requestId=body.path("requestId").asText();
+        assertTrue(requestId.matches("[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}"),"ProblemDetail must carry a server-generated request id.");
+        assertEquals(requestId,response.getHeader("X-Request-ID"));assertNotEquals("client-controlled-id",requestId);
+        assertEquals(path,body.path("instance").asText());
+        assertFalse(response.getContentAsString().matches("(?s).*(private|JDBC|password=|secret_table|IllegalStateException|DataAccessResourceFailureException).*"));
+        assertFalse(body.has("msg"));assertFalse(body.has("stackTrace"));
+    }
+
+    private static void assertDiagnostic(List<ch.qos.logback.classic.spi.ILoggingEvent> events,int before,
+            org.springframework.mock.web.MockHttpServletResponse response,int status,String causeType)throws Exception {
+        assertEquals(before+1,events.size(),"Each actual server failure must emit one safe diagnostic.");
+        var event=events.get(before);assertNull(event.getThrowableProxy(),"Raw throwable logging must stay disabled.");
+        assertEquals(status==503?ch.qos.logback.classic.Level.WARN:ch.qos.logback.classic.Level.ERROR,event.getLevel());
+        String text=event.getFormattedMessage();var record=new ObjectMapper().readTree(text);
+        assertEquals("api_server_error",record.path("event").asText());assertEquals(status,record.path("status").asInt());
+        assertEquals(response.getHeader("X-Request-ID"),record.path("requestId").asText());
+        assertTrue(java.util.stream.StreamSupport.stream(record.path("errors").spliterator(),false)
+            .anyMatch(error->causeType.equals(error.path("type").asText())),"The original failure type must survive for diagnostics.");
+        assertFalse(text.matches("(?s).*(private|JDBC|password=|secret_table|SELECT).*"));
     }
 }
