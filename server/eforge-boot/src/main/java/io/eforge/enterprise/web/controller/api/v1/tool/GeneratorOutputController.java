@@ -1,6 +1,8 @@
 package io.eforge.enterprise.web.controller.api.v1.tool;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import io.eforge.enterprise.framework.web.exception.ApiDiagnostics;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +50,10 @@ public class GeneratorOutputController {
         public io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult getOutput(){return output;}
     }
     @ExceptionHandler(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure.class)
-    public ResponseEntity<CustomOutputProblem> customFailure(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure failure){
-        return ResponseEntity.status(503).contentType(MediaType.APPLICATION_PROBLEM_JSON).cacheControl(CacheControl.noStore()).body(new CustomOutputProblem(failure));
+    public ResponseEntity<CustomOutputProblem> customFailure(io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure failure,HttpServletRequest request){
+        ApiDiagnostics.reportServerError(org.slf4j.LoggerFactory.getLogger(GeneratorOutputController.class),failure,503,request);
+        var problem=new CustomOutputProblem(failure);problem.setProperty("requestId",ApiDiagnostics.requestId(request));
+        return ResponseEntity.status(503).contentType(MediaType.APPLICATION_PROBLEM_JSON).cacheControl(CacheControl.noStore())
+            .header(ApiDiagnostics.REQUEST_ID_HEADER,ApiDiagnostics.requestId(request)).body(problem);
     }
 }

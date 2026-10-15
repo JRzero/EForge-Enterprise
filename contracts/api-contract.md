@@ -101,6 +101,8 @@ Example:
 ```http
 400 Bad Request
 Content-Type: application/problem+json
+Cache-Control: no-store
+X-Request-ID: a8fce236-90a8-4db6-b225-f7ca8afc2a39
 ```
 
 ```json
@@ -111,11 +113,18 @@ Content-Type: application/problem+json
   "detail": "One or more request fields are invalid.",
   "instance": "/api/v1/system/users",
   "code": "VALIDATION_ERROR",
-  "traceId": "..."
+  "requestId": "a8fce236-90a8-4db6-b225-f7ca8afc2a39"
 }
 ```
 
 Production responses must not expose stack traces, SQL, secrets, or internal exception class names.
+
+Canonical errors, including security/routing failures and structured generator partial
+outcomes, carry a server-generated `requestId` ProblemDetail extension and matching
+`X-Request-ID` response header. Inbound request IDs are not trusted or echoed. This
+identifier correlates a failure with bounded server diagnostics; it is not a credential,
+idempotency key, or distributed trace. Existing `code` and partial-result fields remain
+authoritative for client behavior. See [the diagnostic runbook](../docs/runbooks/api-server-errors.md).
 
 ## Legacy compatibility
 

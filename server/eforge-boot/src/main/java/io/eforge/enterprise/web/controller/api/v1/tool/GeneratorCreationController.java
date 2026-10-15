@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.*;
 import io.eforge.enterprise.common.annotation.Log;
 import io.eforge.enterprise.common.enums.BusinessType;
 import io.eforge.enterprise.generator.service.GeneratorCreationCommand;
+import io.eforge.enterprise.framework.web.exception.ApiDiagnostics;
 
 @RestController
 @RequestMapping("/api/v1/tool/generator/creations")
@@ -27,6 +28,7 @@ public class GeneratorCreationController {
             code=failure.code();creation=failure.creation();
             setTitle(HttpStatus.valueOf(failure.status()).getReasonPhrase());
             setDetail(failure.getMessage());setInstance(URI.create(request.getRequestURI()));
+            setProperty("requestId",ApiDiagnostics.requestId(request));
         }
         @Override @Schema(hidden=true) public java.util.Map<String,Object> getProperties(){return super.getProperties();}
         public String getCode(){return code;}
@@ -52,7 +54,9 @@ public class GeneratorCreationController {
     }
     @ExceptionHandler(GeneratorCreationCommand.Failure.class)
     public ResponseEntity<CreationProblem> partialFailure(GeneratorCreationCommand.Failure failure,HttpServletRequest request) {
+        ApiDiagnostics.reportServerError(org.slf4j.LoggerFactory.getLogger(GeneratorCreationController.class),failure,failure.status(),request);
         return ResponseEntity.status(failure.status()).cacheControl(CacheControl.noStore())
+            .header(ApiDiagnostics.REQUEST_ID_HEADER,ApiDiagnostics.requestId(request))
             .contentType(MediaType.APPLICATION_PROBLEM_JSON).body(new CreationProblem(failure,request));
     }
 }

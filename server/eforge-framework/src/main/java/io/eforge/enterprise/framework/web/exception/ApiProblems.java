@@ -15,6 +15,7 @@ public final class ApiProblems
         problem.setTitle(status.getReasonPhrase());
         problem.setInstance(URI.create(request.getRequestURI()));
         problem.setProperty("code", code);
+        problem.setProperty("requestId", ApiDiagnostics.requestId(request));
         return problem;
     }
 }

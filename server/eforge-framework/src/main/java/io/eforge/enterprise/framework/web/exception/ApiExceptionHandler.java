@@ -1,6 +1,8 @@
 package io.eforge.enterprise.framework.web.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -25,10 +27,13 @@ import io.eforge.enterprise.common.exception.user.UserException;
 @RestControllerAdvice(basePackages = "io.eforge.enterprise.web.controller.api.v1")
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
     @ExceptionHandler(io.eforge.enterprise.common.exception.ApiFailure.class)
     public ResponseEntity<Object> business(io.eforge.enterprise.common.exception.ApiFailure exception,
             HttpServletRequest request)
     {
+        ApiDiagnostics.reportServerError(LOG, exception, exception.status(), request);
         return problem(HttpStatus.valueOf(exception.status()), exception.code(), exception.getMessage(), request);
     }
 
@@ -53,8 +58,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> unexpected(HttpServletRequest request)
+    public ResponseEntity<Object> unexpected(Exception exception, HttpServletRequest request)
     {
+        ApiDiagnostics.reportServerError(LOG, exception, 500, request);
         return problem(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "The request could not be completed.", request);
     }
 
@@ -64,6 +70,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler
     {
         // Never serialize rejected values, parser messages or exception details.
         HttpStatus httpStatus = HttpStatus.valueOf(status.value());
+        ApiDiagnostics.reportServerError(LOG, exception, status.value(), ((ServletWebRequest) request).getRequest());
         ProblemDetail problem = ApiProblems.create(httpStatus,
                 status.value() == 400 ? "VALIDATION_ERROR" : "HTTP_" + status.value(),
                 status.value() == 400 ? "The request body or parameters are invalid." : httpStatus.getReasonPhrase(),
@@ -71,12 +78,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.putAll(headers);
         responseHeaders.setCacheControl("no-store");
+        responseHeaders.set(ApiDiagnostics.REQUEST_ID_HEADER,
+                ApiDiagnostics.requestId(((ServletWebRequest) request).getRequest()));
         return new ResponseEntity<>(problem, responseHeaders, status);
     }
 
     private ResponseEntity<Object> problem(HttpStatus status, String code, String detail, HttpServletRequest request)
     {
-        var response = ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, "no-store");
+        var response = ResponseEntity.status(status).header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(ApiDiagnostics.REQUEST_ID_HEADER, ApiDiagnostics.requestId(request));
         if (status == HttpStatus.UNAUTHORIZED)
             response.header(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
         return response.body(ApiProblems.create(status, code, detail, request));

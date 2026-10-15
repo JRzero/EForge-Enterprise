@@ -17,6 +17,7 @@ $testPassword = [guid]::NewGuid().ToString('N')
 $createdContainers = [System.Collections.Generic.List[string]]::new()
 $previousEnv = @{}
 $appProcess = $null
+$diagnosticResponses = [System.Collections.Generic.List[object]]::new()
 $logDirectory = Join-Path $repoRoot 'server/eforge-boot/target/auth-integration'
 $uploadDirectory = Join-Path $logDirectory "uploads-$runId"
 $customOutputDirectory = Join-Path $logDirectory "custom-output-$runId"
@@ -45,6 +46,9 @@ function Assert-Problem($response, [int]$status, [string]$code) {
     Assert-Check (($response.Headers['Content-Type'] -join ';') -like 'application/problem+json*') 'Expected ProblemDetail media type.'
     $payload = $response.Content | ConvertFrom-Json
     Assert-Check ($payload.status -eq $status -and $payload.code -eq $code) "Expected problem $status/$code, received $($payload.status)/$($payload.code) at $($payload.instance)."
+    Assert-Check ($payload.requestId -cmatch '^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$') 'ProblemDetail must carry a server-generated request id.'
+    Assert-Check (($response.Headers['X-Request-ID'] -join '') -ceq $payload.requestId) 'Problem body/header correlation mismatch.'
+    if ($status -ge 500) { $diagnosticResponses.Add(@{RequestId=$payload.requestId;Status=$status}) }
 }
 
 try {
@@ -404,6 +408,20 @@ try {
     $withCaptcha = '{"username":"admin","password":"admin123","code":"42","uuid":"integration-challenge"}'
     Assert-Check ((Request '/api/v1/auth/login' 'POST' $withCaptcha).StatusCode -eq 200) 'Valid captcha login failed.'
     Assert-Problem (Request '/api/v1/auth/login' 'POST' $withCaptcha) 400 'CAPTCHA_INVALID'
+    $diagnosticLogEntries = @{}
+    foreach ($diagnosticLine in Get-Content -LiteralPath (Join-Path $logDirectory 'application.log')) {
+        $diagnosticMatch = [regex]::Match($diagnosticLine, '\{.*"event":"api_server_error".*\}')
+        if ($diagnosticMatch.Success) {
+            $diagnosticRecord = $diagnosticMatch.Value | ConvertFrom-Json
+            $diagnosticLogEntries[$diagnosticRecord.requestId] = $diagnosticRecord
+        }
+    }
+    foreach ($diagnosticResponse in $diagnosticResponses) {
+        $diagnosticRecord = $diagnosticLogEntries[$diagnosticResponse.RequestId]
+        Assert-Check ($null -ne $diagnosticRecord -and $diagnosticRecord.status -eq $diagnosticResponse.Status) 'A real server error could not be correlated with its safe diagnostic.'
+    }
+    Assert-Check ($diagnosticResponses.Count -gt 0) 'Expected actual dependency/server failures in the integration suite.'
+    Write-Output "PASS: canonical ProblemDetail body/header request ids and $($diagnosticResponses.Count) actual server-failure diagnostic records."
     Write-Output 'PASS: navigation migration/constraints, admin and ordinary-user bootstrap, hidden/unauthorized nodes, role revocation, account invalidation, MySQL login, Redis TTL, captcha replay and OpenAPI.'
 }
 finally {

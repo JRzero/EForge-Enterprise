@@ -124,5 +124,6 @@ class GeneratorOutputControllerTest {
         var partial=new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputResult(List.of(new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputOutcome("main/java/generated/domain/OutputEntry.java",io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.State.CREATED),new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.CustomOutputOutcome("main/java/generated/mapper/OutputEntryMapper.java",io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.State.FAILED)));
         when(tables.selectGenTableById(ID)).thenReturn(table(ID,"OutputEntry"));when(custom.write(any())).thenThrow(new io.eforge.enterprise.generator.rendering.GeneratorCustomOutput.Failure(partial));
         mvc.perform(post(BASE+"/tables/"+ID+"/custom-output")).andExpect(status().isServiceUnavailable()).andExpect(content().contentType("application/problem+json"))
+            .andExpect(jsonPath("$.requestId").isString()).andExpect(header().exists("X-Request-ID"))
             .andExpect(jsonPath("$.code").value("GENERATOR_CUSTOM_OUTPUT_PARTIAL")).andExpect(jsonPath("$.output.files[0].state").value("CREATED")).andExpect(jsonPath("$.output.files[1].state").value("FAILED"));
     }}

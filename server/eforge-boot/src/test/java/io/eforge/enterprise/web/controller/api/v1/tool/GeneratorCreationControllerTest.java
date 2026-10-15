@@ -80,6 +80,7 @@ class GeneratorCreationControllerTest {
         when(command.create(anyString(),anyString())).thenThrow(new GeneratorCreationCommand.Failure(503,"GENERATOR_CREATE_UNCONFIRMED","Review retained table outcomes.",partial));
         mvc.perform(post(PATH).contentType("application/json").content("{\"sql\":\"x\"}"))
             .andExpect(status().isServiceUnavailable()).andExpect(content().contentType("application/problem+json"))
+            .andExpect(jsonPath("$.requestId").isString()).andExpect(header().exists("X-Request-ID"))
             .andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.code").value("GENERATOR_CREATE_UNCONFIRMED"))
             .andExpect(jsonPath("$.creation.physical[0].state").value("CREATED"))
             .andExpect(jsonPath("$.creation.physical[1].state").value("UNCONFIRMED"))

@@ -4,6 +4,8 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import io.eforge.enterprise.framework.security.handle.ApiSecurityProblemHandler;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiRoutingExceptionResolver implements HandlerExceptionResolver
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ApiRoutingExceptionResolver.class);
     private final ObjectMapper objectMapper;
 
     public ApiRoutingExceptionResolver(ObjectMapper objectMapper)
@@ -36,10 +39,12 @@ public class ApiRoutingExceptionResolver implements HandlerExceptionResolver
                 || !(exception instanceof ErrorResponse error))
             return null;
         HttpStatus status = HttpStatus.valueOf(error.getStatusCode().value());
+        ApiDiagnostics.reportServerError(LOG, exception, status.value(), request);
         response.setStatus(status.value());
         error.getHeaders().forEach((name, values) -> values.forEach(value -> response.addHeader(name, value)));
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         response.setHeader("Cache-Control", "no-store");
+        response.setHeader(ApiDiagnostics.REQUEST_ID_HEADER, ApiDiagnostics.requestId(request));
         try
         {
             objectMapper.writeValue(response.getOutputStream(),
