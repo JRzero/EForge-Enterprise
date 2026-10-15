@@ -44,6 +44,9 @@ export function TreeSelect({label, nodes, value, onChange, disabled, readOnly, l
         {!loading&&!error&&rows.map((row,index)=><div key={row.node.value} role="treeitem" aria-level={row.depth+1} aria-selected={row.node.value===value} aria-disabled={row.node.disabled||undefined}
           aria-expanded={row.hasChildren?!!query||!collapsed.has(row.node.value):undefined} tabIndex={row.node.value===(rows.some(item=>item.node.value===active)?active:rows[0]?.node.value)?0:-1} onFocus={()=>setActive(row.node.value)} data-value={row.node.value} style={{paddingInlineStart:Math.min(row.depth,12)*16+8}}
           onKeyDown={event=>{
+            // Native disclosure/label buttons own activation; tree navigation
+            // keys still work after a pointer has focused either button.
+            if(event.target!==event.currentTarget&&(event.key==='Enter'||event.key===' '))return;
             const items=Array.from(tree.current?.querySelectorAll<HTMLElement>('[role=treeitem]')??[]);
             if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();items[event.key==='Home'?0:event.key==='End'?items.length-1:Math.max(0,Math.min(items.length-1,index+(event.key==='ArrowDown'?1:-1)))]?.focus();}
             else if(event.key==='ArrowRight'){event.preventDefault();if(row.hasChildren&&!query.trim()&&collapsed.has(row.node.value))expand(row.node.value,true);else if(row.hasChildren)items[index+1]?.focus();}

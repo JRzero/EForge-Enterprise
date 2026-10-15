@@ -108,7 +108,7 @@ function ShellDemo(){const [allowed,setAllowed]=useState(true);return <><Block t
 function AdvancedDemo(){const [open,setOpen]=useState(false),[toast,setToast]=useState(false),[page,setPage]=useState(1),[message,setMessage]=useState('');return <>
   <Block title="下拉操作"><DropdownMenu button={{label:'更多操作',variant:'secondary'}} items={[{id:'copy',label:'复制示例名称',onClick:()=>setMessage('已选择复制操作（演示）')},{id:'export',label:'导出示例',onClick:()=>setMessage('已选择导出操作（演示）')},{id:'disabled',label:'不可用操作',isDisabled:true}]}/>{message&&<Feedback>{message}</Feedback>}</Block>
   <Block title="基础对话框与消息"><div className="showcase-row"><Button label="打开基础对话框" onClick={()=>setOpen(true)}/><Button label="显示消息" onClick={()=>setToast(true)}/></div><Dialog isOpen={open} onOpenChange={setOpen}><h2>基础对话框</h2><p>适用于轻量确认和说明。</p><Button label="关闭基础对话框" onClick={()=>setOpen(false)}/></Dialog>{toast&&<Toast type="info" body="演示消息已显示" isAutoHide={false} autoHideDuration={4000} onDismiss={()=>setToast(false)}/>}</Block>
-  <Block title="基础分页"><Pagination page={page} onChange={setPage} totalItems={120} pageSize={10}/><p>当前第 {page} 页</p></Block>
+  <Block title="基础分页"><Pagination className="ui-pagination" page={page} onChange={setPage} totalItems={120} pageSize={10}/><p>当前第 {page} 页</p></Block>
 </>;}
 function Showcase(){const initial=()=>sections.some(s=>s[0]===location.hash.slice(1))?location.hash.slice(1) as Section:'overview';const [section,setSection]=useState<Section>(initial),[search,setSearch]=useState('');
   useEffect(()=>{const change=()=>setSection(initial());window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change);},[]);

@@ -32,7 +32,10 @@ export function MultiSelect({label, options, value, onChange, disabled, readOnly
     input.current?.focus();
   }
   return <div ref={root} className="ui-multi-select" data-disabled={disabled || undefined} data-readonly={readOnly || undefined}
-    onKeyDown={event=>{if(event.key==='Tab'){setOpen(false);setActive(null);}}}>
+    onKeyDown={event=>{
+      if(event.key==='Escape'&&open&&!locked){event.preventDefault();event.stopPropagation();setOpen(false);setActive(null);}
+      else if(event.key==='Tab'){setOpen(false);setActive(null);}
+    }}>
     <label htmlFor={id}>{label}</label>
     <div className="ui-multi-control">
       <div className="ui-multi-values">{value.map(key=>{
@@ -47,7 +50,6 @@ export function MultiSelect({label, options, value, onChange, disabled, readOnly
         onChange={event=>{setQuery(event.target.value);setActive(null);setOpen(true);}}
         onKeyDown={event=>{
           if(locked)return;
-          if(event.key==='Escape'){event.preventDefault();event.stopPropagation();setOpen(false);setActive(null);return;}
           if(event.key==='ArrowDown'||event.key==='ArrowUp'){
             event.preventDefault();setOpen(true);const index=available.findIndex(option=>option.value===active);
             const next=event.key==='ArrowDown'?(index+1)%available.length:(index<=0?available.length-1:index-1);
