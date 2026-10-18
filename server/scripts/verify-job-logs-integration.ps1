@@ -87,7 +87,11 @@ try {
         $taskPrivacyAudit=Log-Sql "SELECT error_msg FROM sys_oper_log WHERE oper_url='/monitor/job/changeStatus' AND status=1 AND oper_param LIKE '%$jobMarker%' ORDER BY oper_id DESC LIMIT 1;"
         if($taskPrivacyAudit){break};Start-Sleep -Milliseconds 100
     }
-    Assert-Check ($taskPrivacyAudit -ceq '定时任务操作暂时不可用，请稍后重试。') 'Failed task operation audit must not expose SQL/Quartz/driver details.'
+    # The compatibility response retains its safe localized message, while H03
+    # deliberately never copies arbitrary ServiceException text into the audit.
+    # Require the entire fixed summary and a server-generated correlation ID,
+    # rather than accepting any nonempty or merely SQL-looking-free error.
+    Assert-Check ($taskPrivacyAudit -cmatch '^The operation could not be completed\. \[requestId=[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\]$') 'Failed task operation audit must contain only the fixed safe summary and correlation ID.'
     foreach($taskPrivacyStatus in @('0','1')) {
         $taskPrivacyRetry=Request '/monitor/job/changeStatus' 'PUT' (@{jobId=$taskPrivacyId;jobGroup='SYSTEM';status=$taskPrivacyStatus}|ConvertTo-Json -Compress) $authorized
         Assert-Check (($taskPrivacyRetry.Content|ConvertFrom-Json).code -eq 200) 'Task status must recover after actual SQL fault removal.'

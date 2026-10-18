@@ -59,7 +59,9 @@ try {
     $taskWriteBefore=Log-Sql $taskWriteSqlSnapshot
     Log-Sql "CREATE TRIGGER owned_canonical_task_fault BEFORE UPDATE ON sys_job FOR EACH ROW SET NEW.job_name=IF(NEW.job_id=$taskWriteId,REPEAT('x',1000),NEW.job_name);"|Out-Null
     try {
-        Assert-Problem (Request "$taskWriteBase/$taskWriteId/status" 'PUT' '{"status":"0"}' $authorized) 503 'JOB_SCHEDULE_UNAVAILABLE'
+        $taskWriteFailure=Request "$taskWriteBase/$taskWriteId/status" 'PUT' '{"status":"0"}' $authorized
+        Assert-Problem $taskWriteFailure 503 'JOB_SCHEDULE_UNAVAILABLE'
+        $taskWriteRequestId=($taskWriteFailure.Content|ConvertFrom-Json).requestId
         Assert-Check ((Log-Sql $taskWriteSqlSnapshot) -ceq $taskWriteBefore) 'Real SQL failure must retain complete canonical task state.'
     } finally {Log-Sql 'DROP TRIGGER IF EXISTS owned_canonical_task_fault;'|Out-Null}
     $taskWriteAudit=''
@@ -67,7 +69,7 @@ try {
         $taskWriteAudit=Log-Sql "SELECT error_msg FROM sys_oper_log WHERE oper_url='$taskWriteBase/$taskWriteId/status' AND status=1 ORDER BY oper_id DESC LIMIT 1;"
         if($taskWriteAudit){break};Start-Sleep -Milliseconds 100
     }
-    Assert-Check ($taskWriteAudit -ceq 'Task scheduling is temporarily unavailable.') 'Canonical failure audit must contain only the safe scheduling error.'
+    Assert-Check ($taskWriteAudit -ceq "JOB_SCHEDULE_UNAVAILABLE: Task scheduling is temporarily unavailable. [requestId=$taskWriteRequestId]") 'Canonical failure audit must contain only the safe scheduling code/detail and the same server request ID as its HTTP response.'
     Assert-Check ((Request "$taskWriteBase/$taskWriteId/status" 'PUT' '{"status":"1"}' $authorized).StatusCode -eq 204) 'Canonical task status retry after SQL recovery failed.'
     $taskWriteExpired=TaskWrite-Body 'expired';$taskWriteExpired.cronExpression='0 0 0 1 1 ? 2020'
     $taskWriteExpiredId=TaskWrite-Create $taskWriteExpired;$taskWriteOwned+=@($taskWriteExpiredId)

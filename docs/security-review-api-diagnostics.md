@@ -48,4 +48,21 @@
 - 普通失败审计只存固定摘要+编号；显式ApiFailure保留其公开safe code/detail，仍按2000字符限制并保留完整编号。内部捕获失败记录独立 `audit_recording_failed`，只含固定stage、编号和受限异常类型，不把业务成功误记为HTTP500。
 - 异步持久化机制未改变；提交到队列成功不等于最终SQL审计必达。本切片没有宣称可靠投递或全框架旧日志已完成隐私审计。
 
-上述新改动尚待最终完整Maven、真实生成模块/React与实际审计SQL回归、新精确提交云端终态。不能用旧提交成功任务替代新源码验收。
+最终源码 `server/eforge-boot/target/framework-hardening-final-verify.log` 已终态成功：1124报告计数、实际1113项执行通过、11项环境专用测试跳过。
+
+两配置实际生成应用的最终日志已直接核验：
+
+- `server/eforge-boot/target/hardening-generated-default.log`：2026-10-15 19:12终态通过。
+- `server/eforge-boot/target/hardening-generated-enabled.log`：2026-10-15 19:15终态通过。
+
+两份日志均包含实际生成Java/mapper编译、生成OpenAPI客户端复现与严格类型、安装后的宿主生产构建、CRUD/tree/sub及自动主键/字符串主键页面的真实浏览器操作，以及原Boot/JWT/Redis/MyBatis/LogAspect、撤权/退出和持久审计回归；末尾均为 `PASS: focused generated React and original Boot module verification completed.`。主子富文本字段名称与独立ID的浏览器定位调整也已在这些实际生成页面中执行。原云端暴露的生成错误缺requestId已在真实部署链路验证；这组证据属于生成应用专用验证，不计作完整框架的68项真实浏览器。
+
+当前完整框架两配置HTTP/浏览器仍运行，新的精确提交云端仍待终态。不能用旧提交成功任务替代新源码验收。
+
+### 2026-10-18 任务审计集成断言接续
+
+默认配置的68项框架浏览器在 `hardening-runtime-final-default.log` 已通过；后续API先因锁屏的旧认证错误码断言中断，修正后已证明实际授权故障不续期/不改会话、恢复同JWT可解锁。随后的 `hardening-runtime-accepted-default.log` 暴露旧任务审计断言仍要求原ServiceException文案；`hardening-oct18-default.log` 已证明修正后的旧路由固定摘要/UUID、完整SQL回滚和重试通过，随后规范任务审计仍要求不含code/requestId的旧文本而中断。
+
+两处断言现按已实现的H03合同精确验证：旧路由只能持久化完整固定摘要与合法UUID；规范路由只能持久化公开错误码、固定安全detail及与同次HTTP响应完全相同的requestId。兼容HTTP中文错误、规范503、任务完整行回滚、真实调度和恢复重试保持；不接受任意非空文本，也不仅用“未匹配SQL关键词”代替内容合同。此处未修改产品源码或删除已有隐私检查。
+
+当前验证日志为 `server/eforge-boot/target/hardening-oct18-final-default.log` 和 `hardening-oct18-final-enabled.log`，尚待终态。默认本轮只重跑完整API，沿用同一未变生产源码已通过的68浏览器；启用配置执行完整68浏览器和API。不将上述被断言中断的运行记为全量通过。
