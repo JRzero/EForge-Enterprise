@@ -5,7 +5,7 @@ import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage'
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
-import {useCallback, useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../ui/data';
 import {PermissionGate} from '../../ui/patterns';
 import {Button, Input} from '../../ui/controls';
@@ -28,6 +28,8 @@ export function ConfigurationsPage() {
   const [data, setData] = useState<PageResponseConfigurationResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [feedback, setFeedback] = useState(''), [actionError, setActionError] = useState(''), [busy, setBusy] = useState(false);
   const [dateError, setDateError] = useState(''), dateField = useRef<DateRangeFieldHandle>(null);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false), [dateFocusRequest, setDateFocusRequest] = useState(0);
+  useLayoutEffect(() => {if (dateFocusRequest > 0) dateField.current?.focus('to');}, [dateFocusRequest]);
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<{id?: string; form: ConfigurationRequest; initial: string} | null>(null), [deleting, setDeleting] = useState<string[] | null>(null);
   const editorDirty = !!editor && editor.initial !== JSON.stringify(editor.form);
@@ -71,7 +73,7 @@ export function ConfigurationsPage() {
   function refresh(message = '') {setFeedback(message); setSelection({}); setVersion(value => value + 1);}
   function applyFilters(event: FormEvent) {
     event.preventDefault();
-    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。');setActionError('开始日期不能晚于结束日期。');dateField.current?.focus('to');return;}
+    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。');setActionError('开始日期不能晚于结束日期。');setAdvancedExpanded(true);setDateFocusRequest(value => value + 1);return;}
     setDateError('');
     setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1);
   }
@@ -101,7 +103,7 @@ export function ConfigurationsPage() {
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
   return <ListPage className="posts-page" title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理">
     <DictionaryNotice dictionary={dictionary} />
-    <ListFilters primaryCount={3} advancedCount={[draft.from, draft.to].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDateError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
+    <ListFilters expanded={advancedExpanded} onExpandedChange={setAdvancedExpanded} primaryCount={3} advancedCount={[draft.from, draft.to].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDateError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
       <Input label="参数名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名" value={draft.key} onChange={key => setDraft({...draft, key})} />
       <label>系统内置<Select aria-label="系统内置" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>

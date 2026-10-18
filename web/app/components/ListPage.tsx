@@ -22,16 +22,22 @@ function filterFields(children: ReactNode, parentKey = ''): ReactNode[] {
   });
 }
 
-export function ListFilters({children, actions, primaryCount = Infinity, advancedCount = 0, className = '', ...props}: ComponentPropsWithoutRef<'form'> & {
+export function ListFilters({children, actions, primaryCount = Infinity, advancedCount = 0, expanded: controlledExpanded, onExpandedChange, className = '', ...props}: ComponentPropsWithoutRef<'form'> & {
   actions?: ReactNode; primaryCount?: number; advancedCount?: number;
+  expanded?: boolean; onExpandedChange?: (expanded: boolean) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const expanded = controlledExpanded ?? internalExpanded;
+  function setExpanded(next: boolean) {
+    if (controlledExpanded === undefined) setInternalExpanded(next);
+    onExpandedChange?.(next);
+  }
   const advancedId = useId();
   const fields = filterFields(children);
   const hasAdvanced = fields.length > primaryCount;
   return <form {...props} className={`post-filters list-filters ${className}`}>
     {fields.slice(0, primaryCount)}
-    <div className="list-filter-actions">{actions}{hasAdvanced && <NativeButton type="button" className="list-filter-toggle" aria-expanded={expanded} aria-controls={advancedId} onClick={() => setExpanded(value => !value)}>
+    <div className="list-filter-actions">{actions}{hasAdvanced && <NativeButton type="button" className="list-filter-toggle" aria-expanded={expanded} aria-controls={advancedId} onClick={() => setExpanded(!expanded)}>
       <span>{expanded ? '收起筛选' : '更多筛选'}</span>
       {advancedCount > 0 && <span className="list-filter-count"><span aria-hidden="true">{advancedCount}</span><span className="list-page-title">{advancedCount} 项已填写</span></span>}
       <svg className="list-filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>

@@ -56,7 +56,7 @@ test('configuration dates associate validation with both inputs and preserve res
   const range=page.getByRole('group',{name:'日期范围',exact:true}),from=range.getByLabel('开始日期',{exact:true}),to=range.getByLabel('结束日期',{exact:true});
   await from.fill('2026-10-15');await to.fill('2026-10-01');const count=queries.length;await page.getByRole('button',{name:'查询',exact:true}).click();
   await expect(to).toBeFocused();for(const field of [from,to]){await expect(field).toHaveAttribute('aria-invalid','true');await expect(field).toHaveAccessibleDescription('开始日期不能晚于结束日期。');}expect(queries).toHaveLength(count);
-  await page.getByRole('button',{name:/^收起筛选/}).click();await page.getByRole('button',{name:'查询',exact:true}).click();await expect(range).toBeHidden();await expect(page.locator('.list-page-body > [role=alert]')).toHaveText('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
-  await page.getByRole('button',{name:/^更多筛选/}).click();await to.fill('2026-10-16');await expect(range.getByRole('alert')).toHaveCount(0);await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('to')).toBe('2026-10-16');
+  await page.getByRole('button',{name:/^收起筛选/}).click();await page.getByRole('button',{name:'查询',exact:true}).click();await expect(range).toBeVisible();await expect(to).toBeFocused();await expect(page.locator('.list-page-body > [role=alert]')).toHaveText('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
+  await to.fill('2026-10-16');await expect(range.getByRole('alert')).toHaveCount(0);await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('to')).toBe('2026-10-16');
   await page.getByRole('button',{name:'重置',exact:true}).click();await expect(from).toHaveValue('');await expect(to).toHaveValue('');await expect(to).not.toHaveAttribute('aria-invalid','true');
 });

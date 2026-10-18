@@ -16,7 +16,7 @@ export type EditableDetailTableProps<T> = {
   onFocusCell?:(target:{rowId:string;field:string})=>void;
   footer?:ReactNode;
 };
-type FocusIntent = {kind:'add'|'remove';origin:Element|null;before:string[];removed?:string;neighbours:string[];key?:string;ready:boolean};
+type FocusIntent = {kind:'add'|'remove';origin:Element|null;before:string[];removed?:string;neighbours:string[];key?:string;ready:boolean;originDisabled?:boolean};
 
 /** A controlled detail grid. Data validation and persistence stay with the form. */
 export function EditableDetailTable<T>({title,rows,columns,getRowKey,busy=false,readOnly=false,onAdd,onRemove,addLabel='新增明细',removeLabel='删除明细',emptyText='暂无明细',rowError,cellError,focusColumn,onFocusCell,footer}:EditableDetailTableProps<T>) {
@@ -31,7 +31,7 @@ export function EditableDetailTable<T>({title,rows,columns,getRowKey,busy=false,
     const leave=(event:Event)=>{
       const current=intent.current;if(!current)return;
       if(event.target instanceof Node&&current.origin?.contains(event.target))return;
-      if(event.type==='focusin'&&event.target===document.body&&(!current.origin?.isConnected||current.origin.matches(':disabled')))return;
+      if(event.type==='focusin'&&event.target===document.body&&(current.originDisabled||!current.origin?.isConnected||current.origin.matches(':disabled')))return;
       intent.current=null;
     };
     const blur=()=>{intent.current=null;};
@@ -41,6 +41,9 @@ export function EditableDetailTable<T>({title,rows,columns,getRowKey,busy=false,
   useLayoutEffect(()=>{
     const current=intent.current;if(!current)return;
     if(readOnly){intent.current=null;return;}
+    // Native disabled buttons lose focus to body. Remember why before a later
+    // render enables the origin again; user pointer/focus moves still cancel.
+    if(current.origin?.matches(':disabled'))current.originDisabled=true;
     if(!current.ready||busy)return;
     const keys=rows.map(getRowKey);
     let target:string|undefined;
@@ -57,7 +60,7 @@ export function EditableDetailTable<T>({title,rows,columns,getRowKey,busy=false,
     }
     intent.current=null;
     const document=region.current?.ownerDocument,active=document?.activeElement;
-    if(active!==current.origin&&!(active===document?.body&&(!current.origin?.isConnected||current.origin.matches(':disabled'))))return;
+    if(active!==current.origin&&!(active===document?.body&&(current.originDisabled||!current.origin?.isConnected||current.origin.matches(':disabled'))))return;
     if(target!==undefined){
       const field=focusColumn??columns[0]?.key;
       if(field&&onFocusCell){onFocusCell({rowId:target,field});return;}

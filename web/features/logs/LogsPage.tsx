@@ -4,7 +4,7 @@ import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage'
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
-import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
+import {useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '../../ui/data';
 import {PermissionGate} from '../../ui/patterns';
 import {Button, Input} from '../../ui/controls';
@@ -37,6 +37,8 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   const [detail, setDetail] = useState<string | null>(null), [confirmation, setConfirmation] = useState<{action: 'delete' | 'clear' | 'unlock'; ids: string[]; username?: string} | null>(null);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
   const [dateError, setDateError] = useState(''), dateField = useRef<DateRangeFieldHandle>(null);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false), [dateFocusRequest, setDateFocusRequest] = useState(0);
+  useLayoutEffect(() => {if (dateFocusRequest > 0) dateField.current?.focus('to');}, [dateFocusRequest]);
   const query = useMemo(() => ({ip: filters.ip, status: filters.status ? Number(filters.status) : undefined,
     $from: filters.from || undefined, to: filters.to || undefined, direction: sorting[0]?.desc ? 'desc' as const : 'asc' as const}), [filters, sorting]);
   const operationQuery = useMemo(() => ({...query, title: filters.title, operator: filters.person, businessType: filters.businessType ? Number(filters.businessType) : undefined,
@@ -73,7 +75,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   const selectedIds = Object.keys(selection).filter(id => selection[id]), selected = data?.items.find(row => row.id === selectedIds[0]);
   function apply(event: FormEvent) {
     event.preventDefault(); setActionError('');
-    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。'); setActionError('开始日期不能晚于结束日期。'); dateField.current?.focus('to'); return;}
+    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。'); setActionError('开始日期不能晚于结束日期。'); setAdvancedExpanded(true); setDateFocusRequest(value => value + 1); return;}
     setDateError('');
     setFilters(draft); setPage(1); setVersion(value => value + 1);
   }
@@ -98,7 +100,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   }
   return <ListPage className="logs-page" title={title} description={operation ? '查看系统操作记录和执行详情。' : '查看登录记录并管理账号解锁。'}>
     <DictionaryNotice dictionary={statuses} />{types && <DictionaryNotice dictionary={types} />}
-    {showFilters && <ListFilters primaryCount={3} advancedCount={[...(operation ? [draft.businessType, draft.status] : []), draft.from, draft.to].filter(Boolean).length} actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
+    {showFilters && <ListFilters expanded={advancedExpanded} onExpandedChange={setAdvancedExpanded} primaryCount={3} advancedCount={[...(operation ? [draft.businessType, draft.status] : []), draft.from, draft.to].filter(Boolean).length} actions={<><Button label="搜索" type="submit" /><Button label="重置" variant="ghost" onClick={reset} /></>} onSubmit={apply}><Input label={operation ? '操作地址' : '登录地址'} value={draft.ip} onChange={ip => setDraft({...draft, ip})} />
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
       {operation && <label>操作类型<Select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></Select></label>}
       <label>{operation ? '操作状态' : '登录状态'}<Select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>
@@ -107,7 +109,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
     <ListToolbar ><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}
       <PermissionGate permission={`${permission}:export`}><Button label="导出" variant="ghost" isDisabled={busy || loading} onClick={() => {void download();}} /></PermissionGate>
-      <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => setShowFilters(value => !value)} /><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
+      <Button label={showFilters ? '隐藏搜索' : '显示搜索'} variant="ghost" onClick={() => {setShowFilters(value => !value);setAdvancedExpanded(false);}} /><Button label="刷新" variant="ghost" isDisabled={loading} onClick={() => setVersion(value => value + 1)} />
       <ColumnVisibilityMenu labels={Object.fromEntries(columns.filter(column => column.id !== 'actions').map(column => ['accessorKey' in column ? String(column.accessorKey) : column.id ?? '', String(column.header)]))} visibility={visibility} onChange={setVisibility} title="列显示" className="post-column-menu" />
     </ListToolbar>
     {feedback && <p role="status">{feedback}</p>}{actionError && !confirmation && <p role="alert">{actionError}</p>}

@@ -132,7 +132,7 @@ test('operation date filter exposes correctable errors and focuses visible bound
   await from.fill('2026-10-15');await to.fill('2026-10-01');const count=queries.length;
   await page.getByRole('button',{name:'搜索',exact:true}).click();await expect(to).toBeFocused();await expect(to).toHaveAccessibleDescription('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
   await page.getByRole('button',{name:/^收起筛选/}).click();await page.getByRole('button',{name:'搜索',exact:true}).click();
-  await expect(range).toBeHidden();await expect(page.locator('.list-page-body > [role=alert]')).toHaveText('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
-  await page.getByRole('button',{name:/^更多筛选/}).click();await to.fill('2026-10-16');await expect(to).not.toHaveAttribute('aria-invalid','true');await expect(range.getByRole('alert')).toHaveCount(0);
+  await expect(range).toBeVisible();await expect(to).toBeFocused();await expect(page.locator('.list-page-body > [role=alert]')).toHaveText('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
+  await to.fill('2026-10-16');await expect(to).not.toHaveAttribute('aria-invalid','true');await expect(range.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button',{name:'搜索',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('to')).toBe('2026-10-16');expect(queries.at(-1)?.get('from')).toBe('2026-10-15');
 });

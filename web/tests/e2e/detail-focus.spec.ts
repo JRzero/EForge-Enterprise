@@ -1,5 +1,44 @@
 import {test,expect} from './fixtures';
 
+test('async detail focus waits for busy controls to become available without losing its intent',async({page})=>{
+  await page.goto('/tests/fixtures/detail-focus.html');
+  await page.getByRole('button',{name:'新增明细'}).click();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-busy',{detail:true})));
+  await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+  const added=page.getByLabel('内容 新:行/中文');await expect(added).toBeDisabled();await expect(added).not.toBeFocused();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-busy',{detail:false})));
+  await expect(added).toBeFocused();
+});
+
+test('leaving during busy work cancels delayed detail focus',async({page})=>{
+  await page.goto('/tests/fixtures/detail-focus.html');await page.getByRole('button',{name:'新增明细'}).click();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-busy',{detail:true})));
+  await page.getByLabel('其他输入').fill('保持这里');
+  await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-busy',{detail:false})));
+  await expect(page.getByLabel('内容 新:行/中文')).toBeEnabled();await expect(page.getByLabel('其他输入')).toBeFocused();
+});
+
+test('readonly transitions cancel old focus even if editing resumes before the mutation completes',async({page})=>{
+  await page.goto('/tests/fixtures/detail-focus.html');await page.getByRole('button',{name:'新增明细'}).click();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-readonly',{detail:true})));
+  await expect(page.getByRole('button',{name:'新增明细'})).toHaveCount(0);
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-readonly',{detail:false})));
+  await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+  await expect(page.getByLabel('内容 新:行/中文')).toBeVisible();await expect(page.getByLabel('内容 新:行/中文')).not.toBeFocused();
+});
+
+test('unmounted detail completion cannot focus a replacement table',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/tests/fixtures/detail-focus.html');await page.getByRole('button',{name:'新增明细'}).click();
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-mounted',{detail:false})));
+  await expect(page.getByRole('region',{name:'异步明细',exact:true})).toHaveCount(0);
+  await page.getByLabel('其他输入').fill('替换表格期间保留');
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('detail-mounted',{detail:true})));
+  await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+  await expect(page.getByLabel('内容 新:行/中文')).toBeVisible();await expect(page.getByLabel('其他输入')).toBeFocused();expect(errors).toEqual([]);
+});
+
 test('mounting a rich text detail cell preserves the requested first-field focus',async({page})=>{
   await page.goto('/tests/fixtures/detail-focus.html?rich');
   await page.getByRole('button',{name:'新增明细'}).click();

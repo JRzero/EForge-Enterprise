@@ -1,13 +1,13 @@
 # 字段、弹层和错误定位契约方案
 
-状态：**H04 组件实现、前端回归与两配置生成应用通过，完整真实环境/云端仍待验收；H05 尚未实施**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H04、H05。FormField、三种选择器、富文本、CheckboxGroup、RadioGroup、DateRangeField 已接入字段契约与真实消费者。最终 lint/typecheck、生成客户端复现、131单元、294模拟API浏览器、build及正式产物5项通过。下表记录设计时问题，不代表修复后仍全部存在；完整最终运行与云端证据以任务清单为准。
+状态：**H04 已完成精确云端验收；H05 分片实现与验收中**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H04、H05。FormField、三种选择器、富文本、CheckboxGroup、RadioGroup、DateRangeField 已接入字段契约与真实消费者。最终 lint/typecheck、生成客户端复现、131单元、294模拟API浏览器、build及正式产物5项通过。下表记录设计时问题，不代表修复后仍全部存在；完整最终运行与云端证据以任务清单为准。
 
 ## 本地实现与证据
 
 - `framework-fields-final-generated/unit/build/browser/dist.log`：顺序进程54797终态0，分别证明客户端复现、131单元、正式构建、294浏览器及5项dist。
 - ReferenceSelect 默认ID跨可用状态保持、TreeSelect变只读时仅在内部焦点被移除后回焦、Quill两层Escape：`field-contract-review-red-native.log`四例修复前失败；最终 `field-contract-review-final-browser.log` 50/50通过。不会将覆盖层后不可直接点到的按钮用例冒充成功外点保存。
 - 选项组/日期新增五例先红，最终 `group-field-contracts-accepted-browser.log` 37/37，`group-field-contracts-final-static.log` lint/typecheck通过。Checkbox required只描述整组必填，不强制每项选中；Radio使用实例独立name；公开focus定位实际选项或只读/空组；Date保留日期字符串、旧error并与fieldError去重。
-- 日志和参数配置继续保留全局日期错误，并关联到实际日期字段；当前高级筛选收起时不会强行聚焦隐藏控件，自动揭示和提交后导航属于H05。用户编辑对已选停用岗位/角色补帮助说明，未知旧值和精确ID不变。
+- 日志和参数配置继续保留全局日期错误，并关联到实际日期字段；H04阶段高级筛选收起时不会强行聚焦隐藏控件；后续H05第六片补充自动揭示和提交后导航。用户编辑对已选停用岗位/角色补帮助说明，未知旧值和精确ID不变。
 - 生成模板为主表/子表富文本提供业务字段名和独立ID，移除包裹其自身标签的外层label。`server/eforge-boot/target/hardening-generated-default.log` 与 `hardening-generated-enabled.log` 均终态通过：真实生成并编译CRUD/tree/sub及自动主键/String键应用，实际浏览器按richContent/childRichContent分别定位并验证ID唯一，保留上传、Activity、布局、精确长ID/金额、时区、权限和SQL内容断言。两份安装后OpenAPI一致；这是实际生成应用证据，不是普通mock套件。
 
 ## 设计时的问题基线
@@ -310,3 +310,13 @@ EditableDetailTable现在捕获操作前的稳定行键和相邻键，onAdd可�
 第五片基础检查：h05-generated-errors-final-lint/typecheck/check-generated/test/build 均通过，131单元；两实时OpenAPI SHA256同为677574099734C447415004D49818998561F8C109A4D4AFCADA0E0E50096CA960。本片没有修改共享组件运行源码，新增行为由两配置实际生成应用浏览器验证；305模拟API浏览器/5 dist属于前一片精确云端基线，不重复描述为本片新执行结果。完整Maven为1124报告记录、11环境跳过、0失败。
 
 该实时OpenAPI来自安装七类示例后的应用，包含新增21个fixture端点，不能宣称与未安装示例的主契约逐字相等。首次直接文本比较因此失败；随后两配置分别逐项deepEqual证明原118个端点和171个模型均与提交契约一致，仅新增生成业务端点/模型。客户端生成仍使用原主契约并通过可复现检查。
+
+第五片精确云端验收：216e0cf769a7f5a0f224c942d405625a464b023e 的 server39092336321 四项及 web39092336353 全部终态 success，直接日志 h05-generated-errors-cloud-final.log 已保存。
+
+## H05 第六片：折叠筛选与异步明细焦点
+
+ListFilters 增加可选 expanded/onExpandedChange，原调用仍使用内部状态。日志和参数配置提交倒置日期时先展开高级条件，再在布局提交后定位结束日期；保留草稿、字段描述和全局提示，不发送无效查询。日志隐藏整个筛选区时仍恢复原先重新展示后的收起状态；参数配置保留原有隐藏不卸载语义。两处真实浏览器用例 h05-hidden-filter-red.log 修复前失败，修复后与明细共21项通过。
+
+异步新增期间禁用原按钮会使浏览器焦点退到 body，重新启用后原 disabled 信息消失。EditableDetailTable 记住这一原因，但用户转移焦点、点击别处、窗口失焦仍取消意图；只读切换及卸载使旧意图失效。h05-focus-lifecycle-red.log 实际1失败9通过，修复后10通过，覆盖忙碌恢复、主动离开、只读恢复、卸载并替换组件。未引入计时器、全局字段查询或业务写入变化。
+
+最终 lint/typecheck、客户端复现、131单元、build、309模拟API浏览器及5正式产物全部通过，日志 h05-focus-client/unit/build/browser/dist.log；定向日志 h05-focus-final-targeted.log。审查确认可选受控属性不泄漏到 DOM，定位只发生于用户提交错误后，不因普通渲染抢焦点；前端改动没有修改后端/API/数据库，未重复本地 Maven 和真实 MySQL 全套，本片精确云端仍待验证。H05 尚保留隐藏/失效目标的最终边界审查，整个规格未完成。
