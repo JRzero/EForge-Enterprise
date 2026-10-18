@@ -96,3 +96,19 @@ test('last-row deletion returns focus to add and old async rejection cannot repl
   await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
   await expect(page.getByLabel('内容 新:行/中文-1')).toBeFocused();
 });
+
+for (const unavailable of ['hidden','inert','disabled','nonfocusable'] as const) {
+  test(`deletion skips a ${unavailable} stable field and focuses a usable control in the surviving row`,async({page})=>{
+    await page.goto('/tests/fixtures/detail-focus.html');
+    await page.getByLabel('内容 B').evaluate((element,mode)=>{
+      if(mode==='hidden') (element as HTMLElement).style.display='none';
+      else if(mode==='inert') element.setAttribute('inert','');
+      else if(mode==='disabled') element.setAttribute('disabled','');
+      else {const replacement=document.createElement('span');replacement.id=element.id;replacement.textContent='只读内容';element.replaceWith(replacement);}
+    },unavailable);
+    await page.getByRole('button',{name:'删除明细'}).first().click();
+    await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+    await expect(page.getByLabel('内容 A')).toHaveCount(0);
+    await expect(page.locator('tr[data-detail-row="B"]').getByRole('button',{name:'删除明细'})).toBeFocused();
+  });
+}

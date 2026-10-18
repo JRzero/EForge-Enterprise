@@ -320,3 +320,13 @@ ListFilters 增加可选 expanded/onExpandedChange，原调用仍使用内部状
 异步新增期间禁用原按钮会使浏览器焦点退到 body，重新启用后原 disabled 信息消失。EditableDetailTable 记住这一原因，但用户转移焦点、点击别处、窗口失焦仍取消意图；只读切换及卸载使旧意图失效。h05-focus-lifecycle-red.log 实际1失败9通过，修复后10通过，覆盖忙碌恢复、主动离开、只读恢复、卸载并替换组件。未引入计时器、全局字段查询或业务写入变化。
 
 最终 lint/typecheck、客户端复现、131单元、build、309模拟API浏览器及5正式产物全部通过，日志 h05-focus-client/unit/build/browser/dist.log；定向日志 h05-focus-final-targeted.log。审查确认可选受控属性不泄漏到 DOM，定位只发生于用户提交错误后，不因普通渲染抢焦点；前端改动没有修改后端/API/数据库，未重复本地 Maven 和真实 MySQL 全套，本片精确云端仍待验证。H05 尚保留隐藏/失效目标的最终边界审查，整个规格未完成。
+
+## H05 失效目标边界审查
+
+实际删除明细后，下一行的稳定字段若 display:none、inert 或被只读文本替代，旧实现调用 focus 后直接返回，会留下 body 焦点。h05-unavailable-target-red.log 四例中三失败、一禁用场景通过。修复后只尝试表格内部、可见且未禁用/inert的节点，并确认 activeElement 确实改变；失败继续查找同一行可用原生控件，最后回到新增按钮或表格区域。没有自动展开调用方隐藏内容，没有越行聚焦，也未改变 onFocusCell 调用方自行导航的合同。
+
+h05-unavailable-target-green.log 全14项通过，覆盖稳定行重排、异步完成/失败/过期、忙碌恢复、用户离开、只读/卸载、富文本挂载与四种失效字段。新的静态检查、131单元及正式构建通过（h05-target-final-lint/types/unit/build.log）。前端公共行为修复没有更改后端、契约或客户端；全浏览器与dist终态另记，不能用前一提交309项冒充本次。
+
+前一精确提交8c7bdccf964018bff7b18bca1c83fa72957d1442的server39093250169、web39093250115仍在运行，agent-skills39093250132成功。本片与前片均须各自精确云端终态；当前H05保持in_progress，后续H06–H11/H13范围不变。
+
+本片完整回归首轮 h05-target-final-browser.log 为312通过/1缓存图表30秒超时。trace显示已执行到最后返回缓存菜单的点击，无功能断言失败；同期build耗时32.55秒，存在资源竞争的可能，未据此直接归为基础设施成功。保留失败日志和所有原断言/超时，构建结束后顺序重跑 h05-target-sequential-browser.log 全313通过，随后 h05-target-sequential-dist.log 全5通过。没有修改缓存产品代码或放宽测试。本片本地验证终态成功，新提交云端仍待验收；前片web39093250115现已success，server仍运行。

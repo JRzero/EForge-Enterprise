@@ -61,17 +61,22 @@ export function EditableDetailTable<T>({title,rows,columns,getRowKey,busy=false,
     intent.current=null;
     const document=region.current?.ownerDocument,active=document?.activeElement;
     if(active!==current.origin&&!(active===document?.body&&(current.originDisabled||!current.origin?.isConnected||current.origin.matches(':disabled'))))return;
+    const focusAvailable=(element:HTMLElement|null|undefined)=>{
+      if(!element||!region.current?.contains(element)||element.matches(':disabled')||element.closest('[inert]')||!element.getClientRects().length)return false;
+      element.focus();
+      return document?.activeElement===element;
+    };
     if(target!==undefined){
       const field=focusColumn??columns[0]?.key;
       if(field&&onFocusCell){onFocusCell({rowId:target,field});return;}
       const fieldElement=field?document?.getElementById(`${id}-${JSON.stringify([target,field])}`):null;
-      if(fieldElement instanceof HTMLElement&&region.current?.contains(fieldElement)&&!fieldElement.matches(':disabled')){fieldElement.focus();return;}
+      if(fieldElement instanceof HTMLElement&&focusAvailable(fieldElement))return;
       // Compatibility for callers that have not adopted the stable cell ID yet.
       const row=Array.from(region.current?.querySelectorAll<HTMLElement>('tr[data-detail-row]')??[]).find(element=>element.dataset.detailRow===target);
-      const first=row?.querySelector<HTMLElement>('input:not(:disabled),button:not(:disabled),select:not(:disabled),textarea:not(:disabled)');
-      if(first){first.focus();return;}
+      const controls=row?.querySelectorAll<HTMLElement>('input:not(:disabled),button:not(:disabled),select:not(:disabled),textarea:not(:disabled)')??[];
+      for(const control of controls)if(focusAvailable(control))return;
     }
-    (region.current?.querySelector<HTMLElement>('.detail-table-header button:not(:disabled)')??region.current)?.focus();
+    if(!focusAvailable(region.current?.querySelector<HTMLElement>('.detail-table-header button:not(:disabled)')))focusAvailable(region.current);
   },[rows,getRowKey,columns,busy,readOnly,settled,focusColumn,onFocusCell,id]);
   async function operate(kind:'add'|'remove',action:()=>void|string|Promise<void|string>,removed?:string){
     const version=++operationVersion.current;
