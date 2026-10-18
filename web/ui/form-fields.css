@@ -11,6 +11,9 @@
 .ui-form-error-summary button { border: 0; background: transparent; color: inherit; font: inherit; padding: 4px 0; text-align: left; text-decoration: underline; overflow-wrap: anywhere; cursor: pointer; max-width: 100%; }
 .ui-form-error-summary button:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 2px; }
 .ui-field-error,.ui-required { color: #dc3545; }
+.ui-exact-number{display:block;min-width:0;max-width:100%}
+.ui-exact-number>input{width:100%;min-width:0}
+.ui-exact-number>.ui-field-error{display:block;white-space:normal;overflow-wrap:anywhere}
 .ui-required { margin-right: 4px; }
 .ui-choice-group { min-width: 0; margin: 0; padding: 0; border: 0; }
 .ui-choice-group:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 4px; border-radius: 2px; }

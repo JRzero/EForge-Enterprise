@@ -4,6 +4,7 @@ import {ApprovalDemo} from './ApprovalDemo';
 import {TabbedDetailPage} from '../ui/TabbedDetailPage';
 import {ReferenceSelect} from '../ui/ReferenceSelect';
 import {RemoteRecordDemo} from './RemoteRecordDemo';
+import {ExactNumberDemo} from './ExactNumberDemo';
 import {BatchActionBar,AppliedFilters,SavedListViews} from '../ui';
 import {normalizeShowcaseListView} from './showcaseListView';
 import {TreeSelect} from '../ui/TreeSelect';
@@ -82,7 +83,7 @@ function FormDemo(){
   const [name,setName]=useState(''),[email,setEmail]=useState(''),[remark,setRemark]=useState(''),[enabled,setEnabled]=useState(true),[message,setMessage]=useState('');
   const [fieldMode,setFieldMode]=useState('edit'),[fieldIssue,setFieldIssue]=useState(false);
   const groupState={readOnly:fieldMode==='readonly',disabled:fieldMode==='disabled'};
-  return <EditorPage title="新增客户" description="本地演示，保存不会发送网络请求。" busy={false} saveLabel="保存客户" cancelLabel="清空表单" onCancel={()=>{setName('');setEmail('');setRemark('');setMessage('');setCustomer(null);setDepartment(null);setPeriod({from:'',to:''});setCollaborators([]);setChannels(['email']);setPriority('normal');setEnabled(true);}} onSubmit={()=>{setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}}>
+  return <><EditorPage title="新增客户" description="本地演示，保存不会发送网络请求。" busy={false} saveLabel="保存客户" cancelLabel="清空表单" onCancel={()=>{setName('');setEmail('');setRemark('');setMessage('');setCustomer(null);setDepartment(null);setPeriod({from:'',to:''});setCollaborators([]);setChannels(['email']);setPriority('normal');setEnabled(true);}} onSubmit={()=>{setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}}>
     <FormSection title="基本信息"><Input label="客户名称" value={name} onChange={setName} isRequired/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/></FormSection>
     <FormSection title="业务设置">
       <RemoteRecordDemo/>
@@ -102,7 +103,7 @@ function FormDemo(){
       <Button type="button" variant="secondary" label={fieldIssue?'清除字段错误':'显示字段错误'} aria-pressed={fieldIssue} onClick={()=>setFieldIssue(value=>!value)}/>
     </div>
     {message&&<Feedback tone="success">{message}</Feedback>}
-  </EditorPage>;
+  </EditorPage><ExactNumberDemo/></>;
 }
 function DetailDemo(){const [tab,setTab]=useState('basic');return <TabbedDetailPage label="项目详情页签" value={tab} onChange={setTab} tabs={[{key:'basic',label:'基本信息',content:<>
   <DetailSection title="基本信息"><DetailField label="项目编号">EF-2026-001</DetailField><DetailField label="项目名称">企业服务平台</DetailField><DetailField label="负责人">林小禾</DetailField><DetailField label="客户">星河科技</DetailField><DetailField label="开始日期">2026-10-01</DetailField><DetailField label="项目状态"><Tag tone="success">进行中</Tag></DetailField></DetailSection>

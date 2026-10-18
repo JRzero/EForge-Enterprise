@@ -1,4 +1,5 @@
 import {NativeInput, Select, TextareaControl} from '../../../ui/native';
+import {ExactNumberInput} from '../../../ui/ExactNumberInput';
 import {FormErrorSummary, type FormErrorItem, type FormErrorTarget} from '../../../ui/FormErrorSummary';
 #if($table.sub)
 import {EditableDetailTable, MasterDetailLayout} from '../../../ui';
@@ -166,6 +167,7 @@ function FieldControl({field, value, disabled, onChange, id, fieldError}: {field
     <UploadEntries paths={text(value).split(',').filter(Boolean)} disabled={disabled || uploading} onChange={paths => onChange(paths.join(','))}>{(path, index) => <>{field.html === 'imageUpload' ? <ImagePreview src={path} label={(field.label ?? field.key) + ' 文件 ' + (index + 1)} width={148} height={148} /> : <ResourceFileLinks src={path} />}<span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(Boolean).filter((_item, ordinal) => ordinal !== index).join(','))} /></>}</UploadEntries>
   </div>;
   if (field.html === 'textarea') return <TextareaControl {...fieldAttributes(fieldId, field, fieldError)} value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
+  if (field.type === 'Long' || field.type === 'BigDecimal') return <ExactNumberInput {...fieldAttributes(fieldId, field, fieldError)} value={text(value)} disabled={disabled} required={field.required} integer={field.type === 'Long'} onValueChange={next => onChange(next === '' ? undefined : next)} />;
   return <NativeInput {...fieldAttributes(fieldId, field, fieldError)} value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}
     type={field.type === 'Date' ? 'datetime-local' : 'text'} step={field.type === 'Date' ? '.001' : undefined}
     inputMode={field.type === 'Long' || field.type === 'BigDecimal' ? 'decimal' : undefined}

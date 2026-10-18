@@ -438,7 +438,12 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         await expect(dialog.getByLabel('__proto__',{exact:true})).toHaveValue('');
         await dialog.getByLabel('oRderKey', {exact:true}).fill(id);
         await dialog.getByLabel('label', {exact:true}).first().fill(label);
-        await dialog.getByLabel('amount', {exact:true}).fill('9007199254740993.00001');
+        const exactAmount=dialog.getByLabel('amount', {exact:true});
+        await exactAmount.fill('1,23');await exactAmount.blur();
+        assert.equal(await exactAmount.evaluate(input=>input.validity.valid),false,'Ambiguous decimal draft must not be submitted');
+        await expect(exactAmount).toHaveValue('1,23');
+        await exactAmount.fill('9007199254740993.00001');
+        assert.equal(await exactAmount.evaluate(input=>input.validity.valid),true);
         await dialog.getByLabel('insertOnly',{exact:true}).fill('新增专用保持');await expect(dialog.getByLabel('editOnly',{exact:true})).toHaveCount(0);
         if (category !== 'tree') await dialog.getByLabel('parentId', {exact:true}).fill('0');
         if (category === 'sub') {

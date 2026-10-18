@@ -66,3 +66,6 @@ export {SavedListViews} from './SavedListViews';
 export type {ListViewState} from './SavedListViews';
 export {AuditTimeline} from './AuditTimeline';
 export type {AuditEvent,AuditChange} from './AuditTimeline';
+export {ExactNumberInput} from './ExactNumberInput';
+export {exactNumberIssue,normalizeNumberPaste} from './exact-number';
+export type {ExactNumberRules} from './exact-number';
