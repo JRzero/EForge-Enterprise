@@ -244,3 +244,7 @@ H04 已创建并进入完整回归的独立测试包括：
 | 视觉与正式产物 | 桌面/320 窄屏、焦点/错误可见；开发态及 dist 产物回归，保持原外观方向 |
 
 保留并扩充 `shared-selectors.spec.ts`、`shared-form-states.spec.ts`、`notice-rich-text.spec.ts`、`showcase.spec.ts` 和真实业务测试。第一薄片测试通过不替代 H04/H05 完成；最终执行项目适用 lint/typecheck/test/build、生成客户端可复现及相关/完整真实环境和云端门槛。
+
+## 2026-10-18 阶段验收
+
+H04精确提交7331671已通过完整云端验收：131单元、294模拟浏览器、5正式产物、两配置各68真实浏览器与完整API、实际生成富文本字段关联。H05设计尚未实施，不能以H04验收替代隐藏错误导航和明细定位。 统一证据见 [H01–H04验收](framework-hardening-h01-h04-acceptance.md)。
