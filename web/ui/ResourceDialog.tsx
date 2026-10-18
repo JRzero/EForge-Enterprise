@@ -1,3 +1,4 @@
+import './resource-dialog.css';
 import {NativeButton} from './native';
 import {useEffect, useId, useLayoutEffect, useRef, type ReactNode} from 'react';
 import {useDialogGeometry} from './useDialogGeometry';

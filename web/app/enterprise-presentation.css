@@ -39,11 +39,6 @@
 .post-table .post-row-actions button[data-variant=ghost] { color: var(--ui-primary); padding-inline: 6px; min-height: 30px; }
 .enterprise-layout button:disabled { cursor: not-allowed; }
 .posts-page select, .posts-page textarea, .post-dialog input[type=number], .navigation-search input { border-color: #e8e9eb; border-radius: 4px; }
-.post-dialog { color: var(--ui-text); box-shadow: 0 16px 48px #172b4d33; }
-.post-dialog h2 { font-size: 18px; font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid var(--ui-border); }
-.post-dialog form { gap: 18px; }
-.post-dialog form > .post-row-actions:last-child { justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--ui-border); }
-.post-dialog::backdrop { background: #172b4d66; }
 .server-card, .workspace-note { background: #fff; border-color: var(--ui-border); border-radius: 4px; }
 .server-card h2 { font-size: 16px; border-bottom: 1px solid var(--ui-border); padding-bottom: 12px; }
 .welcome-panel { margin: 20px 0; padding: 24px; background: #fff; border: 1px solid var(--ui-border); border-left: 3px solid var(--ui-primary); }
@@ -68,7 +63,6 @@
   .post-filters input, .post-filters select { max-width: 100%; }
   .enterprise-layout button[data-variant] { min-height: 40px; }
   .post-table .post-row-actions button[data-variant] { min-height: 36px; }
-  .post-dialog { max-width: calc(100vw - 24px); padding: 20px; }
   .ef-page-header { gap: 12px; flex-wrap: wrap; }
   .ef-page-header h1 { font-size: 20px; }
 }

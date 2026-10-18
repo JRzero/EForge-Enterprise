@@ -1,0 +1,30 @@
+.post-dialog {background: white; padding: 28px; border-radius: 4px; width: min(100%, 520px); max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 70px #102e3550;}
+.post-dialog h2 {font-size: 20px; margin: 0 0 20px;} .post-dialog form {display: grid; gap: 16px;} .post-dialog textarea {min-height: 80px; resize: vertical;}
+.post-dialog::backdrop {background: #102e3560;} .post-dialog {border: 0; color: var(--ui-text);}
+.dialog-move-title {cursor:move;touch-action:none;padding-right:32px;}
+.dialog-geometry-help {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle) {position:absolute;background:var(--ui-canvas);color:var(--ui-text);border:1px solid var(--ui-border);border-radius:4px;padding:2px;touch-action:none;min-width:22px;min-height:22px;}
+.dialog-move-handle {right:8px;top:8px;cursor:move;}
+.dialog-width-handle {right:0;top:40%;cursor:ew-resize;}
+.dialog-size-handle {right:0;bottom:0;cursor:nwse-resize;}
+.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):focus-visible {outline:2px solid var(--ui-primary);outline-offset:2px;}
+.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):disabled {cursor:default;opacity:.5;}
+.post-dialog input[type=number] {font: inherit; padding: 9px 12px; border: 1px solid var(--ui-border); border-radius: 6px;}
+.post-dialog { color: var(--ui-text); box-shadow: 0 16px 48px #172b4d33; }
+.post-dialog h2 { font-size: 18px; font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid var(--ui-border); }
+.post-dialog form { gap: 18px; }
+.post-dialog form > .post-row-actions:last-child { justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--ui-border); }
+.post-dialog::backdrop { background: #172b4d66; }
+@media (max-width:760px) {.post-dialog { max-width: calc(100vw - 24px); padding: 20px; }}
+.post-dialog { border-radius: 4px; padding: 20px; }
+.post-dialog h2 { font-size: 18px; font-weight: 400; padding-bottom: 14px; margin-bottom: 20px; }
+.post-dialog form { gap: 16px; }
+.post-dialog legend { padding-inline: 6px; font-size: 13px; color: #606266; }
+.post-dialog :is(input[type=checkbox], input[type=radio]) { accent-color: var(--ui-primary); }
+.post-dialog .post-dialog-actions, .post-dialog form > .post-row-actions:last-child { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 16px; border-top: 1px solid var(--ui-border); }
+.post-dialog-actions > button { width: auto; flex: 0 0 auto; }
+.post-dialog > .state-actions { justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--ui-border); }
+.post-dialog label:has(> input:is([type=checkbox],[type=radio])) { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+.post-dialog > .post-row-actions { justify-content: flex-end; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--ui-border); }
+.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle) { background: transparent; border-color: transparent; color: #a0a8b2; opacity: .45; }
+.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):is(:hover,:focus-visible) { opacity: 1; background: #f5f7fa; border-color: #dcdfe6; }

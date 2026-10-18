@@ -51,20 +51,8 @@
 .post-status {padding: 4px 9px; border-radius: 6px; font-size: 12px; white-space: nowrap;}
 .status-0 {background: #e4f5eb; color: #257448;} .status-1 {background: #f4eee3; color: #89662a;}
 .post-overlay {position: fixed; inset: 0; z-index: 20; background: #102e3560; display: flex; justify-content: center; align-items: center; padding: 24px;}
-.post-dialog {background: white; padding: 28px; border-radius: 4px; width: min(100%, 520px); max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 70px #102e3550;}
-.post-dialog h2 {font-size: 20px; margin: 0 0 20px;} .post-dialog form {display: grid; gap: 16px;} .post-dialog textarea {min-height: 80px; resize: vertical;}
 .posts-page [role=alert] {color: #a13f36; font-size: 14px;}
-@media (max-width: 760px) {.post-filters {align-items: stretch; flex-direction: column;} .post-pagination {justify-content: flex-start;} .post-overlay {padding: 16px;} .post-dialog {padding: 20px;}}
-.post-dialog::backdrop {background: #102e3560;} .post-dialog {border: 0; color: var(--ui-text);}
-.dialog-move-title {cursor:move;touch-action:none;padding-right:32px;}
-.dialog-geometry-help {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
-.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle) {position:absolute;background:var(--ui-canvas);color:var(--ui-text);border:1px solid var(--ui-border);border-radius:4px;padding:2px;touch-action:none;min-width:22px;min-height:22px;}
-.dialog-move-handle {right:8px;top:8px;cursor:move;}
-.dialog-width-handle {right:0;top:40%;cursor:ew-resize;}
-.dialog-size-handle {right:0;bottom:0;cursor:nwse-resize;}
-.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):focus-visible {outline:2px solid var(--ui-primary);outline-offset:2px;}
-.post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):disabled {cursor:default;opacity:.5;}
-.post-dialog input[type=number] {font: inherit; padding: 9px 12px; border: 1px solid var(--ui-border); border-radius: 6px;}
+@media (max-width: 760px) {.post-filters {align-items: stretch; flex-direction: column;} .post-pagination {justify-content: flex-start;} .post-overlay {padding: 16px;}}
 .post-filters[hidden] {display: none;}
 .post-table table {min-width: 850px;} .post-table th {white-space: nowrap;} .post-table .post-row-actions {flex-wrap: nowrap; gap: 4px;}
 .department-name {display: flex; align-items: center; gap: 7px; white-space: nowrap;} .department-name button {border: 0; border-radius: 4px; padding: 5px; background: var(--ui-primary-soft); color: var(--ui-primary); cursor: pointer; width: 26px;} .department-leaf {width: 26px; flex-shrink: 0;}
@@ -95,7 +83,6 @@
 .roles-page .ef-data-table__toolbar, .role-user-list .ef-data-table__toolbar {display: none;}
 .grant-fieldset {min-width: 0; border: 1px solid var(--ui-border); border-radius: 8px; padding: 12px;}
 .grant-toolbar {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px;}
-.post-dialog .grant-toolbar label, .post-dialog .grant-row label, .post-dialog .grant-unavailable {display: flex; flex-direction: row; align-items: center; gap: 8px;}
 .grant-tree {list-style: none; padding: 0; margin: 0; max-height: 320px; overflow: auto;}
 .grant-tree ul {list-style: none; margin: 0; padding-inline-start: 20px;}
 .grant-tree ul[hidden] {display: none;}
@@ -357,3 +344,5 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 .generated-business-page .post-dialog form>label {min-width:0;overflow-wrap:anywhere;}
 .generated-business-page [aria-label="子表明细"] {min-width:0;max-width:100%;overflow-x:auto;}
 .generated-business-page [aria-label="子表明细"] td {min-width:160px;vertical-align:top;}
+
+.post-dialog .grant-toolbar label, .post-dialog .grant-row label, .post-dialog .grant-unavailable {display: flex; flex-direction: row; align-items: center; gap: 8px;}
