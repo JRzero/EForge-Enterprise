@@ -54,7 +54,7 @@ export {DetailTabs,TabbedDetailPage} from './TabbedDetailPage';
 export type {DetailTab,DetailTabsProps} from './TabbedDetailPage';
 
 export {EditableDetailTable} from './EditableDetailTable';
-export type {EditableDetailTableProps,DetailColumn} from './EditableDetailTable';
+export type {EditableDetailTableProps,DetailColumn,DetailCellState} from './EditableDetailTable';
 export {MasterDetailLayout} from './MasterDetailLayout';
 export {FormErrorSummary} from './FormErrorSummary';
 export type {FormErrorItem,FormErrorTarget} from './FormErrorSummary';

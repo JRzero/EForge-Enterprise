@@ -1,4 +1,5 @@
-import {useId, type FormEvent, type ReactNode} from 'react';
+import {useId, type FormEvent, type ReactNode, type Ref} from 'react';
+import {FormErrorSummary,type FormErrorItem,type FormErrorTarget} from './FormErrorSummary';
 import {ResourceDialog} from '../app/components/ResourceDialog';
 import {Button} from './controls';
 import {FormPage, PageForm} from './FormPage';
@@ -11,6 +12,9 @@ export type EditorFormProps = {
   busy: boolean;
   readOnly?: boolean;
   error?: string;
+  errors?:readonly FormErrorItem[];
+  onNavigateError?:(target:FormErrorTarget)=>void;
+  errorSummaryRef?:Ref<HTMLElement>;
   saveLabel?: string;
   busyLabel?: string;
   cancelLabel?: string;
@@ -18,10 +22,11 @@ export type EditorFormProps = {
   className?: string;
 };
 
-export function EditorForm({children, onSubmit, onCancel, busy, readOnly, error, saveLabel='保存', busyLabel='正在保存…', cancelLabel='取消', noValidate, className}: EditorFormProps) {
+export function EditorForm({children, onSubmit, onCancel, busy, readOnly, error, errors=[], onNavigateError,errorSummaryRef, saveLabel='保存', busyLabel='正在保存…', cancelLabel='取消', noValidate, className}: EditorFormProps) {
   return <PageForm className={className} noValidate={noValidate} aria-busy={busy}
     onSubmit={event=>{event.preventDefault();if(!busy&&!readOnly)onSubmit(event);}}
     actions={<>{!readOnly?<Button type="submit" variant="primary" label={busy?busyLabel:saveLabel} isDisabled={busy}/>:null}<Button type="button" variant="secondary" label={cancelLabel} isDisabled={busy} onClick={onCancel}/></>}>
+    <FormErrorSummary ref={errorSummaryRef} errors={errors} onNavigate={onNavigateError}/>
     {children}{error?<p className="editor-error" role="alert">{error}</p>:null}
   </PageForm>;
 }

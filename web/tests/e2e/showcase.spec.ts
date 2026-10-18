@@ -148,6 +148,34 @@ test('showcase editors, permissions and secondary interactions remain usable',as
   await page.goBack();await expect(page).toHaveURL(/#list$/);
 });
 
+test('master detail errors follow the original row after deleting a preceding row',async({page},info)=>{
+ await page.goto('/showcase.html#master-detail');
+ for(const [index,name] of ['甲','乙','丙'].entries()){
+  await page.getByRole('button',{name:'新增明细',exact:true}).click();
+  await page.getByLabel(`商品名称 ${index+1}`,{exact:true}).fill(name);
+ }
+ const key=await page.locator('tr[data-detail-row]').nth(1).getAttribute('data-detail-row');
+ const fieldId=await page.getByLabel('数量 2',{exact:true}).getAttribute('id');
+ await page.getByLabel('数量 2',{exact:true}).fill('0');
+ await page.getByRole('button',{name:'保存采购单',exact:true}).click();
+ const summary=page.getByRole('region',{name:'请检查以下字段',exact:true});
+ await expect(summary).toBeFocused();
+ await page.screenshot({path:info.outputPath('master-detail-field-errors.png'),fullPage:true});
+ await summary.getByRole('button',{name:/数量 2/}).click();
+ await expect(page.getByLabel('数量 2',{exact:true})).toBeFocused();
+ await page.getByRole('button',{name:'删除明细',exact:true}).first().click();
+ await summary.getByRole('button',{name:/数量 1/}).click();
+ await expect(page.locator('tr[data-detail-row]').first()).toHaveAttribute('data-detail-row',key!);
+ await expect(page.getByLabel('数量 1',{exact:true})).toBeFocused();
+ await expect(page.getByLabel('数量 1',{exact:true})).toHaveAttribute('id',fieldId!);
+ await expect(page.getByLabel('数量 1',{exact:true})).toHaveAttribute('aria-invalid','true');
+ await expect(page.getByLabel('商品名称 1',{exact:true})).toHaveValue('乙');
+ await page.getByLabel('数量 1',{exact:true}).fill('2');
+ await expect(summary).toHaveCount(0);
+ await page.getByRole('button',{name:'保存采购单',exact:true}).click();
+ await expect(page.locator('.enterprise-form > p[role=status]')).toHaveText('已保存 2 行明细');
+});
+
 test('detail template links tabs and preserves mounted panel contents',async({page})=>{
  await page.goto('/showcase.html#detail');const first=page.getByRole('tab',{name:'基本信息',exact:true});await first.focus();await first.press('End');
  const history=page.getByRole('tab',{name:'业务与记录',exact:true});await expect(history).toBeFocused();await expect(page.getByRole('tabpanel',{name:'业务与记录',exact:true})).toBeVisible();await expect(page.getByText('2026-10-09 · 界面验收中',{exact:true})).toBeVisible();

@@ -266,3 +266,15 @@ H04精确提交7331671已通过完整云端验收：131单元、294模拟浏览�
 完整前端回归正在执行，精确提交云端尚待验收。此片不代替EditableDetailTable异步新增/删除、生成主子字段和通用EditorForm的H05工作，也不宣称H05完成。
 
 第二片本地验收：final-lint/types/generated/unit/build/browser/dist全部通过，131单元、297模拟API浏览器、5正式产物；追加visual用例通过并人工查看320截图，摘要无横向裁切。仅追加截图测试发生在完整回归之后，产品源码未再修改。第一片f8a0a60的web39086338220、技能39086338216已成功，server39086338236仍运行；第二片云端尚未验收。
+
+## H05 第三片：稳定明细导航与实际主子模板
+
+EditableDetailTable现在捕获操作前的稳定行键和相邻键，onAdd可返回本次创建行键（同步或Promise）；旧void调用只在恰好一个新增键时推导。异步完成后再等实际rows提交，不因中途排序跳到另一行。用户转移焦点、点击其他区域、窗口离开、只读或卸载后取消待执行焦点；失败不移动焦点并提供固定安全提示；旧操作拒绝不覆盖新操作状态。行被删除后的空表回新增按钮，原兼容消费者尚未传field.id时保留原控件焦点回退。
+
+新增cellError(rowId,field)和render state.rowId/field.id/error，错误仍由字段组件唯一展示；EditorForm增加可选errors/onNavigateError/errorSummaryRef。MasterDetailDemo实际接入摘要、主字段/每格FormField及稳定refs，删除前一行后原行控件id不变，摘要定位正确数量，修正后保存。保持原只读、合计/数量/单价规则和原生输入约束；精确金额仍待H08，不宣称本片解决浮点问题。
+
+测试记录：初次detail-focus-red夹具存在JSX语法错误，不算行为红证据；修正夹具后临时使用HEAD原组件，finally精确恢复实现，h05-detail-focus-behavior-red.log真实三项失败。修复后三项全绿，再扩展失败重试、末行删除和旧拒绝隔离。实际主子模板先因无摘要失败，修复后仅新测试的全局status选择器命中按钮内部状态，改为精确保存结果定位，未放宽行为断言。17项相关消费者通过。
+
+最终h05-detail-final-types/lint/generated/unit/build/browser/dist通过，131单元、303模拟API浏览器、5正式产物。人工查看master-detail-field-errors.png，原表格操作、行内错误和摘要可见；旧只读手机布局测试继续通过。本片仅修改前端，新的精确云端仍待核验；生成模板稳定childRowKeys、完整结构化required结果与异步隐藏目标矩阵尚未完成，H05保持in_progress。
+
+前两片精确云端收口：f8a0a60 server39086338236四项成功；c1be174 server39087007135四项、web39087007090、skills39087007023全部成功。直接h05-generator-cloud-server/web-final.log确认两配置各68真实浏览器、完整API、默认37/启用40故障诊断、131单元/297模拟浏览器/5正式产物及契约一致。不可将其替代本次尚未提交的明细变更验收。
