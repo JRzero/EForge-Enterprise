@@ -2,7 +2,8 @@ import {ReferenceSelect} from '../../ui/ReferenceSelect';
 import {PageTabs} from '../../ui/PageTabs';
 import {NativeButton, Select, TextareaControl, Table, NativeInput} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
-import {useEffect, useRef, useState, type FormEvent} from 'react';
+import {useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent} from 'react';
+import {FormErrorSummary,type FormErrorItem,type FormErrorTarget} from '../../ui/FormErrorSummary';
 import {Button, Input} from '../../ui/controls';
 import type {GeneratorConfigurationUpdate, GeneratorFieldUpdate, TableDetail, DictionaryTypeOption, MenuChoice} from '../../generated/api';
 import {ResourceDialog} from '../../app/components/ResourceDialog';
@@ -15,7 +16,7 @@ const webTypes=['eforge-react','element-ui','element-plus','element-plus-typescr
 const javaTypes=['Long','String','Integer','Double','BigDecimal','Date','Boolean'] as const;
 const controls=['input','textarea','select','radio','checkbox','datetime','imageUpload','fileUpload','editor'] as const;
 const queries=['EQ','NE','GT','GTE','LT','LTE','LIKE','BETWEEN'] as const;
-type ColumnDraft=Omit<GeneratorFieldUpdate,'javaType'|'controlType'|'queryType'> & {javaType:string;controlType:string;queryType:string};
+type ColumnDraft=Omit<GeneratorFieldUpdate,'javaType'|'controlType'|'queryType'|'order'> & {javaType:string;controlType:string;queryType:string;order:number|''};
 type Draft=Omit<GeneratorConfigurationUpdate,'columns'|'webType'> & {columns:ColumnDraft[];webType:string};
 class LocalValidationError extends Error {}
 function selected<T extends string>(value:string, choices:readonly T[]):T {
@@ -38,15 +39,33 @@ function draftOf(detail:TableDetail):Draft {
       editable:field.editable ?? false,listed:field.listed ?? false,queryable:field.queryable ?? false,
       queryType:field.queryType ?? 'EQ',controlType:field.controlType ?? 'input',dictionaryType:field.dictionaryType ?? '',order:field.order ?? 0}))};
 }
-function ChoiceSelect({label,value,values,onChange,disabled}:{label:string;value:string;values:readonly string[];onChange:(value:string)=>void;disabled:boolean}) {
-  return <label>{label}<Select aria-label={label} value={value} disabled={disabled} onChange={event=>onChange(event.target.value)}>
+function ChoiceSelect({label,value,values,onChange,disabled,id,error}:{label:string;value:string;values:readonly string[];onChange:(value:string)=>void;disabled:boolean;id?:string;error?:string}) {
+  return <label>{label}<Select id={id} aria-label={label} aria-invalid={error?true:undefined} aria-describedby={error?`${id}-error`:undefined} value={value} disabled={disabled} onChange={event=>onChange(event.target.value)}>
     {!values.includes(value)?<option value={value}>{value || '请选择'}</option>:null}
-    {values.map(choice=><option key={choice} value={choice}>{optionLabels[choice] ?? choice}</option>)}</Select></label>;
+    {values.map(choice=><option key={choice} value={choice}>{optionLabels[choice] ?? choice}</option>)}</Select>{error?<span id={`${id}-error`} className="ui-field-error" role="alert">{error}</span>:null}</label>;
 }
 export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;onCancel:()=>void;onSaved:()=>void}) {
   const api=useApi(),[form,setForm]=useState(()=>draftOf(detail)),[tab,setTab]=useState('basic');
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[discard,setDiscard]=useState(false);
   const [dirty,setDirty]=useState(false),dragging=useRef<string|null>(null);
+  const instanceId=useId(),formElement=useRef<HTMLFormElement>(null),summary=useRef<HTMLElement>(null),summaryRequested=useRef(false);
+  const inputRefs=useRef(new Map<string,HTMLInputElement>());
+  const [fieldErrors,setFieldErrors]=useState<FormErrorItem[]>([]),[focusRequest,setFocusRequest]=useState(0),pendingTarget=useRef<FormErrorTarget|null>(null);
+  const controlId=useCallback((scope:string,field:string,rowId='')=>`${instanceId}-${JSON.stringify([scope,rowId,field])}`,[instanceId]);
+  const fieldError=(scope:string,field:string,rowId='')=>fieldErrors.find(item=>item.key===controlId(scope,field,rowId))?.message;
+  const registerInput=(scope:string,field:string)=>(node:HTMLInputElement|null)=>{
+    const key=controlId(scope,field);if(node)inputRefs.current.set(key,node);else inputRefs.current.delete(key);
+  };
+  useLayoutEffect(()=>{
+    if(summaryRequested.current){summaryRequested.current=false;summary.current?.focus();}
+  },[fieldErrors]);
+  useLayoutEffect(()=>{
+    const target=pendingTarget.current;if(!target)return;pendingTarget.current=null;
+    const key=controlId(target.scope,target.field,target.rowId);
+    const control=inputRefs.current.get(key)??formElement.current?.elements.namedItem(key);
+    if(control instanceof HTMLElement&&!control.matches(':disabled')&&control.getClientRects().length)control.focus();
+    else summary.current?.focus();
+  },[tab,focusRequest,controlId]);
   const [menus,setMenus]=useState<MenuChoice[]>([]),[dictionaries,setDictionaries]=useState<DictionaryTypeOption[]>([]);
   const [menuError,setMenuError]=useState(''),[dictionaryError,setDictionaryError]=useState(''),[optionLoading,setOptionLoading]=useState(true),[optionVersion,setOptionVersion]=useState(0),[menuSearch,setMenuSearch]=useState('');
   useEffect(()=>{
@@ -60,15 +79,32 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
     });return()=>controller.abort();
   },[api,optionVersion]);
   const menuOptions=generatorMenuLabels(menus).filter(menu=>!menuSearch||menu.label.includes(menuSearch));
-  function change(next:Draft){setForm(next);setDirty(true);setError('');}
+  function validate(draft:Draft):FormErrorItem[]{
+    const errors:FormErrorItem[]=[];
+    const add=(scope:string,field:string,label:string,message:string,rowId?:string)=>errors.push({key:controlId(scope,field,rowId),label,message,target:{scope,field,rowId}});
+    for(const [field,label] of Object.entries({...basicLabels,...outputLabels})) {
+      if(field==='outputPath')continue;
+      const value=draft[field as keyof typeof basicLabels|keyof typeof outputLabels];
+      if(!value?.trim())add(field in basicLabels?'basic':'output',field,label,'请填写此字段。');
+    }
+    if(!(webTypes as readonly string[]).includes(draft.webType))add('output','webType','前端类型','请选择支持的前端类型。');
+    for(const field of draft.columns){
+      const name=detail.columns.find(item=>item.id===field.id)?.name??field.id;
+      for(const [key,label,choices] of [['javaType','Java类型',javaTypes],['controlType','显示控件',controls],['queryType','查询方式',queries]] as const)
+        if(!(choices as readonly string[]).includes(field[key]))add('fields',key,`${label} ${name}`,'请选择有效选项。',field.id);
+      if(field.order===''||!Number.isInteger(field.order)||field.order<0||field.order>1000000)
+        add('fields','order',`排序 ${name}`,'请填写 0 至 1000000 的整数。',field.id);
+    }
+    return errors;
+  }
+  function change(next:Draft){setForm(next);setDirty(true);setError('');if(fieldErrors.length)setFieldErrors(validate(next));}
   function cancel(){if(dirty) setDiscard(true);else onCancel();}
   async function save(event:FormEvent) {
     event.preventDefault();if(busy)return;setError('');
+    const errors=validate(form);summaryRequested.current=errors.length>0;setFieldErrors(errors);if(errors.length)return;
     try {
       const body:GeneratorConfigurationUpdate={...form,webType:selected(form.webType,webTypes),
-        columns:form.columns.map(field=>({...field,javaType:selected(field.javaType,javaTypes),controlType:selected(field.controlType,controls),queryType:selected(field.queryType,queries)}))};
-      if([body.name,body.comment,body.className,body.packageName,body.moduleName,body.businessName,body.functionName,body.author].some(value=>!value.trim()))
-        throw new LocalValidationError('请填写表名称、描述、类名、包名、模块、业务、功能名称和作者。');
+        columns:form.columns.map(field=>({...field,order:Number(field.order),javaType:selected(field.javaType,javaTypes),controlType:selected(field.controlType,controls),queryType:selected(field.queryType,queries)}))};
       setBusy(true);await api.updateGeneratorTable(detail.table.id,body);onSaved();
     }catch(cause){setError(cause instanceof LocalValidationError?cause.message:errorMessage(cause));}finally{setBusy(false);}
   }
@@ -91,10 +127,11 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
     <h2 id="generator-editor-title">编辑生成配置</h2>
     {discard?<div role="alert"><p>有未保存的修改，是否放弃？</p><Button label="继续编辑" onClick={()=>setDiscard(false)}/><Button label="放弃修改" variant="secondary" onClick={onCancel}/></div>:null}
     <PageTabs label="生成配置" value={tab} onChange={setTab} disabled={busy} items={[['basic','基本信息'],['fields','字段信息'],['output','生成信息']].map(([value,label])=>({value:value!,label,id:'generator-tab-'+value,panelId:'generator-panel-'+value}))}/>
-    <PageForm onSubmit={event=>{void save(event);}}>
+    <PageForm ref={formElement} noValidate onSubmit={event=>{void save(event);}}>
+      <FormErrorSummary ref={summary} errors={fieldErrors} onNavigate={target=>{if(!busy){pendingTarget.current=target;setTab(target.scope);setFocusRequest(value=>value+1);}}}/>
       <div hidden={tab!=='basic'} role="tabpanel" id="generator-panel-basic" aria-labelledby="generator-tab-basic">
         <label>备注<TextareaControl aria-label="备注" value={form.remark ?? ''} disabled={busy} onChange={event=>change({...form,remark:event.target.value})}/></label>
-        {Object.entries(basicLabels).map(([key,label])=><Input key={key} label={label} value={form[key as keyof typeof basicLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
+        {Object.entries(basicLabels).map(([key,label])=><Input key={key} ref={registerInput('basic',key)} status={fieldError('basic',key)?{type:'error',message:fieldError('basic',key)}:undefined} label={label} value={form[key as keyof typeof basicLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
       </div>
       <div hidden={tab!=='fields'} role="tabpanel" id="generator-panel-fields" aria-labelledby="generator-tab-fields" className="post-table">
         {dictionaryError?<div role="alert">字典选项：{dictionaryError}<Button label="重试字典选项" isDisabled={busy||optionLoading} onClick={()=>setOptionVersion(value=>value+1)}/></div>:null}
@@ -103,22 +140,22 @@ export function GeneratorEditor({detail,onCancel,onSaved}:{detail:TableDetail;on
             const physical=detail.columns.find(column=>column.id===field.id);
             return <tr key={field.id} onDragOver={event=>{if(dragging.current&&!busy)event.preventDefault();}} onDrop={event=>{event.preventDefault();drop(field.id);}}><td>{physical?.name}<br/>{physical?.databaseType}{physical?.primaryKey?' · 主键':''}{physical?.autoIncrement?' · 自增':''}</td>
               <td><Input label={'字段描述 '+physical?.name} value={field.comment ?? ''} isDisabled={busy} onChange={comment=>fieldChange(index,{comment})}/></td>
-              <td><ChoiceSelect label={'Java类型 '+physical?.name} value={field.javaType} values={javaTypes} disabled={busy} onChange={javaType=>fieldChange(index,{javaType})}/></td>
+              <td><ChoiceSelect id={controlId('fields','javaType',field.id)} error={fieldError('fields','javaType',field.id)} label={'Java类型 '+physical?.name} value={field.javaType} values={javaTypes} disabled={busy} onChange={javaType=>fieldChange(index,{javaType})}/></td>
               <td><Input label={'Java属性 '+physical?.name} value={field.javaField} isDisabled={busy} onChange={javaField=>fieldChange(index,{javaField})}/></td>
               <td>{([['required','必填'],['insertable','插入'],['editable','编辑'],['listed','列表'],['queryable','查询']] as const).map(([key,label])=><label key={key}><NativeInput type="checkbox" disabled={busy} aria-label={label+' '+physical?.name} checked={field[key]} onChange={event=>fieldChange(index,{[key]:event.target.checked})}/>{label}</label>)}</td>
-              <td><ChoiceSelect label={'查询方式 '+physical?.name} value={field.queryType} values={queries} disabled={busy} onChange={queryType=>fieldChange(index,{queryType})}/></td>
-              <td><ChoiceSelect label={'显示控件 '+physical?.name} value={field.controlType} values={controls} disabled={busy} onChange={controlType=>fieldChange(index,{controlType})}/></td>
+              <td><ChoiceSelect id={controlId('fields','queryType',field.id)} error={fieldError('fields','queryType',field.id)} label={'查询方式 '+physical?.name} value={field.queryType} values={queries} disabled={busy} onChange={queryType=>fieldChange(index,{queryType})}/></td>
+              <td><ChoiceSelect id={controlId('fields','controlType',field.id)} error={fieldError('fields','controlType',field.id)} label={'显示控件 '+physical?.name} value={field.controlType} values={controls} disabled={busy} onChange={controlType=>fieldChange(index,{controlType})}/></td>
               <td><ReferenceSelect label={'字典类型 '+physical?.name} value={field.dictionaryType||null} placeholder="无字典" disabled={busy} loading={optionLoading} error={dictionaryError} onRetry={()=>setOptionVersion(value=>value+1)} options={dictionaries.map(item=>({value:item.code,label:item.name+' · '+item.code+(item.status==='1'?'（停用）':'')}))} onChange={dictionaryType=>fieldChange(index,{dictionaryType:dictionaryType??''})}/></td>
-              <td><NativeButton type="button" draggable={!busy} disabled={busy} aria-label={'拖动排序 '+physical?.name} onDragStart={event=>{dragging.current=field.id;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',field.id);}} onDragEnd={()=>{dragging.current=null;}}>拖动排序</NativeButton><NativeInput type="number" aria-label={'排序 '+physical?.name} min={0} max={1000000} required value={field.order} disabled={busy} onChange={event=>fieldChange(index,{order:Number(event.target.value)})}/>
-                <Button label={'上移 '+physical?.name} isDisabled={busy||index===0} onClick={()=>move(index,-1)}/><Button label={'下移 '+physical?.name} isDisabled={busy||index===form.columns.length-1} onClick={()=>move(index,1)}/></td>
+              <td><NativeButton type="button" draggable={!busy} disabled={busy} aria-label={'拖动排序 '+physical?.name} onDragStart={event=>{dragging.current=field.id;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',field.id);}} onDragEnd={()=>{dragging.current=null;}}>拖动排序</NativeButton><NativeInput id={controlId('fields','order',field.id)} aria-invalid={fieldError('fields','order',field.id)?true:undefined} aria-describedby={fieldError('fields','order',field.id)?controlId('fields','order',field.id)+'-error':undefined} type="number" aria-label={'排序 '+physical?.name} min={0} max={1000000} required value={field.order} disabled={busy} onChange={event=>fieldChange(index,{order:event.target.value===''?'':Number(event.target.value)})}/>
+                {fieldError('fields','order',field.id)?<span id={controlId('fields','order',field.id)+'-error'} className="ui-field-error" role="alert">{fieldError('fields','order',field.id)}</span>:null}<Button label={'上移 '+physical?.name} isDisabled={busy||index===0} onClick={()=>move(index,-1)}/><Button label={'下移 '+physical?.name} isDisabled={busy||index===form.columns.length-1} onClick={()=>move(index,1)}/></td>
             </tr>;
           })}
         </tbody></Table>
       </div>
       <div hidden={tab!=='output'} role="tabpanel" id="generator-panel-output" aria-labelledby="generator-tab-output">
         <ChoiceSelect label="生成模板" value={form.category} values={['crud','tree','sub']} disabled={busy} onChange={value=>change({...form,category:selected(value,['crud','tree','sub'] as const),subTableName:value==='sub'?form.subTableName:'',subTableForeignKey:value==='sub'?form.subTableForeignKey:''})}/>
-        <ChoiceSelect label="前端类型" value={form.webType} values={webTypes} disabled={busy} onChange={webType=>change({...form,webType})}/>
-        {Object.entries(outputLabels).map(([key,label])=><Input key={key} label={label} value={form[key as keyof typeof outputLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
+        <ChoiceSelect id={controlId('output','webType')} error={fieldError('output','webType')} label="前端类型" value={form.webType} values={webTypes} disabled={busy} onChange={webType=>change({...form,webType})}/>
+        {Object.entries(outputLabels).map(([key,label])=><Input key={key} ref={registerInput('output',key)} status={fieldError('output',key)?{type:'error',message:fieldError('output',key)}:undefined} label={label} value={form[key as keyof typeof outputLabels] ?? ''} isDisabled={busy} onChange={value=>change({...form,[key]:value})}/>)}
         <Button label="恢复默认生成路径" isDisabled={busy} onClick={()=>change({...form,outputPath:'/'})}/>
         <label>表单列数<Select aria-label="表单列数" value={form.formColumns} disabled={busy} onChange={event=>change({...form,formColumns:Number(event.target.value)})}>{[1,2,3].map(value=><option key={value}>{value}</option>)}</Select></label>
         <ChoiceSelect label="生成方式" value={form.outputType} values={['0','1']} disabled={busy} onChange={outputType=>change({...form,outputType})}/>

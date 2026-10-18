@@ -3,6 +3,74 @@ import type {Page} from '@playwright/test';
 const id='9007199254740993';
 const table={id,name:'ef_test',comment:'<img src=x onerror=alert(1)>',className:'Example',category:'crud',webType:'eforge-react'};
 
+test('generator errors reveal hidden fields and preserve exact draft identities',async({page},info)=>{
+  const detail={table,configuration:{packageName:'io.example',moduleName:'sample',businessName:'example',functionName:'功能',author:'作者',formColumns:1,outputType:'0',outputPath:'/',options:{parentMenuId:'0',generateDetail:false}},columns:[{id:'9007199254740994',name:'entry_id',databaseType:'bigint',primaryKey:true,javaType:'Long',javaField:'entryId',comment:'编号',required:false,insertable:false,editable:false,listed:true,queryable:false,queryType:'EQ',controlType:'input',order:0}],tables:[]};
+  let writes=0,saved:unknown;
+  await page.route('**/api/v1/tool/generator/tables?*',route=>route.fulfill({json:{items:[table],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/tool/generator/tables/'+id,route=>{if(route.request().method()==='PUT'){writes++;saved=route.request().postDataJSON();return route.fulfill({status:204});}return route.fulfill({json:detail});});
+  await login(page,['tool:gen:list','tool:gen:query','tool:gen:edit']);
+  await page.getByRole('button',{name:'编辑 ef_test',exact:true}).click();
+  const dialog=page.getByRole('dialog'),summary=dialog.getByRole('region',{name:'请检查以下字段'});
+  await dialog.getByLabel('备注',{exact:true}).fill('草稿内容');
+  await dialog.getByRole('tab',{name:'生成信息',exact:true}).click();
+  await dialog.getByLabel('上级菜单',{exact:true}).selectOption('9007199254740995');
+  await dialog.getByLabel('生成包路径',{exact:true}).fill('');
+  await dialog.getByRole('tab',{name:'基本信息',exact:true}).click();
+  await dialog.getByRole('button',{name:'保存配置',exact:true}).click();
+  await expect(summary).toBeFocused();
+  await page.screenshot({path:info.outputPath('error-summary-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:320,height:800});
+  const bounds=await summary.boundingBox();expect(bounds).not.toBeNull();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(320);
+  await page.screenshot({path:info.outputPath('error-summary-mobile.png'),fullPage:true});
+  await page.setViewportSize({width:1280,height:900});
+  await summary.getByRole('button',{name:/生成包路径/}).click();
+  await expect(dialog.getByLabel('生成包路径',{exact:true})).toBeFocused();
+  await expect(dialog.getByLabel('生成包路径',{exact:true})).toHaveAttribute('aria-invalid','true');
+  await expect(dialog.getByLabel('上级菜单',{exact:true})).toHaveValue('9007199254740995');
+  expect(writes).toBe(0);
+  await dialog.getByLabel('生成包路径',{exact:true}).fill('io.updated');
+  await dialog.getByRole('tab',{name:'字段信息',exact:true}).click();
+  await dialog.getByLabel('排序 entry_id',{exact:true}).fill('');
+  await expect(dialog.getByLabel('排序 entry_id',{exact:true})).toHaveValue('');
+  await dialog.getByRole('tab',{name:'基本信息',exact:true}).click();
+  await dialog.getByRole('button',{name:'保存配置',exact:true}).click();
+  await summary.getByRole('button',{name:/排序 entry_id/}).click();
+  await expect(dialog.getByLabel('排序 entry_id',{exact:true})).toBeFocused();
+  expect(writes).toBe(0);
+  for(const invalid of ['-1','1000001','0.5']) {
+    await dialog.getByLabel('排序 entry_id',{exact:true}).fill(invalid);
+    await dialog.getByRole('button',{name:'保存配置',exact:true}).click();
+    await expect(summary).toBeFocused();expect(writes).toBe(0);
+  }
+  await dialog.getByLabel('排序 entry_id',{exact:true}).fill('7');
+  await dialog.getByRole('button',{name:'保存配置',exact:true}).click();
+  await expect(dialog).toHaveCount(0);
+  expect(saved).toMatchObject({remark:'草稿内容',packageName:'io.updated',options:{parentMenuId:'9007199254740995'},columns:[{id:'9007199254740994',order:7}]});
+});
+
+test('generator error targets follow exact field identity after reordering unsupported old options',async({page})=>{
+  const fields=[{id:'9007199254740994',name:'first',javaType:'String',javaField:'first',controlType:'input',queryType:'EQ',order:0},{id:'9007199254740995',name:'second',javaType:'OldType',javaField:'second',controlType:'input',queryType:'EQ',order:1}];
+  const detail={table,configuration:{packageName:'io.example',moduleName:'sample',businessName:'example',functionName:'功能',author:'作者',formColumns:1,outputType:'0',outputPath:'/',options:{parentMenuId:'0',generateDetail:false}},columns:fields,tables:[]};
+  let writes=0,saved:unknown;
+  await page.route('**/api/v1/tool/generator/tables?*',route=>route.fulfill({json:{items:[table],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/tool/generator/tables/'+id,route=>{if(route.request().method()==='PUT'){writes++;saved=route.request().postDataJSON();return route.fulfill({status:204});}return route.fulfill({json:detail});});
+  await login(page,['tool:gen:list','tool:gen:query','tool:gen:edit']);await page.getByRole('button',{name:'编辑 ef_test',exact:true}).click();
+  const dialog=page.getByRole('dialog'),summary=dialog.getByRole('region',{name:'请检查以下字段'});
+  await dialog.getByRole('button',{name:'保存配置',exact:true}).click();
+  await summary.getByRole('button',{name:/Java类型 second/}).click();
+  await expect(dialog.getByLabel('Java类型 second',{exact:true})).toBeFocused();
+  await expect(dialog.getByLabel('Java类型 second',{exact:true})).toHaveValue('OldType');
+  await dialog.getByRole('button',{name:'上移 second',exact:true}).click();
+  await dialog.getByRole('tab',{name:'生成信息',exact:true}).click();
+  await summary.getByRole('button',{name:/Java类型 second/}).click();
+  await expect(dialog.getByLabel('Java类型 second',{exact:true})).toBeFocused();
+  expect(writes).toBe(0);
+  await dialog.getByLabel('Java类型 second',{exact:true}).selectOption('String');
+  await dialog.getByRole('button',{name:'保存配置',exact:true}).click();await expect(dialog).toHaveCount(0);
+  expect(saved).toMatchObject({columns:[{id:fields[1]!.id,javaType:'String',order:0},{id:fields[0]!.id,order:1}]});
+});
+
 test('generator component visual review covers all configuration panels without writing',async({page},info)=>{
   const detail={table:{...table,comment:'示例业务表'},configuration:{packageName:'io.example',moduleName:'sample',businessName:'example',functionName:'示例管理',author:'作者',formColumns:2,outputType:'0',outputPath:'/',options:{parentMenuId:'0',generateDetail:false}},columns:[{id:'11',name:'entry_id',databaseType:'bigint',primaryKey:true,javaType:'Long',javaField:'entryId',comment:'编号',required:false,insertable:false,editable:false,listed:true,queryable:false,queryType:'EQ',controlType:'input',order:0}],tables:[]};
   let writes=0;
