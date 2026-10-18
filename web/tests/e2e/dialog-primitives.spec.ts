@@ -7,6 +7,10 @@ test('standalone modal owns sizing, geometry handles and focus recovery',async({
   const initial=(await dialog.boundingBox())!;
   expect(initial.width).toBe(520);
   expect(await dialog.evaluate(node=>getComputedStyle(node).padding)).toBe('20px');
+  const caption=dialog.locator('label').filter({hasText:'名称'});
+  const captionBox=(await caption.boundingBox())!,inputBox=(await dialog.getByLabel('名称',{exact:true}).boundingBox())!;
+  expect(captionBox.width).toBe(110);
+  expect(inputBox.x).toBeGreaterThan(captionBox.x+captionBox.width);
   const handle=dialog.getByRole('button',{name:'移动弹窗',exact:true});
   expect(await handle.evaluate(node=>getComputedStyle(node).position)).toBe('absolute');
   expect(await handle.evaluate(node=>getComputedStyle(node).touchAction)).toBe('none');

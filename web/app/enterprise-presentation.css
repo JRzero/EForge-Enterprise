@@ -30,10 +30,10 @@
 .enterprise-layout button[data-variant=primary] { background: var(--ui-primary); color: white; border: 1px solid var(--ui-primary); }
 .enterprise-layout button[data-variant=secondary] { background: white; color: var(--ui-text); border: 1px solid #e8e9eb; }
 .enterprise-layout button[data-variant=secondary]:hover:not(:disabled) { color: var(--ui-primary); border-color: var(--ui-primary); background: var(--ui-primary-soft); }
-.post-filters button[type=submit][data-variant], .post-dialog button[type=submit][data-variant] { background: var(--ui-primary); color: white; border-color: var(--ui-primary); }
+.post-filters button[type=submit][data-variant] { background: var(--ui-primary); color: white; border-color: var(--ui-primary); }
 .post-table .post-row-actions button[data-variant=ghost] { color: var(--ui-primary); padding-inline: 6px; min-height: 30px; }
 .enterprise-layout button:disabled { cursor: not-allowed; }
-.posts-page select, .posts-page textarea, .post-dialog input[type=number], .navigation-search input { border-color: #e8e9eb; border-radius: 4px; }
+.posts-page select, .posts-page textarea, .navigation-search input { border-color: #e8e9eb; border-radius: 4px; }
 .server-card, .workspace-note { background: #fff; border-color: var(--ui-border); border-radius: 4px; }
 .server-card h2 { font-size: 16px; border-bottom: 1px solid var(--ui-border); padding-bottom: 12px; }
 .welcome-panel { margin: 20px 0; padding: 24px; background: #fff; border: 1px solid var(--ui-border); border-left: 3px solid var(--ui-primary); }

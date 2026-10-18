@@ -28,3 +28,11 @@
 .post-dialog > .post-row-actions { justify-content: flex-end; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--ui-border); }
 .post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle) { background: transparent; border-color: transparent; color: #a0a8b2; opacity: .45; }
 .post-dialog :is(.dialog-move-handle,.dialog-width-handle,.dialog-size-handle):is(:hover,:focus-visible) { opacity: 1; background: #f5f7fa; border-color: #dcdfe6; }
+
+
+.post-dialog button[type=submit][data-variant] { background: var(--ui-primary); color: white; border-color: var(--ui-primary); }
+.post-dialog input[type=number] { border-color: #e8e9eb; border-radius: 4px; }
+@media (max-width:760px) {
+  .post-dialog { padding: 20px; }
+}
+.post-dialog fieldset {border-color:#dcdfe6;border-radius:4px;}

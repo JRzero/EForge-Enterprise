@@ -3,3 +3,6 @@
 .column-visibility-menu { position: relative; width: max-content; max-width: 100%; }
 .column-visibility-menu .post-columns { left: 0; right: auto; }
 .post-toolbar .column-visibility-menu .post-columns { left: auto; right: 0; }
+
+
+.post-columns { border-radius: 4px; border-color: #e4e7ed; box-shadow: 0 2px 12px #0000001a; }

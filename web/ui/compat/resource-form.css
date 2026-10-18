@@ -1,0 +1,30 @@
+
+@media (min-width:992px) {
+  .post-dialog form > div:has(> label):has([data-pressable-container]), .post-dialog form > label:has(> :is(select,textarea,input:not([type=checkbox]):not([type=radio]):not([type=file]))) {
+    display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 8px; align-items: start; min-width: 0;
+  }
+}
+@media (min-width:992px) {
+  .post-dialog form > div:has(> label):has([data-pressable-container]) > label { padding-top: 6px; text-align: right; }
+}
+@media (min-width:992px) {
+  .post-dialog form > div:has(> label):has([data-pressable-container]) > [role=alert] { grid-column: 2; }
+}
+@media (min-width:992px) {
+  .post-dialog form > .password-field { grid-template-columns: minmax(0,1fr); gap: 4px; }
+}
+@media (min-width:992px) {
+  .post-dialog form > .password-field > div:has(> label) { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 8px; align-items: start; }
+}
+@media (min-width:992px) {
+  .post-dialog form > .password-field > div > label { text-align: right; padding-top: 6px; }
+}
+@media (min-width:992px) {
+  .post-dialog form > .password-field > button { justify-self: end; min-height: 24px; padding: 2px 6px; font-size: 12px; }
+}
+@media (min-width:992px) {
+  .post-dialog form > label:has(> :is(select,textarea,input:not([type=checkbox]):not([type=radio]):not([type=file]))) { text-align: right; color: #606266; }
+}
+@media (min-width:992px) {
+  .post-dialog form > label > :is(select,textarea,input) { text-align: left; }
+}

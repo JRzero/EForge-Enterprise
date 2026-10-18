@@ -66,3 +66,7 @@ H09公共弹窗基础样式迁移：ResourceDialog独立导入resource-dialog.cs
 账号模板/复杂公共控件切片：AccountLayout、SelectionTree、IconPicker、DictionaryTag及完整Pagination各自导入CSS。使用CSS AST拆分混合选择器，保留原媒体条件与styles→presentation→workspace顺序，导航图标/密度/页面专属选择器保留应用。独立公共主题实际验证账号面板1440/390/320居中和无溢出，权限树父子联动、图标搜索选择、未知字典值布局、分页大小/换页与手机边界。79092两定向及typecheck通过；15462终态0，h09-templates-final.log含lint/生成复现、146单元、构建、341模拟、5dist全通过。后端未改，本地不重复SQL/Maven，待精确CI。c0ac32a弹窗server39141683368及web39141683332终态success。H09仍需图表卡片/动画数字、公共页签与剩余模板覆盖审计。
 
 图表与页签切片：ChartCard/AnimatedNumber、TagNavigation/TagMenu、RichTextContent、UiIcon现在自带基础样式；按钮行action-layout由公共和应用主题组合。页签原enterprise外壳限定规则变为组件默认，隐藏/滚动/按钮/菜单/手机规则保持；图表默认主题变量不再依赖dashboard父容器。5013定向独立主题验证30页签末端滚动/选中、菜单Escape、SVG及320px图表/数据表通过。36189终态0，h09-navigation-chart-final.log包含lint/typecheck/生成复现、146单元、build、342模拟及5dist全部通过。后端源码未变，不重复本地Maven/SQL，精确CI待验收。剩余app命中主要是锁屏头像、导航图标、密度、用户/生成器对话框等上下文覆盖；ResourceDialog通用表单列与页面混合规则、ColumnVisibilityMenu弹层外观仍需最后审计，不仅以静态class搜索称H09完成。
+
+边界收尾审计：ResourceDialog通用桌面label/control列（包含PasswordField组合）迁入ui/compat/resource-form.css并由组件导入；用户/生成器特定表单布局仍属app。弹窗通用fieldset/数字输入/提交按钮和列菜单外观由公共组件提供。独立弹窗94615验证110px标签、输入右侧对齐、手机/移动/Home/草稿/焦点均通过。还需将ef-data-table、ef-page-header等通用EForge DOM规则从app集中到compat；外壳ef-app-shell及业务限定覆盖不与纯公共组件混为一谈。最终H09验收必须结合这些实际源码边界和精确CI，不仅依赖搜索未发现或历史单测。
+
+本轮50396终态0，h09-boundary-final.log记录lint/生成复现、146单元、build、342模拟和5dist全部通过；typecheck及独立弹窗94615通过。后端源码不变，本地未重复Maven/SQL；精确新CI待验收。
