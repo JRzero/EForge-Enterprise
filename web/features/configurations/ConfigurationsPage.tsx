@@ -1,4 +1,4 @@
-import {DateRangeField} from '../../ui/DateRangeField';
+import {DateRangeField, type DateRangeFieldHandle} from '../../ui/DateRangeField';
 import {Select, TextareaControl} from '../../ui/native';
 import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
@@ -27,6 +27,7 @@ export function ConfigurationsPage() {
   const [showFilters, setShowFilters] = useState(true), [page, setPage] = useState(1), [pageSize, setPageSize] = useState(10), [version, setVersion] = useState(0);
   const [data, setData] = useState<PageResponseConfigurationResponse | null>(null), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [feedback, setFeedback] = useState(''), [actionError, setActionError] = useState(''), [busy, setBusy] = useState(false);
+  const [dateError, setDateError] = useState(''), dateField = useRef<DateRangeFieldHandle>(null);
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [editor, setEditor] = useState<{id?: string; form: ConfigurationRequest; initial: string} | null>(null), [deleting, setDeleting] = useState<string[] | null>(null);
   const editorDirty = !!editor && editor.initial !== JSON.stringify(editor.form);
@@ -70,7 +71,8 @@ export function ConfigurationsPage() {
   function refresh(message = '') {setFeedback(message); setSelection({}); setVersion(value => value + 1);}
   function applyFilters(event: FormEvent) {
     event.preventDefault();
-    if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;}
+    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。');setActionError('开始日期不能晚于结束日期。');dateField.current?.focus('to');return;}
+    setDateError('');
     setActionError(''); setPage(1); setFilters({...draft}); setVersion(value => value + 1);
   }
   async function save(event: FormEvent) {
@@ -99,11 +101,11 @@ export function ConfigurationsPage() {
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
   return <ListPage className="posts-page" title="参数配置" description="维护应用参数与系统内置设置。" eyebrow="系统管理">
     <DictionaryNotice dictionary={dictionary} />
-    <ListFilters primaryCount={3} advancedCount={[draft.from, draft.to].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
+    <ListFilters primaryCount={3} advancedCount={[draft.from, draft.to].filter(Boolean).length} hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => {setActionError(''); setDateError(''); setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); refresh();}} /></>} onSubmit={applyFilters}>
       <Input label="参数名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <Input label="参数键名" value={draft.key} onChange={key => setDraft({...draft, key})} />
       <label>系统内置<Select aria-label="系统内置" value={draft.builtin} onChange={event => setDraft({...draft, builtin: event.target.value})}><option value="">全部</option><DictionaryOptions options={dictionary.options} current={draft.builtin} /></Select></label>
-      <DateRangeField value={{from:draft.from,to:draft.to}} onChange={range=>setDraft({...draft,...range})}/>
+      <DateRangeField ref={dateField} id="configuration-date-filter" fieldError={dateError} value={{from:draft.from,to:draft.to}} onChange={range=>{setDraft({...draft,...range});setDateError('');if(dateError&&actionError===dateError)setActionError('');}}/>
 
     </ListFilters>
     <ListToolbar >

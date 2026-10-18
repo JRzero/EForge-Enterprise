@@ -2,7 +2,7 @@ import {test,expect} from './fixtures';
 
 for(const key of ['Enter','Space'])test(`tree disclosure retains selection and only toggles after mouse focus then ${key}`,async({page},info)=>{
   await page.goto('/showcase.html#form');
-  const trigger=page.getByRole('button',{name:/^负责部门 /});await trigger.click();
+  const trigger=page.getByRole('combobox',{name:/^负责部门 /});await trigger.click();
   const tree=page.getByRole('tree',{name:'负责部门选项'}),root=tree.locator('[data-value="root"]');
   const collapse=tree.getByRole('button',{name:'折叠总部',exact:true});await collapse.click();
   const expand=tree.getByRole('button',{name:'展开总部',exact:true});await expect(expand).toBeFocused();

@@ -133,7 +133,10 @@ async function verifyUploadEditing(page,category,id,model) {
 }
 async function verifyPendingUpload(page,category,field,file){
   const uploadPath='/common/upload';
-  const control=page.getByRole('dialog').locator('label').filter({hasText:new RegExp('^'+field)}).first();
+  const dialog=page.getByRole('dialog');
+  const control=field==='richContent'
+    ? dialog.locator('.rich-text-editor').filter({has:page.getByRole('textbox',{name:field,exact:true})})
+    : dialog.locator('label').filter({hasText:new RegExp('^'+field)}).first();
   let release;const gate=new Promise(resolve=>{release=resolve;});let writes=0;
   await page.route('**'+uploadPath,async route=>{writes++;await gate;await route.continue().catch(()=>{});});
   const sent=page.waitForRequest(request=>new URL(request.url()).pathname===uploadPath&&request.method()==='POST');
@@ -145,7 +148,7 @@ async function verifyPendingUpload(page,category,field,file){
     await expect(page.getByRole('dialog').getByRole('button',{name:'保存',exact:true})).toBeDisabled();
     assert.equal(captured.failure(),null,'Sent upload must settle once instead of aborting on Activity hide');assert.equal(writes,1);
   }finally{release();}
-  const acknowledgement=await committed;if(acknowledgement.error)throw acknowledgement.error;if(field==='richContent'){await expect(control.getByRole('textbox',{name:'公告内容'}).locator('img')).toBeVisible();}else{await expect(control.getByRole('button',{name:'移除文件',exact:true})).toBeVisible();}
+  const acknowledgement=await committed;if(acknowledgement.error)throw acknowledgement.error;if(field==='richContent'){await expect(control.getByRole('textbox',{name:field,exact:true}).locator('img')).toBeVisible();}else{await expect(control.getByRole('button',{name:'移除文件',exact:true})).toBeVisible();}
   await expect(control.locator('input[type=file]')).toBeEnabled();assert.equal(writes,1);
   await page.unroute('**'+uploadPath);
   console.log('PASS: '+category+' '+field+' real browser history retains one pending upload and form lock until genuine200 acknowledgement.');
@@ -158,7 +161,7 @@ async function fillChildControls(scope,root,page,category) {
   await scope.getByLabel('childEventTime',{exact:true}).fill('2026-10-07T01:02:03.456');
   await scope.locator('label').filter({hasText:/^childBoolSelected/}).locator('select').selectOption('1');await scope.locator('label').filter({hasText:/^childBoolRadio/}).getByRole('radio').last().check();  await scope.getByLabel('childQuantity',{exact:true}).fill('17');await scope.getByLabel('childRatio',{exact:true}).fill('0.125');await scope.getByLabel('childEnabled',{exact:true}).fill('true');
   await scope.getByLabel('childPrototype',{exact:true}).fill('子行合法字段');await scope.getByLabel('childLong',{exact:true}).fill('9007199254741001');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.00001');
-  await scope.getByRole('textbox',{name:'公告内容',exact:true}).fill('子表富文本');
+  await scope.getByRole('textbox',{name:'childRichContent',exact:true}).fill('子表富文本');
   await verifyPendingUpload(page,category,'childImagePaths',join(root,'tests/fixtures/avatar.png'));
   await verifyPendingUpload(page,category,'childFilePaths',{name:'子表文本.txt',mimeType:'text/plain',buffer:Buffer.from('子表实际文件')});
 }
@@ -168,7 +171,7 @@ async function clearChildControls(scope) {
   const checks=scope.locator('label').filter({hasText:/^childCheckedStatuses/}).getByRole('checkbox');await checks.first().uncheck();await checks.last().uncheck();
   await expect(scope.locator('label').filter({hasText:/^childBoolSelected/}).locator('select')).toHaveValue('1');await expect(scope.locator('label').filter({hasText:/^childBoolRadio/}).getByRole('radio').last()).toBeChecked();
   await scope.locator('label').filter({hasText:/^childBoolSelected/}).locator('select').selectOption('0');await scope.locator('label').filter({hasText:/^childBoolRadio/}).getByRole('radio').first().check();  await scope.getByLabel('childQuantity',{exact:true}).fill('0');await scope.getByLabel('childRatio',{exact:true}).fill('0');await scope.getByLabel('childEnabled',{exact:true}).fill('false');await scope.getByLabel('childEventTime',{exact:true}).fill('');
-  await scope.getByLabel('childLong',{exact:true}).fill('9007199254741007');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.12500');await scope.getByRole('textbox',{name:'公告内容',exact:true}).fill('');
+  await scope.getByLabel('childLong',{exact:true}).fill('9007199254741007');await scope.getByLabel('childAmount',{exact:true}).fill('9007199254740993.12500');await scope.getByRole('textbox',{name:'childRichContent',exact:true}).fill('');
   for(const name of ['childImagePaths','childFilePaths'])await scope.locator('label').filter({hasText:new RegExp('^'+name)}).getByRole('button',{name:'移除文件',exact:true}).click();
 }
 async function verifyChildControls(page,row) {
@@ -344,7 +347,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
       if(state==='editor') {
         const fields=page.locator(category==='sub'?'.post-dialog .master-detail-fields':'.post-dialog form');
-        const richBounds=await fields.locator(':scope > label:has(.rich-text-editor) .ql-container').first().boundingBox();
+        const richBounds=await fields.locator('.rich-text-editor').filter({has:page.getByRole('textbox',{name:'richContent',exact:true})}).boundingBox();
         const nextBounds=await fields.locator(':scope > label').filter({has:page.getByLabel('quantity',{exact:true})}).boundingBox();
         assert(richBounds && nextBounds && richBounds.y+richBounds.height<=nextBounds.y+1,'Rich editor must not overlap the following generated field');
       }
@@ -436,7 +439,15 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await dialog.getByLabel('eventTime', {exact:true}).fill(initialDate);
           await dialog.locator('label').filter({hasText:/^boolSelected/}).locator('select').selectOption('1');await dialog.locator('label').filter({hasText:/^boolRadio/}).getByRole('radio').last().check();          await dialog.getByLabel('enabled', {exact:true}).fill('true'); await dialog.getByLabel('quantity', {exact:true}).fill('17');await dialog.getByLabel('ratio', {exact:true}).fill('0.125');
           await dialog.getByLabel('__proto__', {exact:true}).fill('合法字段保持精确');
-          await dialog.getByRole('textbox', {name:'公告内容', exact:true}).first().fill('生成富文本中文');
+          const rich=dialog.getByRole('textbox', {name:'richContent', exact:true});
+          await expect(rich).toHaveCount(1);
+          const richId=await rich.getAttribute('id');assert(richId,'Generated rich text must expose a field identity');
+          if(category==='sub') {
+            const childRich=dialog.getByRole('textbox',{name:'childRichContent',exact:true});
+            await expect(childRich).toHaveCount(1);
+            const childId=await childRich.getAttribute('id');assert(childId&&childId!==richId,'Root and child rich text identities must be distinct');
+          }
+          await rich.fill('生成富文本中文');
           await verifyPendingUpload(page,category,'imagePaths',join(root,'tests/fixtures/avatar.png'));
           await expect(dialog.locator('label').filter({hasText:/^imagePaths/})).toContainText('移除文件');
           await verifyPendingUpload(page,category,'filePaths',{name:'生成文本.txt',mimeType:'text/plain',buffer:Buffer.from('实际文件内容')});
@@ -489,7 +500,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           const checks=dialog.locator('label').filter({hasText:/^checkedStatuses/}).getByRole('checkbox');await checks.first().uncheck();await checks.last().uncheck();
           await expect(dialog.locator('label').filter({hasText:/^boolSelected/}).locator('select')).toHaveValue('1');await expect(dialog.locator('label').filter({hasText:/^boolRadio/}).getByRole('radio').last()).toBeChecked();
           await dialog.locator('label').filter({hasText:/^boolSelected/}).locator('select').selectOption('0');await dialog.locator('label').filter({hasText:/^boolRadio/}).getByRole('radio').first().check();          await dialog.getByLabel('enabled',{exact:true}).fill('false');await dialog.getByLabel('quantity',{exact:true}).fill('0');await dialog.getByLabel('ratio',{exact:true}).fill('0');
-          await dialog.getByRole('textbox',{name:'公告内容',exact:true}).first().fill('');
+          await dialog.getByRole('textbox',{name:'richContent',exact:true}).fill('');
           for(const field of ['imagePaths','filePaths'])await dialog.locator('label').filter({hasText:new RegExp('^'+field)}).getByRole('button',{name:'移除文件',exact:true}).click();
         }
         await dialog.getByRole('button', {name:'保存', exact:true}).click();

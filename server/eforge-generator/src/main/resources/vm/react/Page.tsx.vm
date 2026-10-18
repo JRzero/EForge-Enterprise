@@ -3,7 +3,7 @@ import {NativeInput, Select, TextareaControl} from '../../../ui/native';
 import {EditableDetailTable, MasterDetailLayout} from '../../../ui';
 #end
 import {ListPage, ListFilters, ListToolbar, PageForm} from '../../../ui/pages';
-import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState, useId, useContext, createContext, type FormEvent, type ReactNode} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState} from '../../../ui/data';
 import {PermissionGate} from '../../../ui/patterns';
 import {Button} from '../../../ui/controls';
@@ -135,11 +135,12 @@ function QueryDictionaryControl({field, value, disabled, onChange}: {field: Fiel
   </Select></>;
 }
 function FieldControl({field, value, disabled, onChange}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void}) {
+  const fieldId = useId();
   const changeUploads = useContext(UploadContext);
   const api = useApi(), [uploading, setUploading] = useState(false), [error, setError] = useState('');
   const pending = useRef<AbortController | null>(null);
   if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange}} />;
-  if (field.html === 'editor') return <RichTextEditor value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
+  if (field.html === 'editor') return <RichTextEditor id={fieldId} label={field.label ?? field.key} required={field.required} value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
   if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
     <NativeInput type="file" multiple hidden={field.html === 'imageUpload' && text(value).split(',').filter(Boolean).length >= 5} disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
       const files = [...(event.target.files ?? [])]; event.target.value = ''; setError('');
@@ -161,6 +162,11 @@ function FieldControl({field, value, disabled, onChange}: {field: Field; value: 
     type={field.type === 'Date' ? 'datetime-local' : 'text'} step={field.type === 'Date' ? '.001' : undefined}
     inputMode={field.type === 'Long' || field.type === 'BigDecimal' ? 'decimal' : undefined}
     onChange={event => {try {onChange(valueFor(field, event.target.value));} catch {onChange(event.target.value);}}} />;
+}
+function FieldLabel({field, editing, children}: {field: Field; editing: boolean; children: ReactNode}) {
+  // Rich text owns the label associated with its editable root. Other controls
+  // retain their existing native label and readonly display behavior.
+  return field.html === 'editor' && editing ? <div style={{gridColumn: '1 / -1', minWidth: 0}}>{children}</div> : <label>{field.label}{children}</label>;
 }
 const initial = (): Write => ({
 #if($table.tree)
@@ -327,21 +333,21 @@ export function GeneratedPage() {
 #if($table.sub)
         <MasterDetailLayout master={<>
 #end
-        {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <label key={field.key}>{field.label}
+        {fields.filter(field => editor.viewing || writableRootField(field, editor.id === undefined)).map(field => <FieldLabel key={field.key} field={field} editing={!editor.viewing}>
           {editor.viewing ? <FieldDisplay field={field} value={fieldValue(editor.model, field.key)} /> :
 #if($table.tree)
           field.key === treeParent ? <Select value={text(fieldValue(editor.form, field.key)) || '0'} disabled={busy} onChange={event => setEditor(current => current && ({...current, form: {...current.form, [field.key]: valueFor(field, event.target.value)}}))}>
             <option value="0">根节点</option>{parentOptions.map(row => <option key={text(row[pk])} value={text(row[treeCode])}>{text(row[treeName])}</option>)}</Select> :
 #end
           <FieldControl field={field} value={fieldValue(editor.form, field.key)} disabled={operationBusy} onChange={value => setEditor(current => current && ({...current, form: {...current.form, [field.key]: value}}))} />}
-        </label>)}
+        </FieldLabel>)}
 #if($table.sub)
         </>}>
         <EditableDetailTable<ChildWrite> title="子表明细" rows={editor.form[childKey] ?? []} getRowKey={(_,index)=>editor.childRowKeys?.[index] ?? String(index)} busy={busy} readOnly={editor.viewing} addLabel="新增子表行" removeLabel="删除子表行"
           onAdd={()=>setEditor(current=>current&&({...current,childRowKeys:[...(current.childRowKeys??[]),crypto.randomUUID()],form:{...current.form,[childKey]:[...current.form[childKey],{}]}}))}
           onRemove={(_,index)=>setEditor(current=>current&&({...current,childRowKeys:current.childRowKeys?.filter((_,ordinal)=>ordinal!==index),form:{...current.form,[childKey]:current.form[childKey].filter((_,ordinal)=>ordinal!==index)}}))}
-          columns={childFields.filter(field=>field.key!==childForeignKey&&(!field.pk||!field.auto)&&(field.insert||field.edit||field.list)).map(field=>({key:field.key,label:field.label,render:(row,index,state)=><label>{field.label}
-            {state.readOnly?<FieldDisplay field={field} value={fieldValue(row,field.key)}/>:<FieldControl field={field} value={fieldValue(row,field.key)} disabled={operationBusy||!(editor.id===undefined?field.insert||field.pk&&!field.auto:field.edit||field.pk&&!field.auto)} onChange={value=>setEditor(current=>current&&({...current,form:{...current.form,[childKey]:current.form[childKey].map((item,ordinal)=>ordinal===index?{...item,[field.key]:value}:item)}}))}/>}</label>}))}/>
+          columns={childFields.filter(field=>field.key!==childForeignKey&&(!field.pk||!field.auto)&&(field.insert||field.edit||field.list)).map(field=>({key:field.key,label:field.label,render:(row,index,state)=><FieldLabel field={field} editing={!state.readOnly}>
+            {state.readOnly?<FieldDisplay field={field} value={fieldValue(row,field.key)}/>:<FieldControl field={field} value={fieldValue(row,field.key)} disabled={operationBusy||!(editor.id===undefined?field.insert||field.pk&&!field.auto:field.edit||field.pk&&!field.auto)} onChange={value=>setEditor(current=>current&&({...current,form:{...current.form,[childKey]:current.form[childKey].map((item,ordinal)=>ordinal===index?{...item,[field.key]:value}:item)}}))}/>}</FieldLabel>}))}/>
         </MasterDetailLayout>
 #end
         {actionError ? <p role="alert">{actionError}</p> : null}

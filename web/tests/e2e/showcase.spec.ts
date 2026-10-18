@@ -164,3 +164,13 @@ test('master detail template keeps row identity when deleting, validates and sup
  await page.getByLabel('只读展示',{exact:true}).check();await expect(page.getByRole('button',{name:'新增明细',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'删除明细',exact:true})).toHaveCount(0);await expect(page.getByRole('cell',{name:'产品乙',exact:true})).toBeVisible();
  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('master-detail-mobile.png'),fullPage:true});
 });
+
+test('showcase choice and date controls demonstrate help, correctable errors and readonly versus disabled states',async({page})=>{
+  await page.goto('/showcase.html#form');const choices=page.getByRole('group',{name:'通知渠道',exact:true}),radio=page.getByRole('radiogroup',{name:'服务等级',exact:true}),range=page.getByRole('group',{name:'服务周期',exact:true});
+  await page.getByRole('button',{name:'显示字段错误',exact:true}).click();await expect(choices).toHaveAccessibleDescription('可同时选择多个通知渠道。 请核对通知渠道（校验状态演示）');await expect(radio).toHaveAttribute('aria-invalid','true');
+  await choices.getByRole('checkbox',{name:'短信',exact:true}).check();await radio.getByRole('radio',{name:'优先',exact:true}).check();await range.getByLabel('开始日期',{exact:true}).fill('2026-10-15');
+  await page.getByRole('button',{name:'只读字段',exact:true}).click();await choices.focus();await expect(choices).toBeFocused();await expect(choices.getByRole('checkbox',{name:'短信',exact:true})).toBeDisabled();await expect(range.getByLabel('开始日期',{exact:true})).not.toBeEditable();
+  await page.getByRole('button',{name:'禁用字段',exact:true}).click();await expect(range.getByLabel('开始日期',{exact:true})).toBeDisabled();await expect(radio.getByRole('radio',{name:'优先',exact:true})).toBeChecked();
+  await page.getByRole('button',{name:'编辑字段',exact:true}).click();await page.getByRole('button',{name:'清除字段错误',exact:true}).click();await expect(choices).toHaveAccessibleDescription('可同时选择多个通知渠道。');await expect(choices.getByRole('checkbox',{name:'短信',exact:true})).toBeChecked();
+  await page.setViewportSize({width:320,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

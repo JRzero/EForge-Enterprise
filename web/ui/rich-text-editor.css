@@ -1,0 +1,8 @@
+.rich-text-editor > label { display: block; margin-bottom: 6px; color: var(--ui-muted, #606266); font-size: 14px; }
+.rich-text-default-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.rich-text-editor > :is(.ui-field-hint,.ui-field-error) { margin-top: 4px; overflow-wrap: anywhere; }
+.rich-text-editor .ql-toolbar[inert] { opacity: .55; }
+.rich-text-editor[data-disabled] .ql-editor { color: var(--ui-muted, #606266); background: #f5f7fa; cursor: not-allowed; }
+.rich-text-editor[data-invalid] :is(.ql-toolbar,.ql-container) { border-color: #dc3545; }
+.rich-text-editor .ql-container:has(.ql-editor:focus-visible) { outline: 2px solid var(--ui-primary, #2468f2); outline-offset: 2px; }
+.rich-text-editor .ql-editor { overflow-wrap: anywhere; }

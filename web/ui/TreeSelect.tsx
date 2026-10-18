@@ -1,14 +1,37 @@
-import {useId, useMemo, useRef, useState} from 'react';
+import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {NativeButton, NativeInput} from './native';
+import type {SelectionFieldProps} from './FormField';
 
 export type TreeSelectNode = {value: string; parentValue?: string; label: string; disabled?: boolean};
 /** Caller provides the authorized node set; no fetching or permission expansion. */
-export function TreeSelect({label, nodes, value, onChange, disabled, readOnly, loading, error, onRetry, placeholder = '请选择', unknownLabel = '当前已选项'}: {
+export function TreeSelect({id: providedId, label, required, hint, fieldError, nodes, value, onChange, disabled, readOnly, loading, error, onRetry, placeholder = '请选择', unknownLabel = '当前已选项'}: SelectionFieldProps & {
   label: string; nodes: TreeSelectNode[]; value: string | null; onChange: (value: string | null) => void;
   disabled?: boolean; readOnly?: boolean; loading?: boolean; error?: string; onRetry?: () => void; placeholder?: string; unknownLabel?: string;
 }) {
-  const id=useId(),trigger=useRef<HTMLButtonElement>(null),tree=useRef<HTMLDivElement>(null);
+  const generatedId=useId(),id=providedId??generatedId,trigger=useRef<HTMLButtonElement>(null),tree=useRef<HTMLDivElement>(null);
+  const description=[hint?`${id}-hint`:'',fieldError?`${id}-field-error`:'',error?`${id}-error`:''].filter(Boolean).join(' ')||undefined;
   const [active,setActive]=useState<string|null>(null),[open,setOpen]=useState(false),[query,setQuery]=useState(''),[collapsed,setCollapsed]=useState<Set<string>>(new Set());
+  const root=useRef<HTMLDivElement>(null),ownsFocus=useRef(false),locked=Boolean(disabled||readOnly);
+  useEffect(()=>{if(locked){
+    // The panel has just been removed. Preserve keyboard position only when
+    // focus belonged to this field; an outside action keeps its own focus.
+    if(open&&readOnly&&!disabled&&ownsFocus.current)trigger.current?.focus();
+    setOpen(false);setActive(null);
+  }},[locked,open,readOnly,disabled]);
+  useEffect(()=>{
+    if(!open)return;
+    let pointerDown=false;
+    const dismiss=(event:Event)=>{if(root.current&&!event.composedPath().includes(root.current)){setOpen(false);setActive(null);}};
+    const pointerStart=()=>{pointerDown=true;},pointerEnd=()=>{pointerDown=false;};
+    const focusOutside=(event:FocusEvent)=>{if(!pointerDown)dismiss(event);};
+    // Keep a pointer's target stable until its click has reached the dialog action.
+    document.addEventListener('click',dismiss);
+    document.addEventListener('pointerdown',pointerStart,true);
+    document.addEventListener('pointerup',pointerEnd,true);
+    document.addEventListener('pointercancel',pointerEnd,true);
+    document.addEventListener('focusin',focusOutside);
+    return ()=>{document.removeEventListener('click',dismiss);document.removeEventListener('pointerdown',pointerStart,true);document.removeEventListener('pointerup',pointerEnd,true);document.removeEventListener('pointercancel',pointerEnd,true);document.removeEventListener('focusin',focusOutside);};
+  },[open]);
   const rows=useMemo(()=>{
     const map=new Map(nodes.map(node=>[node.value,node])),children=new Map<string,TreeSelectNode[]>();
     for(const node of nodes)if(node.parentValue&&map.has(node.parentValue))children.set(node.parentValue,[...(children.get(node.parentValue)??[]),node]);
@@ -32,14 +55,19 @@ export function TreeSelect({label, nodes, value, onChange, disabled, readOnly, l
   function expand(key:string,expand:boolean){setCollapsed(previous=>{const next=new Set(previous);if(expand)next.delete(key);else next.add(key);return next;});}
   function close(){setOpen(false);trigger.current?.focus();}
   const selected=nodes.find(node=>node.value===value);
-  return <div className="ui-tree-select" onKeyDown={event=>{if(event.key==='Escape'&&open){event.preventDefault();event.stopPropagation();close();}}}>
-    <label id={`${id}-label`}>{label}</label>
-    <div className="ui-tree-trigger-row"><NativeButton ref={trigger} type="button" aria-labelledby={`${id}-label ${id}-value`} aria-haspopup="tree" aria-controls={`${id}-tree`} aria-expanded={open&&!disabled&&!readOnly} data-value={value??''} disabled={disabled||readOnly} onClick={()=>setOpen(state=>!state)}>
+  return <div ref={root} className="ui-tree-select" onFocusCapture={()=>{ownsFocus.current=true;}}
+    onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget))ownsFocus.current=false;}}
+    onKeyDown={event=>{if(event.key==='Escape'&&open&&!locked){event.preventDefault();event.stopPropagation();close();}}}>
+    <label id={`${id}-label`} htmlFor={id}>{required&&<span aria-hidden="true" className="ui-required">*</span>}{label}</label>
+    <div className="ui-tree-trigger-row"><NativeButton ref={trigger} id={id} type="button" role="combobox" aria-labelledby={`${id}-label ${id}-value`} aria-describedby={description} aria-required={required||undefined} aria-invalid={fieldError?true:undefined} aria-readonly={readOnly||undefined} aria-haspopup="tree" aria-controls={open&&!locked?`${id}-tree`:undefined} aria-expanded={open&&!locked} data-value={value??''} disabled={disabled} onClick={()=>{if(!locked)setOpen(state=>!state);}}>
       <span id={`${id}-value`}>{selected?.label??(value?`${unknownLabel}（${value}）`:placeholder)}</span><span aria-hidden="true">{open?'▴':'▾'}</span>
     </NativeButton>{value&&!readOnly&&<NativeButton type="button" aria-label={`清空${label}`} disabled={disabled} onClick={()=>{onChange(null);trigger.current?.focus();}}>×</NativeButton>}</div>
+    {hint&&<div id={`${id}-hint`} className="ui-field-hint">{hint}</div>}
+    {fieldError&&<div id={`${id}-field-error`} role="alert" className="ui-field-error">{fieldError}</div>}
+    {error&&<div id={`${id}-error`} role="alert" className="ui-field-error">{error}{onRetry&&<NativeButton type="button" disabled={locked||loading} onClick={()=>{trigger.current?.focus();onRetry();}}>重试{label}</NativeButton>}</div>}
     {open&&!disabled&&!readOnly&&<div className="ui-tree-panel">
       <label>搜索{label}<NativeInput type="search" value={query} onChange={event=>setQuery(event.target.value)} onKeyDown={event=>{if(event.key==='ArrowDown'){event.preventDefault();tree.current?.querySelector<HTMLElement>('[role=treeitem]')?.focus();}}}/></label>
-      {loading?<p role="status">正在加载…</p>:error?<div role="alert">{error}{onRetry&&<NativeButton type="button" onClick={onRetry}>重试{label}</NativeButton>}</div>:null}
+      {loading?<p role="status">正在加载…</p>:null}
       <div ref={tree} id={`${id}-tree`} role="tree" aria-label={`${label}选项`} aria-busy={loading||undefined}>
         {!loading&&!error&&rows.map((row,index)=><div key={row.node.value} role="treeitem" aria-level={row.depth+1} aria-selected={row.node.value===value} aria-disabled={row.node.disabled||undefined}
           aria-expanded={row.hasChildren?!!query||!collapsed.has(row.node.value):undefined} tabIndex={row.node.value===(rows.some(item=>item.node.value===active)?active:rows[0]?.node.value)?0:-1} onFocus={()=>setActive(row.node.value)} data-value={row.node.value} style={{paddingInlineStart:Math.min(row.depth,12)*16+8}}

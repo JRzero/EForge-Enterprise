@@ -63,7 +63,7 @@ test('operation filters, two-way server sort, applied export, columns and retrya
   await page.route('**/api/v1/monitor/operation-logs/clear', route => {clearCalls++; return route.fulfill({status: 204});});
   await page.route('**/api/v1/monitor/operation-logs/export?*', route => {exported = new URL(route.request().url()).searchParams; return route.fulfill({body: Buffer.from([80, 75, 3, 4]), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});});
   await login(page, '/operlog', ['monitor:operlog:list', 'monitor:operlog:remove', 'monitor:operlog:export']); await expect(page.getByRole('cell', {name: id, exact: true})).toBeVisible();
-  const initialQueries = queries.length; await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-01'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于'); expect(queries).toHaveLength(initialQueries);
+  const initialQueries = queries.length; await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-01'); await page.getByRole('button', {name: '搜索', exact: true}).click(); await expect(page.getByRole('group',{name:'日期范围',exact:true}).getByRole('alert')).toContainText('开始日期不能晚于'); expect(queries).toHaveLength(initialQueries);
   await page.getByLabel('开始日期').fill('2026-10-01'); await page.getByLabel('结束日期').fill('2026-10-05'); await page.getByRole('textbox', {name: '系统模块', exact: true}).fill('模块 & /'); await page.getByRole('textbox', {name: '操作人员', exact: true}).fill('张 & /'); await page.getByRole('textbox', {name: '操作地址', exact: true}).fill('127.'); await page.getByRole('combobox', {name: '操作类型', exact: true}).selectOption('2'); await page.getByRole('combobox', {name: '操作状态', exact: true}).selectOption('0'); await page.getByRole('button', {name: '搜索', exact: true}).click();
   await expect.poll(() => queries.at(-1)?.get('title')).toBe('模块 & /'); expect(queries.at(-1)?.get('status')).toBe('0'); expect(queries.at(-1)?.get('from')).toBe('2026-10-01');
   await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('sort')).toBe('duration'); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('desc'); await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('asc'); await page.getByRole('button', {name: '消耗时间', exact: true}).click(); await expect.poll(() => queries.at(-1)?.get('direction')).toBe('desc');
@@ -121,4 +121,18 @@ test('advanced filters retain values and applied query when collapsed, reset cle
   await toggle.click(); await expect(page.getByLabel('开始日期')).toHaveValue('');
   await toggle.click(); await page.setViewportSize({width:1440,height:900});
   await page.screenshot({path:info.outputPath('compact-list.png'),fullPage:true});
+});
+
+test('operation date filter exposes correctable errors and focuses visible bounds without applying invalid queries',async({page})=>{
+  const queries:URLSearchParams[]=[];
+  await page.route('**/api/v1/monitor/operation-logs?*',route=>{queries.push(new URL(route.request().url()).searchParams);return route.fulfill({json:{items:[operation],total:1,page:1,pageSize:10}});});
+  await login(page,'/operlog',['monitor:operlog:list']);await expect(page.getByRole('cell',{name:id,exact:true})).toBeVisible();
+  await page.getByRole('button',{name:/^更多筛选/}).click();
+  const range=page.getByRole('group',{name:'日期范围',exact:true}),from=range.getByLabel('开始日期',{exact:true}),to=range.getByLabel('结束日期',{exact:true});
+  await from.fill('2026-10-15');await to.fill('2026-10-01');const count=queries.length;
+  await page.getByRole('button',{name:'搜索',exact:true}).click();await expect(to).toBeFocused();await expect(to).toHaveAccessibleDescription('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
+  await page.getByRole('button',{name:/^收起筛选/}).click();await page.getByRole('button',{name:'搜索',exact:true}).click();
+  await expect(range).toBeHidden();await expect(page.locator('.list-page-body > [role=alert]')).toHaveText('开始日期不能晚于结束日期。');expect(queries).toHaveLength(count);
+  await page.getByRole('button',{name:/^更多筛选/}).click();await to.fill('2026-10-16');await expect(to).not.toHaveAttribute('aria-invalid','true');await expect(range.getByRole('alert')).toHaveCount(0);
+  await page.getByRole('button',{name:'搜索',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('to')).toBe('2026-10-16');expect(queries.at(-1)?.get('from')).toBe('2026-10-15');
 });

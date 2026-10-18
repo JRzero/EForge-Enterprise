@@ -1,10 +1,10 @@
-import {DateRangeField} from '../../ui/DateRangeField';
+import {DateRangeField, type DateRangeFieldHandle} from '../../ui/DateRangeField';
 import {Select} from '../../ui/native';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
 import {ColumnVisibilityMenu} from '../../app/components/ColumnVisibilityMenu';
 import {useRetainedRead} from '../../app/useRetainedRead';
-import {useEffect, useMemo, useState, type FormEvent} from 'react';
+import {useEffect, useMemo, useRef, useState, type FormEvent} from 'react';
 import {DataTable, type ColumnDef, type RowSelectionState, type SortingState, type VisibilityState} from '../../ui/data';
 import {PermissionGate} from '../../ui/patterns';
 import {Button, Input} from '../../ui/controls';
@@ -36,6 +36,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   const [selection, setSelection] = useState<RowSelectionState>({}), [visibility, setVisibility] = useState<VisibilityState>({});
   const [detail, setDetail] = useState<string | null>(null), [confirmation, setConfirmation] = useState<{action: 'delete' | 'clear' | 'unlock'; ids: string[]; username?: string} | null>(null);
   const [busy, setBusy] = useState(false), [actionError, setActionError] = useState(''), [feedback, setFeedback] = useState('');
+  const [dateError, setDateError] = useState(''), dateField = useRef<DateRangeFieldHandle>(null);
   const query = useMemo(() => ({ip: filters.ip, status: filters.status ? Number(filters.status) : undefined,
     $from: filters.from || undefined, to: filters.to || undefined, direction: sorting[0]?.desc ? 'desc' as const : 'asc' as const}), [filters, sorting]);
   const operationQuery = useMemo(() => ({...query, title: filters.title, operator: filters.person, businessType: filters.businessType ? Number(filters.businessType) : undefined,
@@ -72,10 +73,11 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
   const selectedIds = Object.keys(selection).filter(id => selection[id]), selected = data?.items.find(row => row.id === selectedIds[0]);
   function apply(event: FormEvent) {
     event.preventDefault(); setActionError('');
-    if (draft.from && draft.to && draft.from > draft.to) {setActionError('开始日期不能晚于结束日期。'); return;}
+    if (draft.from && draft.to && draft.from > draft.to) {setDateError('开始日期不能晚于结束日期。'); setActionError('开始日期不能晚于结束日期。'); dateField.current?.focus('to'); return;}
+    setDateError('');
     setFilters(draft); setPage(1); setVersion(value => value + 1);
   }
-  function reset() {setDraft(emptyFilters); setFilters(emptyFilters); setSorting([{id: timeField, desc: true}]); setPage(1); setActionError(''); setVersion(value => value + 1);}
+  function reset() {setDraft(emptyFilters); setFilters(emptyFilters); setSorting([{id: timeField, desc: true}]); setPage(1); setActionError(''); setDateError(''); setVersion(value => value + 1);}
   function confirm(action: 'delete' | 'clear' | 'unlock') {
     setActionError(''); setFeedback(''); setConfirmation({action, ids: selectedIds, username: selected && !operation ? (selected as LoginLogResponse).username : undefined});
   }
@@ -100,7 +102,7 @@ function LogsPage({kind, types}: {kind: Kind; types?: ReturnType<typeof useDicti
       {operation && <Input label="系统模块" value={draft.title} onChange={title => setDraft({...draft, title})} />}<Input label={operation ? '操作人员' : '用户名称'} value={draft.person} onChange={person => setDraft({...draft, person})} />
       {operation && <label>操作类型<Select aria-label="操作类型" value={draft.businessType} onChange={event => setDraft({...draft, businessType: event.target.value})}><option value="">全部类型</option><DictionaryOptions options={typeOptions} current={draft.businessType} /></Select></label>}
       <label>{operation ? '操作状态' : '登录状态'}<Select aria-label={operation ? '操作状态' : '登录状态'} value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部状态</option><DictionaryOptions options={statuses.options} current={draft.status} /></Select></label>
-      <DateRangeField value={{from:draft.from,to:draft.to}} onChange={range=>setDraft({...draft,...range})}/>
+      <DateRangeField ref={dateField} id={`${kind}-date-filter`} fieldError={dateError} value={{from:draft.from,to:draft.to}} onChange={range=>{setDraft({...draft,...range});setDateError('');if(dateError&&actionError===dateError)setActionError('');}}/>
       </ListFilters>}
     <ListToolbar ><PermissionGate permission={`${permission}:remove`}><Button label="删除" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => confirm('delete')} /><Button label="清空" variant="secondary" isDisabled={busy} onClick={() => confirm('clear')} /></PermissionGate>
       {!operation && <PermissionGate permission="monitor:logininfor:unlock"><Button label="解锁" isDisabled={busy || selectedIds.length !== 1 || !(selected as LoginLogResponse | undefined)?.username} onClick={() => confirm('unlock')} /></PermissionGate>}

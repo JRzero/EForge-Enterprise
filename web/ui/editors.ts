@@ -1,5 +1,5 @@
 /** Optional heavier editors; import this entry separately from basic controls. */
-export {RichTextEditor} from './RichTextEditor';
+export {RichTextEditor, type RichTextEditorHandle} from './RichTextEditor';
 export {RichTextContent} from './RichTextContent';
 export {sanitizeNoticeHtml as sanitizeRichText} from './rich-text-security';
 export {PasswordField} from '../app/components/PasswordField';

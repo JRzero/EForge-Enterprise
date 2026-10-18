@@ -7,6 +7,9 @@
 .ui-field-error,.ui-required { color: #dc3545; }
 .ui-required { margin-right: 4px; }
 .ui-choice-group { min-width: 0; margin: 0; padding: 0; border: 0; }
+.ui-choice-group:focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 4px; border-radius: 2px; }
+.ui-choice-message { margin: 4px 0 0; overflow-wrap: anywhere; }
+.ui-field-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .ui-choice-group > legend { color: var(--ui-muted); margin-bottom: 8px; padding: 0; }
 .ui-choice-options { display: flex; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }
 .ui-choice-options > label { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; margin: 0; overflow-wrap: anywhere; }
@@ -16,7 +19,7 @@
 .ui-date-range > .ui-date-part { display: grid; grid-template-columns: 100px minmax(0,1fr); align-items: center; gap: 12px; text-align: right; color: var(--ui-muted); }
 .ui-date-range input { min-width: 0; width: 150px; }
 .ui-date-range-clear { border: 0; background: transparent; color: var(--ui-primary); padding: 6px; cursor: pointer; }
-.ui-date-range > [role=alert] { flex-basis: 100%; }
+.ui-date-range > [role=alert],.ui-date-range > .ui-field-hint { flex-basis: 100%; overflow-wrap: anywhere; }
 .list-filters .ui-date-range > .ui-date-part { grid-template-columns: 80px 136px; gap: 8px; font-size: 13px; margin: 0; }
 .list-filters .ui-date-range input { width: 136px; text-align: left; }
 @media(max-width:760px) {

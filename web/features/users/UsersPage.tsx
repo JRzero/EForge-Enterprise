@@ -30,6 +30,7 @@ type Action = {kind: 'delete'; ids: string[]} | {kind: 'status'; user: UserRespo
 
 function Choices({label, options, selected, disabled, onChange}: {label: string; options: UserOption[]; selected: string[]; disabled: boolean; onChange: (ids: string[]) => void}) {
   return <CheckboxGroup className="user-choices" label={label} disabled={disabled} value={selected} onChange={onChange}
+    hint={options.some(option => option.status === '1' && selected.includes(option.id)) ? '已分配的停用项可保留或取消；未分配的停用项不可新增。' : undefined}
     emptyText={`暂无可分配的${label}。`} unknownLabel={id => `当前已分配的${label}（${id}）`}
     options={options.map(option => ({value: option.id, label: option.name + (option.status === '1' ? '（停用）' : ''), disabled: option.status === '1' && !selected.includes(option.id)}))}/>;
 }

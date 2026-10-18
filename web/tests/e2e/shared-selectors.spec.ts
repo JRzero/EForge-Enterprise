@@ -72,7 +72,7 @@ test('role assignment uses shared multi selector and submits retained long IDs u
 
  test('tree selection searches ancestors, preserves unknown values and supports keyboard navigation',async({page},info)=>{
   await page.goto('/showcase.html#form');
-  const trigger=page.getByRole('button',{name:/^负责部门 /});
+  const trigger=page.getByRole('combobox',{name:/^负责部门 /});
   await expect(trigger).toContainText('9007199254740993');await trigger.click();
   const tree=page.getByRole('tree',{name:'负责部门选项'});
   await tree.getByRole('button',{name:'折叠总部',exact:true}).click();
@@ -93,12 +93,12 @@ test('role assignment uses shared multi selector and submits retained long IDs u
 
 test('tree selector handles retry, scoped roots, readonly and loading',async({page})=>{
  await page.goto('/tests/fixtures/component-gallery.html');
- await expect(page.getByRole('button',{name:/^只读树 /})).toBeDisabled();await expect(page.getByRole('button',{name:/^禁用树 /})).toBeDisabled();
- await page.getByRole('button',{name:/^加载树 /}).click();await expect(page.getByRole('button',{name:'不可提前选择',exact:true})).toHaveCount(0);
- await page.getByRole('button',{name:/^失败树 /}).click();await expect(page.getByRole('alert').filter({hasText:'树加载失败'})).toBeVisible();
+ const readonly=page.getByRole('combobox',{name:/^只读树 /});await expect(readonly).not.toBeDisabled();await expect(readonly).toHaveAttribute('aria-readonly','true');await readonly.focus();await expect(readonly).toBeFocused();await readonly.press('Enter');await expect(readonly).toHaveAttribute('aria-expanded','false');await expect(page.getByRole('combobox',{name:/^禁用树 /})).toBeDisabled();
+ await page.getByRole('combobox',{name:/^加载树 /}).click();await expect(page.getByRole('button',{name:'不可提前选择',exact:true})).toHaveCount(0);
+ await page.getByRole('combobox',{name:/^失败树 /}).click();await expect(page.getByRole('alert').filter({hasText:'树加载失败'})).toBeVisible();
  await page.getByRole('button',{name:'重试失败树',exact:true}).click();
  const root=page.getByRole('treeitem').filter({has:page.getByRole('button',{name:'范围内部门',exact:true})});await expect(root).toHaveAttribute('aria-level','1');
- await root.getByRole('button',{name:'范围内部门',exact:true}).click();await expect(page.getByRole('button',{name:/^失败树 /})).toContainText('范围内部门');
+ await root.getByRole('button',{name:'范围内部门',exact:true}).click();await expect(page.getByRole('combobox',{name:/^失败树 /})).toContainText('范围内部门');
 });
 
 test('user editor department tree submits scoped long IDs and excludes other inactive departments',async({page})=>{
@@ -112,7 +112,7 @@ test('user editor department tree submits scoped long IDs and excludes other ina
  let submitted:Record<string,unknown>|undefined;await page.route('**/api/v1/system/users/3',route=>{if(route.request().method()==='GET')return route.fulfill({json:{user,roleIds:[],postIds:[]}});submitted=route.request().postDataJSON();return route.fulfill({status:204});});
  await page.goto('/user');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
  await page.getByRole('button',{name:'修改用户 sample',exact:true}).click();const dialog=page.getByRole('dialog');
- const picker=dialog.getByRole('button',{name:/^归属部门 /});await expect(picker).toContainText('原停用部门（停用）');await picker.click();
+ const picker=dialog.getByRole('combobox',{name:/^归属部门 /});await expect(picker).toContainText('原停用部门（停用）');await picker.click();
  await expect(dialog.getByRole('button',{name:'其他停用部门（停用）',exact:true})).toHaveCount(0);await dialog.getByRole('button',{name:'范围内部门',exact:true}).click();
  await dialog.getByRole('button',{name:'保存用户',exact:true}).click();await expect(dialog).toHaveCount(0);expect(submitted?.departmentId).toBe('9007199254740993');
 });
@@ -134,4 +134,21 @@ test('reference loading, retry and readonly keep the stored record',async({page}
  await page.getByRole('button',{name:'重试失败关联',exact:true}).click();await failure.click();await page.getByRole('option',{name:'恢复的记录',exact:true}).click();await expect(failure).toContainText('恢复的记录');
  await page.getByRole('button',{name:'Clear 失败关联',exact:true}).click();await expect(failure).toContainText('请选择');
  await page.setViewportSize({width:390,height:844});await failure.click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('reference-mobile.png'),fullPage:true});
+});
+
+test('user choice groups describe retained inactive assignments and keep other inactive options unavailable',async({page})=>{
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'2',username:'editor',displayName:'编辑'},roles:['editor'],permissions:['system:user:list','system:user:edit'],navigation:[{key:'users',type:'ROUTE',routeId:'system-users',label:'用户管理',order:0,children:[]}]}}));
+  await page.route('**/api/v1/system/users/departments',route=>route.fulfill({json:[]}));
+  const user={id:'3',username:'sample',displayName:'示例',status:'0'},role='9007199254740993',post='9007199254740995';
+  await page.route('**/api/v1/system/users?*',route=>route.fulfill({json:{items:[user],total:1,page:1,pageSize:10}}));
+  await page.route('**/api/v1/system/users/options',route=>route.fulfill({json:{departments:[],posts:[{id:post,name:'原岗位',status:'1'},{id:'4',name:'其他岗位',status:'1'}],roles:[{id:role,name:'原角色',status:'1'},{id:'5',name:'其他角色',status:'1'}]}}));
+  let submitted:Record<string,unknown>|undefined;await page.route('**/api/v1/system/users/3',route=>{if(route.request().method()==='GET')return route.fulfill({json:{user,roleIds:[role],postIds:[post]}});submitted=route.request().postDataJSON();return route.fulfill({status:204});});
+  await page.goto('/user');await page.getByLabel('账号',{exact:true}).fill('editor');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('button',{name:'修改用户 sample',exact:true}).click();
+  const dialog=page.getByRole('dialog'),roles=dialog.getByRole('group',{name:'角色',exact:true}),posts=dialog.getByRole('group',{name:'岗位',exact:true});
+  for(const group of [roles,posts])await expect(group).toHaveAccessibleDescription('已分配的停用项可保留或取消；未分配的停用项不可新增。');
+  await expect(roles.getByRole('checkbox',{name:'原角色（停用）',exact:true})).toBeChecked();await expect(roles.getByRole('checkbox',{name:'其他角色（停用）',exact:true})).toBeDisabled();await expect(posts.getByRole('checkbox',{name:'其他岗位（停用）',exact:true})).toBeDisabled();
+  await posts.getByRole('checkbox',{name:'原岗位（停用）',exact:true}).uncheck();await expect(posts.getByRole('checkbox',{name:'原岗位（停用）',exact:true})).toBeDisabled();await expect(posts).not.toHaveAttribute('aria-describedby');
+  await dialog.getByRole('button',{name:'保存用户',exact:true}).click();await expect(dialog).toHaveCount(0);expect(submitted?.postIds).toEqual([]);expect(submitted?.roleIds).toEqual([role]);
 });

@@ -35,8 +35,17 @@ test('real configuration paging, dates, last-page deletion and batch selection',
   await page.locator('.list-filters').getByLabel('参数名称', {exact: true}).fill(prefix); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByText('共 12 条，第 1 页', {exact: true})).toBeVisible();
   await page.getByRole('button', {name: '下一页', exact: true}).click(); await expect(page.getByText('共 12 条，第 2 页', {exact: true})).toBeVisible();
   for (const index of [10, 11]) await page.getByRole('checkbox', {name: `选择参数 ${prefix}-${index}`, exact: true}).check(); await page.getByRole('button', {name: '删除所选参数'}).click(); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('共 10 条，第 1 页', {exact: true})).toBeVisible();
-  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByRole('alert')).toContainText('开始日期不能晚于结束日期');
+  await page.getByRole('button', {name: /^更多筛选/}).click(); await page.getByLabel('开始日期').fill('2026-10-05'); await page.getByLabel('结束日期').fill('2026-10-04'); await page.getByRole('button', {name: '查询', exact: true}).click();
+  const dateRange = page.getByRole('group', {name: '日期范围', exact: true});
+  await expect(dateRange.getByRole('alert')).toHaveText('开始日期不能晚于结束日期。');
+  await expect(page.getByRole('alert').filter({hasText: '开始日期不能晚于结束日期。'})).toHaveCount(2);
+  for (const label of ['开始日期', '结束日期']) {
+    await expect(page.getByLabel(label)).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel(label)).toHaveAccessibleDescription('开始日期不能晚于结束日期。');
+  }
   await page.getByLabel('开始日期').fill('2000-01-01'); await page.getByLabel('结束日期').fill('2000-01-02'); await page.getByRole('button', {name: '查询', exact: true}).click(); await expect(page.getByText('暂无参数', {exact: true})).toBeVisible();
+  await expect(dateRange.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByLabel('开始日期')).not.toHaveAttribute('aria-invalid', 'true');
   await page.getByRole('button', {name: '重置', exact: true}).click(); await expect(page.getByLabel('开始日期')).toHaveValue(''); await page.locator('.list-filters').getByLabel('参数名称', {exact: true}).fill(prefix); await page.getByRole('button', {name: '查询', exact: true}).click(); await page.getByLabel('每页条数').selectOption('20'); await expect(page.getByText('共 10 条，第 1 页', {exact: true})).toBeVisible();
   for (let index = 0; index < 10; index++) await page.getByRole('checkbox', {name: `选择参数 ${prefix}-${index}`, exact: true}).check(); await page.getByRole('button', {name: '删除所选参数'}).click(); await expect(page.getByRole('alertdialog')).toContainText('10 个参数'); await page.getByRole('button', {name: '确认删除'}).click(); await expect(page.getByText('暂无参数', {exact: true})).toBeVisible();
 });
