@@ -1,5 +1,8 @@
 import {Select, NativeInput, TextareaControl} from '../../ui/native';
 import {ConfirmActionDialog} from '../../ui/ConfirmActionDialog';
+import {AppliedFilters,BatchActionBar} from '../../ui/ListFeedback';
+import {SavedListViews} from '../../ui/SavedListViews';
+import {normalizePostListView} from './postListView';
 import {PageForm} from '../../ui/FormPage';
 import {ListFilters, ListToolbar, ListPage} from '../../app/components/ListPage';
 import {Pagination} from '../../app/components/Pagination';
@@ -12,7 +15,7 @@ import {DataTable, type ColumnDef, type RowSelectionState, type VisibilityState}
 import {PermissionGate} from '../../ui/patterns';
 import {Button, Input} from '../../ui/controls';
 import type {PostRequest, PostResponse, PageResponsePostResponse} from '../../generated/api';
-import {useApi} from '../../app/context';
+import {useApi,useBootstrap} from '../../app/context';
 import {errorMessage} from '../../integration/errors';
 import {ResourceDialog as PostDialog} from '../../app/components/ResourceDialog';
 import {captureDraft, useDiscardChanges, usePageDraft} from '../../app/useDraftProtection';
@@ -24,6 +27,7 @@ const columnLabels = {id: '岗位编号', code: '岗位编码', name: '岗位名
 export function PostsPage() {
   const statusDictionary = useDictionary('sys_normal_disable');
   const api = useApi();
+  const bootstrap=useBootstrap();
   const [draft, setDraft] = useState(emptyFilters);
   const [showFilters, setShowFilters] = useState(true);
   const [filters, setFilters] = useState(emptyFilters);
@@ -36,10 +40,13 @@ export function PostsPage() {
   const [feedback, setFeedback] = useState('');
   const [selection, setSelection] = useState<RowSelectionState>({});
   const [visibility, setVisibility] = useState<VisibilityState>({});
+  const tableRegion = useRef<HTMLDivElement>(null);
+  const returnToTable=useRef(false);
   const [editor, setEditor] = useState<{id?: string; form: PostRequest; initial: string} | null>(null);
   const [deleting, setDeleting] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState('');
+  useEffect(()=>{if(returnToTable.current&&!deleting&&!busy){returnToTable.current=false;tableRegion.current?.focus();}},[deleting,busy]);
   const editorDirty = !!editor && editor.initial !== JSON.stringify(editor.form);
   const pageDraft = usePageDraft(editorDirty), discard = useDiscardChanges(editorDirty, busy);
   const detailRequest = useRef<AbortController | null>(null);
@@ -102,7 +109,7 @@ export function PostsPage() {
   async function remove() {
     if (!deleting || busy) return;
     setBusy(true); setActionError('');
-    try { await api.deletePosts(deleting); setDeleting(null); setPage(1); refresh('岗位已删除。'); }
+    try { await api.deletePosts(deleting); returnToTable.current=true;setDeleting(null); setPage(1); refresh('岗位已删除。'); }
     catch (cause) { setActionError(errorMessage(cause)); }
     finally { setBusy(false); }
   }
@@ -117,26 +124,35 @@ export function PostsPage() {
     finally { setBusy(false); }
   }
   const selectedIds = Object.keys(selection).filter(id => selection[id]);
+  function resetFilters(){setDraft(emptyFilters);setFilters(emptyFilters);setSelection({});setPage(1);setVersion(value=>value+1);}
+  const applied=Object.entries(filters).filter(([,value])=>value!=='').map(([key,value])=>({key,label:{code:'岗位编码',name:'岗位名称',status:'状态'}[key]!,value:key==='status'?(statusDictionary.options.find(option=>option.value===value)?.label??value):value}));
   return <ListPage className="posts-page" title="岗位管理" description="维护岗位信息与显示顺序。" eyebrow="系统管理">
     <DictionaryNotice dictionary={statusDictionary} />
-    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={() => { setDraft(emptyFilters); setFilters(emptyFilters); setPage(1); setVersion(value => value + 1); }} /></>} onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
+    <ListFilters hidden={!showFilters} actions={<><Button label="查询" type="submit" /><Button label="重置" variant="secondary" onClick={resetFilters} /></>} onSubmit={event => { event.preventDefault(); setPage(1); setFilters({...draft}); setVersion(value => value + 1); }}>
       <Input label="岗位编码" value={draft.code} onChange={code => setDraft({...draft, code})} />
       <Input label="岗位名称" value={draft.name} onChange={name => setDraft({...draft, name})} />
       <label>状态<Select aria-label="状态" value={draft.status} onChange={event => setDraft({...draft, status: event.target.value})}><option value="">全部</option><DictionaryOptions options={statusDictionary.options} current={draft.status} /></Select></label>
 
     </ListFilters>
+    <SavedListViews userId={bootstrap.user.id} routeId="system-posts" version={1} state={{filters,columns:visibility}} normalize={normalizePostListView} disabled={busy}
+      onApply={view=>{const next={code:view.filters.code??'',name:view.filters.name??'',status:view.filters.status??''};setDraft(next);setFilters(next);setVisibility(view.columns);setPage(1);setSelection({});setVersion(value=>value+1);}}/>
+    <AppliedFilters items={applied} disabled={busy} onRemove={key=>{if(!Object.hasOwn(emptyFilters,key))return;setFilters(previous=>({...previous,[key]:''}));setDraft(previous=>({...previous,[key]:''}));setSelection({});setPage(1);tableRegion.current?.focus();}}
+      onReset={()=>{resetFilters();tableRegion.current?.focus();}}/>
     <ListToolbar >
       <PermissionGate permission="system:post:add"><Button label="新增岗位" variant="primary" isDisabled={busy} onClick={() => { setActionError(''); setFeedback(''); setEditor(captureDraft({...emptyForm})); }} /></PermissionGate>
-      <PermissionGate permission="system:post:remove"><Button label="删除所选岗位" variant="secondary" isDisabled={busy || !selectedIds.length} onClick={() => { setActionError(''); setDeleting(selectedIds); }} /></PermissionGate>
+      {!selectedIds.length&&<PermissionGate permission="system:post:remove"><Button label="删除所选岗位" variant="secondary" isDisabled /></PermissionGate>}
       <PermissionGate permission="system:post:export"><Button label="导出岗位" variant="secondary" isDisabled={busy} onClick={() => { void exportFile(); }} /></PermissionGate>
       <Button label="刷新列表" variant="ghost" isDisabled={loading} onClick={() => refresh()} />
       <Button label={showFilters ? '隐藏筛选' : '显示筛选'} variant="ghost" onClick={() => setShowFilters(value => !value)} />
       <ColumnVisibilityMenu labels={columnLabels} visibility={visibility} onChange={setVisibility} />
     </ListToolbar>
+    <BatchActionBar count={selectedIds.length} busy={busy||loading} onClear={()=>{setSelection({});tableRegion.current?.focus();}}>
+      <PermissionGate permission="system:post:remove"><Button label="删除所选岗位" variant="secondary" isDisabled={busy||loading} onClick={()=>{setActionError('');setDeleting(selectedIds);}}/></PermissionGate>
+    </BatchActionBar>
     {feedback ? <p role="status">{feedback}</p> : null}
     {error ? <div role="alert"><p>{error}</p><Button label="重试列表" onClick={() => refresh()} /></div> : null}
     {actionError && !editor && !deleting ? <p role="alert">{actionError}</p> : null}
-    <div className="post-table"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无岗位" pagination={false} sortable={false}
+    <div ref={tableRegion} className="post-table" tabIndex={-1} aria-label="岗位列表"><DataTable data={data?.items ?? []} columns={columns} loading={loading} emptyText="暂无岗位" pagination={false} sortable={false}
       selectable showColumnVisibility={false} rowSelection={selection} onRowSelectionChange={setSelection} columnVisibility={visibility} getRowId={row => row.id} getRowSelectionLabel={row => `选择岗位 ${row.name}`} /></div>
     <Pagination page={page} pageSize={pageSize} total={data?.total} loading={loading} busy={false} onPage={setPage} onSize={setPageSize} />
     {editor ? <PostDialog titleId="post-editor-title" busy={busy} onCancel={() => discard.confirm(closeEditor)}><h2 id="post-editor-title">{editor.id ? '修改岗位' : '新增岗位'}</h2>

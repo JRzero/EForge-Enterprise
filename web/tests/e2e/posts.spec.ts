@@ -18,7 +18,7 @@ test('shared delete confirmation preserves exact IDs on failure and prevents pen
   await expect.poll(()=>writes.length).toBe(1);await expect(dialog.getByRole('button',{name:'确认删除',exact:true})).toBeDisabled();
   await page.keyboard.press('Escape');await expect(dialog).toBeVisible();release();
   await expect(dialog.getByRole('alert')).toBeVisible();await dialog.getByRole('button',{name:'确认删除',exact:true}).click();
-  await expect(dialog).toBeHidden();expect(writes).toEqual([{ids:['9007199254740993']},{ids:['9007199254740993']}]);
+  await expect(dialog).toBeHidden();expect(writes).toEqual([{ids:['9007199254740993']},{ids:['9007199254740993']}]);await expect(page.locator('.post-table')).toBeFocused();
 });
 
 test('successful shrinking totals normalize the page while failed refresh preserves retry page and filters', async ({page}) => {
@@ -117,4 +117,40 @@ test('shared dictionary labels recover independently and drive list, filter and 
   await page.route('**/api/v1/system/dictionaries/lookup/sys_normal_disable', route => route.fulfill({json: [{value: '1', label: '仅剩停用', style: 'INFO', defaultEntry: false}]}));
   await page.reload(); await expect(page.locator('.dictionary-tags')).toHaveText('0'); await page.getByRole('button', {name: '新增岗位'}).click();
   const status = page.getByRole('dialog').getByLabel('岗位状态'); await expect(status).toHaveValue('0'); await expect(status.getByRole('option', {name: '0', exact: true})).toHaveAttribute('value', '0'); await page.keyboard.press('Escape');
+});
+
+for(const canRemove of [false,true])test(`applied filters and page selection remain explicit with remove permission ${canRemove}`,async({page})=>{
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:'2',username:'reader',displayName:'读者'},roles:[],permissions:['system:post:list',...(canRemove?['system:post:remove']:[])],navigation:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}}));
+  const queries:URLSearchParams[]=[];
+  await page.route('**/api/v1/system/posts?*',route=>{const query=new URL(route.request().url()).searchParams;queries.push(query);return route.fulfill({json:{items:[{id:'9007199254740993',code:'exact',name:'精确岗位',sort:0,status:'0'}],total:11,page:Number(query.get('page')),pageSize:10}});});
+  await page.goto('/post');await page.getByLabel('账号',{exact:true}).fill('reader');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();
+  const fields=page.locator('.list-filters');await expect(page.getByRole('cell',{name:'精确岗位',exact:true})).toBeVisible();
+  await fields.getByLabel('岗位编码',{exact:true}).fill('applied');await page.getByRole('button',{name:'查询',exact:true}).click();
+  const summary=page.getByRole('region',{name:'已生效筛选'});await expect(summary).toContainText('applied');await fields.getByLabel('岗位名称',{exact:true}).fill('未提交草稿');
+  await page.getByRole('button',{name:'隐藏筛选'}).click();await expect(summary).not.toContainText('未提交草稿');await summary.getByRole('button',{name:'移除岗位编码条件'}).click();
+  await expect.poll(()=>queries.at(-1)?.get('code')??'').toBe('');await expect(summary).toHaveCount(0);
+  await page.getByRole('button',{name:'显示筛选'}).click();await expect(fields.getByLabel('岗位名称',{exact:true})).toHaveValue('未提交草稿');expect(queries.at(-1)?.get('name')??'').toBe('');
+  await page.getByRole('checkbox',{name:'选择岗位 精确岗位',exact:true}).check();const batch=page.getByRole('region',{name:'已选记录操作'});await expect(batch).toContainText('当前页已选 1 条');
+  await expect(batch.getByRole('button',{name:'删除所选岗位'})).toHaveCount(canRemove?1:0);
+  await batch.getByRole('button',{name:'清除选择'}).click();await expect(batch).toHaveCount(0);await expect(page.locator('.post-table')).toBeFocused();
+  await page.getByRole('checkbox',{name:'选择岗位 精确岗位',exact:true}).check();await page.getByRole('button',{name:'第 2 页',exact:true}).click();await expect(batch).toHaveCount(0);await expect.poll(()=>queries.at(-1)?.get('page')).toBe('2');
+});
+test('saved post views persist only applied filters and columns, isolate accounts and never apply automatically',async({page})=>{
+  let userId='2';const queries:URLSearchParams[]=[];
+  await page.route('**/captchaImage',route=>route.fulfill({json:{code:200,captchaEnabled:false}}));
+  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:'fixture-token',tokenType:'Bearer'}}));
+  await page.route('**/api/v1/app/bootstrap',route=>route.fulfill({json:{user:{id:userId,username:'reader'+userId,displayName:'读者'},roles:[],permissions:['system:post:list'],navigation:[{key:'posts',type:'ROUTE',routeId:'system-posts',label:'岗位管理',order:0,children:[]}]}}));
+  await page.route('**/api/v1/system/posts?*',route=>{const query=new URL(route.request().url()).searchParams;queries.push(query);return route.fulfill({json:{items:[{id:'9007199254740993',code:'exact',name:'精确岗位',sort:0,status:'0'}],total:1,page:1,pageSize:10}});});
+  async function enter(){await page.goto('/post');await expect(page.getByLabel('账号',{exact:true}).or(page.getByRole('cell',{name:'精确岗位',exact:true})).first()).toBeVisible();if(await page.getByLabel('账号',{exact:true}).isVisible()){await page.getByLabel('账号',{exact:true}).fill('reader');await page.getByLabel('密码',{exact:true}).fill('password');await page.getByRole('button',{name:'登录',exact:true}).click();}await expect(page.getByRole('cell',{name:'精确岗位',exact:true})).toBeVisible();}
+  await enter();const fields=page.locator('.list-filters');await fields.getByLabel('岗位编码',{exact:true}).fill('saved-code');await page.getByRole('button',{name:'查询',exact:true}).click();await expect.poll(()=>queries.at(-1)?.get('code')).toBe('saved-code');
+  await fields.getByLabel('岗位名称',{exact:true}).fill('未提交');await page.getByRole('checkbox',{name:'选择岗位 精确岗位'}).check();
+  await page.locator('.ui-saved-views summary').click();await page.getByLabel('视图名称',{exact:true}).fill('我的筛选');await page.getByRole('button',{name:'保存当前视图'}).click();
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('eforge:list-views:'+JSON.stringify(['2','system-posts',1]))!));
+  expect(stored[0].state).toEqual({filters:{code:'saved-code',name:'',status:''},columns:{}});expect(JSON.stringify(stored)).not.toContain('9007199254740993');
+  await page.getByRole('button',{name:'重置',exact:true}).click();await page.getByRole('button',{name:'应用视图'}).click();await expect.poll(()=>queries.at(-1)?.get('code')).toBe('saved-code');await expect(fields.getByLabel('岗位名称',{exact:true})).toHaveValue('');await expect(page.getByRole('region',{name:'已选记录操作'})).toHaveCount(0);
+  userId='3';await page.reload();await enter();await page.locator('.ui-saved-views summary').click();await expect(page.getByRole('button',{name:'应用视图'})).toBeDisabled();expect(queries.at(-1)?.get('code')??'').toBe('');
+  userId='2';await page.reload();await enter();await page.locator('.ui-saved-views summary').click();await page.getByLabel('已保存视图').selectOption({label:'我的筛选'});expect(queries.at(-1)?.get('code')??'').toBe('');await page.getByRole('button',{name:'应用视图'}).click();await expect.poll(()=>queries.at(-1)?.get('code')).toBe('saved-code');
+  await page.getByRole('button',{name:'删除视图',exact:true}).click();await expect(page.getByRole('button',{name:'应用视图'})).toBeDisabled();expect(await page.evaluate(()=>localStorage.getItem('eforge:list-views:'+JSON.stringify(['2','system-posts',1])))).toBe('[]');
 });

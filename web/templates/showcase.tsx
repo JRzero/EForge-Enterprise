@@ -4,6 +4,8 @@ import {ApprovalDemo} from './ApprovalDemo';
 import {TabbedDetailPage} from '../ui/TabbedDetailPage';
 import {ReferenceSelect} from '../ui/ReferenceSelect';
 import {RemoteRecordDemo} from './RemoteRecordDemo';
+import {BatchActionBar,AppliedFilters,SavedListViews} from '../ui';
+import {normalizeShowcaseListView} from './showcaseListView';
 import {TreeSelect} from '../ui/TreeSelect';
 import {TreeListLayout} from '../ui/TreeListLayout';
 import {DateRangeField} from '../ui/DateRangeField';
@@ -49,17 +51,25 @@ function TreeListDemo(){
   return <ListPage title="按分类查看客户"><TreeListLayout sidebarLabel="客户分类" selectionLabel={category} sidebar={<ul>{['全部客户','正常','停用'].map(label=><li key={label}><Button label={label} variant="ghost" onClick={()=>setCategory(label)} aria-pressed={category===label}/></li>)}</ul>}><DataTable data={rows} columns={[{accessorKey:'name',header:'客户名称'},{accessorKey:'status',header:'状态'}]} getRowId={row=>row.id} pagination={false}/></TreeListLayout></ListPage>;
 }
 function ListDemo(){
+  const [selection,setSelection]=useState<Record<string,boolean>>({}),[batchMessage,setBatchMessage]=useState('');
+  const listRegion=useRef<HTMLDivElement>(null);
   const [draft,setDraft]=useState(''),[query,setQuery]=useState(''),[page,setPage]=useState(1),[size,setSize]=useState(10),[visibility,setVisibility]=useState<VisibilityState>({}),[detail,setDetail]=useState<typeof sampleRows[number]|null>(null);
   const rows=sampleRows.filter(row=>row.name.includes(query));
-  return <ListPage title="客户列表"><ListFilters onSubmit={e=>{e.preventDefault();setQuery(draft);setPage(1);}} actions={<><Button label="查询" type="submit" variant="primary"/><Button label="重置" variant="secondary" onClick={()=>{setDraft('');setQuery('');setPage(1);}}/></>}><Input label="客户名称" value={draft} onChange={setDraft}/></ListFilters>
+  const selectedCount=Object.values(selection).filter(Boolean).length;
+  function reset(){setDraft('');setQuery('');setPage(1);setSelection({});}
+  return <ListPage title="客户列表"><ListFilters onSubmit={e=>{e.preventDefault();setQuery(draft);setPage(1);setSelection({});}} actions={<><Button label="查询" type="submit" variant="primary"/><Button label="重置" variant="secondary" onClick={reset}/></>}><Input label="客户名称" value={draft} onChange={setDraft}/></ListFilters>
+    <SavedListViews userId="showcase-demo" routeId="sample-customers" version={1} state={{filters:{name:query},columns:visibility}} normalize={normalizeShowcaseListView} onApply={view=>{setDraft(view.filters.name??'');setQuery(view.filters.name??'');setVisibility(view.columns);setPage(1);setSelection({});}}/>
+    <AppliedFilters items={query?[{key:'name',label:'客户名称',value:query}]:[]} onRemove={()=>{reset();listRegion.current?.focus();}} onReset={()=>{reset();listRegion.current?.focus();}}/>
     <ListToolbar><Tag>{rows.length} 位客户</Tag><ColumnVisibilityMenu labels={{name:'客户名称',email:'邮箱',status:'状态'}} visibility={visibility} onChange={setVisibility}/></ListToolbar>
-    <DataTable data={rows.slice((page-1)*size,page*size)} columns={[
+    <BatchActionBar count={selectedCount} onClear={()=>{setSelection({});listRegion.current?.focus();}}><Button label="模拟批量操作" variant="secondary" onClick={()=>setBatchMessage(`已模拟处理 ${selectedCount} 条，仅演示，不修改真实数据。`)}/></BatchActionBar>
+    {batchMessage&&<p role="status">{batchMessage}</p>}
+    <div ref={listRegion} tabIndex={-1} aria-label="示例客户列表"><DataTable data={rows.slice((page-1)*size,page*size)} selectable rowSelection={selection} onRowSelectionChange={setSelection} getRowSelectionLabel={row=>`选择客户 ${row.name}`} columns={[
       ...(!visibility.name&&visibility.name!==undefined?[]:[{accessorKey:'name',header:'客户名称'}]),
       ...(visibility.email===false?[]:[{accessorKey:'email',header:'邮箱'}]),
       ...(visibility.status===false?[]:[{accessorKey:'status',header:'状态',cell:({row}:{row:{original:typeof sampleRows[number]}})=><Tag tone={row.original.status==='正常'?'success':'info'}>{row.original.status}</Tag>}]),
       {id:'actions',header:'操作',cell:({row})=><Button label="查看详情" variant="ghost" onClick={()=>setDetail(row.original)}/>}
-    ]} getRowId={row=>row.id} pagination={false}/>
-    <ListPagination page={page} pageSize={size} total={rows.length} loading={false} onPage={setPage} onSize={setSize}/>
+    ]} getRowId={row=>row.id} pagination={false}/></div>
+    <ListPagination page={page} pageSize={size} total={rows.length} loading={false} onPage={next=>{setPage(next);setSelection({});}} onSize={next=>{setSize(next);setPage(1);setSelection({});}}/>
     {detail&&<ResourceDialog titleId="customer-detail" busy={false} onCancel={()=>setDetail(null)}><h2 id="customer-detail">客户详情</h2><dl><dt>名称</dt><dd>{detail.name}</dd><dt>邮箱</dt><dd>{detail.email}</dd></dl><Button label="关闭详情" onClick={()=>setDetail(null)}/></ResourceDialog>}
   </ListPage>;
 }

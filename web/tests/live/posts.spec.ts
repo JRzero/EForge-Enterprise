@@ -94,6 +94,19 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   await page.getByText('显示列', {exact: true}).click();
   await page.getByRole('checkbox', {name: '创建时间', exact: true}).uncheck();
   await expect(page.getByRole('columnheader', {name: '创建时间', exact: true})).toHaveCount(0);
+  await page.getByText('显示列', {exact: true}).click();
+  await expect(page.getByRole('region', {name: '已生效筛选'})).toContainText(code);
+  await page.locator('.ui-saved-views summary').click();
+  await page.getByLabel('视图名称', {exact: true}).fill('真实停用岗位视图');
+  await page.getByRole('button', {name: '保存当前视图', exact: true}).click();
+  await page.getByRole('button', {name: '重置', exact: true}).click();
+  await expect(page.getByRole('region', {name: '已生效筛选'})).toHaveCount(0);
+  await page.getByRole('button', {name: '应用视图', exact: true}).click();
+  await expect(page.getByRole('cell', {name: code, exact: true})).toBeVisible();
+  await expect(page.locator('.list-filters').getByLabel('状态', {exact: true})).toHaveValue('1');
+  await expect(page.getByRole('columnheader', {name: '创建时间', exact: true})).toHaveCount(0);
+  await page.locator('.ui-saved-views summary').click();
+  await page.getByText('显示列', {exact: true}).click();
   await page.getByRole('checkbox', {name: '创建时间', exact: true}).check();
   await page.getByText('显示列', {exact: true}).click();
   await page.screenshot({path: 'test-results/live-posts.png', fullPage: true});
@@ -103,12 +116,15 @@ test('real post create, duplicate handling, edit, filters, columns, XLSX and del
   const file = await download.path(); expect(file).not.toBeNull();
   const xml = workbookXml(await readFile(file!)); expect(xml).toContain(code); expect(xml).toContain('停用'); expect(xml).not.toContain('董事长');
   await page.getByRole('checkbox', {name: `选择岗位 ${name}`, exact: true}).check();
+  await expect(page.getByRole('region', {name: '已选记录操作'})).toContainText('当前页已选 1 条');
   await page.getByRole('button', {name: '删除所选岗位', exact: true}).click();
   await page.getByRole('button', {name: '取消', exact: true}).click();
   await expect(page.getByRole('cell', {name: code, exact: true})).toBeVisible();
   await page.getByRole('button', {name: '删除所选岗位', exact: true}).click();
   await page.getByRole('button', {name: '确认删除', exact: true}).click();
   await expect(page.getByText('暂无岗位', {exact: true})).toBeVisible();
+  await expect(page.getByRole('region', {name: '已选记录操作'})).toHaveCount(0);
+  await expect(page.getByLabel('岗位列表', {exact: true})).toBeFocused();
   expect(errors).toEqual([]);
 });
 
