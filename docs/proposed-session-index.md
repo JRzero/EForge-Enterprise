@@ -1,6 +1,6 @@
 # H10 user/session index: implementation boundary
 
-Status: implementation and targeted native verification in progress, full regression/CI pending. The publication-lock slice is accepted at `894aaa6`; do not count this document as H10 completion. Actual indexed lifecycle and recovery evidence is recorded in `security-review-session-index.md`.
+Status: historical design, implemented and accepted at `9f6ae55` (server `39152321902`, all four jobs successful). The publication-lock slice is accepted at `894aaa6`. Actual indexed lifecycle, rollout contract and recovery evidence are recorded in `security-review-session-index.md`; proposed wording below preserves the original design discussion.
 
 ## Required end state
 

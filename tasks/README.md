@@ -1,6 +1,6 @@
 # 迭代任务索引
 
-进行中：[框架可靠性与组件契约](framework-hardening.md)，[规格](../spec/framework-hardening.md)。依据2026-10-15深入审查，按用户授权完成故障修复、契约统一、高频组件、规模与正式产物验收，完整范围持续保留。
+已完成：[框架可靠性与组件契约](framework-hardening.md)（done，2026-10-19），[规格](../spec/framework-hardening.md)、[最终验收](../docs/framework-hardening-final-audit.md)。H01–H13全部验收，最终后端9f6ae55的server39152321902四作业及技能检查成功；前端保持已验收c76c1cb源码。已推送工作分支，尚未合并main；表单构建器仍暂缓。
 
 已完成：[公共组件与页面模板抽象](shared-ui-abstraction.md)（done，2026-10-13），[规格](../spec/shared-ui-abstraction.md)、[验收](../docs/shared-ui-completion-audit.md)。完整组件及五类模板已接入实际消费者和示例；精确46da40a云端全绿，本地两配置各68真实浏览器及完整API通过，尚未合并main。
 

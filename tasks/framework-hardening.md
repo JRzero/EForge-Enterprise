@@ -1,6 +1,6 @@
 # 框架可靠性与组件契约任务
 
-状态：in_progress。规格：[framework-hardening](../spec/framework-hardening.md)，依据：[深入审查](../docs/framework-review-2026-10-15.md)。基线108e9a2，完整目标“按照建议方案执行”。
+状态：done（2026-10-19）。规格：[framework-hardening](../spec/framework-hardening.md)，依据：[深入审查](../docs/framework-review-2026-10-15.md)。基线108e9a2，完整目标“按照建议方案执行”。最终证据见[逐项验收](../docs/framework-hardening-final-audit.md)。已推送工作分支，尚未合并main或部署；表单构建器仍暂缓。
 
 | ID | 切片 | 状态 | 证据/接续点 |
 |---|---|---|---|
@@ -13,10 +13,10 @@
 | H07 | 表格批量条、筛选摘要/保存视图 | done | 0587b90精确server39117234444四项/web39117234460成功；133单元/331模拟浏览器/5 dist及两配置各68真实浏览器/完整API/实际生成应用通过，见docs/list-views-and-actions.md |
 | H08 | 文件字段、精确数值、审计展示 | done | 审计4e69ac0、数值469fc28、文件9f98bea精确云端全绿；141单元/336模拟/5dist、两配置各68真实浏览器及两实际生成应用通过，见docs/business-fields-and-audit.md最终验收 |
 | H09 | 样式/公共层边界与lint | done | c76c1cb精确server39144862054四项/web39144862093及skills全成功；147单元/342模拟/5dist/2规模、两配置各68真实浏览器/完整API及实际生成应用通过，见docs/ui-layer-boundaries.md |
-| H10 | 锁/会话扫描/审批查询规模治理 | in_progress | 角色批量e916f97、审批批量e453168、完整SCAN73c10d8及有界发布锁894aaa6均精确云端成功。用户会话索引已接入创建/续期/CAS/候选查询，18真实Redis测试及2365真实MySQL/Redis断言通过；100/3稳定索引只读3会话且无全局SCAN。完整回归/生命周期最终审查与精确CI待验收，见security-review-session-index |
+| H10 | 锁/会话扫描/审批查询规模治理 | done | 角色/审批批量、SCAN、有界发布锁均验收；最终索引9f6ae55的server39152321902四项成功。23真实Redis、2365权限/锁断言、52菜单边界、两配置各68真实浏览器/API/OpenAPI及实际生成应用通过；100/3稳定索引只读3会话且无全局SCAN，升级边界见security-review-session-index |
 | H11 | 页签/大列表性能与包体积预算 | done | f91b4a6/0621313/cb81269精确web及对应server全部成功；30独立页签草稿、10000总量100行分页/10条远程选择器、回收与入口预算CI实测，见docs/frontend-performance-budget.md最终验收；非生产体验SLA |
 | H12 | dist正式产物浏览器验收 | done | 正式build后5/5通过；7e411bb web-ci 38710412483终态success。范围为dist本身三入口/深链/登录/懒块中断恢复，不替代真实反代/CDN部署验收；总目标未完成 |
-| H13 | 完整回归/安全审查/文档/云端验收 | in_progress | 逐项最终核对已记录；最新索引完整本地回归通过，待精确提交云端全部作业成功，见docs/framework-hardening-final-audit.md |
+| H13 | 完整回归/安全审查/文档/云端验收 | done | 精确9f6ae55服务器四作业及技能39152321863全成功，直接最终日志确认新Redis门槛/原生故障/两68/API/OpenAPI/两实际生成应用；前端树与已验收c76c1cb一致，逐规格核对见docs/framework-hardening-final-audit.md |
 
 启动检查：工作区无跟踪文件修改；历史root JSON和审查截图保留。开发沿用当前codex/compact-list-layout；不会将完成H02等局部阶段当成完整目标完成。日常实现/提交推送按已有授权，不重复询问。
 
@@ -64,3 +64,5 @@ SCAN本地最终验收：80752终态0，默认/启用各68真实浏览器、两�
 锁优化最终本地验收：session6859终态0，h10-lock-disabled/enabled-runtime.log两配置各68真实浏览器及完整API/SQL/Redis/ACL全部通过；两实时OpenAPI与契约deep-equal。源码在回归期间固定，不以H09旧云端代替新后端CI。下一步先接精确锁优化CI，再实施docs/proposed-session-index.md所列完整索引生命周期/恢复/迁移边界，不能把SCAN或本锁切片当H10全部完成。
 
 2026-10-19 索引本地最终验收：完整Maven通过，23真实Redis、2365 MySQL/Redis权限与锁断言、52菜单写边界、两配置专门HTTP故障恢复均成功。session39124顺序两配置各68浏览器/完整API终态0，两个OpenAPI与契约deepEqual；安全默认通过。生产源码回归期间固定，之后仅扩充测试和证据文档。准备推送精确CI，H10/H13尚不标done；见session-index安全审查和最终核对。
+
+最终精确云端验收：9f6ae55的server39152321902全部四作业、skills39152321863成功；h10-index-cloud-final.log及status.json直接绑定SHA、23真实Redis/2365权限锁/52菜单/两68/API/OpenAPI/两生成应用全部通过。H10/H13正式done，完整规格完成。仅工作分支推送，未合并main或部署；暂缓表单构建器不计入完成。历史待验收文字由本段和当前状态表更新。

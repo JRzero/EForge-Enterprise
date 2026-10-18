@@ -1,6 +1,8 @@
 # User/session index implementation review
 
-Status: implementation, local full regression and lifecycle review complete; precise CI pending. Not yet accepted as the completed H10/H13 goal.
+Status: accepted at `9f6ae557a0e9921bac0bde2d832bb22f4410339c` on 2026-10-19. Exact server run `39152321902` completed all four jobs successfully; skills `39152321863` succeeded. Local pending statements below record pre-push checkpoints and are superseded by this acceptance.
+
+Final direct evidence: `h10-index-cloud-final-status.json` binds SHA/terminal jobs; `h10-index-cloud-final.log` confirms 17 index plus 6 TokenService Redis tests (23, zero skips), 2365 native authorization assertions, 52 menu boundary assertions, default/enabled 68 browser cases each, 37/40 actual failure diagnostics, exact OpenAPI and two complete generated React CRUD/tree/sub applications in original Boot/JWT/Redis/audit. H10 and H13 are accepted within the framework-hardening specification; no main merge or production deployment occurred.
 
 ## Runtime boundary
 
