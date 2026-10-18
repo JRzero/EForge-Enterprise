@@ -41,3 +41,5 @@ OpenAPI检查边界：生成应用专用运行安装了业务端点，因此直�
 文件真实回归首轮73546终态失败：容量超限提示与前次单文件校验错误同时展示，旧 getByRole(alert) 产生两个匹配；产品提示内容正确。断言已限定“最多上传五个文件。”，保留原失败队列及零上传请求断言。新顺序进程14135运行默认/启用真实生成回归，默认日志 h08-file-generated-default-retry.log，未终态不得验收。
 
 文件切片真实本地终态：14135 exit0，h08-file-generated-default-retry.log 与 h08-file-generated-enabled.log 均以 focused generated React verification PASS 结束。两配置实际CRUD/tree/sub/自动主键/String键应用编译运行、文件失败重试及混合批次成功保留、拖动/键盘排序、预览、Activity隐藏上传锁、SQL精确保存、权限/撤权/审计全部通过。原框架OpenAPI所有paths/schemas及其余合同字段逐项精确一致，额外仅21个生成fixture路径和30个fixture模型。仅修改数量提示测试定位后重跑，没有产品代码变化；141单元/336模拟浏览器/5 dist/Maven证据仍对应最终产品源。精确提交CI待验收，H08保持in_progress。
+
+H08最终验收：文件切片9f98bea0052634b29dcdd98fd4d0fad92ed6c4d0的server39121728756四作业、web39121728712和skills39121728838全部success。h08-file-cloud-final.log直接确认两配置各68真实浏览器、完整API/OpenAPI、两实际生成CRUD/tree/sub应用回归。结合已验收审计4e69ac0与精确数值469fc28，规格要求的文件上传/诚实进度/取消/重试/预览/排序、精确金额/百分比、安全审计时间线/差异已具备实际消费者和showcase，H08完成。没有远程删除语义、没有虚假网络进度，权限仍由原服务端校验；总体H09/H10/H11/H13仍未完成。
