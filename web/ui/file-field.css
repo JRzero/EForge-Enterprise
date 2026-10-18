@@ -1,0 +1,6 @@
+.ui-file-field{min-width:0;max-width:100%}
+.ui-file-field input[type=file]{max-width:100%}
+.ui-file-queue ul{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}
+.ui-file-queue li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;overflow-wrap:anywhere;min-width:0}
+.ui-file-queue li>span{min-width:0;max-width:100%}
+.ui-file-queue progress{max-width:100%;width:140px}

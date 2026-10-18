@@ -11,7 +11,7 @@
 | H05 | 错误摘要与明细字段定位 | done | 5135ded精确server39093834387四项/web39093834349成功；131单元/313模拟浏览器/5 dist，两配置各68真实浏览器/完整API及实际生成应用通过。隐藏页签/高级筛选揭示、稳定行键、异步/失效目标回退完成，见字段契约最终验收 |
 | H06 | 远程记录选择 | done | a9c473e精确server39113824223四项/web39113824200成功；131单元/323模拟浏览器/5 dist，两配置各68真实浏览器/完整API/实际生成应用通过。审批人实际查询及showcase接入；见docs/remote-record-selection.md最终验收 |
 | H07 | 表格批量条、筛选摘要/保存视图 | done | 0587b90精确server39117234444四项/web39117234460成功；133单元/331模拟浏览器/5 dist及两配置各68真实浏览器/完整API/实际生成应用通过，见docs/list-views-and-actions.md |
-| H08 | 文件字段、精确数值、审计展示 | in_progress | AuditTimeline接入实际审批详情及示例，2单元/17定向浏览器通过；完整回归与文件/精确数值字段仍待实施，见docs/business-fields-and-audit.md |
+| H08 | 文件字段、精确数值、审计展示 | in_progress | 审计4e69ac0与精确数值469fc28的精确云端全部通过；FileField接入生成页面及示例，141单元/336模拟浏览器/5 dist及Maven通过，真实生成两配置回归进行中，见docs/business-fields-and-audit.md |
 | H09 | 样式/公共层边界与lint | pending | 不破坏固定依赖、不引入巨型包装 |
 | H10 | 锁/会话扫描/审批查询规模治理 | pending | [规模方案](../docs/proposed-scale-baseline.md)明确授权按角色查询、审批N+1及计数矩阵；待实测/优化，不删原锁或添加跨请求权限缓存 |
 | H11 | 页签/大列表性能与包体积预算 | pending | 已记录三个当前dist入口磁盘/gzip基线；不等于网络/内存或改善。页签/大列表实际测量及预算待实施，保护未保存草稿 |

@@ -1,5 +1,6 @@
 import {NativeInput, Select, TextareaControl} from '../../../ui/native';
 import {ExactNumberInput} from '../../../ui/ExactNumberInput';
+import {FileField} from '../../../ui/FileField';
 import {FormErrorSummary, type FormErrorItem, type FormErrorTarget} from '../../../ui/FormErrorSummary';
 #if($table.sub)
 import {EditableDetailTable, MasterDetailLayout} from '../../../ui';
@@ -14,7 +15,6 @@ import {useRetainedRead} from '../../../app/useRetainedRead';
 import {ResourceDialog} from '../../../app/components/ResourceDialog';
 import {ImagePreview} from '../../../app/components/ImagePreview';
 import {ResourceFileLinks} from '../../../app/components/ResourceFileLinks';
-import {UploadEntries} from '../../../app/components/UploadEntries';
 import {generatedUploadIssue} from '../../generator/uploadPolicy';
 #if(!$table.tree)
 import {Pagination} from '../../../app/components/Pagination';
@@ -146,26 +146,16 @@ function QueryDictionaryControl({field, value, disabled, onChange}: {field: Fiel
 function FieldControl({field, value, disabled, onChange, id, fieldError}: {field: Field; value: unknown; disabled: boolean; onChange: (value: unknown) => void; id?: string; fieldError?: string}) {
   const generatedId = useId(), fieldId = id ?? generatedId;
   const changeUploads = useContext(UploadContext);
-  const api = useApi(), [uploading, setUploading] = useState(false), [error, setError] = useState('');
-  const pending = useRef<AbortController | null>(null);
+  const api = useApi();
   if (field.dict && ['select', 'radio', 'checkbox'].includes(field.html ?? '')) return <DictControl {...{field, value, disabled, onChange, fieldError}} id={fieldId} />;
   if (field.html === 'editor') return <RichTextEditor id={fieldId} fieldError={fieldError} label={field.label ?? field.key} required={field.required} value={text(value)} onChange={onChange} disabled={disabled} uploadImage={async (file, signal) => {changeUploads(1); try {return await api.uploadGeneratedFile(file, signal);} finally {changeUploads(-1);}}} />;
-  if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <div>
-    <NativeInput {...fieldAttributes(fieldId, field, fieldError)} type="file" multiple hidden={field.html === 'imageUpload' && text(value).split(',').filter(Boolean).length >= 5} disabled={disabled || uploading} accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'} onChange={async event => {
-      const files = [...(event.target.files ?? [])]; event.target.value = ''; setError('');
-      if (files.length + text(value).split(',').filter(Boolean).length > 5) {setError('最多上传五个文件。'); return;}
-      pending.current?.abort(); const controller = new AbortController(); pending.current = controller; setUploading(true); changeUploads(1);
-      try {const paths = text(value).split(',').filter(Boolean), issues: string[] = []; for (const file of files) {
-        const issue = generatedUploadIssue([file], 0, field.html === 'imageUpload'); if (issue) {issues.push(file.name + '：' + issue); continue;}
-        try {const uploaded = await api.uploadGeneratedFile(file, controller.signal); if (uploaded.includes(',')) throw new Error('上传路径无法保存为文件列表。'); paths.push(uploaded); if (!controller.signal.aborted) onChange(paths.join(','));}
-        catch (cause) {if (controller.signal.aborted) break; issues.push(file.name + '：' + errorMessage(cause));}
-      } if (!controller.signal.aborted) setError(issues.join('；'));}
-      catch (cause) {if (!controller.signal.aborted) setError(errorMessage(cause));} finally {changeUploads(-1); if (pending.current === controller) {pending.current = null; setUploading(false);}}
-    }} />
-    {uploading ? <p role="status">正在上传…</p> : null}{error ? <p role="alert">{error}</p> : null}
-    <p>最多上传五个文件，每个小于 5 MB。格式：{field.html === 'imageUpload' ? 'JPG/JPEG/PNG/GIF/WEBP' : 'DOC/DOCX/XLS/XLSX/PPT/PPTX/TXT/PDF'}</p>
-    <UploadEntries paths={text(value).split(',').filter(Boolean)} disabled={disabled || uploading} onChange={paths => onChange(paths.join(','))}>{(path, index) => <>{field.html === 'imageUpload' ? <ImagePreview src={path} label={(field.label ?? field.key) + ' 文件 ' + (index + 1)} width={148} height={148} /> : <ResourceFileLinks src={path} />}<span>{path.split('/').at(-1)}</span><Button label="移除文件" variant="ghost" isDisabled={disabled || uploading} onClick={() => onChange(text(value).split(',').filter(Boolean).filter((_item, ordinal) => ordinal !== index).join(','))} /></>}</UploadEntries>
-  </div>;
+  if (['fileUpload', 'imageUpload'].includes(field.html ?? '')) return <FileField id={fieldId} label={field.label ?? field.key} fieldError={fieldError} required={field.required}
+    value={text(value).split(',').filter(Boolean)} disabled={disabled} maxFiles={5} limitMessage="最多上传五个文件。" onChange={paths => onChange(paths.join(','))}
+    accept={field.html === 'imageUpload' ? '.jpg,.jpeg,.png,.gif,.webp' : '.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf'}
+    hint={'最多上传五个文件，每个小于 5 MB。格式：' + (field.html === 'imageUpload' ? 'JPG/JPEG/PNG/GIF/WEBP' : 'DOC/DOCX/XLS/XLSX/PPT/PPTX/TXT/PDF')}
+    validate={file => generatedUploadIssue([file], 0, field.html === 'imageUpload')} errorMessage={errorMessage} onBusyChange={uploading => changeUploads(uploading ? 1 : -1)}
+    upload={async (file, signal) => {const path = await api.uploadGeneratedFile(file, signal); if (path.includes(',')) throw new Error('上传路径无法保存为文件列表。'); return path;}}
+    renderFile={(path,index) => <>{field.html === 'imageUpload' ? <ImagePreview src={path} label={(field.label ?? field.key) + ' 文件 ' + (index + 1)} width={148} height={148} /> : <ResourceFileLinks src={path}/>}<span>{path.split('/').at(-1)}</span></>} />;
   if (field.html === 'textarea') return <TextareaControl {...fieldAttributes(fieldId, field, fieldError)} value={text(value)} disabled={disabled} required={field.required} onChange={event => onChange(event.target.value)} />;
   if (field.type === 'Long' || field.type === 'BigDecimal') return <ExactNumberInput {...fieldAttributes(fieldId, field, fieldError)} value={text(value)} disabled={disabled} required={field.required} integer={field.type === 'Long'} onValueChange={next => onChange(next === '' ? undefined : next)} />;
   return <NativeInput {...fieldAttributes(fieldId, field, fieldError)} value={field.type === 'Date' ? localDate(value) : text(value)} disabled={disabled} required={field.required}

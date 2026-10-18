@@ -27,3 +27,17 @@ AuditTimeline接受显式AuditEvent与AuditChange投影，不读取业务context
 数值切片本地终态：58886 exit0，默认/启用h08-number-generated-default/enabled.log均PASS，真实生成CRUD/tree/sub及自动主键/String键页面编译、构建、浏览器、精确ID/金额SQL往返、权限/审计与原上传/时区回归通过。随后7196 exit0，完整334模拟浏览器、5 dist通过；138单元及Maven全模块成功。新native有效性断言证明歧义1,23保持草稿且拒绝提交，合法超精度金额恢复有效。
 
 OpenAPI检查边界：生成应用专用运行安装了业务端点，因此直接与无业务契约deepEqual会失败；差异已逐项核实，两配置的所有原框架paths/schema/security/info/server字段完全一致，额外仅21个/api/v1/business/fixture路径与30个fixture模型。不是放宽原框架一致性，动态生成契约仍经实际客户端严格类型与HTTP验证。数值切片精确提交云端待验收；文件字段尚未实现，其他H09-H11/H13保留。
+
+文件字段切片实现中：FileField受控路径列表/有界本地File队列，注入上传、校验、错误消息、渲染与busy回调。复用UploadEntries排序（实现移入ui，原app路径仅兼容导出），生成Page.tsx.vm接入并保留五文件/原格式/5MB/逗号限制、预览、链接、原权限上传路径。使用原fetch认证传输时显示不定进度与完成文件数；适配器提供实际loaded/total才显示字节进度，不伪造真实网络百分比。展示FileFieldDemo明确本地模拟。
+
+取消中止队列，已确认成功的文件保留；迟到响应不写回；重试失败/取消项重新校验剩余容量；没有远程DELETE。真实卸载通过清理后的DOM连接状态中止请求，Activity隐藏时节点仍连接因而保留上传。busy回调按操作一次开始/一次释放，取消回焦点到字段。只读与disabled阻止选择/移除/重排/重试，完成响应后若已只读不再写值。
+
+当前13项文件/展示浏览器通过，3项迟到响应单元通过（忽略signal的适配器在取消/真实卸载/只读后完成，onChange仍零次，busy精确true/false）；初次展示旧全局file input选择器因新增字段匹配两个元素失败，已限定原“文件选择”区域，保留原测试能力。首轮完整Maven及前端单元/build通过；随后仅补生成器原“五个文件”文案与实际HTTP失败重试断言，最终Maven进程41817、前端26166仍待终态。尚未开始本切片真实生成应用，不将前一数值验证充当文件验证。
+
+文件切片最终静态/框架验证：41817 Maven全模块verify成功、26166 lint/typecheck/141单元/build成功，79868完整336模拟浏览器/5 dist成功。最终源已固定。实际生成回归唯一顺序进程73546正在默认后启用VerifyGeneratedReactOnly，日志h08-file-generated-default/enabled.log，勿重复启动或同时修改生成路由/打包；最终jar已包含FileField模板。真实脚本新增原服务失败文件重试成功、移除重试结果后继续原混合批次/顺序/SQL验证，写请求数相应精确更新；原文案“五个文件”通过业务limitMessage保留。未终态前不宣称实际生成回归通过，未提交此文件切片。
+
+数值切片精确云端验收：469fc28d6f5cdfd88c7ea02e2db713e8b6f80139 的 server39119838559 四作业及 web39119838587 均终态 success；h08-number-cloud-final.log 直接确认两配置各68真实浏览器、完整API/OpenAPI及两配置实际生成React应用通过。
+
+文件真实回归首轮73546终态失败：容量超限提示与前次单文件校验错误同时展示，旧 getByRole(alert) 产生两个匹配；产品提示内容正确。断言已限定“最多上传五个文件。”，保留原失败队列及零上传请求断言。新顺序进程14135运行默认/启用真实生成回归，默认日志 h08-file-generated-default-retry.log，未终态不得验收。
+
+文件切片真实本地终态：14135 exit0，h08-file-generated-default-retry.log 与 h08-file-generated-enabled.log 均以 focused generated React verification PASS 结束。两配置实际CRUD/tree/sub/自动主键/String键应用编译运行、文件失败重试及混合批次成功保留、拖动/键盘排序、预览、Activity隐藏上传锁、SQL精确保存、权限/撤权/审计全部通过。原框架OpenAPI所有paths/schemas及其余合同字段逐项精确一致，额外仅21个生成fixture路径和30个fixture模型。仅修改数量提示测试定位后重跑，没有产品代码变化；141单元/336模拟浏览器/5 dist/Maven证据仍对应最终产品源。精确提交CI待验收，H08保持in_progress。

@@ -138,7 +138,7 @@ test('showcase editors, permissions and secondary interactions remain usable',as
   await page.getByRole('button',{name:'显示消息',exact:true}).click();
   await expect(page.getByText('演示消息已显示',{exact:true})).toBeVisible();
   await page.goto('/showcase.html#files');
-  await page.locator('input[type=file]').setInputFiles({name:'example.txt',mimeType:'text/plain',buffer:Buffer.from('local sample')});
+  await page.locator('section').filter({has:page.getByRole('heading',{name:'文件选择',exact:true})}).locator('input[type=file]').setInputFiles({name:'example.txt',mimeType:'text/plain',buffer:Buffer.from('local sample')});
   await expect(page.getByText('example.txt',{exact:true}).last()).toBeVisible();
   await page.goto('/showcase.html#list');
   await page.getByRole('navigation',{name:'示例分类'}).getByRole('link',{name:'图表看板',exact:true}).click();

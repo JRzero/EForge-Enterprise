@@ -107,15 +107,18 @@ async function verifyUploadEditing(page,category,id,model) {
     for(const file of [{name:'拒绝,逗号.txt',mimeType:'text/plain',buffer:Buffer.from('x')},{name:'拒绝.exe',mimeType:'application/octet-stream',buffer:Buffer.from('x')},{name:'边界.txt',mimeType:'text/plain',buffer:Buffer.alloc(5*1024*1024)}]) {
       await input.setInputFiles(file);await expect(control.getByRole('alert')).toBeVisible();assert.equal(writes,0);
     }
-    await input.setInputFiles(Array.from({length:4},(_,i)=>({name:`超量${i}.txt`,mimeType:'text/plain',buffer:Buffer.from('x')})));await expect(control.getByRole('alert')).toContainText('五个');assert.equal(writes,0);
+    await input.setInputFiles(Array.from({length:4},(_,i)=>({name:`超量${i}.txt`,mimeType:'text/plain',buffer:Buffer.from('x')})));await expect(control.getByRole('alert').filter({hasText:'最多上传五个文件。'})).toBeVisible();assert.equal(writes,0);
     failNext=true;
     const recovered=page.waitForResponse(response=>new URL(response.url()).pathname==='/common/upload'&&response.status()===200);
     await input.setInputFiles([{name:'服务失败.txt',mimeType:'text/plain',buffer:Buffer.from('失败不得保存')},{name:'服务恢复.txt',mimeType:'text/plain',buffer:Buffer.from('成功必须保留')}]);await recovered;
     await expect(entries).toHaveCount(3);await expect(control.getByRole('alert')).toContainText('服务失败.txt');assert.equal(writes,2);
+    await control.getByRole('button',{name:'重试 服务失败.txt',exact:true}).click();
+    await expect(entries).toHaveCount(4);assert.equal(writes,3);
+    await entries.last().getByRole('button',{name:'移除文件',exact:true}).click();await expect(entries).toHaveCount(3);
     await entries.last().getByRole('button',{name:'移除文件',exact:true}).click();await expect(entries).toHaveCount(2);
     const acknowledgement=page.waitForResponse(response=>new URL(response.url()).pathname==='/common/upload'&&response.status()===200);
     await input.setInputFiles([{name:'混合,拒绝.txt',mimeType:'text/plain',buffer:Buffer.from('x')},{name:'混合合法.txt',mimeType:'text/plain',buffer:Buffer.from('保留成功文件')}]);await acknowledgement;
-    await expect(entries).toHaveCount(3);await expect(control.getByRole('alert')).toContainText('逗号');assert.equal(writes,3);
+    await expect(entries).toHaveCount(3);await expect(control.getByRole('alert')).toContainText('逗号');assert.equal(writes,4);
     await dialog.getByRole('button',{name:'保存',exact:true}).click();
     try {await expect(dialog).toHaveCount(0);}catch(cause){console.error('Upload editor save diagnostics:',await dialog.innerText(),await dialog.locator('input,select,textarea').evaluateAll(elements=>elements.filter(element=>!element.checkValidity()).map(element=>({name:element.name,type:element.type,message:element.validationMessage}))));throw cause;}
     const changed=(await readDetail(page,id)).data.filePaths.split(',');assert.equal(changed[0],second);assert.equal(changed[1],original);assert.equal(changed.length,3);
