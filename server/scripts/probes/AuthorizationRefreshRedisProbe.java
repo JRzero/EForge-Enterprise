@@ -69,6 +69,8 @@ class AuthorizationRefreshRedisProbe {
         final List<String> reads = new ArrayList<>(), writes = new ArrayList<>(), successes = new ArrayList<>();
         Fault fault = Fault.NONE;
         boolean armed;
+        boolean measuring;
+        int enumerations, snapshotReads, casCalls;
         OrderedCache(RedisCommands<String,String> admin) { this.admin = admin; }
         void arm(Fault next, List<Session> sessions) {
             fault = next; armed = true; orderedKeys = sessions.stream().map(Session::key).toList();
@@ -76,6 +78,7 @@ class AuthorizationRefreshRedisProbe {
         }
         void disarm() { armed = false; fault = Fault.NONE; }
         @Override public Collection<String> keys(String pattern) {
+            if(measuring)enumerations++;
             Collection<String> actual = super.keys(pattern);
             if (!armed) return actual;
             require(actual != null && new HashSet<>(actual).equals(new HashSet<>(orderedKeys)), "Real Redis enumeration differs from the three owned sessions.");
@@ -84,10 +87,12 @@ class AuthorizationRefreshRedisProbe {
             return List.copyOf(orderedKeys);
         }
         @Override public <T> CacheSnapshot<T> getExpiringCacheSnapshot(String key) {
+            if(measuring)snapshotReads++;
             if (armed) reads.add(key);
             return super.getExpiringCacheSnapshot(key);
         }
         @Override public boolean compareAndSetExpiringCacheObject(String key, byte[] before, byte[] value) {
+            if(measuring)casCalls++;
             if (armed) writes.add(key);
             boolean updated = super.compareAndSetExpiringCacheObject(key, before, value);
             if (armed && updated) {
@@ -110,6 +115,7 @@ class AuthorizationRefreshRedisProbe {
         final ApiSecurityProblemHandler problems = new ApiSecurityProblemHandler(new ObjectMapper());
         final PermissionService permission = new PermissionService();
         final SysUserServiceImpl users;
+        final RoleSessionRefresher refresher;
         RuntimeBoundary(DataSource source, LettuceConnectionFactory redis, RedisCommands<String,String> admin) throws Exception {
             PlatformTransactionManager manager = new DataSourceTransactionManager(source);
             var factory = new SqlSessionFactoryBean(); factory.setDataSource(source);
@@ -134,7 +140,7 @@ class AuthorizationRefreshRedisProbe {
             field(tokens, "header", "Authorization"); field(tokens, "expireTime", 60);
             field(tokens, "secret", Base64.getEncoder().encodeToString(new byte[64]));
             var mutex = session.getMapper(DepartmentMutationMapper.class);
-            var refresher = new RoleSessionRefresher(cache, users, navigation, permissions, tokens, mutex, manager);
+            refresher = new RoleSessionRefresher(cache, users, navigation, permissions, tokens, mutex, manager);
             // status uses these concrete services/mappers; unrelated CRUD dependencies are deliberately absent.
             roles = new RoleService(legacyRoles, menus, null, users, session.getMapper(RoleSelectionMapper.class), mutex, refresher, manager);
             filter = new JwtAuthenticationTokenFilter(); field(filter, "tokenService", tokens);
@@ -143,8 +149,12 @@ class AuthorizationRefreshRedisProbe {
             field(filter, "consoleAuthenticator", providers.getBeanProvider(DiagnosticConsoleAuthenticator.class));
         }
         List<Session> sessions(RedisCommands<String,String> admin) {
+            return sessions(admin,3);
+        }
+        List<Session> sessions(RedisCommands<String,String> admin,int count) {
             var results = new ArrayList<Session>();
-            for (String label : List.of("A", "B", "C")) {
+            for (int index=0;index<count;index++) {
+                String label=index<3?List.of("A","B","C").get(index):"session-"+index;
                 MockHttpServletRequest request = request();
                 RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
                 try {
@@ -158,7 +168,7 @@ class AuthorizationRefreshRedisProbe {
                     results.add(new Session(label, key, jwt, bytes, ttl));
                 } finally { RequestContextHolder.resetRequestAttributes(); }
             }
-            check(results.stream().map(Session::key).distinct().count() == 3, "Three logins must produce distinct sessions.");
+            check(results.stream().map(Session::key).distinct().count() == count, "Owned logins must produce distinct sessions.");
             return results;
         }
         int protectedRequest(String jwt, boolean requireGrant) throws Exception {
@@ -276,6 +286,24 @@ class AuthorizationRefreshRedisProbe {
         sql.update("INSERT INTO sys_user_role(user_id,role_id) VALUES(?,?)", USER, ROLE);
         sql.update("INSERT INTO sys_role_menu(role_id,menu_id) VALUES(?,1000)", ROLE);
     }
+    static void scale(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin){
+        runtime.cache.disarm();sql.update("UPDATE sys_role SET status='0' WHERE role_id=?",ROLE);
+        for(int count:List.of(3,30,100)){
+            var sessions=runtime.sessions(admin,count);
+            try{
+                var cache=runtime.cache;cache.enumerations=0;cache.snapshotReads=0;cache.casCalls=0;
+                long started=System.nanoTime();cache.measuring=true;
+                try{runtime.refresher.refresh(Set.of(USER));}finally{cache.measuring=false;}
+                double elapsed=(System.nanoTime()-started)/1_000_000.0;
+                check(cache.enumerations==1&&cache.snapshotReads==count&&cache.casCalls==count,"Refresh scale baseline changed: inspect actual Redis operations.");
+                for(var session:sessions){
+                    check(decode(raw(admin,session.key())).getPermissions().equals(Set.of(GRANT)),"Scale refresh changed effective authority.");
+                    check(admin.pttl(session.key())>0&&admin.pttl(session.key())<=session.ttlBefore(),"Scale refresh changed original session lifetime.");
+                }
+                System.out.printf(Locale.ROOT,"REFRESH_SCALE: sessions=%d affected=%d enumeration=%d snapshot_lua=%d cas_lua=%d elapsed_ms=%.3f; includes SQL and shared-lock transaction, not Redis-only time%n",count,count,cache.enumerations,cache.snapshotReads,cache.casCalls,elapsed);
+            }finally{check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==count,"Owned scale session cleanup incomplete.");}
+        }
+    }
     public static void main(String[] args) throws Exception {
         String url = env("EFORGE_AUTH_REFRESH_JDBC_URL");
         require(url.startsWith("jdbc:mysql://127.0.0.1:") && url.contains("/eforge_enterprise?"), "Probe JDBC target is not the owned localhost fixture.");
@@ -298,6 +326,7 @@ class AuthorizationRefreshRedisProbe {
                 var runtime = new RuntimeBoundary(routing, redis, admin);
                 scenario(runtime, sql, admin, Fault.INITIAL_READ);
                 scenario(runtime, sql, admin, Fault.AFTER_FIRST_CAS);
+                scale(runtime,sql,admin);
                 check(sql.queryForObject("SELECT COUNT(*) FROM sys_user", Integer.class) == 2
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role", Integer.class) == 1
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role_menu", Integer.class) == 1, "Unexpected physical IAM row changes.");
