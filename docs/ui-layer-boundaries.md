@@ -1,6 +1,6 @@
 # 公共 UI 与应用组合边界
 
-H09 进行中。固定 EForge 依赖与原组件行为不变，不复制上游源码。
+H09 本地实现与分层审计完成，最终精确提交云端待验收，状态仍为 in_progress。固定 EForge 依赖与原组件行为不变，不复制上游源码。下方历史记录保留原阶段状态；最新结论见本节及文末收尾审计。
 
 ## 模块方向
 
@@ -70,3 +70,17 @@ H09公共弹窗基础样式迁移：ResourceDialog独立导入resource-dialog.cs
 边界收尾审计：ResourceDialog通用桌面label/control列（包含PasswordField组合）迁入ui/compat/resource-form.css并由组件导入；用户/生成器特定表单布局仍属app。弹窗通用fieldset/数字输入/提交按钮和列菜单外观由公共组件提供。独立弹窗94615验证110px标签、输入右侧对齐、手机/移动/Home/草稿/焦点均通过。还需将ef-data-table、ef-page-header等通用EForge DOM规则从app集中到compat；外壳ef-app-shell及业务限定覆盖不与纯公共组件混为一谈。最终H09验收必须结合这些实际源码边界和精确CI，不仅依赖搜索未发现或历史单测。
 
 本轮50396终态0，h09-boundary-final.log记录lint/生成复现、146单元、build、342模拟和5dist全部通过；typecheck及独立弹窗94615通过。后端源码不变，本地未重复Maven/SQL；精确新CI待验收。
+
+## 最终分层审计（2026-10-19，本地完成）
+
+通用 EForge 表格、页头呈现集中到 `ui/compat/data-presentation.css`，由公共主题和应用主题按原组合位置导入。保留原媒体条件、选择器和声明顺序。新增 lint 拒绝兼容目录以外的顶层通用 `.ef-data-table` / `.ef-page-header` 规则；允许明确的页面组合覆盖。该规则是项目代码约定检查，不是任意 CSS 语法的安全解析器。
+
+| 层级 | 归属及保留理由 | 验证 |
+|---|---|---|
+| 主题与兼容 | ui/base、theme-tokens、compat 中输入/选择器/表单/表格规则；公共主题不反向导入 app | CSS import 与 DOM 边界 lint、147 单元 |
+| 公共组件 | 弹层、树、分页、图表、页签、密码、头像、品牌、字典、图片和文件列表由组件导入自身样式 | 独立公共主题夹具、桌面及 390/320px 浏览器 |
+| 模板 | ui/list-layout、page-templates、form-fields 及组件组合；不携带业务 API 或路由 | 列表/表单/详情/账号及 showcase 回归 |
+| 应用外壳 | app/theme 组合、shell-controls、导航与密度覆盖 | 实际工作区/保留页签及正式 dist |
+| 业务覆盖 | 锁屏头像尺寸、导航图标、用户/生成器弹窗、dashboard 页头、特定页面表格工具栏隐藏 | 保留对应选择器与业务回归，不机械删除 app 中全部组件类名 |
+
+最终固定生产源码的 session69248 终态0，`h09-data-final.log`：生成客户端复现、147 单元、build、三入口预算、342 模拟浏览器、5 正式 dist、2 规模测试全部通过；此前 lint/typecheck session37022通过。随后仅扩展独立列表测试夹具，session28049 typecheck及浏览器通过：公共 PageHeader 18px、DataTable 表头背景和单元格间距在没有 app CSS 时生效，原分页/密码交互和手机无溢出仍通过。未改变后端源/契约，本地不重复 Maven/SQL；最终精确提交服务器、真实生成应用及 web CI 仍待，不提前将 H09 标记 done。完整 H10 用户会话索引/持锁网络治理和 H13 验收继续保留。

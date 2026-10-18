@@ -1,6 +1,13 @@
 import {expect,it} from 'vitest';
 // @ts-expect-error Native ESM checker is shared with the lint command.
 import {styleBoundaryIssues} from '../../scripts/check-style-boundaries.mjs';
+it('keeps generic EForge table/header rules in compatibility files while allowing template composition',()=>{
+  for(const source of ['.ef-data-table th {color:red}', '@media (max-width:500px) {.ef-page-header h1 {font-size:20px}}']){
+    expect(styleBoundaryIssues('/web/app/styles.css',source)).toHaveLength(1);
+    expect(styleBoundaryIssues('/web/ui/compat/data.css',source)).toEqual([]);
+  }
+  expect(styleBoundaryIssues('/web/ui/list.css','.list-page > .ef-page-header {margin:0}')).toEqual([]);
+});
 it('isolates vendor DOM selectors while permitting owned component and portal styles',()=>{
   expect(styleBoundaryIssues('/web/features/list.css','.astryx-selector { color:red; }')).toHaveLength(1);
   expect(styleBoundaryIssues('/web/ui/compat/selector.css','.astryx-selector { color:red; }')).toEqual([]);

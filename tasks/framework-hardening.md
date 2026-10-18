@@ -12,7 +12,7 @@
 | H06 | 远程记录选择 | done | a9c473e精确server39113824223四项/web39113824200成功；131单元/323模拟浏览器/5 dist，两配置各68真实浏览器/完整API/实际生成应用通过。审批人实际查询及showcase接入；见docs/remote-record-selection.md最终验收 |
 | H07 | 表格批量条、筛选摘要/保存视图 | done | 0587b90精确server39117234444四项/web39117234460成功；133单元/331模拟浏览器/5 dist及两配置各68真实浏览器/完整API/实际生成应用通过，见docs/list-views-and-actions.md |
 | H08 | 文件字段、精确数值、审计展示 | done | 审计4e69ac0、数值469fc28、文件9f98bea精确云端全绿；141单元/336模拟/5dist、两配置各68真实浏览器及两实际生成应用通过，见docs/business-fields-and-audit.md最终验收 |
-| H09 | 样式/公共层边界与lint | in_progress | c33d722、7b2ce63、74460ba公共层/兼容样式/依赖lint精确云端通过；145单元/336模拟/5dist、两配置各68真实浏览器及实际生成应用通过；历史基础样式分层待续，见docs/ui-layer-boundaries.md |
+| H09 | 样式/公共层边界与lint | in_progress | 公共组件/模板/外壳及兼容规则归属本地审计完成；最终147单元/342模拟/5dist/2规模与独立公共表格手机验证通过，最终精确CI待验收，见docs/ui-layer-boundaries.md |
 | H10 | 锁/会话扫描/审批查询规模治理 | in_progress | 角色批量e916f97与审批批量e453168精确云端成功；c40dc73会话/真实根锁基线1162断言通过。73c10d8完整SCAN已精确云端通过；用户会话索引与持锁网络治理待续，见对应安全审查，不删原锁或添加跨请求权限缓存 |
 | H11 | 页签/大列表性能与包体积预算 | done | f91b4a6/0621313/cb81269精确web及对应server全部成功；30独立页签草稿、10000总量100行分页/10条远程选择器、回收与入口预算CI实测，见docs/frontend-performance-budget.md最终验收；非生产体验SLA |
 | H12 | dist正式产物浏览器验收 | done | 正式build后5/5通过；7e411bb web-ci 38710412483终态success。范围为dist本身三入口/深链/登录/懒块中断恢复，不替代真实反代/CDN部署验收；总目标未完成 |

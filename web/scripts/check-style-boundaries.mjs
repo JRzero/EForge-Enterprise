@@ -6,6 +6,7 @@ export function styleBoundaryIssues(filename,source) {
   const text=source.replace(/\/\*[\s\S]*?\*\//g,''),issues=[];
   const normalized=filename.replaceAll('\\','/');
   if (/\.astryx-[\w-]+/.test(text)&&!normalized.includes('/ui/compat/')) issues.push('Vendor DOM selectors belong only in ui/compat.');
+  if (/(?:^|[{}])\s*\.ef-(?:data-table|page-header)[\w-]*/.test(text)&&!normalized.includes('/ui/compat/')) issues.push('Generic EForge table/header presentation belongs in ui/compat; keep only scoped composition overrides elsewhere.');
   for(const match of text.matchAll(/@import\s+(?:url\(\s*(?:['"]([^'"]+)['"]|([^\s)]+))\s*\)|['"]([^'"]+)['"])/g)) {
     const specifier=match[1]??match[2]??match[3];
     if(normalized.includes('/ui/')&&specifier.startsWith('.')){

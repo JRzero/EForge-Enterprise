@@ -3,6 +3,9 @@ import {test,expect} from './fixtures';
 test('public list primitives carry desktop and mobile layout without application styles',async({page})=>{
   await page.goto('/tests/fixtures/list-primitives.html');
   await page.setViewportSize({width:1440,height:900});
+  await expect(page.getByRole('heading',{name:'独立公共表格'})).toHaveCSS('font-size','18px');
+  await expect(page.getByRole('columnheader',{name:'名称'})).toHaveCSS('background-color','rgb(248, 248, 249)');
+  await expect(page.getByRole('cell',{name:'示例记录'})).toHaveCSS('padding','9px 12px');
   expect((await page.locator('.brand-mark').boundingBox())!.width).toBe(28);
   expect((await page.locator('.header-account-avatar').boundingBox())!.height).toBe(28);
   expect(await page.locator('.password-field').evaluate(node=>getComputedStyle(node).display)).toBe('grid');

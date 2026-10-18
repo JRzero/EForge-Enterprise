@@ -1,0 +1,27 @@
+
+.ef-page-header h1 { font-size: 22px; font-weight: 600; line-height: 1.4; }
+.ef-page-header p { font-size: 13px; margin-top: 5px; }
+.post-table .ef-data-table { border: 0; border-radius: 0; }
+.ef-data-table th { background: #f6f8fa; color: #515d6b; font-weight: 600; }
+.ef-data-table th, .ef-data-table td { padding: 11px 14px; border-bottom-color: #edf0f3; }
+.ef-data-table tbody tr:hover { background: #f5f8ff; }
+.ef-data-table__toolbar { background: #fff; }
+@media (max-width: 600px) {
+  .ef-page-header { gap: 12px; flex-wrap: wrap; }
+}
+@media (max-width: 600px) {
+  .ef-page-header h1 { font-size: 20px; }
+}
+.ef-page-header { align-items: center; gap: 16px; margin-bottom: 16px; }
+.ef-page-header h1 { font-size: 18px; font-weight: 600; }
+.ef-page-header__eyebrow { display: none; }
+.ef-page-header p { font-size: 12px; margin-top: 4px; }
+.ef-data-table { border-radius: 0; }
+.ef-data-table table { font-size: 13px; }
+.ef-data-table :is(th,td) { padding: 9px 12px; height: 40px; }
+.ef-data-table th { background: #f8f8f9; color: #515a6e; }
+.ef-data-table__sort { justify-content: flex-start; }
+.enterprise-layout .ef-data-table th { font-size: 14px; font-weight: 400; color: #151b26; background: #f7f8fa; }
+.enterprise-layout .ef-data-table td { font-size: 12px; font-weight: 400; color: #151b26; }
+.enterprise-layout .ef-data-table__sort { font: inherit; color: inherit; }
+.enterprise-layout .ef-data-table :is(th,td) { border-bottom-color: #e8e9eb; }

@@ -2,11 +2,7 @@
 .enterprise-layout, .login-layout { --ui-text: #151b26; --ui-muted: #5c5f66; }
 .enterprise-layout :is(button,input,select,textarea) { font-family: inherit; }
 .enterprise-layout .list-filters label { font-size: var(--ui-control-font); font-weight: 400; color: #5c5f66; }
-.enterprise-layout .ef-data-table th { font-size: 14px; font-weight: 400; color: #151b26; background: #f7f8fa; }
-.enterprise-layout .ef-data-table td { font-size: 12px; font-weight: 400; color: #151b26; }
-.enterprise-layout .ef-data-table__sort { font: inherit; color: inherit; }
 .enterprise-layout .post-table { border-color: #e8e9eb; }
-.enterprise-layout .ef-data-table :is(th,td) { border-bottom-color: #e8e9eb; }
 
 /* Shared button states from the reference AMIS theme. */
 .ui-select.ui-select, .ui-textarea.ui-textarea {

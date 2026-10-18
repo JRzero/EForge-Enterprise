@@ -6,6 +6,7 @@
 @import './styles.css';
 @import './enterprise-theme.css';
 @import './workspace-layout.css';
+@import '../ui/compat/data-presentation.css';
 @import '../ui/list-layout.css';
 @import '../ui/styles.css';
 @import '../ui/spcore-theme.css';

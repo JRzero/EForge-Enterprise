@@ -6,6 +6,8 @@ import {PaginationNavigation} from '../../ui/PaginationNavigation';
 import {PasswordField} from '../../ui/PasswordField';
 import {AccountAvatar} from '../../ui/AccountAvatar';
 import {BrandMark} from '../../ui/BrandMark';
+import {DataTable} from '../../ui/data';
+import {PageHeader} from '../../ui/patterns';
 import '../../ui/theme.css';
 
 function Fixture() {
@@ -13,6 +15,8 @@ function Fixture() {
   const [password,setPassword]=useState('sample-password');
   return <main style={{padding:16}}><TreeListLayout sidebarLabel="部门树" sidebar={<ul><li><button type="button" aria-pressed="true">研发部门</button></li></ul>}>
     <p>独立列表内容</p>
+    <PageHeader title="独立公共表格" description="仅加载公共主题"/>
+    <DataTable data={[{id:'1',name:'示例记录'}]} columns={[{accessorKey:'name',header:'名称'}]} pagination={false} showColumnVisibility={false}/>
     <PaginationNavigation page={page} pageSize={10} total={10000} disabled={false} onChange={setPage}/>
     <output aria-label="当前页">{page}</output>
     <BrandMark/>

@@ -6,6 +6,7 @@
 @import './base.css';
 @import './theme-tokens.css';
 @import './compat/input-theme.css';
+@import './compat/data-presentation.css';
 @import './list-layout.css';
 @import './styles.css';
 @import './spcore-theme.css';

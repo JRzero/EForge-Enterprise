@@ -1452,3 +1452,7 @@ Current requested scope is complete and automatic development can stop. Historic
 ## 2026-10-18 阶段验收
 
 H01–H04精确提交7331671的server39084790316全部四作业、web39084790318与技能39084790402均成功。两配置各68真实浏览器/完整API/OpenAPI和实际生成应用已验收；历史待验收文字由本段及阶段验收记录更新。H05–H11和H13仍待完成，工作分支尚未合并main。 统一证据见 [H01–H04验收](framework-hardening-h01-h04-acceptance.md)。
+
+## 2026-10-19 框架加固接续
+
+以 tasks/framework-hardening.md 的当前状态表为准：H01–H08、H11、H12已逐切片验收；H09公共组件样式归属与边界lint本地完成，最终147单元、342模拟浏览器、5dist、2规模和独立公共主题表格验证通过，等待最终精确CI。H10已交付角色/审批批量查询及SCAN，用户会话索引和持锁网络治理仍待；H13完整验收未完成。分支尚未合并main，暂缓表单构建器不计入本轮范围。
