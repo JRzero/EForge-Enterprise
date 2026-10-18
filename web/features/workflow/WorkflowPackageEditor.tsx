@@ -1,4 +1,6 @@
-import {lazy,Suspense,useCallback,useRef,useState,type FormEvent} from 'react';
+import {lazy,Suspense,useCallback,useId,useLayoutEffect,useRef,useState,type FormEvent} from 'react';
+import {FormErrorSummary,type FormErrorItem} from '../../ui/FormErrorSummary';
+import {FormField} from '../../ui/FormField';
 import type {DesignerHandle} from './WorkflowDesigner';
 import {prepareDiagram} from './designer-xml';
 import type {WorkflowPackageResponse,WorkflowScenarioRequest} from '../../generated/api';
@@ -21,6 +23,8 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
   const [initial]=useState(()=>({name:draft?.name??'请假审批',xml:draft?.source?.bpmnXml??exampleXml,
     scenarios:JSON.stringify(draft?.source?.scenarios??exampleScenarios,null,2)}));
   const [form,setForm]=useState(initial),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  const [fieldErrors,setFieldErrors]=useState<FormErrorItem[]>([]),summary=useRef<HTMLElement>(null),advanced=useRef<HTMLDetailsElement>(null),scenarioInput=useRef<HTMLTextAreaElement>(null),scenarioId=useId();
+  useLayoutEffect(()=>{if(fieldErrors.length)summary.current?.focus();},[fieldErrors]);
   const [visual,setVisual]=useState(()=>{try{prepareDiagram(initial.xml);return true;}catch{return false;}}),[diagramDirty,setDiagramDirty]=useState(false),[ready,setReady]=useState(false),designer=useRef<DesignerHandle>(null);
   const markDiagramDirty=useCallback(()=>setDiagramDirty(true),[]),markReady=useCallback((value:boolean)=>setReady(value),[]);
   const dirty=diagramDirty||JSON.stringify(form)!==JSON.stringify(initial),pageDraft=usePageDraft(dirty),discard=useDiscardChanges(dirty,busy);
@@ -38,14 +42,14 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
     }catch(cause){setError(cause instanceof Error?cause.message:'无法导出，请确认画布已成功加载。');}finally{setBusy(false);}
   }
   async function save(event:FormEvent){
-    event.preventDefault();if(busy)return;setError('');
+    event.preventDefault();if(busy)return;setError('');setFieldErrors([]);
     let scenarios:WorkflowScenarioRequest[];
     try{
       const parsed:unknown=JSON.parse(form.scenarios);
       if(!Array.isArray(parsed)||parsed.length>20)throw new Error('invalid');
       // The canonical backend validates the complete scenario contract before any engine work.
       scenarios=parsed as WorkflowScenarioRequest[];
-    }catch{setError('场景应为有效的 JSON 数组，最多 20 项。');return;}
+    }catch{setFieldErrors([{key:'scenarios',label:'审批场景',message:'场景应为有效的 JSON 数组，最多 20 项。',target:{scope:'advanced',field:'scenarios'}}]);return;}
     setBusy(true);const finishSave=pageDraft.beginSave();
     try{
       const xml=visual?await designer.current!.save():form.xml;
@@ -60,6 +64,10 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
     <h2 id="workflow-editor-title">{draft?'编辑流程包':'新增流程包'}</h2>
     <p className="workflow-editor-intro">先设计审批流程，再保存草稿。校验与发布在流程列表中完成。</p>
     <PageForm onSubmit={event=>{void save(event);}} actions={<><Button type="submit" variant="primary" label={busy?'正在保存…':'保存草稿'} isDisabled={busy||visual&&!ready}/><Button label="取消" variant="secondary" isDisabled={busy} onClick={()=>discard.confirm(close)}/></>}>
+      <FormErrorSummary ref={summary} errors={fieldErrors} onNavigate={target=>{
+        if(target.scope!=='advanced'||target.field!=='scenarios'||busy||!advanced.current||!scenarioInput.current)return;
+        advanced.current.open=true;scenarioInput.current.focus();
+      }}/>
       <FormSection title="基本信息"><Input label="流程名称" value={form.name} isDisabled={busy} aria-required="true" onChange={name=>setForm({...form,name})}/><p>业务：请假审批{draft?.revision?` · 当前草稿版本 ${draft.revision}`:''}</p></FormSection>
       <FormSection title="流程设计">
         <p className="workflow-editor-intro">添加节点 → 选择节点配置审批 → 连接下一步</p>
@@ -70,9 +78,9 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
           void file.text().then(xml=>{prepareDiagram(xml);setForm(current=>({...current,xml}));}).catch(()=>setError('导入失败：请检查 BPMN 文件，原草稿内容已保留。')).finally(()=>setBusy(false));
         }}/></label></>}
       </FormSection>
-      <details className="workflow-advanced"><summary>高级配置 · 审批验证场景</summary>
+      <details ref={advanced} className="workflow-advanced"><summary>高级配置 · 审批验证场景</summary>
         <p>用于验证批准、拒绝等路径。新增流程已预置两个示例；更改节点标识或审批路径后，请同步调整场景。</p>
-        <label>审批场景<TextareaControl aria-label="审批场景" rows={10} value={form.scenarios} disabled={busy} onChange={event=>setForm({...form,scenarios:event.target.value})}/></label>
+        <FormField id={scenarioId} label="审批场景" error={fieldErrors.find(item=>item.key==='scenarios')?.message}>{control=><TextareaControl {...control} ref={scenarioInput} rows={10} value={form.scenarios} disabled={busy} onChange={event=>{setForm({...form,scenarios:event.target.value});setFieldErrors([]);}}/>}</FormField>
       </details>
       <p className="workflow-editor-intro">保存不会发布流程，也不会改变正在运行的审批。</p>
       {error?<p role="alert">{error}</p>:null}
