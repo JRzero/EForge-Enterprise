@@ -1,6 +1,8 @@
 package io.eforge.enterprise.web.controller.api.v1.system;
 
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -23,6 +25,7 @@ import io.eforge.enterprise.system.service.ISysUserService;
 public class RoleSessionRefresher
 {
     private static final int MAX_REFRESH_ATTEMPTS = 3;
+    private static final int PUBLICATION_BATCH_SIZE = 32;
 
     private final RedisCache cache;
     private final ISysUserService users;
@@ -77,76 +80,98 @@ public class RoleSessionRefresher
         {
             return;
         }
-        transaction.executeWithoutResult(status -> {
-            // Fresh snapshot under the shared lock: older callbacks cannot publish old DB state.
-            if (mutations.lockRoot() == null)
+        // Enumeration and unrelated/expired session reads need no IAM row lock.
+        // Complete enumeration first; a failed cursor must not publish a partial batch.
+        Collection<String> keys = cache.scanKeys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+        if (keys != null)
+        {
+            List<String> batch = new ArrayList<>(PUBLICATION_BATCH_SIZE);
+            for (String key : keys)
             {
-                throw new ApiFailure(409, "DEPARTMENT_ROOT_MISSING", "Root department does not exist.");
-            }
-            Collection<String> keys = cache.scanKeys(CacheConstants.LOGIN_TOKEN_KEY + "*");
-            if (keys != null)
-            {
-                for (String key : keys)
+                if (key.startsWith(CacheConstants.LOGIN_TOKEN_KEY))
                 {
-                    if (key.startsWith(CacheConstants.LOGIN_TOKEN_KEY))
+                    batch.add(key.substring(CacheConstants.LOGIN_TOKEN_KEY.length()));
+                    if (batch.size() == PUBLICATION_BATCH_SIZE)
                     {
-                        refreshSession(key.substring(CacheConstants.LOGIN_TOKEN_KEY.length()), userIds);
+                        refreshBatch(batch, userIds);
+                        batch.clear();
                     }
                 }
             }
-        });
+            refreshBatch(batch, userIds);
+        }
     }
 
-    private void refreshSession(String token, Set<Long> userIds)
+    private void refreshBatch(List<String> candidates, Set<Long> userIds)
     {
-        for (int attempt = 0; attempt < MAX_REFRESH_ATTEMPTS; attempt++)
+        List<String> pending = candidates;
+        for (int attempt = 0; attempt < MAX_REFRESH_ATTEMPTS && !pending.isEmpty(); attempt++)
         {
-            LoginUser session = tokens.getLoginUserByToken(token);
-            if (session == null || !userIds.contains(session.getUserId()))
+            List<LoginUser> sessions = new ArrayList<>(pending.size());
+            for (String token : pending)
+            {
+                LoginUser session = tokens.getLoginUserByToken(token);
+                if (session != null && userIds.contains(session.getUserId())) sessions.add(session);
+            }
+            if (sessions.isEmpty())
             {
                 return;
             }
+            pending = transaction.execute(status -> {
+                if (mutations.lockRoot() == null)
+                {
+                    throw new ApiFailure(409, "DEPARTMENT_ROOT_MISSING", "Root department does not exist.");
+                }
+                List<String> conflicts = new ArrayList<>();
+                for (LoginUser session : sessions)
+                {
+                    if (!publish(session.getToken(), session)) conflicts.add(session.getToken());
+                }
+                return conflicts;
+            });
+            // Release the lock before reading conflicts; the next bounded batch
+            // gets a new SQL view. At most 32 session snapshots are retained here.
+        }
+        // Repeated contention fails closed without recreating any session.
+        for (String token : pending) tokens.delLoginUser(token);
+    }
+
+    private boolean publish(String token, LoginUser session)
+    {
+        // Keep the lock through CAS/revocation: another IAM mutation cannot commit
+        // between this SQL read and publication of its authority into Redis.
+        try
+        {
+            var user = users.selectUserById(session.getUserId());
+            if (user == null || !"0".equals(user.getStatus()) || !"0".equals(user.getDelFlag()))
+            {
+                tokens.delLoginUser(token);
+                return true;
+            }
+            user.setRoles(navigation.selectActiveRoles(user.getUserId()));
+            session.setUser(user);
+            session.setDeptId(user.getDeptId());
+            session.setPermissions(user.isAdmin() || !user.getRoles().isEmpty()
+                    ? permissions.getMenuPermission(user) : Set.of());
+            return tokens.updateLoginUser(session);
+        }
+        catch (RuntimeException failure)
+        {
+            // The DB mutation has already committed. When this identified
+            // session cannot receive fresh authority, revoke it if Redis is
+            // available and preserve the original failure for the caller.
             try
             {
-                var user = users.selectUserById(session.getUserId());
-                if (user == null || !"0".equals(user.getStatus()) || !"0".equals(user.getDelFlag()))
-                {
-                    tokens.delLoginUser(token);
-                    return;
-                }
-                user.setRoles(navigation.selectActiveRoles(user.getUserId()));
-                session.setUser(user);
-                session.setDeptId(user.getDeptId());
-                session.setPermissions(user.isAdmin() || !user.getRoles().isEmpty()
-                        ? permissions.getMenuPermission(user) : Set.of());
-                if (tokens.updateLoginUser(session))
-                {
-                    return;
-                }
+                tokens.delLoginUser(token);
             }
-            catch (RuntimeException failure)
+            catch (RuntimeException revocationFailure)
             {
-                // The DB mutation has already committed. When this identified
-                // session cannot receive fresh authority, revoke it if Redis is
-                // available and preserve the original failure for the caller.
-                try
+                if (revocationFailure != failure)
                 {
-                    tokens.delLoginUser(token);
+                    failure.addSuppressed(revocationFailure);
                 }
-                catch (RuntimeException revocationFailure)
-                {
-                    if (revocationFailure != failure)
-                    {
-                        failure.addSuppressed(revocationFailure);
-                    }
-                }
-                throw failure;
             }
-            // A profile/bootstrap writer may have won the CAS. Read its current
-            // bytes and recompute authority; never retry using an old snapshot.
+            throw failure;
         }
-        // Repeated contention must not leave withdrawn permissions usable.
-        // Deletion is safe even if logout/expiry already removed this token.
-        tokens.delLoginUser(token);
     }
 }

@@ -69,8 +69,61 @@ class RoleSessionRefresherTest
             return new SimpleTransactionStatus();
         });
         when(mutations.lockRoot()).thenReturn(100L);
+        located();
+    }
+
+    void located()
+    {
         when(cache.scanKeys("login_tokens:*")).thenReturn(List.of(key));
         when(tokens.getLoginUserByToken("existing")).thenReturn(session);
+    }
+
+    @Test
+    void thirtyThreeSessionsUseTwoBoundedPublicationTransactions()
+    {
+        when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+        when(mutations.lockRoot()).thenReturn(100L);
+        var keys = java.util.stream.IntStream.range(0, 33).mapToObj(i -> "login_tokens:batch-" + i).toList();
+        when(cache.scanKeys("login_tokens:*")).thenReturn(keys);
+        when(tokens.getLoginUserByToken(anyString())).thenAnswer(call -> {
+            LoginUser value = new LoginUser(7L, 103L, new SysUser(7L), Set.of("old:permission"));
+            value.setToken(call.getArgument(0));
+            return value;
+        });
+        when(users.selectUserById(7L)).thenReturn(fresh);
+        when(navigation.selectActiveRoles(7L)).thenReturn(List.of());
+        when(tokens.updateLoginUser(any())).thenReturn(true);
+        refresher.refresh(Set.of(7L));
+        verify(manager, times(2)).getTransaction(any());
+        verify(mutations, times(2)).lockRoot();
+        verify(manager, times(2)).commit(any());
+        var order = inOrder(tokens, manager);
+        for (int i = 0; i < 32; i++) order.verify(tokens).getLoginUserByToken("batch-" + i);
+        order.verify(manager).getTransaction(any());
+        order.verify(tokens, times(32)).updateLoginUser(any());
+        order.verify(manager).commit(any());
+        order.verify(tokens).getLoginUserByToken("batch-32");
+        order.verify(manager).getTransaction(any());
+        order.verify(tokens).updateLoginUser(any());
+        order.verify(manager).commit(any());
+    }
+
+    @Test
+    void readsRedisBeforeOpeningThePublicationTransaction()
+    {
+        existing();
+        when(users.selectUserById(7L)).thenReturn(fresh);
+        when(navigation.selectActiveRoles(7L)).thenReturn(List.of());
+        when(tokens.updateLoginUser(session)).thenReturn(true);
+        refresher.refresh(Set.of(7L));
+        var order = inOrder(cache, tokens, manager, mutations, users);
+        order.verify(cache).scanKeys("login_tokens:*");
+        order.verify(tokens).getLoginUserByToken("existing");
+        order.verify(manager).getTransaction(any());
+        order.verify(mutations).lockRoot();
+        order.verify(users).selectUserById(7L);
+        order.verify(tokens).updateLoginUser(session);
+        order.verify(manager).commit(any());
     }
 
     @Test
@@ -92,8 +145,8 @@ class RoleSessionRefresherTest
         assertEquals(Set.of("new:permission"), session.getPermissions());
         assertEquals(12345L, session.getExpireTime());
         var order = inOrder(mutations, tokens, users, manager);
-        order.verify(mutations).lockRoot();
         order.verify(tokens).getLoginUserByToken("existing");
+        order.verify(mutations).lockRoot();
         order.verify(users).selectUserById(7L);
         order.verify(tokens).updateLoginUser(session);
         order.verify(manager).commit(any());
@@ -136,11 +189,19 @@ class RoleSessionRefresherTest
         assertEquals("Newer committed profile", profileWon.getUser().getNickName());
         verify(users, times(2)).selectUserById(7L);
         verify(navigation, times(2)).selectActiveRoles(7L);
-        var order = inOrder(tokens);
+        var order = inOrder(tokens, manager, mutations, users);
         order.verify(tokens).getLoginUserByToken("existing");
+        order.verify(manager).getTransaction(any());
+        order.verify(mutations).lockRoot();
+        order.verify(users).selectUserById(7L);
         order.verify(tokens).updateLoginUser(session);
+        order.verify(manager).commit(any());
         order.verify(tokens).getLoginUserByToken("existing");
+        order.verify(manager).getTransaction(any());
+        order.verify(mutations).lockRoot();
+        order.verify(users).selectUserById(7L);
         order.verify(tokens).updateLoginUser(profileWon);
+        order.verify(manager).commit(any());
         verify(tokens, never()).delLoginUser(any());
     }
 
@@ -189,10 +250,10 @@ class RoleSessionRefresherTest
     @Test
     void expiredSessionIsNeverWritten()
     {
-        existing();
+        located();
         when(tokens.getLoginUserByToken("existing")).thenReturn(null);
         refresher.refresh(Set.of(7L));
-        verifyNoInteractions(users, navigation, permissions);
+        verifyNoInteractions(users, navigation, permissions, manager, mutations);
         verify(tokens, never()).updateLoginUser(any());
     }
 
@@ -211,9 +272,9 @@ class RoleSessionRefresherTest
     @Test
     void unrelatedSessionsAreUntouched()
     {
-        existing();
+        located();
         refresher.refresh(Set.of(8L));
-        verifyNoInteractions(users, navigation, permissions);
+        verifyNoInteractions(users, navigation, permissions, manager, mutations);
         verify(tokens, never()).updateLoginUser(any());
         verify(tokens, never()).delLoginUser(any());
     }
@@ -255,13 +316,24 @@ class RoleSessionRefresherTest
     }
 
     @Test
-    void missingRootRollsBackBeforeReadingOrWritingSessions()
+    void missingRootRollsBackBeforeReadingAuthorityOrPublishingSession()
     {
+        located();
         when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
         when(mutations.lockRoot()).thenReturn(null);
         assertThrows(io.eforge.enterprise.common.exception.ApiFailure.class, () -> refresher.refresh(Set.of(7L)));
         verify(manager).rollback(any());
-        verifyNoInteractions(cache, users, tokens);
+        verifyNoInteractions(users, navigation, permissions);
+        verify(tokens, never()).updateLoginUser(any());
+        verify(tokens, never()).delLoginUser(any());
+    }
+
+    @Test
+    void failedEnumerationCannotAcquireRootOrPublishAPartialBatch()
+    {
+        when(cache.scanKeys("login_tokens:*")).thenThrow(new IllegalStateException("cursor failed"));
+        assertThrows(IllegalStateException.class, () -> refresher.refresh(Set.of(7L)));
+        verifyNoInteractions(manager, mutations, users, tokens);
     }
 
     private static SysUser user(String name)

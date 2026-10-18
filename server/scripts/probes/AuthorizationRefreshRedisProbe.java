@@ -71,7 +71,7 @@ class AuthorizationRefreshRedisProbe {
         boolean armed;
         boolean measuring;
         int enumerations, snapshotReads, casCalls;
-        Runnable afterEnumeration;
+        Runnable afterEnumeration, beforeSnapshot, beforeCas;
         OrderedCache(RedisCommands<String,String> admin) { this.admin = admin; }
         void arm(Fault next, List<Session> sessions) {
             fault = next; armed = true; orderedKeys = sessions.stream().map(Session::key).toList();
@@ -91,11 +91,13 @@ class AuthorizationRefreshRedisProbe {
         @Override public <T> CacheSnapshot<T> getExpiringCacheSnapshot(String key) {
             if(measuring)snapshotReads++;
             if (armed) reads.add(key);
+            if(beforeSnapshot!=null)beforeSnapshot.run();
             return super.getExpiringCacheSnapshot(key);
         }
         @Override public boolean compareAndSetExpiringCacheObject(String key, byte[] before, byte[] value) {
             if(measuring)casCalls++;
             if (armed) writes.add(key);
+            if(beforeCas!=null)beforeCas.run();
             boolean updated = super.compareAndSetExpiringCacheObject(key, before, value);
             if (armed && updated) {
                 successes.add(key);
@@ -258,8 +260,8 @@ class AuthorizationRefreshRedisProbe {
             check(runtime.cache.reads.equals(keys.subList(0, 1)) && runtime.cache.writes.isEmpty(), "Initial read fault occurred after a write or after another session.");
             aclLog(admin, "get");
         } else {
-            check(runtime.cache.reads.equals(keys.subList(0, 2)) && runtime.cache.writes.equals(keys.subList(0, 2))
-                    && runtime.cache.successes.equals(keys.subList(0, 1)), "Actual A-success/B-failure/C-unprocessed ordering was not established.");
+            check(runtime.cache.reads.equals(keys) && runtime.cache.writes.equals(keys.subList(0, 2))
+                    && runtime.cache.successes.equals(keys.subList(0, 1)), "Actual bounded pre-read/A-success/B-failure/C-unwritten ordering was not established.");
             aclLog(admin, "set"); aclLog(admin, "del");
             check(Arrays.stream(failure.getSuppressed()).anyMatch(AuthorizationRefreshRedisProbe::denied), "B compensating deletion did not fail through the actual Redis ACL.");
         }
@@ -314,10 +316,15 @@ class AuthorizationRefreshRedisProbe {
         }
     }
     static void lockWait(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin)throws Exception{
+        for(String phase:List.of("enumeration","snapshot","publication"))lockPhase(runtime,sql,admin,phase);
+    }
+    static void lockPhase(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin,String phase)throws Exception{
         var sessions=runtime.sessions(admin);
         var worker=java.util.concurrent.Executors.newSingleThreadExecutor();
         var waiting=new java.util.concurrent.atomic.AtomicReference<java.util.concurrent.Future<Double>>();
-        runtime.cache.afterEnumeration=()->{
+        Runnable probe=()->{
+            // Inspect one production operation; subsequent sessions keep their normal path.
+            runtime.cache.afterEnumeration=null;runtime.cache.beforeSnapshot=null;runtime.cache.beforeCas=null;
             waiting.set(worker.submit(()->{
                 try(var connection=Objects.requireNonNull(sql.getDataSource()).getConnection()){
                     connection.setAutoCommit(false);
@@ -326,20 +333,30 @@ class AuthorizationRefreshRedisProbe {
                     double elapsed=(System.nanoTime()-start)/1_000_000.0;connection.rollback();return elapsed;
                 }
             }));
+            if(!phase.equals("publication")){
+                try{
+                    check(waiting.get().get(2,java.util.concurrent.TimeUnit.SECONDS)>=0,"Root lock contender did not finish during "+phase);
+                }catch(Exception failure){throw new AssertionError("Redis "+phase+" still holds the IAM root lock",failure);}
+                return;
+            }
             boolean observed=false;
             for(int attempt=0;attempt<100;attempt++){
                 if(sql.queryForObject("SELECT COUNT(*) FROM performance_schema.data_lock_waits",Integer.class)>0){observed=true;break;}
                 try{Thread.sleep(10);}catch(InterruptedException failure){Thread.currentThread().interrupt();throw new IllegalStateException(failure);}
             }
-            check(observed,"The real root-row contender was not observed waiting during Redis enumeration.");
-            check(!waiting.get().isDone(),"The root-row contender escaped the refresh transaction.");
+            check(observed,"The real root-row contender was not observed waiting during Redis publication.");
+            check(!waiting.get().isDone(),"The root-row contender escaped the publication transaction.");
         };
+        if(phase.equals("enumeration"))runtime.cache.afterEnumeration=probe;
+        else if(phase.equals("snapshot"))runtime.cache.beforeSnapshot=probe;
+        else runtime.cache.beforeCas=probe;
         try{
             runtime.refresher.refresh(Set.of(USER));
             double elapsed=waiting.get().get(5,java.util.concurrent.TimeUnit.SECONDS);
-            System.out.printf(Locale.ROOT,"REFRESH_LOCK: actual InnoDB waiter observed during enumeration; contender_ms=%.3f (includes diagnostic coordination, not production latency)%n",elapsed);
+            System.out.printf(Locale.ROOT,"REFRESH_LOCK: phase=%s actual_InnoDB_blocked=%s contender_ms=%.3f (includes diagnostic coordination, not production latency)%n",phase,phase.equals("publication"),elapsed);
         }finally{
-            runtime.cache.afterEnumeration=null;worker.shutdownNow();worker.awaitTermination(5,java.util.concurrent.TimeUnit.SECONDS);
+            runtime.cache.afterEnumeration=null;runtime.cache.beforeSnapshot=null;runtime.cache.beforeCas=null;
+            worker.shutdownNow();worker.awaitTermination(5,java.util.concurrent.TimeUnit.SECONDS);
             check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==3,"Owned lock sample cleanup incomplete.");
         }
     }
