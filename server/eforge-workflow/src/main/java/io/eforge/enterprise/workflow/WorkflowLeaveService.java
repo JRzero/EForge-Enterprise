@@ -61,20 +61,27 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
         paging(page,size);return database(()->{activeActor(actor);
             String where=handled?"exists (select 1 from ef_workflow_leave_audit a where a.leave_id=l.id and a.actor_id=? and a.action in ('APPROVE','REJECT'))":"l.initiator_id=?";
             long total=jdbc.queryForObject("select count(*) from ef_workflow_leave l where "+where,Long.class,actor);
-            var ids=jdbc.queryForList("select l.id from ef_workflow_leave l where "+where+" order by l.created_at desc,l.id desc limit ? offset ?",String.class,actor,size,(page-1)*size);
-            return new Page<>(ids.stream().map(this::read).toList(),total);
+            var rows=jdbc.query("select l.* from ef_workflow_leave l where "+where+" order by l.created_at desc,l.id desc limit ? offset ?",WorkflowLeaveService::mapLeave,actor,size,(page-1)*size);
+            return new Page<>(rows,total);
         });
     }
     @Override public Page<Pending> pending(String actor,int page,int size){
         paging(page,size);return database(()->{
-            activeActor(actor);var groups=jdbc.queryForList("select r.role_id from sys_role r join sys_user_role ur on ur.role_id=r.role_id where ur.user_id=? and r.status='0' and r.del_flag='0'",String.class,actor).stream().map(role->"role:"+role).toList();
+            activeActor(actor);var groups=activeGroups(actor);
             var query=engine.getTaskService().createTaskQuery().active().processVariableValueEquals("businessType","leave")
                 .taskCandidateOrAssigned(actor).taskCandidateGroupIn(groups.isEmpty()?List.of("role:unavailable"):groups);
             long total=query.count();var tasks=query.orderByTaskCreateTime().desc().orderByTaskId().desc().listPage((page-1)*size,size);
+            var processIds=tasks.stream().map(org.flowable.task.api.Task::getProcessInstanceId).distinct().toList();
+            Map<String,Leave> byProcess=new HashMap<>();
+            if(!processIds.isEmpty()){
+                var rows=jdbc.query("select * from ef_workflow_leave where process_id in ("+String.join(",",Collections.nCopies(processIds.size(),"?"))+")",WorkflowLeaveService::mapLeave,processIds.toArray());
+                for(var row:rows)byProcess.put(row.processId(),row);
+            }
             return new Page<>(tasks.stream().map(task->{
-                String id=jdbc.queryForObject("select id from ef_workflow_leave where process_id=?",String.class,task.getProcessInstanceId());
-                boolean canHandle=eligible(task,actor);
-                return new Pending(read(id),new Task(task.getId(),task.getTaskDefinitionKey(),task.getName(),task.getAssignee(),canHandle),canHandle);
+                var row=byProcess.get(task.getProcessInstanceId());
+                if(row==null)throw new org.springframework.dao.EmptyResultDataAccessException(1);
+                boolean canHandle=eligible(task,actor,groups);
+                return new Pending(row,new Task(task.getId(),task.getTaskDefinitionKey(),task.getName(),task.getAssignee(),canHandle),canHandle);
             }).toList(),total);
         });
     }
@@ -117,12 +124,18 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
     }
     private List<org.flowable.task.api.Task> engineTasks(String process){return engine.getTaskService().createTaskQuery().processInstanceId(process).orderByTaskCreateTime().asc().orderByTaskId().asc().list();}
     private boolean eligible(org.flowable.task.api.Task task,String actor){
+        return eligible(task,actor,null);
+    }
+    private boolean eligible(org.flowable.task.api.Task task,String actor,List<String> currentGroups){
         if(task.getAssignee()!=null&&!task.getAssignee().equals(actor))return false;
         var model=engine.getRepositoryService().getBpmnModel(task.getProcessDefinitionId());
         if(!(model.getFlowElement(task.getTaskDefinitionKey()) instanceof UserTask binding))return false;
         if(actor.equals(binding.getAssignee())||binding.getCandidateUsers().contains(actor))return true;
-        var groups=jdbc.queryForList("select r.role_id from sys_role r join sys_user_role ur on ur.role_id=r.role_id where ur.user_id=? and r.status='0' and r.del_flag='0'",String.class,actor);
-        return groups.stream().anyMatch(role->binding.getCandidateGroups().contains("role:"+role));
+        var groups=currentGroups==null?activeGroups(actor):currentGroups;
+        return groups.stream().anyMatch(binding.getCandidateGroups()::contains);
+    }
+    private List<String> activeGroups(String actor){
+        return jdbc.queryForList("select r.role_id from sys_role r join sys_user_role ur on ur.role_id=r.role_id where ur.user_id=? and r.status='0' and r.del_flag='0'",String.class,actor).stream().map(role->"role:"+role).toList();
     }
     private void requireAvailableTasks(String process){
         var tasks=engineTasks(process);if(tasks.isEmpty())throw binding();
@@ -141,8 +154,11 @@ public final class WorkflowLeaveService implements WorkflowLeaves {
         if(jdbc.queryForObject("select count(*) from sys_user where user_id=? and status='0' and del_flag='0'",Long.class,actor)!=1)throw denied();
     }
     private Leave read(String id){
-        var rows=jdbc.query("select * from ef_workflow_leave where id=?",(rs,n)->new Leave(rs.getString("id"),rs.getString("submission_id"),rs.getString("initiator_id"),rs.getString("release_id"),rs.getString("process_id"),rs.getDate("start_date").toLocalDate(),rs.getDate("end_date").toLocalDate(),rs.getString("reason"),rs.getString("state"),rs.getLong("revision"),rs.getTimestamp("created_at").toInstant()),id);
+        var rows=jdbc.query("select * from ef_workflow_leave where id=?",WorkflowLeaveService::mapLeave,id);
         if(rows.isEmpty())throw missing();return rows.get(0);
+    }
+    private static Leave mapLeave(java.sql.ResultSet rs,int row)throws java.sql.SQLException{
+        return new Leave(rs.getString("id"),rs.getString("submission_id"),rs.getString("initiator_id"),rs.getString("release_id"),rs.getString("process_id"),rs.getDate("start_date").toLocalDate(),rs.getDate("end_date").toLocalDate(),rs.getString("reason"),rs.getString("state"),rs.getLong("revision"),rs.getTimestamp("created_at").toInstant());
     }
     private void audit(String id,Command command,String action,String actor,String hash){
         jdbc.update("insert into ef_workflow_leave_audit (id,leave_id,command_id,action,actor_id,task_id,command_digest,comment,event_order,created_at) values (?,?,?,?,?,?,?,?,?,?)",UUID.randomUUID().toString(),id,command.commandId(),action,actor,command.taskId(),hash,command.comment(),action.equals("SUBMIT")?1:command.expectedRevision()+1,Timestamp.from(Instant.now()));

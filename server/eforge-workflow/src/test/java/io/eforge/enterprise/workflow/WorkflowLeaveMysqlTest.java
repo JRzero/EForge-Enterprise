@@ -62,6 +62,7 @@ class WorkflowLeaveMysqlTest {
                 assertThat(next.releaseId()).isEqualTo(nextRelease.id());
                 assertThat(engine.getRuntimeService().createProcessInstanceQuery().processInstanceId(next.processId()).singleResult().getProcessDefinitionId()).isEqualTo(nextRelease.processDefinitionId());
                 leaves.withdraw(next.id(),new WorkflowLeaves.Command(UUID.randomUUID().toString(),1,null,"取消"),"1");
+                WorkflowLeaveQueryBudgetTest.verifyLists(source,jdbc,context.getBean(WorkflowUnitOfWork.class),engine);
             });
     }
     private static int status(Runnable work){try{work.run();return 200;}catch(ApiFailure failure){return failure.status();}}
