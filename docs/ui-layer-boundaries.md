@@ -40,3 +40,5 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 组件样式归属调整后不再声称最终CSS哈希相同；完整h09-owned-theme-final.log包含静态/生成/单元/build/dist/规模/336模拟浏览器，当前运行中。未改后端运行源，本地不重复Maven/真实SQL；精确提交CI仍须执行完整服务器和生成应用门槛。历史app混合样式及UI中外壳选择器进一步归属仍待清理，不把本切片当作H09全部完成。
 
 本轮最终本地结果：h09-owned-theme-final.log 的生成复现/lint/typecheck/build、146单元、5 dist及2规模测试通过；第一次完整模拟浏览器335通过、文件重试1失败。未改上传实现或放宽断言，h09-file-reproduce.log单worker重复五轮10/10通过，随后同源码h09-owned-theme-browser-repeat.log完整336/336通过。首次瞬态失败原因尚未确定，不能宣称已修复，后续CI继续观察。代码审查确认组件CSS单向依赖、原业务权限/数据接口未变；本切片待精确提交云端验收。
+
+上传与外壳归属接续：UploadEntries自带upload-entries.css，原app中的文件列表网格/换行/触摸拖拽/手柄状态全部迁入，独立gallery实际验证grid与touch-action:none，保留排序、上传重试/取消及窄屏。spcore-theme中的应用导航/面包屑/顶部操作/保留页签规则迁至app/shell-controls.css，产品组合在公共主题后导入；公共组件主题不再携带该应用外壳规则。原选择器/声明保持，未改业务交互。进程85865定向4/4；最终76825 exit0：生成复现/lint/types/build、146单元、5dist、2规模及336模拟浏览器全部通过，本轮文件重试通过。h09-upload-shell-budget.json三入口预算通过。后端未变，不重复本地SQL；精确新提交CI待验收，H09历史混合样式仍有后续项。

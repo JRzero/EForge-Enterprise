@@ -9,6 +9,7 @@
 @import '../ui/list-layout.css';
 @import '../ui/styles.css';
 @import '../ui/spcore-theme.css';
+@import './shell-controls.css';
 @import '../ui/page-templates.css';
 @import '../ui/component-details.css';
 @import '../ui/form-fields.css';

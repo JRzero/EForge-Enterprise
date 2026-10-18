@@ -1,5 +1,6 @@
 import {NativeButton} from './native';
 import {useRef, type ReactNode} from 'react';
+import './upload-entries.css';
 
 export function UploadEntries({paths, disabled, onChange, children}: {
   paths: readonly string[]; disabled: boolean; onChange: (paths: string[]) => void;

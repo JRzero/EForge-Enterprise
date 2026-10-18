@@ -359,9 +359,6 @@ dialog.post-dialog:has(.sidebar-drawer-body)::backdrop {background:#0008;}
 .screen-lock-card h1{color:#e9f0fa;font-size:24px}.screen-lock-card label{color:#d2ddeb}.screen-lock-card button{color:#e9f0fa;border:1px solid #6686a6;border-radius:8px;background:transparent;padding:10px 12px}.screen-lock-card form button{color:#09232e;background:#52d2bb;border-color:#52d2bb}
 .pagination-navigation {display:flex;flex-wrap:wrap;gap:4px;align-items:center;} .pagination-navigation form {display:flex;gap:6px;align-items:center;} .pagination-navigation input {width:70px;max-width:100%;} .pagination-navigation [aria-current="page"] {font-weight:700;outline:1px solid currentColor;outline-offset:-2px;}
 
-.generated-upload-entry{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.generated-upload-entry>span,.generated-upload-entry>a{overflow-wrap:anywhere;max-width:100%}
-.generated-upload-handle {touch-action: none; cursor: grab; padding: .5rem;}
-.generated-upload-handle:active {cursor: grabbing;}
 .generated-business-page {min-width:0;}
 .generated-business-page .post-dialog form {min-width:0;grid-template-columns:minmax(0,1fr);}
 .generated-business-page .post-dialog form>label {min-width:0;overflow-wrap:anywhere;}

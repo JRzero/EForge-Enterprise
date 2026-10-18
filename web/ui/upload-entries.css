@@ -1,0 +1,7 @@
+.generated-upload-entry{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.generated-upload-entry>span,.generated-upload-entry>a{overflow-wrap:anywhere;max-width:100%}
+.generated-upload-handle {touch-action: none; cursor: grab; padding: .5rem;}
+.generated-upload-handle:active {cursor: grabbing;}
+.generated-upload-list { display: grid; gap: 8px; margin-top: 10px; }
+.generated-upload-entry { padding: 8px 10px; border: 1px solid #dcdfe6; border-radius: 4px; background: #fafafa; }
+.generated-upload-handle { border: 0; border-radius: 4px; color: #909399; background: transparent; }
+.generated-upload-handle:hover:not(:disabled) { color: var(--ui-primary); background: var(--ui-primary-soft); }

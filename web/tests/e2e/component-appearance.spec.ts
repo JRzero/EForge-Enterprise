@@ -4,6 +4,9 @@ test('shared component details retain focus, mixed grants, file ordering and ima
   await page.setViewportSize({width:1440,height:1000});
   await page.goto('/tests/fixtures/component-gallery.html');
   await expect(page.getByRole('heading',{name:'共享组件样式验收'})).toBeVisible();
+  // The gallery loads only the public theme: upload styling must not need the app shell.
+  await expect(page.locator('.generated-upload-list')).toHaveCSS('display','grid');
+  await expect(page.getByRole('button',{name:'拖动文件 2 排序',exact:true})).toHaveCSS('touch-action','none');
   const account=page.getByLabel('账号',{exact:true});await account.focus();
   expect(await account.evaluate(element=>getComputedStyle(element).outlineStyle)).toBe('none');
   await expect(page.getByLabel('禁用账号')).toBeDisabled();
