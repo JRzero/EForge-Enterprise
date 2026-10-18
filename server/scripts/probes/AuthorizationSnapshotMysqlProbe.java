@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import javax.sql.DataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.RowBounds;
@@ -39,10 +40,11 @@ import io.eforge.enterprise.system.service.impl.*;
 class AuthorizationSnapshotMysqlProbe {
     static final long USER = 9007199254740995L;
     static final String MASTER_SCHEMA = "eforge_enterprise", SLAVE_SCHEMA = "eforge_auth_shadow";
-    static final AtomicInteger assertions = new AtomicInteger(), mapperQueries = new AtomicInteger();
+    static final AtomicInteger assertions = new AtomicInteger(), mapperQueries = new AtomicInteger(), executedQueries = new AtomicInteger();
     static final ThreadLocal<Long> lastReadConnection = new ThreadLocal<>();
     static volatile ReadGate gate;
     static int poolSize = 2;
+    static final int ROLE_FIXTURE_COUNT = 22;
     static void require(boolean condition, String message) {if (!condition) throw new AssertionError(message);}
     static void check(boolean condition, String message) {assertions.incrementAndGet();require(condition, message);}
     static String url(boolean slave) {
@@ -64,11 +66,16 @@ class AuthorizationSnapshotMysqlProbe {
         final CountDownLatch root = new CountDownLatch(1), resume = new CountDownLatch(1);
         final AtomicBoolean first = new AtomicBoolean(true);
     }
-    @Intercepts(@Signature(type=Executor.class, method="query", args={MappedStatement.class,Object.class,RowBounds.class,ResultHandler.class}))
+    @Intercepts({@Signature(type=Executor.class, method="query", args={MappedStatement.class,Object.class,RowBounds.class,ResultHandler.class}),
+        @Signature(type=StatementHandler.class, method="query", args={Statement.class,ResultHandler.class})})
     static final class ReadAudit implements Interceptor {
         private final DataSource source;
         ReadAudit(DataSource source) {this.source=source;}
         @Override public Object intercept(Invocation call) throws Throwable {
+            if(call.getTarget() instanceof StatementHandler) {
+                executedQueries.incrementAndGet();
+                try {return call.proceed();} catch(InvocationTargetException wrapped) {throw wrapped.getCause();}
+            }
             MappedStatement statement=(MappedStatement)call.getArgs()[0];
             String sql=statement.getBoundSql(call.getArgs()[1]).getSql().toUpperCase(Locale.ROOT);
             require(sql.stripLeading().startsWith("SELECT") && !sql.contains("FOR UPDATE"), "Authorization must use non-locking reads.");
@@ -148,7 +155,7 @@ class AuthorizationSnapshotMysqlProbe {
             }
             db.update("INSERT INTO sys_dept(dept_id,parent_id,ancestors,dept_name) VALUES(100,0,'0','Root'),(103,100,'0,100','Old'),(105,100,'0,100','New')");
             db.update("INSERT INTO sys_user(user_id,dept_id,user_name,nick_name,password) VALUES(?,103,'snapshot_actor',?,'hash-before'),(1,103,'admin','Admin','admin-hash')",USER,slave?"Shadow":"Before");
-            for(int role=0;role<7;role++) {
+            for(int role=0;role<ROLE_FIXTURE_COUNT;role++) {
                 db.update("INSERT INTO sys_role(role_id,role_name,role_key,role_sort,data_scope,status,del_flag) VALUES(?,?,?,?,?,?,?)",100+role,"Role "+role,"role_"+role,role,role==0?"2":"5",role==2?"1":"0",role==3?"2":"0");
                 db.update("INSERT INTO sys_menu(menu_id,menu_name,menu_type,perms) VALUES(?,?,'F',?)",1000+role,"Grant "+role,"probe:old:"+role);
                 db.update("INSERT INTO sys_role_menu(role_id,menu_id) VALUES(?,?)",100+role,1000+role);
@@ -160,15 +167,16 @@ class AuthorizationSnapshotMysqlProbe {
         var tx=new TransactionTemplate(manager);tx.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);return tx;
     }
     static void baseline(AuthorizationSnapshotService service,int roles) {
-        var durations=new ArrayList<Long>();int before=mapperQueries.get();
+        var durations=new ArrayList<Long>();int before=mapperQueries.get(),executedBefore=executedQueries.get();
         for(int i=0;i<20;i++) {
             var session=cached();long start=System.nanoTime();service.refresh(session);durations.add(System.nanoTime()-start);
             check(session.getUser().getRoles().size()==roles && session.getPermissions().size()==roles,"Role-count baseline returned incomplete authority.");
         }
         check(mapperQueries.get()-before==20*(roles+2),"Unexpected mapper SQL query count for full authorization read.");
+        check(executedQueries.get()-executedBefore==20*(roles+2),"Actual MyBatis statement execution differs from the baseline budget.");
         Collections.sort(durations);
-        System.out.printf(Locale.ROOT,"BASELINE: roles=%d samples=20 mapper_queries/request=%d median_ms=%.3f p95_ms=%.3f (instrumented local MySQL, not a production capacity claim)%n",
-                roles,roles+2,durations.get(9)/1_000_000.0,durations.get(18)/1_000_000.0);
+        System.out.printf(Locale.ROOT,"BASELINE: roles=%d samples=20 mapper_queries/request=%d executed_business_selects/request=%d median_ms=%.3f p95_ms=%.3f (timing includes one raw connection-inspection SELECT per mapper; execution count excludes those inspections; local MySQL, not production capacity)%n",
+                roles,roles+2,(executedQueries.get()-executedBefore)/20,durations.get(9)/1_000_000.0,durations.get(18)/1_000_000.0);
     }
     static void exercise(AnnotationConfigApplicationContext context) throws Exception {
         var service=context.getBean(AuthorizationSnapshotService.class);var jdbc=context.getBean(JdbcTemplate.class);
@@ -180,9 +188,17 @@ class AuthorizationSnapshotMysqlProbe {
         check("2".equals(session.getUser().getRoles().get(0).getDataScope()) && session.getUser().getRoles().get(0).getPermissions().equals(Set.of("probe:old:0"))
                 && "5".equals(session.getUser().getRoles().get(1).getDataScope()) && session.getUser().getRoles().get(1).getPermissions().equals(Set.of("probe:old:1")),"Cross-role data-scope permission association was flattened.");
         sessionMetadata(session);check(DynamicDataSourceContextHolder.getDataSourceType()==null,"Empty route context was not restored.");
-        baseline(service,2);
-        for(int role=104;role<=106;role++)master.update("INSERT INTO sys_user_role(user_id,role_id) VALUES(?,?)",USER,role);
-        baseline(service,5);master.update("DELETE FROM sys_user_role WHERE user_id=? AND role_id>=104",USER);
+        for(int count:new int[]{0,1,2,5,20}) {
+            master.update("DELETE FROM sys_user_role WHERE user_id=?",USER);
+            int assigned=0;
+            for(int role=100;assigned<count;role++) {
+                if(role==102||role==103)continue;
+                master.update("INSERT INTO sys_user_role(user_id,role_id) VALUES(?,?)",USER,role);assigned++;
+            }
+            baseline(service,count);
+        }
+        master.update("DELETE FROM sys_user_role WHERE user_id=?",USER);
+        for(int role=100;role<=103;role++)master.update("INSERT INTO sys_user_role(user_id,role_id) VALUES(?,?)",USER,role);
 
         DynamicDataSourceContextHolder.setDataSourceType("SLAVE");
         try {
@@ -266,8 +282,8 @@ class AuthorizationSnapshotMysqlProbe {
             sessionMetadata(failed);check("SLAVE".equals(DynamicDataSourceContextHolder.getDataSourceType()),"Failed SQL did not restore caller route.");
         } finally {DynamicDataSourceContextHolder.clearDataSourceType();master.execute("RENAME TABLE authorization_private_fault TO sys_role_menu");}
         var recovered=cached();service.refresh(recovered);check(recovered.getPermissions().equals(Set.of("probe:new:0","probe:new:4")),"SQL recovery still used stale grants.");
-        check(master.queryForObject("SELECT COUNT(*) FROM sys_user",Integer.class)==2&&master.queryForObject("SELECT COUNT(*) FROM sys_role",Integer.class)==7
-                &&master.queryForObject("SELECT COUNT(*) FROM sys_role_menu",Integer.class)==7,"Read/failure tests changed fixture row counts.");
+        check(master.queryForObject("SELECT COUNT(*) FROM sys_user",Integer.class)==2&&master.queryForObject("SELECT COUNT(*) FROM sys_role",Integer.class)==ROLE_FIXTURE_COUNT
+                &&master.queryForObject("SELECT COUNT(*) FROM sys_role_menu",Integer.class)==ROLE_FIXTURE_COUNT,"Read/failure tests changed fixture row counts.");
         check(context.getBean("master",DruidDataSource.class).getActiveCount()==0&&context.getBean("slave",DruidDataSource.class).getActiveCount()==0,"Probe leaked a pooled connection.");
     }
     static void smallPool(AnnotationConfigApplicationContext context) {

@@ -129,3 +129,19 @@ KEYS→SCAN应单独测量和验收：全量遍历成本、返回重复key、扫
 - `server/eforge-workflow/src/test/java/io/eforge/enterprise/workflow/WorkflowLeaveServiceTest.java`、`WorkflowLeaveMysqlTest.java`、`WorkflowTransactionBoundaryTest.java`；实际MySQL测试已有双提交/双claim、撤权、audit故障回滚与重试，尚无列表规模查询预算。
 
 后续执行顺序：固定源码和环境→记录原实现计数与延迟分布→单片针对性RED→实施→相同样本/冷暖状态测量→安全与真实环境回归。计数预算是确定性门槛；延迟改善必须超过同环境测量噪声，不先捏造百分比。两片分别记录结果，完整框架、两配置运行及精确提交云端仍按项目门槛验收。
+
+## 2026-10-18 H10扩展实测
+
+实现优化前，在原授权快照探针中新增 StatementHandler.query 计数，区分 Executor mapper调用与真正到达MyBatis语句执行层的业务SELECT。计数不含ReadAudit通过原始JDBC发出的连接检查SQL；这些检查仍完整运行并计入耗时，没有删除安全断言。只扩展隔离数据库夹具，无运行时代码变化。
+
+| 有效角色数 | 样本 | mapper/次 | 执行业务SELECT/次 | 中位数ms | p95 ms |
+|---|---:|---:|---:|---:|---:|
+| 0 | 20 | 2 | 2 | 18.281 | 25.000 |
+| 1 | 20 | 3 | 3 | 13.998 | 18.783 |
+| 2 | 20 | 4 | 4 | 18.228 | 20.924 |
+| 5 | 20 | 7 | 7 | 25.014 | 28.124 |
+| 20 | 20 | 22 | 22 | 66.679 | 70.545 |
+
+证据：h10-role-baseline-final.log，进程19062 exit0，190项真实授权断言全部通过；单连接外层事务仍约712ms安全503。每请求单独读事务，业务查询计数与mapper一致；不代表其他会话刷新场景没有一级缓存命中。上述计时包含每个mapper一次检查SQL，仅用于本地受控前后比较，不作为生产SLA或已优化证据。首轮扩展fixture后仍断言7角色行而失败，已用统一ROLE_FIXTURE_COUNT=22精确校验角色及关联行数后全绿。原验证逻辑与故障保护保持。
+
+下一步为非空普通角色集增加一次按roleId分组的参数化查询，将业务SELECT目标改为3；必须保留原分割语义、逐role权限/数据范围、无角色与超级管理员分支，并继续真实并发/故障和HTTP回归。H10未完成。

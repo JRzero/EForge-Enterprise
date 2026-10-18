@@ -28,3 +28,5 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 样式切片：主题变量提取到 ui/theme-tokens.css，原输入容器/焦点/尺寸兼容规则提取到 ui/compat/input-theme.css，列表布局归属 ui/list-layout.css；app 原路径保留 CSS import 兼容入口，外壳与页面呈现保留 app/enterprise-presentation.css。顺序与选择器保持不变，没有引入会改变优先级的 @layer。构建后全部 CSS 文件 SHA-256 集合与拆分前完全相同（h09-css-before.json），h09-css-build.log 成功、h09-css-dist.log 5 passed。此低影响归属变更不重复运行 Maven或全量浏览器，直接以相同产物及正式产物回归验证。历史 app/styles.css 与若干模板文件内仍有混合兼容规则，进一步梳理及可执行 CSS 边界检查尚待，不将本切片当作 H09 全部完成。
 
 底层选择器兼容已集中到 ui/compat/selector-theme.css；页签与布尔字段布局分别归属 tab-presentation.css/choice-layout.css，原 component-details.css 仅保留顺序导入。全部正式CSS哈希仍与h09-css-before.json相同。lint现在执行check-style-boundaries.mjs，拒绝兼容目录外的.astryx-*选择器与私有CSS包导入，覆盖引号及url()有/无引号形式；不是安全沙箱或任意混淆CSS解析器。2项规则单元验证拒绝及合法例外，总145单元、lint/typecheck/build和5项dist全部通过。H09仍待历史混合基础样式清理和精确云端验收。
+
+公共层TS迁移c33d722精确云端：server39122293097四作业、web39122293140与skills39122293093全部success；h09-ui-cloud-final.log直接证实两配置各68真实浏览器/完整API/OpenAPI以及两实际生成应用通过。后续样式7b2ce63和74460ba仍待各自终态，不以本结果代替。

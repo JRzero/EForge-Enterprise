@@ -13,7 +13,7 @@
 | H07 | 表格批量条、筛选摘要/保存视图 | done | 0587b90精确server39117234444四项/web39117234460成功；133单元/331模拟浏览器/5 dist及两配置各68真实浏览器/完整API/实际生成应用通过，见docs/list-views-and-actions.md |
 | H08 | 文件字段、精确数值、审计展示 | done | 审计4e69ac0、数值469fc28、文件9f98bea精确云端全绿；141单元/336模拟/5dist、两配置各68真实浏览器及两实际生成应用通过，见docs/business-fields-and-audit.md最终验收 |
 | H09 | 样式/公共层边界与lint | in_progress | 纯组件移入ui、认证组合留app、依赖lint已实施；143单元/lint/types通过，完整浏览器进行中；CSS分层待续，见docs/ui-layer-boundaries.md |
-| H10 | 锁/会话扫描/审批查询规模治理 | pending | [规模方案](../docs/proposed-scale-baseline.md)明确授权按角色查询、审批N+1及计数矩阵；待实测/优化，不删原锁或添加跨请求权限缓存 |
+| H10 | 锁/会话扫描/审批查询规模治理 | in_progress | [规模方案](../docs/proposed-scale-baseline.md)已实测0/1/2/5/20角色执行2/3/4/7/22业务SELECT，190真实断言通过；批量查询及锁/审批优化待续，不删原锁或添加跨请求权限缓存 |
 | H11 | 页签/大列表性能与包体积预算 | pending | 已记录三个当前dist入口磁盘/gzip基线；不等于网络/内存或改善。页签/大列表实际测量及预算待实施，保护未保存草稿 |
 | H12 | dist正式产物浏览器验收 | done | 正式build后5/5通过；7e411bb web-ci 38710412483终态success。范围为dist本身三入口/深链/登录/懒块中断恢复，不替代真实反代/CDN部署验收；总目标未完成 |
 | H13 | 完整回归/安全审查/文档/云端验收 | pending | 本地与精确提交云端均须实际终态；完成审计逐条对照规格 |
