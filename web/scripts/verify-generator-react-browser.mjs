@@ -427,6 +427,22 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
         if (category !== 'tree') await dialog.getByLabel('parentId', {exact:true}).fill('0');
         if (category === 'sub') {
           await dialog.getByRole('button', {name:'新增子表行'}).click();
+          const childRegion = dialog.getByRole('region', {name:'子表明细', exact:true});
+          await expect(childRegion.locator('tbody input:not(:disabled)').first()).toBeFocused();
+          const firstChildLabel = childRegion.getByLabel('label', {exact:true});
+          await expect(firstChildLabel).toHaveAttribute('id', /.+/);
+          const firstChildId = await firstChildLabel.getAttribute('id');
+          await firstChildLabel.fill('待删除的前行');
+          await dialog.getByRole('button', {name:'新增子表行'}).click();
+          const survivingLabel = childRegion.getByLabel('label', {exact:true}).last();
+          const survivingId = await survivingLabel.getAttribute('id');
+          assert(survivingId && survivingId !== firstChildId, 'New child controls must have distinct stable identities');
+          await expect(childRegion.locator('tbody tr').last().locator('input:not(:disabled)').first()).toBeFocused();
+          await survivingLabel.fill('保留的后行');
+          await childRegion.getByRole('button', {name:'删除子表行'}).first().click();
+          await expect(childRegion.getByLabel('label', {exact:true})).toHaveValue('保留的后行');
+          await expect(childRegion.getByLabel('label', {exact:true})).toHaveAttribute('id', survivingId);
+          await expect(childRegion.locator('tbody input:not(:disabled)').first()).toBeFocused();
           await dialog.getByLabel('label', {exact:true}).last().fill('浏览器子表');
           await fillChildControls(dialog.getByRole('region',{name:'子表明细',exact:true}),root,page,category);
         }

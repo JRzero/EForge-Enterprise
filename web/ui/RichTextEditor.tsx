@@ -45,6 +45,17 @@ function insertUploadedImage(quill: Quill, index: number, source: string) {
   quill.insertEmbed(Math.min(index, quill.getLength() - 1), 'image', source, 'user');
   const range = {index: Math.min(index + 1, quill.getLength() - 1), length: 0}; quill.setSelection(range.index, range.length, 'silent'); return range;
 }
+
+function replaceEditorHtml(quill: Quill, html: string) {
+  // Clipboard.dangerouslyPasteHTML also calls setSelection, even for "silent"
+  // writes. Loading a controlled value must not focus an unrelated editor.
+  const range = quill.hasFocus() ? quill.getSelection() : null;
+  quill.setContents(quill.clipboard.convert({html, text: ''}), 'silent');
+  if (range) {
+    const index = Math.min(range.index, quill.getLength() - 1);
+    quill.setSelection(index, Math.min(range.length, quill.getLength() - 1 - index), 'silent');
+  }
+}
 export function RichTextEditor(props: Props) {
   const generatedId = useId(), id = props.id ?? generatedId, label = props.label ?? '公告内容';
   const container = useRef<HTMLDivElement>(null), editor = useRef<Quill | null>(null);
@@ -74,7 +85,7 @@ export function RichTextEditor(props: Props) {
     async function insertImage(file: File) {
       if (pending.current || latest.current.disabled || latest.current.readOnly || controller.signal.aborted) return;
       if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type) || file.size >= 5 * 1024 * 1024) {setError('请选择小于 5 MB 的 JPG、PNG 或 SVG 图片。'); return;}
-      const index = quill.getSelection(true)?.index ?? quill.getLength() - 1;
+      const index = quill.getSelection()?.index ?? selection.current?.index ?? quill.getLength() - 1;
       const uploadController = new AbortController(); pending.current = uploadController;
       const busyChanged = latest.current.onBusyChange; busyChanged?.(true); setError('');
       try {
@@ -126,8 +137,7 @@ export function RichTextEditor(props: Props) {
     function selected(range: {index: number; length: number} | null) {if (range) selection.current = {index: range.index, length: range.length};}
     quill.on('selection-change', selected);
     const incoming = sanitizeNoticeHtml(latest.current.value); if (incoming !== received.current) {received.current = incoming; emitted.current = incoming;}
-    quill.clipboard.dangerouslyPasteHTML(emitted.current, 'silent');
-    if (selection.current) quill.setSelection(Math.min(selection.current.index, quill.getLength() - 1), selection.current.length, 'silent');
+    replaceEditorHtml(quill, emitted.current);
     return () => {controller.abort(); quill.off('text-change', change); quill.off('selection-change', selected); quill.root.removeEventListener('paste', paste, true); quill.root.removeEventListener('keydown', readonlySelect); quill.root.removeEventListener('focus', disabledFocus); host.removeEventListener('keydown',closedPickerEscape,true); editor.current = null; host.replaceChildren();};
   }, []);
   useEffect(() => {
@@ -158,7 +168,7 @@ export function RichTextEditor(props: Props) {
     quill.root.tabIndex = props.disabled ? -1 : 0;
     if (props.disabled) quill.root.blur();
     const clean = sanitizeNoticeHtml(props.value);
-    if (clean !== received.current) {received.current = clean; if (clean !== emitted.current) {emitted.current = clean; quill.clipboard.dangerouslyPasteHTML(clean, 'silent');}}
+    if (clean !== received.current) {received.current = clean; if (clean !== emitted.current) {emitted.current = clean; replaceEditorHtml(quill, clean);}}
     if (!locked) for (const image of completedImages.current.splice(0)) selection.current = insertUploadedImage(quill, image.index, image.source);
   }, [props.value, props.disabled, props.readOnly, props.required, props.hint, props.fieldError, error, id, label]);
   return <div className="rich-text-editor" data-disabled={props.disabled || undefined} data-readonly={props.readOnly || undefined} data-invalid={!!(props.fieldError || error) || undefined}>

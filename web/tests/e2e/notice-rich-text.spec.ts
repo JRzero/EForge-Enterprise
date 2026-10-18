@@ -47,6 +47,18 @@ test('complete notice editor formats, sanitizes paste, uploads images and cleans
   await page.getByRole('button', {name: '切换编辑器'}).click(); await expect(editor).toHaveCount(1); await expect(page.locator('.ql-toolbar')).toHaveCount(1);
 });
 
+test('controlled rich-text refill and Activity remount do not steal focus from their trigger', async ({page}) => {
+  await page.goto('/tests/fixtures/notice-rich-text.html');
+  const refill=page.getByRole('button',{name:'回填',exact:true});
+  await refill.click();
+  await expect(page.getByRole('textbox',{name:'公告内容'})).toContainText('回填标题');
+  await expect(refill).toBeFocused();
+  const toggle=page.getByRole('button',{name:'切换可见',exact:true});
+  await toggle.click();await toggle.click();
+  await expect(page.getByRole('textbox',{name:'公告内容'})).toContainText('回填标题');
+  await expect(toggle).toBeFocused();
+});
+
 test('hidden Activity retains one rich-text upload, queues its genuine result and recreates one toolbar', async ({page}) => {
   await page.goto('/tests/fixtures/notice-rich-text.html');
   await page.getByRole('button', {name:'阻塞上传',exact:true}).click();

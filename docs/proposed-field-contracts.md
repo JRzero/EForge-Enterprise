@@ -278,3 +278,19 @@ EditableDetailTable现在捕获操作前的稳定行键和相邻键，onAdd可�
 最终h05-detail-final-types/lint/generated/unit/build/browser/dist通过，131单元、303模拟API浏览器、5正式产物。人工查看master-detail-field-errors.png，原表格操作、行内错误和摘要可见；旧只读手机布局测试继续通过。本片仅修改前端，新的精确云端仍待核验；生成模板稳定childRowKeys、完整结构化required结果与异步隐藏目标矩阵尚未完成，H05保持in_progress。
 
 前两片精确云端收口：f8a0a60 server39086338236四项成功；c1be174 server39087007135四项、web39087007090、skills39087007023全部成功。直接h05-generator-cloud-server/web-final.log确认两配置各68真实浏览器、完整API、默认37/启用40故障诊断、131单元/297模拟浏览器/5正式产物及契约一致。不可将其替代本次尚未提交的明细变更验收。
+
+第三片精确云端收口：b876b98aada36645f0d9173bd8a4f1df5f2320fb 的 server39088167472 四作业、web39088167470 全部终态成功。直接 h05-detail-cloud-server/web-final.log 确认 131 单元、303 模拟浏览器、5 dist、两配置各68真实浏览器、完整API及实际生成应用通过；不替代后续生成模板的验收。
+
+## H05 第四片：实际生成子表的稳定控件身份（验证中）
+
+生成主子页的 childRowKeys 改为必备状态：创建空数组、读取每行生成独立 UUID，删除按捕获的行键查找当前行，编辑按 state.rowId 更新，禁止缺失身份时退回数组序号。onAdd 返回本次行键，公共 EditableDetailTable 的 field.id 传递到真实输入、下拉、字段组、上传与富文本；UI 行键留在 editor 状态，提交仍只有 editor.form。
+
+实际生成浏览器新增两行/删除前行用例，断言剩余值及控件 ID 不变、不同控件 ID 不重复、新增和删除焦点正确。旧 jar 的 h05-generated-identity-red.log 因子表 label 控件没有 id 实际失败。修复后完整 Maven 验证通过（1124 报告记录、11 环境跳过、0失败），前端 lint/types/生成复现/131单元/build通过。沙箱首次 Maven 在 Byte Buddy 附加处停滞，确认进程后结束并在完整权限环境重跑成功；首次真实回归在临时客户端目录清理遭遇 Windows EPERM，外层已清理，保留日志并重试。两配置生成页面当前仍待终态，不标记通过。
+
+本片未将 requiredMessage 改为结构化错误摘要，原生约束和保存校验保持；生成字段错误导航及完整异步隐藏目标矩阵仍待完成，H05保持进行中。
+
+重试实际生成应用进一步发现：新增包含富文本的子行时，Quill 的 dangerouslyPasteHTML 即使使用 silent 也调用 setSelection，抢走公共明细指定的首字段焦点。独立 detail-focus 富文本夹具实际复现失败；改为公开 clipboard.convert + setContents，仅已有焦点的编辑器恢复合法选区。回填和 Activity 重建也不得自动抢焦点。首轮回归发现恢复后连续图片顺序由 [4,3,10] 变为 [3,10,4]，保留原断言，上传改为读取实际或已记录选区再取末尾，避免 getSelection(true) 强制聚焦重置插入点。最终明细/富文本相关10项通过，补充回填/恢复焦点测试后完整前端及两配置实际应用仍待验收。
+
+第四片最终本地验收：h05-generated-final-lint/typecheck/check-generated/test/build/browser/dist 全部成功，131单元、305模拟API浏览器、5正式产物。h05-generated-identity-final-disabled/enabled.log 两配置真实验证终态成功：七类实际生成页面编译/构建/浏览器、创建两行删除前行后值及ID保持、新增/删除焦点、长ID/精确金额/主子外键、上传/排序、原权限即时撤回与持久审计通过。前述失败日志保留，不以重试掩盖产品缺陷；精确新提交CI仍待核验。
+
+审查：生成控件身份只存在UI状态，所有保存仍使用原Write；没有放宽required/上传/字典权限。富文本仍在原sanitize边界内，使用固定Quill公开API，用户主动粘贴路径不变；隐藏恢复、旧上传隔离和图片顺序原断言保持。无新增依赖、API或SQL行为，完整目标及H05均未完成。

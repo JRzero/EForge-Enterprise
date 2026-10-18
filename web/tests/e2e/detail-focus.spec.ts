@@ -1,5 +1,12 @@
 import {test,expect} from './fixtures';
 
+test('mounting a rich text detail cell preserves the requested first-field focus',async({page})=>{
+  await page.goto('/tests/fixtures/detail-focus.html?rich');
+  await page.getByRole('button',{name:'新增明细'}).click();
+  await page.evaluate(()=>window.dispatchEvent(new Event('detail-resolve')));
+  await expect(page.getByLabel('内容 新:行/中文')).toBeFocused();
+});
+
 test('async detail addition focuses its returned key after unrelated row reordering',async({page})=>{
   await page.goto('/tests/fixtures/detail-focus.html');
   await page.getByRole('button',{name:'新增明细'}).click();

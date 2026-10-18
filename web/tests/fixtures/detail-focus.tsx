@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {EForgeProvider,EditableDetailTable,NativeInput} from '../../ui';
+import {RichTextEditor} from '../../ui/RichTextEditor';
 import '../../ui/theme.css';
 
 function Fixture(){
@@ -18,7 +19,8 @@ function Fixture(){
     <EditableDetailTable title="异步明细" rows={rows} getRowKey={row=>row.id}
       onAdd={async()=>{const serial=sequence.current++,id=serial?`新:行/中文-${serial}`:'新:行/中文';await wait();setRows(current=>[{id,value:'新'},...current]);return id;}}
       onRemove={async row=>{await wait();setRows(current=>current.filter(item=>item.id!==row.id));}}
-      columns={[{key:'value',label:'内容',render:(row,_index,state)=><NativeInput id={state.field.id} aria-label={`内容 ${row.id}`} value={row.value} onChange={event=>setRows(current=>current.map(item=>item.id===row.id?{...item,value:event.target.value}:item))}/>}]}/>
+      columns={[{key:'value',label:'内容',render:(row,_index,state)=><NativeInput id={state.field.id} aria-label={`内容 ${row.id}`} value={row.value} onChange={event=>setRows(current=>current.map(item=>item.id===row.id?{...item,value:event.target.value}:item))}/>},
+        ...(new URLSearchParams(window.location.search).has('rich')?[{key:'rich',label:'富文本',render:()=> <RichTextEditor label="行富文本" value="" onChange={()=>{}} uploadImage={async()=>''}/>}]:[])]}/>
   </main></EForgeProvider>;
 }
 createRoot(document.getElementById('root')!).render(<Fixture/>);
