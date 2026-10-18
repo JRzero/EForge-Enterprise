@@ -1,3 +1,4 @@
+import './tag-navigation.css';
 import type {KeyboardEvent, MouseEvent, ReactNode, RefObject} from 'react';
 
 function StripIcon({kind}: {kind: 'left' | 'right' | 'down' | 'close'}) {

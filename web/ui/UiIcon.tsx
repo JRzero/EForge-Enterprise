@@ -1,3 +1,4 @@
+import './ui-icon.css';
 import type {CSSProperties} from 'react';
 
 export type UiIconName = 'menu' | 'settings' | 'search' | 'fullscreen' | 'code' | 'help' | 'bell' | 'lock' | 'logout' | 'chevron';

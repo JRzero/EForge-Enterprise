@@ -1,3 +1,4 @@
+import './animated-number.css';
 import {useEffect,useState} from 'react';
 export function AnimatedNumber({total,duration}:{total:number;duration:number}){
   const [display,setDisplay]=useState(0);

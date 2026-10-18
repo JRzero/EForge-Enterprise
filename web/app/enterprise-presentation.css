@@ -14,9 +14,6 @@
 .enterprise-header a { margin-inline: 0; text-decoration: none; }
 .sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 6px; }
 .enterprise-breadcrumbs { margin-bottom: 12px; font-size: 13px; }
-.page-tags { padding-bottom: 12px; margin-bottom: 18px; border-bottom: 1px solid var(--ui-border); }
-.page-tag a { font-size: 13px; padding: 5px 10px; }
-.page-tag a[aria-current=page] { color: var(--ui-primary); }
 .ef-page-header h1, .dashboard .ef-page-header h1 { font-size: 22px; font-weight: 600; line-height: 1.4; }
 .ef-page-header p { font-size: 13px; margin-top: 5px; }
 .posts-page, .dashboard, .profile-page { max-width: 1600px; min-width: 0; }
@@ -44,7 +41,7 @@
 .welcome-emblem { color: var(--ui-primary-soft); font-size: 72px; transform: none; }
 .summary-card { padding: 20px; }
 .demo-dashboard, .dashboard-view-switch { --accent-soft: var(--ui-primary-soft); --text: var(--ui-text); --border: var(--ui-border); }
-.demo-dashboard-metrics button, .demo-chart-card, .dashboard-view-switch button, .demo-chart-legends button { border-radius: 4px; }
+.demo-dashboard-metrics button, .dashboard-view-switch button { border-radius: 4px; }
 .login-story { background: linear-gradient(150deg, #253b5b, #1c2d45); }
 @media (max-width: 991px) {
   .ef-app-shell__header { padding: 10px 16px; }

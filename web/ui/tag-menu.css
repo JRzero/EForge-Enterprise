@@ -1,0 +1,9 @@
+
+.page-tag-menu {position:absolute;right:0;top:40px;z-index:20;display:grid;min-width:150px;background:white;border:1px solid #91aaa5;border-radius:6px;box-shadow:0 8px 24px #17392b25;padding:6px;}
+.page-tag-menu button {background:transparent;border:0;text-align:left;padding:9px 12px;color:inherit;cursor:pointer;}
+.page-tag-menu button:hover, .page-tag-menu button:focus-visible {background:var(--ui-primary-soft);}
+.page-tag-menu button:disabled {opacity:.4;cursor:default;}
+.page-tag-menu { border-radius: 4px; border-color: #e4e7ed; box-shadow: 0 2px 12px #0000001a; }
+.page-tag-menu { padding: 4px; border-color: var(--ui-border); }
+.page-tag-menu button { min-height: 32px; padding: 6px 12px; font-size: 13px; border-radius: 3px; }
+.page-tag-menu button:disabled { color: #b8babf; opacity: 1; background: transparent; }

@@ -1,0 +1,5 @@
+
+.notice-content {white-space: normal; overflow-wrap: anywhere; padding: 12px 0;}
+.notice-content img, .notice-content iframe {max-width: 100%;}
+.notice-content iframe {width: 560px; height: 315px;}
+@media (max-width: 760px) { .notice-content iframe {height: 210px;}}

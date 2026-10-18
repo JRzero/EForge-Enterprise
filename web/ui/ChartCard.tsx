@@ -1,3 +1,4 @@
+import './chart-card.css';
 import {useEffect,useRef,useState} from 'react';
 import {NativeButton, Table} from './native';
 import {Button} from './controls';

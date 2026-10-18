@@ -1,3 +1,4 @@
+import './rich-text-content.css';
 import 'quill/dist/quill.core.css';
 import {useEffect} from 'react';
 import {sanitizeNoticeHtml} from './rich-text-security';

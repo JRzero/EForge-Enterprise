@@ -1,3 +1,4 @@
+import './tag-menu.css';
 import type {RefObject} from 'react';
 export interface TagMenuAction {id: string; label: string; disabled?: boolean; onSelect: () => void}
 export function TagMenu({actions, menuRef, point, onDismiss}: {actions: readonly TagMenuAction[]; menuRef: RefObject<HTMLDivElement | null>; point?: {x: number; y: number}; onDismiss: () => void}) {
