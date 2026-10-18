@@ -14,3 +14,5 @@
 @import '../ui/component-details.css';
 @import '../ui/form-fields.css';
 @import '../ui/selectors.css';
+
+@import './user-choice-layout.css';

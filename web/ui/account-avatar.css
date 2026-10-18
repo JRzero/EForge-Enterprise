@@ -1,0 +1,2 @@
+.header-account-avatar {width:28px;height:28px;flex:0 0 28px;object-fit:cover;border-radius:4px;}
+.header-account-avatar-fallback {display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:white;}

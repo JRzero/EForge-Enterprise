@@ -49,3 +49,5 @@ SCAN本地最终验收：80752终态0，默认/启用各68真实浏览器、两�
 最新H09分页/树列表切片本地完成：独立主题实际红绿证据及session29392终态0（146单元/338模拟/5dist/静态与构建）通过，准备提交精确CI。H10扫描73c10d8已推送，server39140452429仍运行，skills39140452422成功；不能称云端验收。H09公共弹窗等/H10会话索引与缩短锁/H13全部原范围保持。
 
 会话SCAN73c10d8的server39140452429四项及skills全部成功，直接h10-scan-cloud-final.log证明1169断言/两68/fullAPI/OpenAPI/两生成运行。公共弹窗样式本地session70204终态0，146单元/339模拟/5dist及静态构建通过，准备提交。分页b802747云端仍待，不用旧提交替代。H09余下混合规则、H10索引/锁及H13保持。
+
+最新账户组件归属：PasswordField/AccountAvatar/BrandMark基础样式自带，用户专用选择布局迁回app。146单元/339模拟/5dist/生成构建通过；夹具defaultValue类型错误改受控值后typecheck与定向通过。H09剩余逐组件清单见ui-layer-boundaries新增核对段，整体未完成。分页b802747云端server/web全绿；弹窗c0ac32a web绿/server仍在。

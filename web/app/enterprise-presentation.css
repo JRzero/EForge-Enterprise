@@ -1,7 +1,6 @@
 .ef-app-shell__sidebar { padding-top: 0; border-right: 1px solid var(--ui-border); }
 .ef-app-shell__brand { min-height: 72px; padding: 16px 20px; }
 .enterprise-brand { gap: 10px; letter-spacing: 0; font-size: 15px; }
-.brand-mark { width: 34px; height: 34px; border-radius: 4px; background: var(--ui-primary); color: white; font-size: 23px; }
 .brand-subtitle { font-size: 10px; letter-spacing: .1em; }
 .ef-app-shell__nav { padding: 8px; }
 .enterprise-navigation a, .navigation-disclosure { min-height: 42px; padding: 10px 12px; border-radius: 4px; margin-bottom: 2px; }

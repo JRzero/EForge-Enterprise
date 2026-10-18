@@ -1,3 +1,4 @@
+import './account-avatar.css';
 import {useState} from 'react';
 import type {UserSummary} from '../generated/api';
 export function AccountAvatar({user}: {user: UserSummary}) {

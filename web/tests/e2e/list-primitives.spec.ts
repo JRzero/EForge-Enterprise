@@ -3,6 +3,11 @@ import {test,expect} from './fixtures';
 test('public list primitives carry desktop and mobile layout without application styles',async({page})=>{
   await page.goto('/tests/fixtures/list-primitives.html');
   await page.setViewportSize({width:1440,height:900});
+  expect((await page.locator('.brand-mark').boundingBox())!.width).toBe(28);
+  expect((await page.locator('.header-account-avatar').boundingBox())!.height).toBe(28);
+  expect(await page.locator('.password-field').evaluate(node=>getComputedStyle(node).display)).toBe('grid');
+  await page.getByRole('button',{name:'显示示例密码'}).click();
+  await expect(page.getByLabel('示例密码',{exact:true})).toHaveAttribute('type','text');
   const sidebar=page.getByRole('complementary',{name:'部门树'}), content=page.locator('.tree-list-content');
   const sideBox=(await sidebar.boundingBox())!, bodyBox=(await content.boundingBox())!;
   expect(sideBox.width).toBe(200);

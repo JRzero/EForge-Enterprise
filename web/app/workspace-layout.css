@@ -7,7 +7,6 @@
 .ef-app-shell__sidebar { height: 100dvh; border: 0; overflow: hidden; }
 .ef-app-shell__brand { height: 50px; min-height: 50px; padding: 0 16px; border-bottom: 0; flex-shrink: 0; }
 .enterprise-brand { font-size: 15px; gap: 9px; }
-.brand-mark { width: 28px; height: 28px; font-size: 21px; }
 .brand-subtitle { display: none; }
 .ef-app-shell__nav { flex: 1; min-height: 0; padding: 0; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #ffffff30 transparent; }
 .ef-app-shell__nav::-webkit-scrollbar { width: 5px; }
@@ -46,7 +45,6 @@
 .enterprise-header-actions button[data-variant]:hover:not(:disabled) { background: #f4f6f8; color: var(--ui-primary); }
 .header-account-link { padding: 0 8px; gap: 7px; max-width: 150px; color: var(--ui-text); }
 .header-account-name { font-size: 13px; max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.header-account-avatar { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 4px; }
 .header-notice-badge { position: absolute; top: 1px; right: -1px; min-width: 14px; padding: 0 3px; background: #f56c6c; border-radius: 8px; color: white; font-size: 10px; line-height: 15px; pointer-events: none; }
 .ef-app-shell__content { padding: 0; min-width: 0; }
 .enterprise-workspace { min-width: 0; }
@@ -112,7 +110,6 @@
 .grant-row:hover { background: #f5f7fa; }
 .grant-row button { color: #909399; }
 .grant-row label, .grant-toolbar label, .grant-unavailable { display: flex; flex-direction: row; align-items: center; gap: 8px; }
-.password-field-toggle { border-radius: 4px; }
 .log-metadata { gap: 10px 16px; padding: 12px 0; border-bottom: 1px solid #ebeef5; }
 .log-metadata dt { color: #606266; }
 .log-payload h3 { font-size: 14px; font-weight: 500; }

@@ -54,3 +54,11 @@ H09富文本修复本地真实生成验证：10788 exit0，h09-rich-generated-ru
 H09分页/树列表归属：PaginationNavigation和TreeListLayout现在分别导入自身CSS，app/styles、workspace-layout、enterprise-presentation和公共兼容文件中的对应重复规则已移除；保留产品200px侧栏/1100px折叠及分页当前态。独立公共主题消费者修复前真实侧栏1408px（预期200），h09-list-primitives-red.log；迁移后h09-list-primitives-green.log通过1440/1050/390/320px布局、折叠、跳页和无水平溢出。最终session29392 exit0：lint/typecheck/生成复现、146单元、build、338模拟浏览器及5正式dist全部通过。仅前端样式归属改变，后端源码不变，不重复本地Maven/SQL；精确云端仍待。ResourceDialog及其他历史混合样式尚待，H09不标完成。
 
 H09公共弹窗基础样式迁移：ResourceDialog独立导入resource-dialog.css，原app的通用尺寸/标题/表单基础/背景/拖拽缩放手柄/焦点及动作区规则按原级联顺序集中，页面专用用户/生成器/权限布局保留原处。独立公共主题夹具修复前宽度失败(h09-dialog-red.log)，修复后520px/20px内边距、真实手柄absolute/touch-action、键盘移动/Home、390/320边界、草稿及Escape焦点恢复通过(h09-dialog-green.log)。session70204终态0：lint/typecheck、146单元、构建、339模拟浏览器及5正式dist全部通过。后端/契约未改，不重复本地Maven/SQL；精确新CI待验收。公共表单与页面混合选择器仍需归属审计，H09暂不标全部完成。
+
+## H09剩余归属核对（2026-10-18）
+
+对ui中静态className与app三份CSS交叉检索后逐组件读取确认：AccountLayout的login面板/卡片/页脚、ChartCard/AnimatedNumber图表容器及辅助文本、IconPicker图标弹层、SelectionTree权限树、DictionaryTag容器、Pagination完整页脚，以及TagNavigation/TagMenu公共页签基础规则仍需接续归属和独立主题验证。AccountAvatar的screen-lock专用尺寸、BrandMark的auth/frontend容器尺寸、PasswordField的post-dialog表单列属于组合覆盖，应保留在相应模板或应用层；不能机械删除所有包含组件class的app规则。ResourceDialog仍有通用表单列与页面专用选择器混合，须拆开检查。当前只有明确迁移并验证的条目已完成，H09整体保持in_progress。
+
+本轮密码/头像/品牌基础样式已组件自带；用户编辑角色岗位规则移出ui/choice-layout到app/user-choice-layout，产品入口在公共布局之后组合。独立夹具初次typecheck发现误用不支持defaultValue；后续改为受控value/onChange，仅夹具修正，不宣称产品bug。全站回归运行时保持源固定，结束后修夹具并补类型与定向验证。
+
+账户基础样式本地终态：h09-account-final.log/session58111 exit0，生成复现、146单元、build、339模拟及5dist通过。夹具受控值修正后38243 exit0，typecheck与独立浏览器补验通过；产品源码在全量期间未变。lint通过，原字段交互/头像故障回退/图标来源未改。新精确CI待验收。分页b802747的server39141072169/web39141072171已终态success，弹窗c0ac32a web39141683332成功/server39141683368仍运行，尚不把弹窗服务器标为完成。

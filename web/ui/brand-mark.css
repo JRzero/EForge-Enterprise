@@ -1,0 +1,2 @@
+.brand-mark {display:inline-grid;place-items:center;width:28px;height:28px;font-size:21px;font-weight:700;flex-shrink:0;border-radius:4px;background:var(--ui-primary);color:white;}
+.brand-mark.eforge-logo {display:block;object-fit:contain;background:transparent;border-radius:0;flex-shrink:0;}
