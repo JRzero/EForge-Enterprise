@@ -1,3 +1,4 @@
+import './pagination-navigation.css';
 import {NativeInput} from './native';
 import {useSyncExternalStore} from 'react';
 import {Button} from './controls';

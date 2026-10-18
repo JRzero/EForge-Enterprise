@@ -38,13 +38,6 @@
   .template-page .form-section [role=alert] { grid-column:1; }
 }
 
-.tree-list-toggle { display:none; }
-.tree-list-content { min-width:0; }
-@media(max-width:1100px) {
-  .tree-list-toggle { display:block; text-align:left; padding:8px 12px; border:1px solid var(--ui-border); background:#fff; color:var(--ui-primary); border-radius:4px; }
-  .tree-list-sidebar[data-collapsed] { display:none; }
-}
-
 .detail-tab-panel { padding-block:20px 0; min-width:0; }
 .detail-tab-panel:focus-visible { outline:2px solid var(--ui-primary); outline-offset:4px; }
 .detail-tabs { min-width:0; }

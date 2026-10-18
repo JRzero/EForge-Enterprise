@@ -50,3 +50,5 @@ H09富文本修复本地真实生成验证：10788 exit0，h09-rich-generated-ru
 最终6workers完整复验89347 exit0：h09-rich-final-browser.log 337/337通过；h09-rich-entry-budget.json三入口预算通过。没有提高超时、删除断言或改缓存产品代码。富文本修复的真实生成应用与完整前端本地验收通过，接续精确云端；019a8b0/d62e742服务器失败仍作为失败历史保留，不能将后续修复结果回填到旧提交。
 
 精确修复提交61b1a87的web39137600447、server39137600455及skills39137600431全部终态success。h09-rich-cloud-final.log直接确认默认/启用各68真实浏览器、完整API/OpenAPI及两次实际生成应用全部通过，原富文本不重叠断言保留并成功。019a8b0/d62e742失败历史不改写；当前修复切片接受。H09仍有ResourceDialog/TreeListLayout/PaginationNavigation基础样式留在app/styles与workspace-layout，需接续归属及独立主题验证，不据此宣称H09全部完成。
+
+H09分页/树列表归属：PaginationNavigation和TreeListLayout现在分别导入自身CSS，app/styles、workspace-layout、enterprise-presentation和公共兼容文件中的对应重复规则已移除；保留产品200px侧栏/1100px折叠及分页当前态。独立公共主题消费者修复前真实侧栏1408px（预期200），h09-list-primitives-red.log；迁移后h09-list-primitives-green.log通过1440/1050/390/320px布局、折叠、跳页和无水平溢出。最终session29392 exit0：lint/typecheck/生成复现、146单元、build、338模拟浏览器及5正式dist全部通过。仅前端样式归属改变，后端源码不变，不重复本地Maven/SQL；精确云端仍待。ResourceDialog及其他历史混合样式尚待，H09不标完成。

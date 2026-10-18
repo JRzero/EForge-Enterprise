@@ -1,0 +1,4 @@
+.pagination-navigation { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.pagination-navigation form { display:flex; gap:6px; align-items:center; }
+.pagination-navigation input { width:70px; max-width:100%; min-height:34px; padding:4px 8px; border:1px solid #e8e9eb; }
+.pagination-navigation [aria-current=page] { font-weight:700; background:var(--ui-primary); color:#fff; outline:none; }

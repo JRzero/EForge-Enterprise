@@ -31,7 +31,6 @@
 .ef-data-table tbody tr:hover { background: #f5f8ff; }
 .ef-data-table__toolbar { background: #fff; }
 .post-pagination { padding-block: 16px; gap: 8px; color: var(--ui-muted); }
-.pagination-navigation [aria-current=page] { background: var(--ui-primary); color: #fff; outline: none; }
 .enterprise-layout button[data-variant], .login-layout button[data-variant] { border-radius: 4px; box-shadow: none; font-weight: 400; min-height: 34px; }
 .enterprise-layout button[data-variant=primary], .login-layout button[data-variant=primary] { background: var(--ui-primary); color: white; border: 1px solid var(--ui-primary); }
 .enterprise-layout button[data-variant=secondary], .login-layout button[data-variant=secondary] { background: white; color: var(--ui-text); border: 1px solid #e8e9eb; }
