@@ -1,3 +1,4 @@
+import './pagination.css';
 import {Select} from './native';
 import {useEffect, useRef} from 'react';
 import {Button} from './controls';

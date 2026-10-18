@@ -1,3 +1,4 @@
+import './icon-picker.css';
 import {NativeButton} from './native';
 import {useRef, useState, type KeyboardEvent} from 'react';
 import {Button, Input} from './controls';

@@ -1,0 +1,14 @@
+
+.post-pagination {display: flex; align-items: center; flex-wrap: wrap; gap: 12px;}
+.post-pagination {justify-content: flex-end; padding: 18px 0; font-size: 13px;}
+.post-pagination label {flex-direction: row; align-items: center;}
+@media (max-width: 760px) { .post-pagination {justify-content: flex-start;}}
+.post-pagination { padding-block: 16px; gap: 8px; color: var(--ui-muted); }
+.post-pagination { margin-top: 12px; padding: 0; font-size: 13px; }
+.post-pagination :is(input,select,button[data-variant]) { height: 30px; min-height: 30px; }
+@media (max-width:600px) {
+  .post-pagination { gap: 8px; }
+}
+@media (max-width:600px) {
+  .post-pagination :is(button[data-variant],select,input) { min-height: 36px; height: 36px; }
+}

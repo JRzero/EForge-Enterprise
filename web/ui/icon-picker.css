@@ -1,0 +1,18 @@
+
+.menu-icon {display: inline-block; width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; vertical-align: middle;}
+.menu-icon-picker {min-width: 0; border: 1px solid var(--ui-border); border-radius: 8px; padding: 12px; display: grid; gap: 12px;}
+.menu-icon-picker summary {cursor: pointer; padding: 10px; border: 1px solid var(--ui-border); border-radius: 6px; overflow-wrap: anywhere;}
+.menu-icon-picker summary img {margin-inline: 8px;} .menu-icon-picker summary[aria-disabled=true] {cursor: default; opacity: .6;}
+.menu-icon-options {display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; max-height: 240px; overflow: auto; padding: 4px;}
+.menu-icon-options button {display: flex; gap: 8px; align-items: center; padding: 8px; min-width: 0; border: 1px solid var(--ui-border); border-radius: 5px; background: var(--ui-canvas); cursor: pointer; font: inherit;}
+.menu-icon-options button span {overflow: hidden; text-overflow: ellipsis; white-space: nowrap;} .menu-icon-options [aria-pressed=true] {border-color: var(--ui-primary); background: var(--ui-primary-soft);}
+@media (max-width: 550px) {.menu-icon-options {grid-template-columns: repeat(2,minmax(0,1fr));}}
+.menu-icon-picker { padding: 12px; border-radius: 4px; }
+.menu-icon-picker summary { border-radius: 4px; padding: 5px 10px; font-size: 14px; }
+.menu-icon-picker summary .menu-icon { width: 16px; height: 16px; vertical-align: middle; }
+.menu-icon-options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; max-height: 200px; padding: 4px; scrollbar-width: thin; }
+.menu-icon-options button { display: flex; flex-direction: row; align-items: center; gap: 6px; min-height: 28px; padding: 4px 6px; border: 1px solid transparent; min-width: 0; }
+.menu-icon-options button .menu-icon { width: 16px; height: 16px; flex: 0 0 16px; }
+.menu-icon-options button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-icon-options button { border-radius: 4px; background: white; font-size: 12px; }
+.menu-icon-options button:hover, .menu-icon-options button[aria-pressed=true] { color: var(--ui-primary); border-color: var(--ui-primary); background: var(--ui-primary-soft); }

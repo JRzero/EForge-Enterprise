@@ -62,3 +62,5 @@ H09公共弹窗基础样式迁移：ResourceDialog独立导入resource-dialog.cs
 本轮密码/头像/品牌基础样式已组件自带；用户编辑角色岗位规则移出ui/choice-layout到app/user-choice-layout，产品入口在公共布局之后组合。独立夹具初次typecheck发现误用不支持defaultValue；后续改为受控value/onChange，仅夹具修正，不宣称产品bug。全站回归运行时保持源固定，结束后修夹具并补类型与定向验证。
 
 账户基础样式本地终态：h09-account-final.log/session58111 exit0，生成复现、146单元、build、339模拟及5dist通过。夹具受控值修正后38243 exit0，typecheck与独立浏览器补验通过；产品源码在全量期间未变。lint通过，原字段交互/头像故障回退/图标来源未改。新精确CI待验收。分页b802747的server39141072169/web39141072171已终态success，弹窗c0ac32a web39141683332成功/server39141683368仍运行，尚不把弹窗服务器标为完成。
+
+账号模板/复杂公共控件切片：AccountLayout、SelectionTree、IconPicker、DictionaryTag及完整Pagination各自导入CSS。使用CSS AST拆分混合选择器，保留原媒体条件与styles→presentation→workspace顺序，导航图标/密度/页面专属选择器保留应用。独立公共主题实际验证账号面板1440/390/320居中和无溢出，权限树父子联动、图标搜索选择、未知字典值布局、分页大小/换页与手机边界。79092两定向及typecheck通过；15462终态0，h09-templates-final.log含lint/生成复现、146单元、构建、341模拟、5dist全通过。后端未改，本地不重复SQL/Maven，待精确CI。c0ac32a弹窗server39141683368及web39141683332终态success。H09仍需图表卡片/动画数字、公共页签与剩余模板覆盖审计。

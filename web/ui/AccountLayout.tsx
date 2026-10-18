@@ -1,3 +1,4 @@
+import './account-layout.css';
 import type {ReactNode} from 'react';
 import {BrandMark} from './BrandMark';
 

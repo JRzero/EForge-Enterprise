@@ -1,3 +1,4 @@
+import './dictionary-tag.css';
 import type {DictionaryValueOption} from '../generated/api';
 import {Tag, type TagTone} from './Tag';
 import {dictionaryTags, type DictionaryValue} from './dictionary-values';

@@ -1,0 +1,21 @@
+
+.grant-fieldset {min-width: 0; border: 1px solid var(--ui-border); border-radius: 8px; padding: 12px;}
+.grant-toolbar {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px;}
+.grant-tree {list-style: none; padding: 0; margin: 0; max-height: 320px; overflow: auto;}
+.grant-tree ul {list-style: none; margin: 0; padding-inline-start: 20px;}
+.grant-tree ul[hidden] {display: none;}
+.grant-row {display: flex; align-items: center; gap: 3px; padding: 5px 0; min-width: 0;}
+.grant-row label {overflow-wrap: anywhere;}
+.grant-row input, .grant-toolbar input, .grant-unavailable input {flex-shrink: 0;}
+.grant-row button {border: 0; background: none; color: var(--ui-primary); width: 24px; min-width: 24px; font: inherit; cursor: pointer;}
+.grant-spacer {width: 24px; min-width: 24px;}
+.grant-unavailable {margin-top: 12px; overflow-wrap: anywhere;}
+
+.post-dialog .grant-toolbar label, .post-dialog .grant-row label, .post-dialog .grant-unavailable {display: flex; flex-direction: row; align-items: center; gap: 8px;}
+.grant-fieldset { padding: 12px; }
+.grant-toolbar { padding-bottom: 8px; border-bottom: 1px solid #ebeef5; }
+.grant-tree { scrollbar-width: thin; }
+.grant-row { padding-block: 3px; min-height: 28px; font-size: 14px; }
+.grant-row:hover { background: #f5f7fa; }
+.grant-row button { color: #909399; }
+.grant-row label, .grant-toolbar label, .grant-unavailable { display: flex; flex-direction: row; align-items: center; gap: 8px; }
