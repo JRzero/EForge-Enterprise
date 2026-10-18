@@ -2,6 +2,6 @@
 export {RichTextEditor, type RichTextEditorHandle} from './RichTextEditor';
 export {RichTextContent} from './RichTextContent';
 export {sanitizeNoticeHtml as sanitizeRichText} from './rich-text-security';
-export {PasswordField} from '../app/components/PasswordField';
+export {PasswordField} from './PasswordField';
 export {IconPicker, MenuIcon} from './IconPicker';
 export {SelectionTree} from './SelectionTree';

@@ -1,9 +1,11 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
 import hooks from 'eslint-plugin-react-hooks';
+import {uiBoundaryRule} from './scripts/ui-boundary-rule.mjs';
 export default ts.config(
   {ignores: ['generated/**', '**/generated-client.ts', 'dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**']},
   js.configs.recommended, ...ts.configs.recommended,
+  {plugins: {architecture: {rules: {'ui-boundary': uiBoundaryRule}}}, rules: {'architecture/ui-boundary': 'error'}},
   {files: ['**/*.ts', '**/*.tsx'], plugins: {'react-hooks': hooks}, rules: {
     'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'error'
   }},

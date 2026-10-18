@@ -1,6 +1,6 @@
 import {useId, type FormEvent, type ReactNode, type Ref} from 'react';
 import {FormErrorSummary,type FormErrorItem,type FormErrorTarget} from './FormErrorSummary';
-import {ResourceDialog} from '../app/components/ResourceDialog';
+import {ResourceDialog} from './ResourceDialog';
 import {Button} from './controls';
 import {FormPage, PageForm} from './FormPage';
 

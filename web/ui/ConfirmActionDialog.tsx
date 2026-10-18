@@ -1,5 +1,5 @@
 import {useId, type ReactNode} from 'react';
-import {ResourceDialog} from '../app/components/ResourceDialog';
+import {ResourceDialog} from './ResourceDialog';
 import {Button} from './controls';
 import {Feedback} from './Feedback';
 

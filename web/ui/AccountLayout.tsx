@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react';
-import {BrandMark} from '../app/components/BrandMark';
+import {BrandMark} from './BrandMark';
 
 /** Shared centered account panel, following the reference login/register layout. */
 export function AccountLayout({children}:{children:ReactNode}) {
