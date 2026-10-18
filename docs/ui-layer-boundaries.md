@@ -48,3 +48,5 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 H09富文本修复本地真实生成验证：10788 exit0，h09-rich-generated-runtime.log实际原Boot/JWT/Redis/MyBatis、生成CRUD/tree/sub及自动PK/String键、图片/文件/富文本、原不重叠/手机边界、XLSX、权限撤回与持久审计全部通过。146单元/5dist/2规模及静态检查也通过。第一轮全量337项中缓存页末尾导航30秒超时、336通过；原trace已保存h09-cache-timeout-trace.zip，图表/溢出断言已完成，最后菜单导航耗尽总时长。未改产品或超时，定向3次全部通过；固定源以6workers复验全部337项中，不称本轮全绿。H11页签/分页/选择器与入口预算的精确证据已补全并在任务表验收done，H10扫描及H13仍在。
 
 最终6workers完整复验89347 exit0：h09-rich-final-browser.log 337/337通过；h09-rich-entry-budget.json三入口预算通过。没有提高超时、删除断言或改缓存产品代码。富文本修复的真实生成应用与完整前端本地验收通过，接续精确云端；019a8b0/d62e742服务器失败仍作为失败历史保留，不能将后续修复结果回填到旧提交。
+
+精确修复提交61b1a87的web39137600447、server39137600455及skills39137600431全部终态success。h09-rich-cloud-final.log直接确认默认/启用各68真实浏览器、完整API/OpenAPI及两次实际生成应用全部通过，原富文本不重叠断言保留并成功。019a8b0/d62e742失败历史不改写；当前修复切片接受。H09仍有ResourceDialog/TreeListLayout/PaginationNavigation基础样式留在app/styles与workspace-layout，需接续归属及独立主题验证，不据此宣称H09全部完成。

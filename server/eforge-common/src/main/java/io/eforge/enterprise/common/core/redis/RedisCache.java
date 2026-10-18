@@ -3,6 +3,7 @@ package io.eforge.enterprise.common.core.redis;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +13,8 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.core.ValueOperations;
@@ -384,5 +387,21 @@ public class RedisCache
     public Collection<String> keys(final String pattern)
     {
         return redisTemplate.keys(pattern);
+    }
+
+    /** Complete cursor enumeration before returning; failures never expose a partial result.
+     * COUNT is a work hint, not a result limit. SCAN may repeat keys.
+     */
+    public Collection<String> scanKeys(final String pattern)
+    {
+        Set<String> keys = new LinkedHashSet<>();
+        try (Cursor<String> cursor = redisTemplate.scan(ScanOptions.scanOptions().match(pattern).count(256).build()))
+        {
+            while (cursor.hasNext())
+            {
+                keys.add(cursor.next());
+            }
+        }
+        return keys;
     }
 }

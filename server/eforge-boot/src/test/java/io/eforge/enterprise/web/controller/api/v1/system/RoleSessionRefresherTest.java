@@ -69,7 +69,7 @@ class RoleSessionRefresherTest
             return new SimpleTransactionStatus();
         });
         when(mutations.lockRoot()).thenReturn(100L);
-        when(cache.keys("login_tokens:*")).thenReturn(List.of(key));
+        when(cache.scanKeys("login_tokens:*")).thenReturn(List.of(key));
         when(tokens.getLoginUserByToken("existing")).thenReturn(session);
     }
 

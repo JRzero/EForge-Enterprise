@@ -78,9 +78,9 @@ class AuthorizationRefreshRedisProbe {
             reads.clear(); writes.clear(); successes.clear();
         }
         void disarm() { armed = false; fault = Fault.NONE; }
-        @Override public Collection<String> keys(String pattern) {
+        @Override public Collection<String> scanKeys(String pattern) {
             if(measuring)enumerations++;
-            Collection<String> actual = super.keys(pattern);
+            Collection<String> actual = super.scanKeys(pattern);
             if(afterEnumeration!=null)afterEnumeration.run();
             if (!armed) return actual;
             require(actual != null && new HashSet<>(actual).equals(new HashSet<>(orderedKeys)), "Real Redis enumeration differs from the three owned sessions.");
@@ -343,6 +343,28 @@ class AuthorizationRefreshRedisProbe {
             check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==3,"Owned lock sample cleanup incomplete.");
         }
     }
+    static void scanCoverage(RuntimeBoundary runtime, RedisCommands<String,String> admin) {
+        Map<String,String> owned = new HashMap<>();
+        Set<String> expected = new HashSet<>();
+        for(int i=0;i<600;i++) { String key="login_tokens:scan-owned-中文-"+i;expected.add(key);owned.put(key,"owned enumeration fixture"); }
+        for(int i=0;i<2048;i++)owned.put("scan-noise-owned:"+i,"unrelated");
+        require("OK".equals(admin.mset(owned)),"Cannot initialize owned cursor fixtures.");
+        try {
+            require("OK".equals(admin.aclSetuser(ACL_USER,new AclSetuserArgs().removeCommand(CommandType.KEYS))),"Cannot deny owned KEYS command.");
+            try { runtime.cache.keys("login_tokens:*");throw new AssertionError("Actual KEYS must be denied."); }
+            catch(RuntimeException expectedFailure) { check(denied(expectedFailure),"Missing actual KEYS NOPERM failure."); aclLog(admin,"keys"); }
+            check(new HashSet<>(runtime.cache.scanKeys("login_tokens:*")).equals(expected),"Cursor omitted/added keys across sparse pages or changed Unicode.");
+            require("OK".equals(admin.aclSetuser(ACL_USER,new AclSetuserArgs().removeCommand(CommandType.SCAN))),"Cannot deny owned SCAN command.");
+            try { runtime.cache.scanKeys("login_tokens:*");throw new AssertionError("Actual SCAN must be denied."); }
+            catch(RuntimeException expectedFailure) { check(denied(expectedFailure),"Missing actual SCAN NOPERM failure."); aclLog(admin,"scan"); }
+            require("OK".equals(admin.aclSetuser(ACL_USER,new AclSetuserArgs().addCommand(CommandType.SCAN))),"Cannot restore owned SCAN command.");
+            check(new HashSet<>(runtime.cache.scanKeys("login_tokens:*")).equals(expected),"Cursor did not recover after actual ACL fault.");
+        } finally {
+            admin.aclSetuser(ACL_USER,new AclSetuserArgs().addCommand(CommandType.SCAN));
+            check(admin.del(owned.keySet().toArray(String[]::new))==owned.size(),"Owned cursor fixture cleanup incomplete.");
+        }
+        System.out.println("PASS: actual cursor enumerates 600 Unicode session keys among 2048 unrelated keys with KEYS denied; SCAN ACL failure/recovery.");
+    }
     public static void main(String[] args) throws Exception {
         String url = env("EFORGE_AUTH_REFRESH_JDBC_URL");
         require(url.startsWith("jdbc:mysql://127.0.0.1:") && url.contains("/eforge_enterprise?"), "Probe JDBC target is not the owned localhost fixture.");
@@ -365,6 +387,7 @@ class AuthorizationRefreshRedisProbe {
                 var runtime = new RuntimeBoundary(routing, redis, admin);
                 scenario(runtime, sql, admin, Fault.INITIAL_READ);
                 scenario(runtime, sql, admin, Fault.AFTER_FIRST_CAS);
+                scanCoverage(runtime,admin);
                 scale(runtime,sql,admin);
                 lockWait(runtime,sql,admin);
                 check(sql.queryForObject("SELECT COUNT(*) FROM sys_user", Integer.class) == 2

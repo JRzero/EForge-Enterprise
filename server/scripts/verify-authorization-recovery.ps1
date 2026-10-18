@@ -101,9 +101,9 @@ $authRecoveryMutationStatus = $null
 $authRecoveryMutationRequestId = $null
 $authRecoveryAclRestored = $false
 try {
-    Assert-Check ((Invoke-Docker exec $redisName redis-cli ACL SETUSER default '-keys') -ceq 'OK') 'Owned Redis KEYS restriction failed.'
-    $authRecoveryKeysDenied = (Invoke-Docker exec $redisName redis-cli KEYS 'login_tokens:*') -join ''
-    Assert-Check ($authRecoveryKeysDenied -match '^NOPERM') 'KEYS must actually be denied before the authorization mutation.'
+    Assert-Check ((Invoke-Docker exec $redisName redis-cli ACL SETUSER default '-scan') -ceq 'OK') 'Owned Redis SCAN restriction failed.'
+    $authRecoveryKeysDenied = (Invoke-Docker exec $redisName redis-cli SCAN 0 MATCH 'login_tokens:*' COUNT 256) -join ''
+    Assert-Check ($authRecoveryKeysDenied -match '^NOPERM') 'SCAN must actually be denied before the authorization mutation.'
 
     $authRecoveryMutation = Request "$authRecoveryRoles/$authRecoveryRoleId" 'PUT' ($authRecoveryRoleBody | ConvertTo-Json -Depth 5 -Compress) $authorized
     $authRecoveryMutationStatus = [int]$authRecoveryMutation.StatusCode
@@ -119,10 +119,10 @@ try {
     $authRecoveryActiveAfter = [int](AuthorizationRecovery-Sql $authRecoveryIdentitySql)
     Assert-Check ($authRecoveryGrantsAfter -eq 0 -and $authRecoveryActiveAfter -eq 1) `
         'The posts grant must actually commit as removed while the account/role assignment remains active.'
-    Write-Host "H01 fault: actual KEYS NOPERM; mutation HTTP=$authRecoveryMutationStatus; committed posts grant=$authRecoveryGrantsAfter; active assignment=$authRecoveryActiveAfter."
+    Write-Host "H01 fault: actual SCAN NOPERM; mutation HTTP=$authRecoveryMutationStatus; committed posts grant=$authRecoveryGrantsAfter; active assignment=$authRecoveryActiveAfter."
 } finally {
-    $authRecoveryAclRestored = (Invoke-Docker exec $redisName redis-cli ACL SETUSER default '+keys') -ceq 'OK'
-    Assert-Check $authRecoveryAclRestored 'Owned Redis KEYS permission could not be restored.'
+    $authRecoveryAclRestored = (Invoke-Docker exec $redisName redis-cli ACL SETUSER default '+scan') -ceq 'OK'
+    Assert-Check $authRecoveryAclRestored 'Owned Redis SCAN permission could not be restored.'
 }
 
 # No bootstrap, getInfo, re-login or session refresher is called between revocation and these requests.
@@ -150,7 +150,7 @@ foreach ($authRecoverySession in $authRecoverySessions) {
 
 $authRecoveryEvidencePath = Join-Path $logDirectory "authorization-recovery-$runId.json"
 $authRecoveryEvidence = [ordered]@{
-    Scenario = 'committed-role-revocation-after-redis-keys-failure'; CapturedAtUtc = [DateTime]::UtcNow.ToString('o')
+    Scenario = 'committed-role-revocation-after-redis-scan-failure'; CapturedAtUtc = [DateTime]::UtcNow.ToString('o')
     JarSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $jar).Hash; RoleId = $authRecoveryRoleId; UserId = $authRecoveryUserId
     GrantBefore = $authRecoveryGrantsBefore; GrantAfter = $authRecoveryGrantsAfter; ActiveAssignmentAfter = $authRecoveryActiveAfter
     MutationHttp = $authRecoveryMutationStatus; MutationRequestId = $authRecoveryMutationRequestId; RedisAclRestored = $authRecoveryAclRestored
@@ -161,7 +161,7 @@ Write-Host "H01 safe evidence: $authRecoveryEvidencePath"
 # Parent finally owns all account/role/session fixtures via its uniquely created containers.
 Assert-Check (@($authRecoveryResults | Where-Object Forbidden).Count -eq 2) `
     "AUTHORIZATION_RECOVERY_RED: committed revocation must deny both original JWTs after Redis recovery; unexpectedly allowed=$($authRecoveryEvidence.UnexpectedlyAllowed)."
-Write-Host 'PASS: both original JWTs are forbidden after committed revocation and actual Redis KEYS failure/recovery.'
+Write-Host 'PASS: both original JWTs are forbidden after committed revocation and actual Redis SCAN failure/recovery.'
 
 # Keep the original red assertion above intact. The remaining matrix only runs after
 # revocation is fail-closed, and records status/count/TTL/correlation data without secrets.

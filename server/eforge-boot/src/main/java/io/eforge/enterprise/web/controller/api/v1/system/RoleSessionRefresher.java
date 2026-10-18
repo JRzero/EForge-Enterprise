@@ -83,7 +83,7 @@ public class RoleSessionRefresher
             {
                 throw new ApiFailure(409, "DEPARTMENT_ROOT_MISSING", "Root department does not exist.");
             }
-            Collection<String> keys = cache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+            Collection<String> keys = cache.scanKeys(CacheConstants.LOGIN_TOKEN_KEY + "*");
             if (keys != null)
             {
                 for (String key : keys)
