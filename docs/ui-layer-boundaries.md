@@ -30,3 +30,5 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 底层选择器兼容已集中到 ui/compat/selector-theme.css；页签与布尔字段布局分别归属 tab-presentation.css/choice-layout.css，原 component-details.css 仅保留顺序导入。全部正式CSS哈希仍与h09-css-before.json相同。lint现在执行check-style-boundaries.mjs，拒绝兼容目录外的.astryx-*选择器与私有CSS包导入，覆盖引号及url()有/无引号形式；不是安全沙箱或任意混淆CSS解析器。2项规则单元验证拒绝及合法例外，总145单元、lint/typecheck/build和5项dist全部通过。H09仍待历史混合基础样式清理和精确云端验收。
 
 公共层TS迁移c33d722精确云端：server39122293097四作业、web39122293140与skills39122293093全部success；h09-ui-cloud-final.log直接证实两配置各68真实浏览器/完整API/OpenAPI以及两实际生成应用通过。后续样式7b2ce63和74460ba仍待各自终态，不以本结果代替。
+
+样式阶段精确云端终态：7b2ce63的server39122633415与web39122633471全部success；74460ba的server39123106414、web39123106411、skills39123106394全部success。直接日志h09-css-cloud-final.log与h09-style-boundary-cloud-final.log分别证明两配置各68真实浏览器/完整API/OpenAPI及两次实际生成应用通过。上述已交付边界与样式切片验收完成；H09仍保留历史基础样式分层未完成项，不扩张完成声明。
