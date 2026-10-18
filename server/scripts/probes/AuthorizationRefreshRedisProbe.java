@@ -71,6 +71,7 @@ class AuthorizationRefreshRedisProbe {
         boolean armed;
         boolean measuring;
         int enumerations, snapshotReads, casCalls;
+        Runnable afterEnumeration;
         OrderedCache(RedisCommands<String,String> admin) { this.admin = admin; }
         void arm(Fault next, List<Session> sessions) {
             fault = next; armed = true; orderedKeys = sessions.stream().map(Session::key).toList();
@@ -80,6 +81,7 @@ class AuthorizationRefreshRedisProbe {
         @Override public Collection<String> keys(String pattern) {
             if(measuring)enumerations++;
             Collection<String> actual = super.keys(pattern);
+            if(afterEnumeration!=null)afterEnumeration.run();
             if (!armed) return actual;
             require(actual != null && new HashSet<>(actual).equals(new HashSet<>(orderedKeys)), "Real Redis enumeration differs from the three owned sessions.");
             if (fault == Fault.INITIAL_READ)
@@ -152,19 +154,22 @@ class AuthorizationRefreshRedisProbe {
             return sessions(admin,3);
         }
         List<Session> sessions(RedisCommands<String,String> admin,int count) {
+            return sessions(admin,count,USER);
+        }
+        List<Session> sessions(RedisCommands<String,String> admin,int count,long userId) {
             var results = new ArrayList<Session>();
             for (int index=0;index<count;index++) {
                 String label=index<3?List.of("A","B","C").get(index):"session-"+index;
                 MockHttpServletRequest request = request();
                 RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
                 try {
-                    SysUser user = users.selectUserById(USER);
-                    LoginUser verified = new LoginUser(USER, user.getDeptId(), user, Set.of());
+                    SysUser user = users.selectUserById(userId);
+                    LoginUser verified = new LoginUser(userId, user.getDeptId(), user, Set.of());
                     String jwt = tokens.createToken(verified);
                     String key = CacheConstants.LOGIN_TOKEN_KEY + verified.getToken();
                     byte[] bytes = raw(admin, key); long ttl = admin.pttl(key);
                     check(ttl > 55 * 60 * 1000, "Fresh fixture session TTL is unexpectedly short.");
-                    check(decode(bytes).getPermissions().equals(Set.of(GRANT)), "Actual login fence did not persist the initial grant.");
+                    check(decode(bytes).getPermissions().equals(userId==1?Set.of("*:*:*"):Set.of(GRANT)), "Actual login fence did not persist the initial grant.");
                     results.add(new Session(label, key, jwt, bytes, ttl));
                 } finally { RequestContextHolder.resetRequestAttributes(); }
             }
@@ -288,20 +293,54 @@ class AuthorizationRefreshRedisProbe {
     }
     static void scale(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin){
         runtime.cache.disarm();sql.update("UPDATE sys_role SET status='0' WHERE role_id=?",ROLE);
-        for(int count:List.of(3,30,100)){
-            var sessions=runtime.sessions(admin,count);
+        for(int[] sample:List.of(new int[]{3,3},new int[]{30,30},new int[]{100,100},new int[]{100,3})){
+            int count=sample[0],affected=sample[1];
+            var sessions=new ArrayList<>(runtime.sessions(admin,affected));
+            if(count>affected)sessions.addAll(runtime.sessions(admin,count-affected,1));
             try{
                 var cache=runtime.cache;cache.enumerations=0;cache.snapshotReads=0;cache.casCalls=0;
                 long started=System.nanoTime();cache.measuring=true;
                 try{runtime.refresher.refresh(Set.of(USER));}finally{cache.measuring=false;}
                 double elapsed=(System.nanoTime()-started)/1_000_000.0;
-                check(cache.enumerations==1&&cache.snapshotReads==count&&cache.casCalls==count,"Refresh scale baseline changed: inspect actual Redis operations.");
+                check(cache.enumerations==1&&cache.snapshotReads==count&&cache.casCalls==affected,"Refresh scale baseline changed: inspect actual Redis operations.");
                 for(var session:sessions){
-                    check(decode(raw(admin,session.key())).getPermissions().equals(Set.of(GRANT)),"Scale refresh changed effective authority.");
+                    var current=raw(admin,session.key());
+                    check(decode(current).getPermissions().equals(decode(session.before()).getPermissions()),"Scale refresh changed effective authority.");
+                    if(decode(session.before()).getUserId()==1)check(Arrays.equals(current,session.before()),"Unrelated session bytes were modified.");
                     check(admin.pttl(session.key())>0&&admin.pttl(session.key())<=session.ttlBefore(),"Scale refresh changed original session lifetime.");
                 }
-                System.out.printf(Locale.ROOT,"REFRESH_SCALE: sessions=%d affected=%d enumeration=%d snapshot_lua=%d cas_lua=%d elapsed_ms=%.3f; includes SQL and shared-lock transaction, not Redis-only time%n",count,count,cache.enumerations,cache.snapshotReads,cache.casCalls,elapsed);
+                System.out.printf(Locale.ROOT,"REFRESH_SCALE: sessions=%d affected=%d enumeration=%d snapshot_lua=%d cas_lua=%d elapsed_ms=%.3f; includes SQL and shared-lock transaction, not Redis-only time%n",count,affected,cache.enumerations,cache.snapshotReads,cache.casCalls,elapsed);
             }finally{check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==count,"Owned scale session cleanup incomplete.");}
+        }
+    }
+    static void lockWait(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin)throws Exception{
+        var sessions=runtime.sessions(admin);
+        var worker=java.util.concurrent.Executors.newSingleThreadExecutor();
+        var waiting=new java.util.concurrent.atomic.AtomicReference<java.util.concurrent.Future<Double>>();
+        runtime.cache.afterEnumeration=()->{
+            waiting.set(worker.submit(()->{
+                try(var connection=Objects.requireNonNull(sql.getDataSource()).getConnection()){
+                    connection.setAutoCommit(false);
+                    long start=System.nanoTime();
+                    try(var statement=connection.prepareStatement("SELECT dept_id FROM sys_dept WHERE parent_id=0 ORDER BY dept_id LIMIT 1 FOR UPDATE")){statement.executeQuery().close();}
+                    double elapsed=(System.nanoTime()-start)/1_000_000.0;connection.rollback();return elapsed;
+                }
+            }));
+            boolean observed=false;
+            for(int attempt=0;attempt<100;attempt++){
+                if(sql.queryForObject("SELECT COUNT(*) FROM performance_schema.data_lock_waits",Integer.class)>0){observed=true;break;}
+                try{Thread.sleep(10);}catch(InterruptedException failure){Thread.currentThread().interrupt();throw new IllegalStateException(failure);}
+            }
+            check(observed,"The real root-row contender was not observed waiting during Redis enumeration.");
+            check(!waiting.get().isDone(),"The root-row contender escaped the refresh transaction.");
+        };
+        try{
+            runtime.refresher.refresh(Set.of(USER));
+            double elapsed=waiting.get().get(5,java.util.concurrent.TimeUnit.SECONDS);
+            System.out.printf(Locale.ROOT,"REFRESH_LOCK: actual InnoDB waiter observed during enumeration; contender_ms=%.3f (includes diagnostic coordination, not production latency)%n",elapsed);
+        }finally{
+            runtime.cache.afterEnumeration=null;worker.shutdownNow();worker.awaitTermination(5,java.util.concurrent.TimeUnit.SECONDS);
+            check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==3,"Owned lock sample cleanup incomplete.");
         }
     }
     public static void main(String[] args) throws Exception {
@@ -327,6 +366,7 @@ class AuthorizationRefreshRedisProbe {
                 scenario(runtime, sql, admin, Fault.INITIAL_READ);
                 scenario(runtime, sql, admin, Fault.AFTER_FIRST_CAS);
                 scale(runtime,sql,admin);
+                lockWait(runtime,sql,admin);
                 check(sql.queryForObject("SELECT COUNT(*) FROM sys_user", Integer.class) == 2
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role", Integer.class) == 1
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role_menu", Integer.class) == 1, "Unexpected physical IAM row changes.");
