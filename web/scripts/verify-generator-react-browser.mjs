@@ -232,7 +232,23 @@ async function verifyAutomaticKey(page, noRoleUser, category) {
       const children=editor.getByRole('region',{name:'子表明细',exact:true});
       await expect(children.getByLabel('childId', {exact:true})).toHaveCount(0);
       await expect(children.getByLabel('ownerReference', {exact:true})).toHaveCount(0);
+      await editor.getByRole('button', {name:'新增子表行'}).click();
+      const targetId=await children.getByLabel('label',{exact:true}).last().getAttribute('id');
+      let invalidWrites=0;
+      const countWrite=request=>{if(request.method()==='POST'&&new URL(request.url()).pathname==='/api/v1/business/fixture/'+category)invalidWrites++;};
+      page.on('request',countWrite);
+      await editor.getByRole('button',{name:'保存',exact:true}).click();
+      const summary=editor.getByRole('region',{name:'请检查以下字段',exact:true});
+      await expect(summary).toBeFocused();await expect(summary.getByRole('button')).toHaveCount(2);
+      await children.getByRole('button',{name:'删除子表行'}).first().click();
+      await expect(summary.getByRole('button')).toHaveCount(1);
+      await summary.getByRole('button',{name:/子表第1行 label/}).click();
+      const surviving=children.getByLabel('label',{exact:true});
+      await expect(surviving).toBeFocused();await expect(surviving).toHaveAttribute('id',targetId);
+      await expect(surviving).toHaveAttribute('aria-invalid','true');await expect(surviving).toHaveAccessibleDescription(/不能为空/);
+      assert.equal(invalidWrites,0);page.off('request',countWrite);
       await children.getByLabel('label', {exact:true}).fill('自动子表-'+index);
+      await expect(summary).toHaveCount(0);
     }
     const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/v1/business/fixture/'+category && response.request().method() === 'POST');
     await editor.getByRole('button', {name:'保存', exact:true}).click();
@@ -342,7 +358,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       await expect(page.getByRole('heading',{name:'Installed '+category,exact:true})).toBeVisible();
       await expect(page.getByRole('button',{name:'新增',exact:true})).toHaveCSS('background-color','rgb(36, 104, 242)');
     }
-    for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
+    for(const [size,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:state==='validation'?320:390,height:844}]]) {
       await page.setViewportSize(viewport);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'Generated '+category+' '+state+' must fit '+size+' width');
       if(state==='editor') {
@@ -472,10 +488,28 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
           await expect(dialog.getByRole('button', {name:'保存',exact:true})).toBeEnabled();
         }
         await captureAppearance(page,category,'editor');
+        await dialog.getByLabel('quantity',{exact:true}).fill('');
+        let validationWrites=0;
+        const countValidationWrite=request=>{if(request.method()==='POST'&&new URL(request.url()).pathname==='/api/v1/business/fixture/'+category)validationWrites++;};
+        page.on('request',countValidationWrite);
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
-        await expect(dialog.getByRole('alert')).toContainText('requiredStatuses');
+        const validationSummary=dialog.getByRole('region',{name:'请检查以下字段',exact:true});
+        await expect(validationSummary).toBeFocused();
+        await expect(validationSummary.getByRole('button')).toHaveCount(2);
+        await captureAppearance(page,category,'validation');
+        await validationSummary.getByRole('button',{name:/quantity/}).click();
+        await expect(dialog.getByLabel('quantity',{exact:true})).toBeFocused();
+        await expect(dialog.getByLabel('quantity',{exact:true})).toHaveAccessibleDescription(/不能为空/);
+        await expect(dialog.getByLabel('amount',{exact:true})).toHaveValue('9007199254740993.00001');
+        await dialog.getByLabel('quantity',{exact:true}).fill('17');
+        await expect(validationSummary.getByRole('button')).toHaveCount(1);
+        await validationSummary.getByRole('button',{name:/requiredStatuses/}).click();
+        const requiredGroup=dialog.getByRole('group',{name:'requiredStatuses',exact:true});
+        await expect(requiredGroup).toBeFocused();await expect(requiredGroup).toHaveAttribute('aria-invalid','true');
+        await expect(requiredGroup).toHaveAccessibleDescription(/不能为空/);
         const requiredChecks=dialog.locator('label').filter({hasText:/^requiredStatuses/}).getByRole('checkbox');
         await requiredChecks.first().check();
+        assert.equal(validationWrites,0);page.off('request',countValidationWrite);
         await dialog.getByRole('button', {name:'保存', exact:true}).click();
         await expect(dialog).toHaveCount(0);
         await expect(page.getByText(label, {exact:true})).toBeVisible();

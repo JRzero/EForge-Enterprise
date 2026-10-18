@@ -294,3 +294,19 @@ EditableDetailTable现在捕获操作前的稳定行键和相邻键，onAdd可�
 第四片最终本地验收：h05-generated-final-lint/typecheck/check-generated/test/build/browser/dist 全部成功，131单元、305模拟API浏览器、5正式产物。h05-generated-identity-final-disabled/enabled.log 两配置真实验证终态成功：七类实际生成页面编译/构建/浏览器、创建两行删除前行后值及ID保持、新增/删除焦点、长ID/精确金额/主子外键、上传/排序、原权限即时撤回与持久审计通过。前述失败日志保留，不以重试掩盖产品缺陷；精确新提交CI仍待核验。
 
 审查：生成控件身份只存在UI状态，所有保存仍使用原Write；没有放宽required/上传/字典权限。富文本仍在原sanitize边界内，使用固定Quill公开API，用户主动粘贴路径不变；隐藏恢复、旧上传隔离和图片顺序原断言保持。无新增依赖、API或SQL行为，完整目标及H05均未完成。
+
+## H05 第五片：实际生成字段错误摘要（验证中）
+
+原 requiredMessage 只返回首个错误，现按 root/child、稳定 rowId、字段名组成结构化目标。根字段和子行使用原可写/自动主键/外键排除规则；原必填判定不变。保存前汇总全部业务必填错误，并检查真实原生 input/select/textarea 的 willValidate 与 validity；noValidate 仅让摘要能统一处理，日期/步长等浏览器约束仍在任何网络请求前执行。
+
+摘要聚焦后可定位当前表单内的实际控制节点，不使用动态CSS选择器；字典组、原生输入、上传、富文本分别保留自身语义，错误通过aria-invalid/aria-describedby关联。删除子行清除该行错误，其余错误按稳定行键保留并实时更新显示行号；更正字段仅清除该字段错误。错误/行标识不进入Write，原API/权限/审计不变。
+
+旧jar的 h05-generated-errors-red.log 在真实CRUD页面因没有摘要而失败。首轮实现的捕获阶段清错导致浏览器回归中已填普通字段丢失，h05-generated-errors-disabled.log 明确由预期2项变为5项，未放宽断言；移除重复捕获事件，只使用字段自身值更新路径清错，重新完整Maven验证通过，h05-generated-errors-events-verify.log。最终两配置实际应用验证仍在运行，尚未验收；新用例要求多错误完整汇总、金额草稿保持、字典组可访问错误、删除前行后定位同一后行、修正清错及无效表单零保存请求，另检查320宽度。
+
+第五片实际应用终态：h05-generated-errors-events-disabled/enabled.log 全部通过，实际安装七类生成页面、严格TypeScript/lint/正式构建、真实HTTP/SQL/Redis/权限/审计及新增摘要断言通过。默认及启用配置均证明根字段同时两个错误、修正一个不掩盖另一个、字典组描述与焦点、自动子表两行错误删除前行后定位相同ID、零无效保存请求，原精确金额/ID/日期/上传和外键规则继续通过。人工查看crud/sub-validation-mobile.png，320宽度摘要和字段无横向裁切。
+
+前一片5edb0d885e38451426159328330a39478e7a2182精确云端server39090717889四项、web39090717888成功；直接h05-generated-identity-cloud-server-final.log确认两配置各68原业务浏览器/完整API及两配置实际生成应用通过。本片新提交CI尚待核验，不沿用上一提交冒充验收。
+
+第五片基础检查：h05-generated-errors-final-lint/typecheck/check-generated/test/build 均通过，131单元；两实时OpenAPI SHA256同为677574099734C447415004D49818998561F8C109A4D4AFCADA0E0E50096CA960。本片没有修改共享组件运行源码，新增行为由两配置实际生成应用浏览器验证；305模拟API浏览器/5 dist属于前一片精确云端基线，不重复描述为本片新执行结果。完整Maven为1124报告记录、11环境跳过、0失败。
+
+该实时OpenAPI来自安装七类示例后的应用，包含新增21个fixture端点，不能宣称与未安装示例的主契约逐字相等。首次直接文本比较因此失败；随后两配置分别逐项deepEqual证明原118个端点和171个模型均与提交契约一致，仅新增生成业务端点/模型。客户端生成仍使用原主契约并通过可复现检查。
