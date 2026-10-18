@@ -1,0 +1,5 @@
+{
+  "index.html": { "bytes": 892000, "gzipBytes": 222000 },
+  "frontend-template.html": { "bytes": 923000, "gzipBytes": 237000 },
+  "showcase.html": { "bytes": 2121000, "gzipBytes": 639000 }
+}

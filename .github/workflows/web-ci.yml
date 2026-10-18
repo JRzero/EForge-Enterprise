@@ -2,9 +2,9 @@ name: web-ci
 on:
   push:
     branches: [main, 'codex/**']
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', 'scripts/measure-web-entry-assets.mjs', 'scripts/tests/measure-web-entry-assets.test.mjs', 'scripts/web-entry-budgets.json', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
   pull_request:
-    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
+    paths: ['web/**', 'contracts/openapi/**', 'dependencies/eforge/**', 'scripts/measure-web-entry-assets.mjs', 'scripts/tests/measure-web-entry-assets.test.mjs', 'scripts/web-entry-budgets.json', '.github/workflows/web-ci.yml', '.github/scripts/install-browser.sh', '.gitattributes']
 permissions:
   contents: read
 jobs:
@@ -27,6 +27,10 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Verify entry asset budgets
+        run: |
+          node --test ../scripts/tests/measure-web-entry-assets.test.mjs
+          node ../scripts/measure-web-entry-assets.mjs --budget ../scripts/web-entry-budgets.json
       - run: bash ../.github/scripts/install-browser.sh
       - name: Verify release output in a real browser
         run: npm run test:e2e:dist
