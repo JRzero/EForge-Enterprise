@@ -1,0 +1,29 @@
+/* Product-owned visual theme, inspired by spcore's AMIS tables and Element Plus
+   shell. EForge remains the component dependency; no upstream source is copied. */
+:root,
+.enterprise-layout,
+.login-layout {
+  --ui-primary: var(--ef-color-accent, #2468f2);
+  --ui-primary-soft: color-mix(in srgb, var(--ui-primary) 8%, white);
+  --ui-text: #303841;
+  --ui-muted: #667180;
+  --ui-border: #e8e9eb;
+  --ui-canvas: #f5f7f9;
+  --ui-sidebar: #304156;
+  --ui-control-font: 14px;
+  --color-text-primary: #151b26;
+  --color-text-secondary: var(--ui-muted);
+  --color-background-body: var(--ui-canvas);
+  --color-background-surface: #fff;
+  --color-border: var(--ui-border);
+  --color-accent: #2468f2;
+  --color-on-accent: #fff;
+  --color-accent-muted: #eaf1ff;
+  --radius-inner: 3px;
+  --radius-element: 4px;
+  --radius-container: 4px;
+  --font-family-body: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family-body);
+  color: var(--ui-text);
+}
+.enterprise-layout { --color-accent: var(--ef-color-accent); }

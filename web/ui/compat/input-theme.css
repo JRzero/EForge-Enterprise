@@ -1,0 +1,45 @@
+body { background: var(--ui-canvas); }
+.enterprise-layout { font-size: 14px; line-height: 1.5; }
+.enterprise-layout :focus-visible, .login-layout :focus-visible { outline: 2px solid var(--ui-primary); outline-offset: 3px; }
+.enterprise-layout :is(input, select, textarea) { accent-color: var(--ui-primary); }
+/* The EForge input container owns its border and focus state. Painting an
+   additional outline on its inner input creates the inset blue box. */
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input) {
+  min-height: 36px;
+  height: auto;
+  padding: 5px 12px;
+  gap: 8px;
+  border: 1px solid #e8e9eb;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+:is(.enterprise-layout, .login-layout) [data-pressable-container] > input {
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  font-size: var(--ui-control-font);
+  line-height: 24px;
+  color: var(--ui-text);
+}
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input):hover { border-color: #aab5c2; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input:focus) { border-color: var(--ui-primary); box-shadow: 0 0 0 1px var(--ui-primary); }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input[aria-invalid=true]) { border-color: #dc3545; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input[aria-invalid=true]:focus) { box-shadow: 0 0 0 1px #dc3545; }
+:is(.enterprise-layout, .login-layout) [data-pressable-container]:has(> input:disabled, > input[aria-disabled=true]) { background: #f5f7fa; border-color: #e3e8ed; color: #8994a2; cursor: not-allowed; }
+:is(.enterprise-layout, .login-layout) input::placeholder { color: #8994a2; opacity: 1; }
+.enterprise-layout :is(select, textarea) { min-height: 36px; line-height: 1.5; }
+:is(.enterprise-layout, .login-layout) input:is([type=checkbox], [type=radio]) { width: 15px; height: 15px; margin: 0; flex-shrink: 0; vertical-align: middle; }
+.login-card label:has(> input[type=checkbox]) { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ui-muted); }
+.enterprise-layout[data-density=small] [data-pressable-container]:has(> input), .enterprise-layout[data-density=mini] [data-pressable-container]:has(> input) { min-height: 30px; padding-block: 2px; }
+.enterprise-layout[data-density=small] [data-pressable-container] > input, .enterprise-layout[data-density=mini] [data-pressable-container] > input { padding: 0; min-height: 24px; }
+.enterprise-layout[data-density=small] { --ui-control-font: 13px; }
+.enterprise-layout[data-density=mini] { --ui-control-font: 12px; }
+.posts-page label:not(:has(input[type=checkbox], input[type=radio])) { align-items: stretch; text-align: left; }
+.enterprise-layout :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]) { border-radius: 4px; }
+.pagination-navigation input { min-height: 34px; padding: 4px 8px; border: 1px solid #e8e9eb; }
