@@ -21,7 +21,7 @@ import {AccountLayout, PasswordField} from '../ui/account';
 import {IconPicker, SelectionTree, RichTextEditor, RichTextContent} from '../ui/editors';
 import {AnimatedNumber, ChartCard} from '../ui/charts';
 import {AppShell, DashboardPage, WorkbenchPage, PermissionProvider, PermissionGate} from '../ui/patterns';
-import '../ui/theme.css';
+import '../app/theme.css';
 import './showcase.css';
 
 const sections = [

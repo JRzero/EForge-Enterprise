@@ -1,11 +1,11 @@
-/* Public design-system stylesheet, in the same order as the product cascade. */
+/* Standalone public components: no application, feature or route dependency. */
 @import '@eforge/tokens/styles.css';
 @import '@eforge/ui/styles.css';
 @import '@eforge/patterns/styles.css';
 @import '@eforge/data/styles.css';
-@import '../app/styles.css';
-@import '../app/enterprise-theme.css';
-@import '../app/workspace-layout.css';
+@import './base.css';
+@import './theme-tokens.css';
+@import './compat/input-theme.css';
 @import './list-layout.css';
 @import './styles.css';
 @import './spcore-theme.css';

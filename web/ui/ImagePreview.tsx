@@ -67,3 +67,4 @@ function ImageViewer({urls,label,onClose}: {urls:string[];label:string;onClose:(
     </footer>
   </dialog>;
 }
+import './image-preview.css';

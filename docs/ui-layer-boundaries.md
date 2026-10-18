@@ -32,3 +32,11 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 公共层TS迁移c33d722精确云端：server39122293097四作业、web39122293140与skills39122293093全部success；h09-ui-cloud-final.log直接证实两配置各68真实浏览器/完整API/OpenAPI以及两实际生成应用通过。后续样式7b2ce63和74460ba仍待各自终态，不以本结果代替。
 
 样式阶段精确云端终态：7b2ce63的server39122633415与web39122633471全部success；74460ba的server39123106414、web39123106411、skills39123106394全部success。直接日志h09-css-cloud-final.log与h09-style-boundary-cloud-final.log分别证明两配置各68真实浏览器/完整API/OpenAPI及两次实际生成应用通过。上述已交付边界与样式切片验收完成；H09仍保留历史基础样式分层未完成项，不扩张完成声明。
+
+公共主题组合接续：原ui/theme.css反向导入app/styles、enterprise-theme和workspace-layout。产品三个入口现使用app/theme.css保持原组合顺序，公共ui/theme只依赖公共层和固定依赖CSS。检查器新增相对CSS导入不得逃出ui目录，覆盖POSIX及Windows盘符；首轮错误使用posix.resolve处理D:/路径产生误报，改为join/normalize并增加实际Windows用例。
+
+仅入口重定位时全部产品CSS哈希与h09-composition-css-before.json相同，但完整独立组件回归出现1项真实失败：attached错误提示定位规则原藏在workspace-layout，独立主题不再加载它。基础盒模型/排版移入ui/base.css后仍能复现该失败，随后将attached提示规则移入ui/compat/input-theme.css，并将图片预览和列菜单各自样式移入ui/image-preview.css、ui/column-visibility.css由组件自身导入。没有恢复ui到app的反向依赖，也没有放宽原提示位置/窄屏/图片预览断言。h09-owned-components-target.log两项通过。
+
+组件样式归属调整后不再声称最终CSS哈希相同；完整h09-owned-theme-final.log包含静态/生成/单元/build/dist/规模/336模拟浏览器，当前运行中。未改后端运行源，本地不重复Maven/真实SQL；精确提交CI仍须执行完整服务器和生成应用门槛。历史app混合样式及UI中外壳选择器进一步归属仍待清理，不把本切片当作H09全部完成。
+
+本轮最终本地结果：h09-owned-theme-final.log 的生成复现/lint/typecheck/build、146单元、5 dist及2规模测试通过；第一次完整模拟浏览器335通过、文件重试1失败。未改上传实现或放宽断言，h09-file-reproduce.log单worker重复五轮10/10通过，随后同源码h09-owned-theme-browser-repeat.log完整336/336通过。首次瞬态失败原因尚未确定，不能宣称已修复，后续CI继续观察。代码审查确认组件CSS单向依赖、原业务权限/数据接口未变；本切片待精确提交云端验收。

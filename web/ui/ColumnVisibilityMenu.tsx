@@ -35,3 +35,4 @@ export function ColumnVisibilityMenu({labels, visibility, onChange, title = '显
       onChange={event => { const checked = event.target.checked; onChange(current => ({...current, [key]: checked})); }} />{label}</label>)}
   </div></details>;
 }
+import './column-visibility.css';

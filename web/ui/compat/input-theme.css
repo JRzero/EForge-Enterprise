@@ -43,3 +43,4 @@ body { background: var(--ui-canvas); }
 .posts-page label:not(:has(input[type=checkbox], input[type=radio])) { align-items: stretch; text-align: left; }
 .enterprise-layout :is(input, select, textarea):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]) { border-radius: 4px; }
 .pagination-navigation input { min-height: 34px; padding: 4px 8px; border: 1px solid #e8e9eb; }
+:is(.enterprise-layout,.login-layout) :is([data-type=error],[data-type=warning],[data-type=success])[data-variant=attached] { position: static; z-index: auto; margin: 0; min-height: 0; line-height: 18px; background: transparent; border: 0; border-radius: 0; padding: 4px 0 0; font-size: 12px; }

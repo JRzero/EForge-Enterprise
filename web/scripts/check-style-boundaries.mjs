@@ -8,6 +8,11 @@ export function styleBoundaryIssues(filename,source) {
   if (/\.astryx-[\w-]+/.test(text)&&!normalized.includes('/ui/compat/')) issues.push('Vendor DOM selectors belong only in ui/compat.');
   for(const match of text.matchAll(/@import\s+(?:url\(\s*(?:['"]([^'"]+)['"]|([^\s)]+))\s*\)|['"]([^'"]+)['"])/g)) {
     const specifier=match[1]??match[2]??match[3];
+    if(normalized.includes('/ui/')&&specifier.startsWith('.')){
+      const target=path.posix.normalize(path.posix.join(path.posix.dirname(normalized),specifier));
+      const uiRoot=normalized.slice(0,normalized.indexOf('/ui/')+4);
+      if(!target.startsWith(uiRoot))issues.push('Public UI styles cannot import application, template or feature layers: '+specifier);
+    }
     if (/astryx/i.test(specifier)||/(?:^|\/)node_modules\//.test(specifier)||(/^@eforge\//.test(specifier)&&!/^@eforge\/[^/]+\/styles\.css$/.test(specifier))) issues.push('Import only public pinned dependency styles: '+specifier);
   }
   return issues;

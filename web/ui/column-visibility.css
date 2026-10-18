@@ -1,0 +1,5 @@
+.post-columns {position: absolute; z-index: 2; right: 0; min-width: 160px; padding: 16px; border: 1px solid var(--ui-border); border-radius: 8px; background: white; box-shadow: 0 8px 24px #12332115; display: grid; gap: 12px;}
+.post-columns label {flex-direction: row; align-items: center;}
+.column-visibility-menu { position: relative; width: max-content; max-width: 100%; }
+.column-visibility-menu .post-columns { left: 0; right: auto; }
+.post-toolbar .column-visibility-menu .post-columns { left: auto; right: 0; }

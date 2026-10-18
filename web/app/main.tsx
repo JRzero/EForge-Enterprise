@@ -2,7 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {createBrowserRouterAdapter} from '@eforge/app';
 import {EForgeProvider} from '../ui/controls';
-import '../ui/theme.css';
+import '../app/theme.css';
 import {Application} from './Application';
 import {browserSessionStorage, createSessionRuntime} from '../integration/session';
 const runtime = createSessionRuntime(browserSessionStorage());

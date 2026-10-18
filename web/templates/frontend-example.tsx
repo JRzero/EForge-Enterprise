@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {EForgeProvider, Button, Input} from '../ui/controls';
 import {FrontendLayout, FormPage, PageForm, ListPage, ListFilters, ListToolbar, BrandMark, DataTable, Feedback} from '../ui';
-import '../ui/theme.css';
+import '../app/theme.css';
 
 // Standalone front-office template with local sample data and no admin session.
 function FrontendExample(){

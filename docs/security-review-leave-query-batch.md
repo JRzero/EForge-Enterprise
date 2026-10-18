@@ -27,3 +27,5 @@ pending保持Flowable公开查询、active/businessType、candidateOrAssigned/ca
 默认配置h10-leave-default-runtime.log已终态PASS，68真实浏览器及完整API/37故障诊断通过，实时OpenAPI与契约JSON精确一致。唯一97504已进入启用配置，仍待终态；不重复启动。
 
 最终本地验收97504终态exit0：默认与启用配置各68真实浏览器、完整API、SQL/Redis/Quartz/Flowable/生成器原回归与37/39故障诊断均通过，两份实时OpenAPI与契约完整JSON精确一致。完整Maven、两模式真实MySQL与本次HTTP全部通过；待提交精确云端验收，不提前声明云端成功。
+
+精确云端验收补记：e453168be7c1889b7503539bd7116a44b20e3a95的server39128595629全部成功，直接h10-leave-cloud-final.log含两配置各68真实浏览器与实际生成CRUD/tree/sub及完整API。审批列表批量查询切片验收通过，不能代表H10锁/会话扫描治理完成。
