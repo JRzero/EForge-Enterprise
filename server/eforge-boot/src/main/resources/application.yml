@@ -63,6 +63,8 @@ token:
   # Required at runtime. Do not commit a fallback secret.
   secret: ${EFORGE_TOKEN_SECRET}
   expireTime: ${EFORGE_TOKEN_EXPIRE_MINUTES:30}
+  # Mixed-version rollout: disable on new nodes; clear only the internal index namespace before re-enabling.
+  sessionIndexEnabled: ${EFORGE_SESSION_INDEX_ENABLED:true}
 
 mybatis:
   typeAliasesPackage: io.eforge.enterprise.**.domain

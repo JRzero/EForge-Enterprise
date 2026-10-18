@@ -1,6 +1,6 @@
 # H10 user/session index: implementation boundary
 
-Status: design under review, no index runtime implementation yet. Continue after the publication-lock slice is verified; do not count this document as H10 completion.
+Status: implementation and targeted native verification in progress, full regression/CI pending. The publication-lock slice is accepted at `894aaa6`; do not count this document as H10 completion. Actual indexed lifecycle and recovery evidence is recorded in `security-review-session-index.md`.
 
 ## Required end state
 

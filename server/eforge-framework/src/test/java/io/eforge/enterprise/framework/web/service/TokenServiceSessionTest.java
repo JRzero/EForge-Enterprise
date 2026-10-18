@@ -45,6 +45,11 @@ class TokenServiceSessionTest
             }
         };
         ReflectionTestUtils.setField(tokens, "redisCache", cache);
+        // This in-memory fixture covers the compatibility CAS semantics. The real
+        // Redis integration suites exercise the default indexed lifecycle and scripts.
+        SessionIndexService index = new SessionIndexService(cache);
+        ReflectionTestUtils.setField(index, "enabled", false);
+        ReflectionTestUtils.setField(tokens, "sessionIndex", index);
         // This fixture isolates Redis CAS; actual SQL proof checks have their own reader tests/probe.
         ReflectionTestUtils.setField(tokens, "authorization", org.mockito.Mockito.mock(AuthorizationSnapshotService.class));
         ReflectionTestUtils.setField(tokens, "header", "Authorization");

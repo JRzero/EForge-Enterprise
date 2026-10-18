@@ -1,6 +1,8 @@
 # Session publication lock boundary
 
-Status: implementation and full local regression complete; precise CI pending. This is the lock-duration part of H10, not acceptance of the pending user/session index.
+Status: accepted at `894aaa6a1059692aa2d656b7f3f6819552b498d3`. Exact server run `39148000906` finished successfully in all four jobs; skills run `39148000948` succeeded. This is the lock-duration part of H10, not acceptance of the separate user/session index.
+
+Cloud evidence: `h10-lock-cloud-final-status.json` binds the SHA and terminal jobs; `h10-lock-cloud-final.log` contains both 68-case browser profiles, complete API/OpenAPI verification, native authorization checks and generated applications. The local pending statements below describe the pre-push checkpoint and are superseded by this acceptance.
 
 ## Invariants and implementation
 

@@ -59,6 +59,9 @@ public class TokenService
     @Autowired
     private AuthorizationSnapshotService authorization;
 
+    @Autowired
+    private SessionIndexService sessionIndex;
+
     /**
      * 获取用户身份信息
      * 
@@ -154,8 +157,7 @@ public class TokenService
             return false;
         }
         byte[] value = redisCache.serializeCacheObject(loginUser);
-        boolean updated = redisCache.compareAndSetExpiringCacheObject(getTokenKey(loginUser.getToken()),
-                loginUser.cacheSnapshot(), value);
+        boolean updated = sessionIndex.compareAndSet(loginUser, loginUser.cacheSnapshot(), value);
         if (updated)
         {
             loginUser.rememberCacheSnapshot(value);
@@ -197,7 +199,7 @@ public class TokenService
         String jwt = createToken(claims);
         byte[] value = redisCache.serializeCacheObject(loginUser);
         boolean created;
-        try { created = redisCache.createExpiringCacheObject(getTokenKey(token), value, expireTime * MILLIS_MINUTE); }
+        try { created = sessionIndex.create(loginUser, value, expireTime * MILLIS_MINUTE); }
         catch (RuntimeException failure) { throw unavailable(failure); }
         if (!created)
         {
@@ -241,8 +243,7 @@ public class TokenService
             return;
         }
         long ttl;
-        try { ttl = redisCache.renewExpiringCacheObject(getTokenKey(loginUser.getToken()),
-                expireTime * MILLIS_MINUTE, thresholdMillis); }
+        try { ttl = sessionIndex.renew(loginUser, expireTime * MILLIS_MINUTE, thresholdMillis); }
         catch (RuntimeException failure) { throw unavailable(failure); }
         if (ttl > 0)
         {

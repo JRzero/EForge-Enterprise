@@ -101,6 +101,11 @@ $authRecoveryMutationStatus = $null
 $authRecoveryMutationRequestId = $null
 $authRecoveryAclRestored = $false
 try {
+    # This scenario specifically exercises complete-SCAN recovery. Remove only this
+    # fixture user's acceleration index so a warm index cannot bypass the injected fault.
+    $authRecoveryIndexKey = "login_user_sessions:$authRecoveryUserId"
+    Invoke-Docker exec $redisName redis-cli DEL $authRecoveryIndexKey | Out-Null
+    Assert-Check ((Invoke-Docker exec $redisName redis-cli EXISTS $authRecoveryIndexKey) -ceq '0') 'Owned recovery index must be absent before the SCAN fault.'
     Assert-Check ((Invoke-Docker exec $redisName redis-cli ACL SETUSER default '-scan') -ceq 'OK') 'Owned Redis SCAN restriction failed.'
     $authRecoveryKeysDenied = (Invoke-Docker exec $redisName redis-cli SCAN 0 MATCH 'login_tokens:*' COUNT 256) -join ''
     Assert-Check ($authRecoveryKeysDenied -match '^NOPERM') 'SCAN must actually be denied before the authorization mutation.'

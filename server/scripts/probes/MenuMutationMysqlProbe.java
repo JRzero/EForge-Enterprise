@@ -159,10 +159,11 @@ class MenuMutationMysqlProbe {
         }
         @Bean RedisTemplate<Object,Object> redisTemplate(LettuceConnectionFactory factory) {return new RedisConfig().redisTemplate(factory);}
         @Bean RedisCache cache() {return new RedisCache();}
+        @Bean SessionIndexService sessionIndex(RedisCache cache) {return new SessionIndexService(cache);}
         @Bean TokenService tokens() {return new TokenService();}
-        @Bean RoleSessionRefresher refresher(RedisCache cache,Users users,NavigationMapper navigation,SysPermissionService permissions,
+        @Bean RoleSessionRefresher refresher(SessionIndexService sessionIndex,Users users,NavigationMapper navigation,SysPermissionService permissions,
                 TokenService tokens,DepartmentMutationMapper mutex,PlatformTransactionManager manager) {
-            return new RoleSessionRefresher(cache,users.service(),navigation,permissions,tokens,mutex,manager);
+            return new RoleSessionRefresher(sessionIndex,users.service(),navigation,permissions,tokens,mutex,manager);
         }
         @Bean MenuService canonicalMenus(MenuMutationMapper mapper,SysMenuServiceImpl legacy,DepartmentMutationMapper mutex,
                 RoleSessionRefresher sessions,Users users,NavigationMapper navigation,SysPermissionService permissions,PlatformTransactionManager manager) throws Exception {
@@ -329,6 +330,7 @@ class MenuMutationMysqlProbe {
             context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("owned-probe",Map.of("token.header","Authorization","token.expireTime",60,"token.secret",Base64.getEncoder().encodeToString(new byte[64]))));
             context.register(Config.class);context.refresh();
             races(context,sql);permissionCases(context,sql,redis.sync());remainingWriters(context,sql);
+            redis.sync().del(SessionIndexService.PREFIX+USER);
             check(redis.sync().keys("*").isEmpty(),"Owned Redis fixture was not cleaned.");
             System.out.println("PASS: actual menu role-grant/delete lock and legacy permission-boundary assertions="+assertions.get());
         } finally {client.shutdown();clear();}

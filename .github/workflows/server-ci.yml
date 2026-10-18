@@ -238,7 +238,7 @@ jobs:
       - name: Verify session revocation and concurrent writes against real Redis
         run: >-
           mvn -B -ntp -f server/pom.xml -pl eforge-framework -am test
-          -Dtest=TokenServiceRedisIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
+          -Dtest=TokenServiceRedisIntegrationTest,SessionIndexRedisIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
           -Deforge.test.redis.port=6379
 
       - name: Verify MySQL, Redis and login session integration

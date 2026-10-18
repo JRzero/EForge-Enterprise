@@ -17,7 +17,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import io.eforge.enterprise.common.core.domain.entity.SysRole;
 import io.eforge.enterprise.common.core.domain.entity.SysUser;
 import io.eforge.enterprise.common.core.domain.model.LoginUser;
-import io.eforge.enterprise.common.core.redis.RedisCache;
+import io.eforge.enterprise.framework.web.service.SessionIndexService;
 import io.eforge.enterprise.framework.web.service.SysPermissionService;
 import io.eforge.enterprise.framework.web.service.TokenService;
 import io.eforge.enterprise.system.mapper.DepartmentMutationMapper;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RoleSessionRefresherTest
 {
-    @Mock RedisCache cache;
+    @Mock SessionIndexService cache;
     @Mock ISysUserService users;
     @Mock NavigationMapper navigation;
     @Mock SysPermissionService permissions;
@@ -74,7 +74,7 @@ class RoleSessionRefresherTest
 
     void located()
     {
-        when(cache.scanKeys("login_tokens:*")).thenReturn(List.of(key));
+        when(cache.sessionKeys(anySet())).thenReturn(List.of(key));
         when(tokens.getLoginUserByToken("existing")).thenReturn(session);
     }
 
@@ -84,7 +84,7 @@ class RoleSessionRefresherTest
         when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
         when(mutations.lockRoot()).thenReturn(100L);
         var keys = java.util.stream.IntStream.range(0, 33).mapToObj(i -> "login_tokens:batch-" + i).toList();
-        when(cache.scanKeys("login_tokens:*")).thenReturn(keys);
+        when(cache.sessionKeys(anySet())).thenReturn(keys);
         when(tokens.getLoginUserByToken(anyString())).thenAnswer(call -> {
             LoginUser value = new LoginUser(7L, 103L, new SysUser(7L), Set.of("old:permission"));
             value.setToken(call.getArgument(0));
@@ -117,7 +117,7 @@ class RoleSessionRefresherTest
         when(tokens.updateLoginUser(session)).thenReturn(true);
         refresher.refresh(Set.of(7L));
         var order = inOrder(cache, tokens, manager, mutations, users);
-        order.verify(cache).scanKeys("login_tokens:*");
+        order.verify(cache).sessionKeys(anySet());
         order.verify(tokens).getLoginUserByToken("existing");
         order.verify(manager).getTransaction(any());
         order.verify(mutations).lockRoot();
@@ -331,7 +331,7 @@ class RoleSessionRefresherTest
     @Test
     void failedEnumerationCannotAcquireRootOrPublishAPartialBatch()
     {
-        when(cache.scanKeys("login_tokens:*")).thenThrow(new IllegalStateException("cursor failed"));
+        when(cache.sessionKeys(anySet())).thenThrow(new IllegalStateException("cursor failed"));
         assertThrows(IllegalStateException.class, () -> refresher.refresh(Set.of(7L)));
         verifyNoInteractions(manager, mutations, users, tokens);
     }

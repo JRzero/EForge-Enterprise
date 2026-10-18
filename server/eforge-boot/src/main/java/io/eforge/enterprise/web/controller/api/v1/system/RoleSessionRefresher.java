@@ -12,7 +12,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import io.eforge.enterprise.common.constant.CacheConstants;
 import io.eforge.enterprise.common.core.domain.model.LoginUser;
-import io.eforge.enterprise.common.core.redis.RedisCache;
+import io.eforge.enterprise.framework.web.service.SessionIndexService;
 import io.eforge.enterprise.common.exception.ApiFailure;
 import io.eforge.enterprise.framework.web.service.SysPermissionService;
 import io.eforge.enterprise.framework.web.service.TokenService;
@@ -27,7 +27,7 @@ public class RoleSessionRefresher
     private static final int MAX_REFRESH_ATTEMPTS = 3;
     private static final int PUBLICATION_BATCH_SIZE = 32;
 
-    private final RedisCache cache;
+    private final SessionIndexService sessionIndex;
     private final ISysUserService users;
     private final NavigationMapper navigation;
     private final SysPermissionService permissions;
@@ -35,11 +35,11 @@ public class RoleSessionRefresher
     private final DepartmentMutationMapper mutations;
     private final TransactionTemplate transaction;
 
-    public RoleSessionRefresher(RedisCache cache, ISysUserService users, NavigationMapper navigation,
+    public RoleSessionRefresher(SessionIndexService sessionIndex, ISysUserService users, NavigationMapper navigation,
             SysPermissionService permissions, TokenService tokens, DepartmentMutationMapper mutations,
             PlatformTransactionManager manager)
     {
-        this.cache = cache;
+        this.sessionIndex = sessionIndex;
         this.users = users;
         this.navigation = navigation;
         this.permissions = permissions;
@@ -82,7 +82,7 @@ public class RoleSessionRefresher
         }
         // Enumeration and unrelated/expired session reads need no IAM row lock.
         // Complete enumeration first; a failed cursor must not publish a partial batch.
-        Collection<String> keys = cache.scanKeys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+        Collection<String> keys = sessionIndex.sessionKeys(userIds);
         if (keys != null)
         {
             List<String> batch = new ArrayList<>(PUBLICATION_BATCH_SIZE);

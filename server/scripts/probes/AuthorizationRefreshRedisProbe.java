@@ -120,7 +120,13 @@ class AuthorizationRefreshRedisProbe {
         final PermissionService permission = new PermissionService();
         final SysUserServiceImpl users;
         final RoleSessionRefresher refresher;
+        final SessionIndexService sessionIndex;
+        final boolean indexed;
         RuntimeBoundary(DataSource source, LettuceConnectionFactory redis, RedisCommands<String,String> admin) throws Exception {
+            this(source, redis, admin, false);
+        }
+        RuntimeBoundary(DataSource source, LettuceConnectionFactory redis, RedisCommands<String,String> admin, boolean indexed) throws Exception {
+            this.indexed = indexed;
             PlatformTransactionManager manager = new DataSourceTransactionManager(source);
             var factory = new SqlSessionFactoryBean(); factory.setDataSource(source);
             factory.setTypeAliasesPackage("io.eforge.enterprise.common.core.domain.entity");
@@ -141,10 +147,42 @@ class AuthorizationRefreshRedisProbe {
             var authorization = new AuthorizationSnapshotService(users, navigation, permissions, manager);
             cache = new OrderedCache(admin); cache.redisTemplate = new RedisConfig().redisTemplate(redis);
             tokens = new TokenService(); field(tokens, "redisCache", cache); field(tokens, "authorization", authorization);
+            // Preserve the original complete-scan ACL and lock regression in rollout
+            // compatibility mode; indexed lifecycle has its own native coverage.
+            sessionIndex = new SessionIndexService(cache) {
+                @Override public Collection<String> sessionKeys(Set<Long> ids) {
+                    var result = super.sessionKeys(ids);
+                    if (indexed && cache.afterEnumeration != null) cache.afterEnumeration.run();
+                    if (indexed && cache.armed) {
+                        require(new HashSet<>(result).equals(new HashSet<>(cache.orderedKeys)), "Indexed candidates differ from owned sessions.");
+                        if (cache.fault == Fault.INITIAL_READ)
+                            require("OK".equals(admin.aclSetuser(ACL_USER, new AclSetuserArgs().removeCommand(CommandType.GET))), "Cannot arm indexed GET ACL failure.");
+                        return List.copyOf(cache.orderedKeys);
+                    }
+                    return result;
+                }
+                @Override public boolean compareAndSet(LoginUser user, byte[] expected, byte[] value) {
+                    if (indexed) {
+                        if (cache.measuring) cache.casCalls++;
+                        if (cache.armed) cache.writes.add(CacheConstants.LOGIN_TOKEN_KEY + user.getToken());
+                        if (cache.beforeCas != null) cache.beforeCas.run();
+                    }
+                    boolean updated = super.compareAndSet(user, expected, value);
+                    if (indexed && cache.armed && updated) {
+                        cache.successes.add(CacheConstants.LOGIN_TOKEN_KEY + user.getToken());
+                        if (cache.fault == Fault.AFTER_FIRST_CAS && cache.successes.size() == 1)
+                            require("OK".equals(admin.aclSetuser(ACL_USER, new AclSetuserArgs()
+                                .removeCommand(CommandType.SET).removeCommand(CommandType.DEL))), "Cannot arm indexed SET/DEL failure.");
+                    }
+                    return updated;
+                }
+            };
+            field(sessionIndex, "enabled", indexed);
+            field(tokens, "sessionIndex", sessionIndex);
             field(tokens, "header", "Authorization"); field(tokens, "expireTime", 60);
             field(tokens, "secret", Base64.getEncoder().encodeToString(new byte[64]));
             var mutex = session.getMapper(DepartmentMutationMapper.class);
-            refresher = new RoleSessionRefresher(cache, users, navigation, permissions, tokens, mutex, manager);
+            refresher = new RoleSessionRefresher(sessionIndex, users, navigation, permissions, tokens, mutex, manager);
             // status uses these concrete services/mappers; unrelated CRUD dependencies are deliberately absent.
             roles = new RoleService(legacyRoles, menus, null, users, session.getMapper(RoleSelectionMapper.class), mutex, refresher, manager);
             filter = new JwtAuthenticationTokenFilter(); field(filter, "tokenService", tokens);
@@ -240,6 +278,7 @@ class AuthorizationRefreshRedisProbe {
     static void scenario(RuntimeBoundary runtime, JdbcTemplate sql, RedisCommands<String,String> admin, Fault fault) throws Exception {
         runtime.cache.disarm(); sql.update("UPDATE sys_role SET status='0' WHERE role_id=?", ROLE);
         List<Session> sessions = runtime.sessions(admin);
+        if(runtime.indexed)runtime.sessionIndex.sessionKeys(Set.of(USER));
         for (Session session : sessions) runtime.protectedRequest(session.jwt(), true);
         var beforeUser = sql.queryForMap("SELECT * FROM sys_user WHERE user_id=?", USER);
         var beforeLinks = sql.queryForList("SELECT * FROM sys_user_role");
@@ -277,6 +316,7 @@ class AuthorizationRefreshRedisProbe {
             System.out.printf("RECOVERY: fault=%s session=%s persisted=%s ttl_not_extended=true original_jwt_status=%d%n", fault, session.label(), refreshed ? "updated" : "original", status);
         }
         check(admin.del(keys.toArray(String[]::new)) == 3, "Owned scenario session cleanup was incomplete.");
+        if(runtime.indexed)admin.del(SessionIndexService.PREFIX+USER);
         System.out.printf("SCENARIO: %s actual_acl=true sql_committed=true protected_boundary=production_filter_and_permission PASS%n", fault);
     }
 
@@ -300,19 +340,23 @@ class AuthorizationRefreshRedisProbe {
             var sessions=new ArrayList<>(runtime.sessions(admin,affected));
             if(count>affected)sessions.addAll(runtime.sessions(admin,count-affected,1));
             try{
+                if(runtime.indexed)runtime.sessionIndex.sessionKeys(Set.of(USER));
                 var cache=runtime.cache;cache.enumerations=0;cache.snapshotReads=0;cache.casCalls=0;
                 long started=System.nanoTime();cache.measuring=true;
                 try{runtime.refresher.refresh(Set.of(USER));}finally{cache.measuring=false;}
                 double elapsed=(System.nanoTime()-started)/1_000_000.0;
-                check(cache.enumerations==1&&cache.snapshotReads==count&&cache.casCalls==affected,"Refresh scale baseline changed: inspect actual Redis operations.");
+                check(cache.enumerations==(runtime.indexed?0:1)&&cache.snapshotReads==(runtime.indexed?affected:count)&&cache.casCalls==affected,"Refresh scale baseline changed: inspect actual Redis operations.");
                 for(var session:sessions){
                     var current=raw(admin,session.key());
                     check(decode(current).getPermissions().equals(decode(session.before()).getPermissions()),"Scale refresh changed effective authority.");
                     if(decode(session.before()).getUserId()==1)check(Arrays.equals(current,session.before()),"Unrelated session bytes were modified.");
                     check(admin.pttl(session.key())>0&&admin.pttl(session.key())<=session.ttlBefore(),"Scale refresh changed original session lifetime.");
                 }
-                System.out.printf(Locale.ROOT,"REFRESH_SCALE: sessions=%d affected=%d enumeration=%d snapshot_lua=%d cas_lua=%d elapsed_ms=%.3f; includes SQL and shared-lock transaction, not Redis-only time%n",count,affected,cache.enumerations,cache.snapshotReads,cache.casCalls,elapsed);
-            }finally{check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==count,"Owned scale session cleanup incomplete.");}
+                System.out.printf(Locale.ROOT,"REFRESH_SCALE: indexed=%s sessions=%d affected=%d enumeration=%d snapshot_lua=%d cas_lua=%d elapsed_ms=%.3f; includes SQL and shared-lock transaction, not Redis-only time%n",runtime.indexed,count,affected,cache.enumerations,cache.snapshotReads,cache.casCalls,elapsed);
+            }finally{
+                check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==count,"Owned scale session cleanup incomplete.");
+                if(runtime.indexed)admin.del(SessionIndexService.PREFIX+USER,SessionIndexService.PREFIX+1);
+            }
         }
     }
     static void lockWait(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin)throws Exception{
@@ -320,6 +364,7 @@ class AuthorizationRefreshRedisProbe {
     }
     static void lockPhase(RuntimeBoundary runtime,JdbcTemplate sql,RedisCommands<String,String> admin,String phase)throws Exception{
         var sessions=runtime.sessions(admin);
+        if(runtime.indexed)runtime.sessionIndex.sessionKeys(Set.of(USER));
         var worker=java.util.concurrent.Executors.newSingleThreadExecutor();
         var waiting=new java.util.concurrent.atomic.AtomicReference<java.util.concurrent.Future<Double>>();
         Runnable probe=()->{
@@ -358,6 +403,7 @@ class AuthorizationRefreshRedisProbe {
             runtime.cache.afterEnumeration=null;runtime.cache.beforeSnapshot=null;runtime.cache.beforeCas=null;
             worker.shutdownNow();worker.awaitTermination(5,java.util.concurrent.TimeUnit.SECONDS);
             check(admin.del(sessions.stream().map(Session::key).toArray(String[]::new))==3,"Owned lock sample cleanup incomplete.");
+            if(runtime.indexed)admin.del(SessionIndexService.PREFIX+USER);
         }
     }
     static void scanCoverage(RuntimeBoundary runtime, RedisCommands<String,String> admin) {
@@ -407,6 +453,11 @@ class AuthorizationRefreshRedisProbe {
                 scanCoverage(runtime,admin);
                 scale(runtime,sql,admin);
                 lockWait(runtime,sql,admin);
+                var indexedRuntime = new RuntimeBoundary(routing, redis, admin, true);
+                scenario(indexedRuntime, sql, admin, Fault.INITIAL_READ);
+                scenario(indexedRuntime, sql, admin, Fault.AFTER_FIRST_CAS);
+                scale(indexedRuntime,sql,admin);
+                lockWait(indexedRuntime,sql,admin);
                 check(sql.queryForObject("SELECT COUNT(*) FROM sys_user", Integer.class) == 2
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role", Integer.class) == 1
                         && sql.queryForObject("SELECT COUNT(*) FROM sys_role_menu", Integer.class) == 1, "Unexpected physical IAM row changes.");

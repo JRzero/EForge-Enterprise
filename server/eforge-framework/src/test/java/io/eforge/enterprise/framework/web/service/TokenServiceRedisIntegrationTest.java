@@ -53,6 +53,7 @@ class TokenServiceRedisIntegrationTest
             }
         };
         ReflectionTestUtils.setField(tokens, "redisCache", cache);
+        ReflectionTestUtils.setField(tokens, "sessionIndex", new SessionIndexService(cache));
         // SQL authority is covered by the real MySQL probe; this suite owns only Redis.
         ReflectionTestUtils.setField(tokens, "authorization", org.mockito.Mockito.mock(AuthorizationSnapshotService.class));
         ReflectionTestUtils.setField(tokens, "header", "Authorization");
@@ -186,6 +187,7 @@ class TokenServiceRedisIntegrationTest
         String jwt = tokens.createToken(session);
         String key = CacheConstants.LOGIN_TOKEN_KEY + session.getToken();
         ownedKeys.add(key);
+        ownedKeys.add(SessionIndexService.PREFIX + session.getUserId());
         Fixture fixture = new Fixture(jwt, key);
         assertNotNull(read(fixture), "Login must still create an authenticatable session");
         return fixture;

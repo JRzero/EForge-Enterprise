@@ -20,6 +20,7 @@ $refreshClasspath = ($refreshClasspath.Split([IO.Path]::PathSeparator) | Where-O
 foreach ($refreshRelative in @(
     'eforge-framework/src/main/java/io/eforge/enterprise/framework/web/service/AuthorizationSnapshotService.java',
     'eforge-framework/src/main/java/io/eforge/enterprise/framework/web/service/TokenService.java',
+    'eforge-framework/src/main/java/io/eforge/enterprise/framework/web/service/SessionIndexService.java',
     'eforge-framework/src/main/java/io/eforge/enterprise/framework/security/filter/JwtAuthenticationTokenFilter.java',
     'eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/RoleService.java',
     'eforge-boot/src/main/java/io/eforge/enterprise/web/controller/api/v1/system/RoleSessionRefresher.java')) {
@@ -27,6 +28,14 @@ foreach ($refreshRelative in @(
     $refreshClass = $refreshSource -replace '[\\/]src[\\/]main[\\/]java[\\/]', '/target/classes/' -replace '\.java$', '.class'
     if (!(Test-Path -LiteralPath $refreshClass) -or (Get-Item -LiteralPath $refreshSource).LastWriteTimeUtc -gt (Get-Item -LiteralPath $refreshClass).LastWriteTimeUtc) {
         throw "Authorization production source is newer than its compiled class ($refreshRelative); finish compilation before this probe."
+    }
+}
+foreach ($refreshLua in @('write.lua','read.lua','rebuild.lua')) {
+    $refreshLuaSource = Join-Path $refreshRoot "server/eforge-framework/src/main/resources/session-index/$refreshLua"
+    $refreshLuaCompiled = Join-Path $refreshRoot "server/eforge-framework/target/classes/session-index/$refreshLua"
+    if (!(Test-Path -LiteralPath $refreshLuaCompiled) -or
+        (Get-FileHash -LiteralPath $refreshLuaSource).Hash -ne (Get-FileHash -LiteralPath $refreshLuaCompiled).Hash) {
+        throw 'Session index Lua resources differ from the compiled runtime; finish compilation before this probe.'
     }
 }
 $refreshRun = [guid]::NewGuid().ToString('N').Substring(0,12)
