@@ -129,6 +129,22 @@ public class SysMenuServiceImpl implements ISysMenuService
         return permsSet;
     }
 
+    /** Request-owned sets preserve each role's data-scope permission association. */
+    @Override
+    public java.util.Map<Long, Set<String>> selectMenuPermsByRoleIds(List<Long> roleIds)
+    {
+        java.util.Map<Long, Set<String>> result = new java.util.LinkedHashMap<>();
+        for (Long roleId : roleIds) if (roleId != null) result.putIfAbsent(roleId, new HashSet<>());
+        if (result.isEmpty()) return result;
+        for (var row : menuMapper.selectMenuPermsByRoleIds(new ArrayList<>(result.keySet())))
+        {
+            Set<String> granted = result.get(row.roleId());
+            if (granted != null && StringUtils.isNotEmpty(row.perms()))
+                granted.addAll(Arrays.asList(row.perms().trim().split(",")));
+        }
+        return result;
+    }
+
     /**
      * 根据用户ID查询菜单
      * 

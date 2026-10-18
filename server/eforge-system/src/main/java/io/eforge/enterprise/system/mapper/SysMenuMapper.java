@@ -42,6 +42,8 @@ public interface SysMenuMapper
      */
     public List<String> selectMenuPermsByRoleId(Long roleId);
 
+    List<io.eforge.enterprise.system.domain.RoleMenuPermission> selectMenuPermsByRoleIds(@Param("roleIds") List<Long> roleIds);
+
     /**
      * 根据用户ID查询权限
      *

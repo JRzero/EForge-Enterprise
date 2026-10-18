@@ -68,12 +68,17 @@ public class SysPermissionService
             List<SysRole> roles = user.getRoles();
             if (!CollectionUtils.isEmpty(roles))
             {
+                List<Long> roleIds = roles.stream()
+                        .filter(role -> StringUtils.equals(role.getStatus(), UserConstants.ROLE_NORMAL) && !role.isAdmin())
+                        .map(SysRole::getRoleId).distinct().toList();
+                var byRole = roleIds.isEmpty() ? java.util.Map.<Long, Set<String>>of()
+                        : menuService.selectMenuPermsByRoleIds(roleIds);
                 // 多角色设置permissions属性，以便数据权限匹配权限
                 for (SysRole role : roles)
                 {
                     if (StringUtils.equals(role.getStatus(), UserConstants.ROLE_NORMAL) && !role.isAdmin())
                     {
-                        Set<String> rolePerms = menuService.selectMenuPermsByRoleId(role.getRoleId());
+                        Set<String> rolePerms = new HashSet<>(byRole.getOrDefault(role.getRoleId(), Set.of()));
                         role.setPermissions(rolePerms);
                         perms.addAll(rolePerms);
                     }

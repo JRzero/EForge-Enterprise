@@ -78,7 +78,7 @@ class LegacyMenuAuthorizationTest
         when(rows.grantedIds(9L)).thenReturn(List.of(1L, 2L));
         when(users.selectUserById(9L)).thenReturn(user(9));
         when(navigation.selectActiveRoles(9L)).thenReturn(List.of(role("0")));
-        when(legacyMapper.selectMenuPermsByRoleId(5L)).thenReturn(List.of("system:menu:edit", "owned:read"));
+        when(legacyMapper.selectMenuPermsByRoleIds(List.of(5L))).thenReturn(List.of(new io.eforge.enterprise.system.domain.RoleMenuPermission(5L, "system:menu:edit"), new io.eforge.enterprise.system.domain.RoleMenuPermission(5L, "owned:read")));
         when(legacyMapper.checkMenuNameUnique(anyString(), anyLong())).thenReturn(null);
         when(legacyMapper.selectMenusByPathOrRouteName(nullable(String.class), nullable(String.class))).thenReturn(List.of());
         when(legacyMapper.insertMenu(any())).thenReturn(1);
@@ -134,7 +134,7 @@ class LegacyMenuAuthorizationTest
         mvc.perform(put("/system/menu").contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.code").value(200)).andExpect(jsonPath("$.msg").value("操作成功"));
         verify(legacyMapper).updateMenu(argThat(menu -> java.util.Objects.equals(body.get("perms"), menu.getPerms())));
-        if (!mode.equals("clear")) verify(legacyMapper, never()).selectMenuPermsByRoleId(anyLong());
+        if (!mode.equals("clear")) verify(legacyMapper, never()).selectMenuPermsByRoleIds(anyList());
     }
 
     @Test void authorizedChangesAndOriginalLegacyRouteFieldsRemainSupported() throws Exception
@@ -150,7 +150,7 @@ class LegacyMenuAuthorizationTest
         var order = inOrder(mutex, rows, users, navigation, legacyMapper);
         order.verify(mutex).lockRoot(); order.verify(rows).rows();
         order.verify(users).selectUserById(9L); order.verify(navigation).selectActiveRoles(9L);
-        order.verify(legacyMapper).selectMenuPermsByRoleId(5L); order.verify(legacyMapper).updateMenu(any());
+        order.verify(legacyMapper).selectMenuPermsByRoleIds(List.of(5L)); order.verify(legacyMapper).updateMenu(any());
     }
 
     @Test void administratorMayWriteAnyPermissionWithoutGrantLookup() throws Exception

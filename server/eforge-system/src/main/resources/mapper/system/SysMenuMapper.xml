@@ -119,6 +119,27 @@
 			 join sys_role r on r.role_id = rm.role_id
 		where m.status = '0' and r.status = '0' and r.del_flag = '0' and rm.role_id = #{roleId}
 	</select>
+
+    <resultMap id="RoleMenuPermissionResult" type="io.eforge.enterprise.system.domain.RoleMenuPermission">
+        <constructor>
+            <arg column="role_id" javaType="java.lang.Long"/>
+            <arg column="perms" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <select id="selectMenuPermsByRoleIds" resultMap="RoleMenuPermissionResult">
+        select distinct rm.role_id, m.perms
+        from sys_menu m
+        join sys_role_menu rm on m.menu_id = rm.menu_id
+        join sys_role r on r.role_id = rm.role_id
+        where m.status = '0' and r.status = '0' and r.del_flag = '0'
+        <choose>
+            <when test="roleIds != null and roleIds.size() > 0">
+                and rm.role_id in
+                <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">#{roleId}</foreach>
+            </when>
+            <otherwise>and 1 = 0</otherwise>
+        </choose>
+    </select>
 	
 	<select id="selectMenuById" parameterType="Long" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>

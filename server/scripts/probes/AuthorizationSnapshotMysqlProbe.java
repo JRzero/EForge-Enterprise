@@ -168,15 +168,17 @@ class AuthorizationSnapshotMysqlProbe {
     }
     static void baseline(AuthorizationSnapshotService service,int roles) {
         var durations=new ArrayList<Long>();int before=mapperQueries.get(),executedBefore=executedQueries.get();
+        int expectedQueries=roles==0?2:3;
         for(int i=0;i<20;i++) {
             var session=cached();long start=System.nanoTime();service.refresh(session);durations.add(System.nanoTime()-start);
             check(session.getUser().getRoles().size()==roles && session.getPermissions().size()==roles,"Role-count baseline returned incomplete authority.");
+            for(var role:session.getUser().getRoles())check(role.getPermissions().equals(Set.of("probe:old:"+(role.getRoleId()-100))),"Batched permissions crossed role boundaries.");
         }
-        check(mapperQueries.get()-before==20*(roles+2),"Unexpected mapper SQL query count for full authorization read.");
-        check(executedQueries.get()-executedBefore==20*(roles+2),"Actual MyBatis statement execution differs from the baseline budget.");
+        check(mapperQueries.get()-before==20*expectedQueries,"Unexpected mapper SQL query count for full authorization read.");
+        check(executedQueries.get()-executedBefore==20*expectedQueries,"Actual MyBatis statement execution differs from the batch query budget.");
         Collections.sort(durations);
         System.out.printf(Locale.ROOT,"BASELINE: roles=%d samples=20 mapper_queries/request=%d executed_business_selects/request=%d median_ms=%.3f p95_ms=%.3f (timing includes one raw connection-inspection SELECT per mapper; execution count excludes those inspections; local MySQL, not production capacity)%n",
-                roles,roles+2,(executedQueries.get()-executedBefore)/20,durations.get(9)/1_000_000.0,durations.get(18)/1_000_000.0);
+                roles,expectedQueries,(executedQueries.get()-executedBefore)/20,durations.get(9)/1_000_000.0,durations.get(18)/1_000_000.0);
     }
     static void exercise(AnnotationConfigApplicationContext context) throws Exception {
         var service=context.getBean(AuthorizationSnapshotService.class);var jdbc=context.getBean(JdbcTemplate.class);

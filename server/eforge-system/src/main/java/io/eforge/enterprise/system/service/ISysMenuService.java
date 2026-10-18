@@ -46,6 +46,8 @@ public interface ISysMenuService
      */
     public Set<String> selectMenuPermsByRoleId(Long roleId);
 
+    java.util.Map<Long, Set<String>> selectMenuPermsByRoleIds(List<Long> roleIds);
+
     /**
      * 根据用户ID查询菜单树信息
      * 
