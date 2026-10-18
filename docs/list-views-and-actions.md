@@ -19,3 +19,5 @@
 实际岗位测试现加入保存已生效条件及隐藏列、重置后显式恢复、继续原XLSX内容验证，以及批量条显示/删除后焦点和选择清除。默认配置两项真实浏览器已通过；默认/启用完整API顺序验证仍在运行，终态及精确提交云端验收尚待记录。
 
 本地最终终态：顺序进程19458 exit0；h07-disabled-runtime.log 与 h07-enabled-runtime.log 各2项真实岗位浏览器及完整MySQL/Redis/Quartz/OSHI/ACL/验证码/权限/事务回归通过，默认37与启用40实际错误诊断记录。两份实时OpenAPI按完整JSON结构与契约deepEqual一致。未更改后端源，复用已验收构建jar，不在运行应用期间打包。精确新提交CI仍待验证，H07暂保留in_progress。
+
+H07最终云端验收：0587b90032e3eb3b730ebadf0bb6b2d11ece3fe2的server39117234444全部四作业、web39117234460、agent-skills39117234439均success。直接日志h07-cloud-final.log确认默认/启用各68真实浏览器、完整API/OpenAPI以及实际生成CRUD/tree/sub React编译运行和原上传回归。H07切片完成；H08及其余原范围未完成。

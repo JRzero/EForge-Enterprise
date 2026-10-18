@@ -71,6 +71,11 @@ test('real leave request, separate approver, claim/approve/reject/withdraw and d
         }
         await detail.getByRole('button',{name:outcome,exact:true}).click();await detail.getByLabel('处理意见').fill(`${outcome}，已核实`);await detail.getByRole('button',{name:`确认${outcome}`,exact:true}).click();
         await expect(detail.getByText(`已${outcome}`,{exact:true})).toBeVisible();await expect(detail.getByRole('button',{name:'领取',exact:true})).toHaveCount(0);
+        await detail.getByRole('tab',{name:'处理记录',exact:true}).click();
+        const timeline=detail.getByRole('region',{name:'处理记录',exact:true});
+        await expect(timeline.locator('strong')).toHaveText(['提交','领取',outcome]);
+        await expect(timeline).toContainText(`${outcome}，已核实`);
+        await expect(timeline.locator('time')).toHaveCount(3);
         await approver.screenshot({path:`test-results/live/workflow-leave-${outcome}.png`,fullPage:true});await detail.getByRole('button',{name:'关闭',exact:true}).click();
         await approver.getByRole('button',{name:'已办',exact:true}).click();await expect(approver.getByRole('cell',{name:reason,exact:true})).toBeVisible();
       }

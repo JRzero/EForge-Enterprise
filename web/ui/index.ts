@@ -64,3 +64,5 @@ export {BatchActionBar,AppliedFilters} from './ListFeedback';
 export type {AppliedFilter} from './ListFeedback';
 export {SavedListViews} from './SavedListViews';
 export type {ListViewState} from './SavedListViews';
+export {AuditTimeline} from './AuditTimeline';
+export type {AuditEvent,AuditChange} from './AuditTimeline';

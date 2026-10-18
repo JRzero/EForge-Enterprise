@@ -16,6 +16,19 @@ test('disabled approvals never read business tables',async({page})=>{
   await expect(page.getByText('工作流尚未启用，请联系管理员。')).toBeVisible();expect(reads).toBe(0);
   await expect(page.getByRole('button',{name:'发起请假'})).toBeDisabled();
 });
+
+test('audit timeline keeps hostile text and exact actor ids inert on a narrow viewport',async({page})=>{
+  await page.setViewportSize({width:320,height:800});
+  await page.route('**/api/v1/workflow/leaves/mine?*',route=>route.fulfill({json:{items:[leave],total:1,page:1,pageSize:10}}));
+  const comment='<img src=x onerror=alert(1)>\n'+ '长文本'.repeat(80);
+  await page.route(`**/api/v1/workflow/leaves/${id}`,route=>route.fulfill({json:{leave,tasks:[],history:[{action:'SUBMIT',actorId:'9007199254740993',comment,createdAt:'2026-10-18T12:00:00+08:00'}]}}));
+  await login(page,'workflow-requests',['workflow:request:list']);await page.getByRole('button',{name:'详情',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'请假审批详情'});await dialog.getByRole('tab',{name:'处理记录',exact:true}).click();
+  const timeline=dialog.getByRole('region',{name:'处理记录',exact:true});await expect(timeline).toContainText('9007199254740993');await expect(timeline.locator('.ui-audit-comment')).toHaveText(comment);await expect(timeline.locator('img,script')).toHaveCount(0);
+  await expect(timeline.locator('time')).toHaveAttribute('datetime','2026-10-18T12:00:00+08:00');
+  expect(await timeline.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
+  await page.screenshot({path:'test-results/audit-timeline-mobile.png',fullPage:true});
+});
 test('submission retry retains its identity and user input',async({page})=>{
   await page.route('**/api/v1/workflow/leaves/mine?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
   const writes:Record<string,unknown>[]=[];await page.route('**/api/v1/workflow/leaves',route=>{writes.push(route.request().postDataJSON());return route.fulfill(writes.length===1?{status:503,json:{code:'WORKFLOW_STORAGE_UNAVAILABLE'}}:{json:leave});});

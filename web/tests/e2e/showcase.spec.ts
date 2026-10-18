@@ -9,7 +9,7 @@ test('workflow local approval template keeps actions and history consistent acro
   await page.getByRole('button',{name:'模拟批准',exact:true}).click();
   await expect(page.getByText('主管批准申请',{exact:true})).toBeVisible();
   await page.getByRole('tab',{name:'申请与任务',exact:true}).click();
-  await expect(page.getByText('已批准',{exact:true})).toBeVisible();
+  await expect(page.getByRole('tabpanel',{name:'申请与任务'}).getByText('已批准',{exact:true})).toBeVisible();
   await expect(page.getByText('流程已结束',{exact:true})).toBeVisible();
 });
 

@@ -1,4 +1,5 @@
 import {ApprovalDetailLayout} from './ApprovalDetailLayout';
+import {AuditTimeline} from '../../ui/AuditTimeline';
 import {useEffect,useState} from 'react';
 import type {LeaveDetailResponse,LeaveCommandRequest} from '../../generated/api';
 import {useApi,useBootstrap} from '../../app/context';
@@ -53,7 +54,7 @@ export function WorkflowLeaveDetail({id,onClose,onChanged}:{id:string;onClose:()
             {task.assignee===bootstrap.user.id?<><Button label="批准" variant="primary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('APPROVE',task.id)}/><Button label="拒绝" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('REJECT',task.id)}/></>:null}
           </div></PermissionGate>:null}
         </DetailField>):<DetailField label="任务">流程已结束</DetailField>}
-      </DetailSection>} history={<section aria-label="处理记录"><h2>处理记录</h2><ol className="workflow-history">{data.history.map((event,index)=><li key={index}><strong>{event.action==='SUBMIT'?'提交':actionLabels[event.action as Action]??event.action}</strong><span>账号 {event.actorId} · {new Date(event.createdAt).toLocaleString('zh-CN')}</span>{event.comment?<p>{event.comment}</p>:null}</li>)}</ol></section>} actions={pending&&data.leave.initiatorId===bootstrap.user.id?<PermissionGate permission="workflow:request:withdraw"><Button label="撤回申请" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('WITHDRAW')}/></PermissionGate>:null}
+      </DetailSection>} history={<AuditTimeline events={data.history.map((event,index)=>({key:String(index),action:event.action==='SUBMIT'?'提交':actionLabels[event.action as Action]??event.action,actor:'账号 '+event.actorId,occurredAt:event.createdAt,comment:event.comment??''}))}/>}  actions={pending&&data.leave.initiatorId===bootstrap.user.id?<PermissionGate permission="workflow:request:withdraw"><Button label="撤回申请" variant="secondary" isDisabled={busy||Boolean(selected)} onClick={()=>choose('WITHDRAW')}/></PermissionGate>:null}
     />:null}
     {selected?<section className="workflow-confirm" aria-label="确认审批操作"><h2>确认{actionLabels[selected.action]}</h2>
       <p>{selected.action==='WITHDRAW'?'撤回后将结束此申请的当前流程。':`将${actionLabels[selected.action]}当前审批任务。`}</p>
