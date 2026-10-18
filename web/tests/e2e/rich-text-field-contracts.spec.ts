@@ -1,5 +1,20 @@
 import {expect, test} from './fixtures';
 
+test('standalone rich editor keeps its full content inside the field before following controls',async({page})=>{
+  await page.goto('/tests/fixtures/rich-text-field-contracts.html');
+  const editor=page.getByRole('textbox',{name:'业务正文',exact:true});
+  for(const width of [1440,390]){
+    await page.setViewportSize({width,height:1000});
+    await editor.fill(Array.from({length:20},(_,index)=>`正文第${index+1}行`).join('\n'));
+    expect(await editor.evaluate(element=>parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThanOrEqual(180);
+    const field=await page.locator('.rich-text-editor').first().boundingBox();
+    const content=await editor.boundingBox();
+    const next=await page.getByRole('button',{name:'后续操作',exact:true}).boundingBox();
+    expect(content!.y+content!.height).toBeLessThanOrEqual(field!.y+field!.height);
+    expect(field!.y+field!.height).toBeLessThanOrEqual(next!.y+1);
+  }
+});
+
 test('rich text associates stable ids, visible labels, required, hint and caller error with a focusable root', async ({page})=>{
   await page.goto('/tests/fixtures/rich-text-field-contracts.html');
   const editor=page.getByRole('textbox',{name:'业务正文',exact:true});

@@ -6,3 +6,11 @@
 .rich-text-editor[data-invalid] :is(.ql-toolbar,.ql-container) { border-color: #dc3545; }
 .rich-text-editor .ql-container:has(.ql-editor:focus-visible) { outline: 2px solid var(--ui-primary, #2468f2); outline-offset: 2px; }
 .rich-text-editor .ql-editor { overflow-wrap: anywhere; }
+.rich-text-editor { min-width: 0; }
+.rich-text-editor .ql-toolbar { border-radius: 4px 4px 0 0; padding: 8px; background: #fafafa; }
+.rich-text-editor .ql-container { height: auto; border-radius: 0 0 4px 4px; font-family: inherit; font-size: 14px; }
+.rich-text-editor .ql-editor { height: auto; }
+.rich-text-editor .ql-editor:focus-visible { outline: none; }
+.rich-text-editor .ql-container:has(.ql-editor:focus) { border-color: var(--ui-primary); }
+.rich-text-editor .ql-editor { min-height: 180px; padding: 12px; }
+.rich-text-editor .ql-toolbar, .rich-text-editor .ql-container { border-color: #dcdfe6; }

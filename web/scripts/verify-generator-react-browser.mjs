@@ -389,7 +389,7 @@ export async function verifyBrowser(root, owned, backend, noRoleUser) {
       "import {createMemoryStorage} from '@eforge/core';",
       "import {EForgeProvider} from '../../../ui/controls';",
       "import {PermissionProvider} from '../../../ui/patterns';",
-      "import '../../../ui/theme.css';",
+      "import '../../../app/theme.css';",
       "import {ApiContext, BootstrapContext} from '../../../app/context';",
       "import {createSessionRuntime} from '../../../integration/session';",
       "import {toEForgePermissions} from '../../../integration/permissions';",

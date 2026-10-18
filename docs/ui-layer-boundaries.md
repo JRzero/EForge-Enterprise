@@ -42,3 +42,9 @@ PasswordReminder 的密码状态和固定导航属于 app，不再由 ui/account
 本轮最终本地结果：h09-owned-theme-final.log 的生成复现/lint/typecheck/build、146单元、5 dist及2规模测试通过；第一次完整模拟浏览器335通过、文件重试1失败。未改上传实现或放宽断言，h09-file-reproduce.log单worker重复五轮10/10通过，随后同源码h09-owned-theme-browser-repeat.log完整336/336通过。首次瞬态失败原因尚未确定，不能宣称已修复，后续CI继续观察。代码审查确认组件CSS单向依赖、原业务权限/数据接口未变；本切片待精确提交云端验收。
 
 上传与外壳归属接续：UploadEntries自带upload-entries.css，原app中的文件列表网格/换行/触摸拖拽/手柄状态全部迁入，独立gallery实际验证grid与touch-action:none，保留排序、上传重试/取消及窄屏。spcore-theme中的应用导航/面包屑/顶部操作/保留页签规则迁至app/shell-controls.css，产品组合在公共主题后导入；公共组件主题不再携带该应用外壳规则。原选择器/声明保持，未改业务交互。进程85865定向4/4；最终76825 exit0：生成复现/lint/types/build、146单元、5dist、2规模及336模拟浏览器全部通过，本轮文件重试通过。h09-upload-shell-budget.json三入口预算通过。后端未变，不重复本地SQL；精确新提交CI待验收，H09历史混合样式仍有后续项。
+
+云端失败核验：019a8b0的web39130632918成功，但server39130632914失败；d62e742的web39131208761成功，但server39131208758失败。两者均为实际生成应用Rich editor must not overlap the following generated field断言失败，不是执行器故障，前述本地前端通过不能代表完整验收。生成验证挂载Application却仍导入ui/theme，现改为与真实产品一致的app/theme；公共RichTextEditor高度/工具栏/边框规则仍藏workspace-layout，现移入其自身rich-text-editor.css，公共主题独立消费者也拥有它们。没有改原生成重叠/手机/CRUD/权限断言。新增独立桌面/手机长正文边界验证；最初精确180px断言错误，原组件内联本就是192px，已改为最低180px且检验真实内容/字段/后续按钮几何边界，不把该测试夹具误判当产品修复前证据。h09-rich-contract-final.log共13项通过；真实产品修复前证据是两次云端同断言失败，后续原真实生成脚本验证中。
+
+H09富文本修复本地真实生成验证：10788 exit0，h09-rich-generated-runtime.log实际原Boot/JWT/Redis/MyBatis、生成CRUD/tree/sub及自动PK/String键、图片/文件/富文本、原不重叠/手机边界、XLSX、权限撤回与持久审计全部通过。146单元/5dist/2规模及静态检查也通过。第一轮全量337项中缓存页末尾导航30秒超时、336通过；原trace已保存h09-cache-timeout-trace.zip，图表/溢出断言已完成，最后菜单导航耗尽总时长。未改产品或超时，定向3次全部通过；固定源以6workers复验全部337项中，不称本轮全绿。H11页签/分页/选择器与入口预算的精确证据已补全并在任务表验收done，H10扫描及H13仍在。
+
+最终6workers完整复验89347 exit0：h09-rich-final-browser.log 337/337通过；h09-rich-entry-budget.json三入口预算通过。没有提高超时、删除断言或改缓存产品代码。富文本修复的真实生成应用与完整前端本地验收通过，接续精确云端；019a8b0/d62e742服务器失败仍作为失败历史保留，不能将后续修复结果回填到旧提交。

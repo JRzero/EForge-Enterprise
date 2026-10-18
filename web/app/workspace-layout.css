@@ -108,13 +108,6 @@
 .state-page .state-actions { justify-content: center; flex-wrap: wrap; }
 .state-page button[data-variant] { border-radius: 4px; min-height: 32px; font-size: 14px; }
 .generator-page .post-dialog [role=tabpanel]:not([hidden]):not(.post-table) { display: grid; gap: 16px; }
-.rich-text-editor { min-width: 0; }
-.rich-text-editor .ql-toolbar { border-radius: 4px 4px 0 0; padding: 8px; background: #fafafa; }
-.rich-text-editor .ql-container { height: auto; border-radius: 0 0 4px 4px; font-family: inherit; font-size: 14px; }
-.rich-text-editor .ql-editor { height: auto; }
-.rich-text-editor .ql-editor:focus-visible { outline: none; }
-.rich-text-editor .ql-container:has(.ql-editor:focus) { border-color: var(--ui-primary); }
-.rich-text-editor .ql-editor { min-height: 180px; padding: 12px; }
 .post-dialog label:has(> input:is([type=checkbox],[type=radio])) { display: flex; flex-direction: row; align-items: center; gap: 8px; }
 .top-navigation .menu-icon { width: 16px; height: 16px; flex: 0 0 16px; }
 .menu-icon-picker { padding: 12px; border-radius: 4px; }
@@ -162,7 +155,6 @@
 .cache-panel-header h2 { font-size: 16px; }
 .console-page iframe { border-radius: 0; height: calc(100dvh - 185px); }
 .user-dropzone { background: #fafbfc; border-color: #c0c4cc; border-radius: 4px; text-align: center; }
-.rich-text-editor .ql-toolbar, .rich-text-editor .ql-container { border-color: #dcdfe6; }
 .screen-lock-card { border-radius: 8px; }
 .screen-lock-card form button { background: #2468f2; border-color: #2468f2; color: white; }
 .top-navigation { margin-top: 0; }
