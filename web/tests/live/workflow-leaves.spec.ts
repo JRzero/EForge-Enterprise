@@ -25,6 +25,16 @@ test('real leave request, separate approver, claim/approve/reject/withdraw and d
     await expect(packageEditor.getByLabel('流程文件',{exact:true})).toHaveCount(0);
     await expect(packageEditor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();
     await packageEditor.getByLabel('选择节点或连线').selectOption('review');
+    // Exercise the scoped real user endpoint without changing this scenario's role-based approval contract.
+    await packageEditor.getByLabel('审批方式').selectOption('assignee');
+    await packageEditor.getByRole('combobox',{name:'查找审批账号',exact:true}).click();
+    const lookup=page.waitForResponse(response=>response.url().includes('/api/v1/system/users?')&&new URL(response.url()).searchParams.get('username')===username);
+    await page.getByRole('searchbox',{name:'搜索查找审批账号'}).fill(username);
+    const lookupReply=await lookup;expect(lookupReply.status()).toBe(200);expect((await lookupReply.json()).items.map((item:{id:string})=>item.id)).toContain(userId);
+    await page.getByRole('option',{name:`审批人（${username}）`,exact:true}).click();
+    await expect(packageEditor.getByLabel('审批对象',{exact:true})).toHaveValue(userId!);
+    await packageEditor.getByLabel('审批方式').selectOption('candidateGroups');
+    await packageEditor.getByLabel('审批对象',{exact:true}).fill('role:2');
     await packageEditor.getByLabel('节点名称',{exact:true}).fill('画布编辑后的审批');
     await packageEditor.getByRole('button',{name:'应用属性',exact:true}).click();
     const creation=page.waitForResponse(response=>response.url().endsWith('/api/v1/workflow/packages')&&response.request().method()==='POST');

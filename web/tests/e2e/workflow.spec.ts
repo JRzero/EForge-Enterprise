@@ -293,3 +293,18 @@ test('workflow activation blocks overlapping recovery until its response complet
     await expect(page.getByRole('dialog').getByRole('button',{name:'关闭',exact:true})).toBeDisabled();
   }finally{finish();}
 });
+
+for(const canReadUsers of [false,true])test(`designer remote assignee respects user-list permission ${canReadUsers} and keeps explicit apply`,async({page})=>{
+  let reads=0,writes=0;
+  await page.route('**/api/v1/workflow/packages?*',route=>route.fulfill({json:{items:[],total:0,page:1,pageSize:10}}));
+  await page.route('**/api/v1/workflow/packages',route=>{writes++;return route.fulfill({status:201,json:row});});
+  await page.route('**/api/v1/system/users?*',route=>{reads++;expect(new URL(route.request().url()).searchParams.get('status')).toBe('0');return route.fulfill({json:{items:[{id:'9007199254740997',username:'reviewer',displayName:'审核员',status:'0'}],total:1,page:1,pageSize:10}});});
+  await login(page,['workflow:definition:list','workflow:definition:edit',...(canReadUsers?['system:user:list']:[])]);
+  await page.getByRole('button',{name:'新增流程包',exact:true}).click();const editor=page.getByRole('region',{name:'新增流程包',exact:true});
+  await expect(editor.getByRole('button',{name:'添加人工审批',exact:true})).toBeEnabled();await editor.getByLabel('选择节点或连线').selectOption('review');await editor.getByLabel('审批方式').selectOption('assignee');
+  const picker=editor.getByRole('combobox',{name:'查找审批账号',exact:true});
+  if(!canReadUsers){await expect(picker).toHaveCount(0);expect(reads).toBe(0);await editor.getByLabel('审批对象',{exact:true}).fill('${approver}');}
+  else {await picker.click();await page.getByRole('option',{name:'审核员（reviewer）'}).click();await expect(editor.getByLabel('审批对象',{exact:true})).toHaveValue('9007199254740997');}
+  expect(writes).toBe(0);await editor.getByRole('button',{name:'应用属性',exact:true}).click();await editor.getByRole('button',{name:'返回 XML 源码'}).click();
+  await expect(editor.getByLabel('流程文件',{exact:true})).toHaveValue(new RegExp(canReadUsers?'assignee="9007199254740997"':'assignee="\\$\\{approver\\}"'));expect(writes).toBe(0);
+});

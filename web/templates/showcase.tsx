@@ -3,6 +3,7 @@ import {ActionFeedbackDemo} from './ActionFeedbackDemo';
 import {ApprovalDemo} from './ApprovalDemo';
 import {TabbedDetailPage} from '../ui/TabbedDetailPage';
 import {ReferenceSelect} from '../ui/ReferenceSelect';
+import {RemoteRecordDemo} from './RemoteRecordDemo';
 import {TreeSelect} from '../ui/TreeSelect';
 import {TreeListLayout} from '../ui/TreeListLayout';
 import {DateRangeField} from '../ui/DateRangeField';
@@ -74,6 +75,7 @@ function FormDemo(){
   return <EditorPage title="新增客户" description="本地演示，保存不会发送网络请求。" busy={false} saveLabel="保存客户" cancelLabel="清空表单" onCancel={()=>{setName('');setEmail('');setRemark('');setMessage('');setCustomer(null);setDepartment(null);setPeriod({from:'',to:''});setCollaborators([]);setChannels(['email']);setPriority('normal');setEnabled(true);}} onSubmit={()=>{setMessage(name.trim()?`已保存：${name}`:'请填写客户名称');}}>
     <FormSection title="基本信息"><Input label="客户名称" value={name} onChange={setName} isRequired/><Input label="电子邮箱" type="email" value={email} onChange={setEmail}/></FormSection>
     <FormSection title="业务设置">
+      <RemoteRecordDemo/>
       <ReferenceSelect label="关联客户" value={customer} onChange={setCustomer} selectedLabel="原关联客户" options={[{value:"9007199254740993",label:"星河科技 · KH001"},{value:"2",label:"明远科技 · KH002"},{value:"3",label:"停用客户",disabled:true}]}/>
       <TreeSelect label="负责部门" value={department} onChange={setDepartment} nodes={[{value:"root",label:"总部"},{value:"sales",parentValue:"root",label:"销售部"},{value:"support",parentValue:"root",label:"服务部"},{value:"disabled",parentValue:"root",label:"停用部门",disabled:true}]}/>
       <DateRangeField {...groupState} id="showcase-service-period" label="服务周期" hint="填写服务开始和结束日期。" value={period} onChange={setPeriod} error={period.from&&period.to&&period.from>period.to?'开始日期不能晚于结束日期':undefined} fieldError={fieldIssue?'请核对服务周期（校验状态演示）':undefined}/>

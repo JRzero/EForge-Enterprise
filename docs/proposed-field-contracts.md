@@ -1,6 +1,6 @@
 # 字段、弹层和错误定位契约方案
 
-状态：**H04 已完成精确云端验收；H05 分片实现与验收中**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H04、H05。FormField、三种选择器、富文本、CheckboxGroup、RadioGroup、DateRangeField 已接入字段契约与真实消费者。最终 lint/typecheck、生成客户端复现、131单元、294模拟API浏览器、build及正式产物5项通过。下表记录设计时问题，不代表修复后仍全部存在；完整最终运行与云端证据以任务清单为准。
+状态：**H04 已完成精确云端验收；H05 已完成精确云端验收（见末尾5135ded审计）**。日期：2026-10-15。对应 `spec/framework-hardening.md` / `tasks/framework-hardening.md` 的 H04、H05。FormField、三种选择器、富文本、CheckboxGroup、RadioGroup、DateRangeField 已接入字段契约与真实消费者。最终 lint/typecheck、生成客户端复现、131单元、294模拟API浏览器、build及正式产物5项通过。下表记录设计时问题，不代表修复后仍全部存在；完整最终运行与云端证据以任务清单为准。
 
 ## 本地实现与证据
 
@@ -330,3 +330,15 @@ h05-unavailable-target-green.log 全14项通过，覆盖稳定行重排、异步
 前一精确提交8c7bdccf964018bff7b18bca1c83fa72957d1442的server39093250169、web39093250115仍在运行，agent-skills39093250132成功。本片与前片均须各自精确云端终态；当前H05保持in_progress，后续H06–H11/H13范围不变。
 
 本片完整回归首轮 h05-target-final-browser.log 为312通过/1缓存图表30秒超时。trace显示已执行到最后返回缓存菜单的点击，无功能断言失败；同期build耗时32.55秒，存在资源竞争的可能，未据此直接归为基础设施成功。保留失败日志和所有原断言/超时，构建结束后顺序重跑 h05-target-sequential-browser.log 全313通过，随后 h05-target-sequential-dist.log 全5通过。没有修改缓存产品代码或放宽测试。本片本地验证终态成功，新提交云端仍待验收；前片web39093250115现已success，server仍运行。
+
+## H05 最终验收（5135ded）
+
+精确提交5135ded8a0cea1235b61687ba9915a5498690a5e的server39093834387四作业、web39093834349、skills39093834389全部success；前片8c7bdcc server39093250169/web39093250115也success。直接h05-target-cloud-final.log证明两配置各68真实浏览器/完整API及两配置实际生成应用回归完成。以上历史pending按此终态更新，不删除红灯过程。
+
+- 结构化错误摘要：生成器、工作流高级场景、主子示例及实际生成表单覆盖多错误、仅清更正字段、零无效写入。
+- 隐藏目标：生成器切换tab、工作流展开高级场景、日志/参数高级日期展开均在DOM提交后定位，保留未保存字段。
+- 稳定身份：主子行以精确字符串rowId+field定位，删除前行/重排后字段与错误仍关联原行；实际生成应用通过。
+- 生命周期：异步忙碌完成、过期拒绝、用户离开、只读切换、卸载替换、富文本挂载均有真实浏览器断言；隐藏/inert/不可聚焦目标只在本区域内回退。
+- 原字段/弹层/草稿/权限边界：完整前端313项、5 dist、131单元及上述真实环境保持通过；没有新数据库或权限语义。
+
+H05按当前规格完成。H06–H11和H13继续，不代表完整框架加固完成；本次没有合并main或部署。

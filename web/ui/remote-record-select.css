@@ -1,0 +1,15 @@
+.ui-remote-record{position:relative;min-width:0}
+.ui-remote-record-trigger{display:flex;gap:4px;min-width:0}
+.ui-remote-record-trigger>button{border:1px solid var(--ui-border,#dcdfe6);border-radius:4px;background:var(--ui-surface,#fff);padding:7px 10px;min-height:36px;font:inherit;color:var(--ui-text,#303133)}
+.ui-remote-record-trigger>[role=combobox]{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;min-width:0;text-align:start}
+.ui-remote-record-trigger>[role=combobox]>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui-remote-record-panel{position:absolute;inset-inline:0;top:100%;z-index:30;padding:12px;background:var(--ui-surface,#fff);border:1px solid var(--ui-border,#dcdfe6);border-radius:6px;box-shadow:0 6px 18px #0002;display:grid;gap:8px}
+.ui-remote-record-panel input{width:100%;min-width:0;min-height:36px;padding:7px 10px;box-sizing:border-box;border:1px solid var(--ui-border,#dcdfe6);border-radius:4px;background:var(--ui-surface,#fff);font:inherit;color:var(--ui-text,#303133)}
+.ui-remote-record :is(button,input):focus-visible{outline:2px solid var(--ui-primary,#2563eb);outline-offset:2px}
+.ui-remote-record-panel [role=listbox]{display:grid;max-height:240px;overflow:auto;gap:2px}
+.ui-remote-record-panel [role=option]{text-align:start;white-space:normal;overflow-wrap:anywhere;padding:8px;border:0;background:transparent}
+.ui-remote-record-panel [role=option]:hover,.ui-remote-record-panel [role=option]:focus-visible{background:var(--ui-primary-soft,#ecf5ff)}
+.ui-remote-record-panel [aria-selected=true]{color:var(--ui-primary,#2563eb);font-weight:600}
+.ui-remote-record-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;font-size:12px}
+.ui-remote-record-pager button{padding:5px 8px;border:1px solid var(--ui-border,#dcdfe6);border-radius:4px;background:var(--ui-surface,#fff);color:var(--ui-text,#303133);font:inherit}
+.ui-remote-record button:disabled{color:var(--ui-muted,#909399);cursor:not-allowed;background:var(--ui-background,#f5f7fa)}

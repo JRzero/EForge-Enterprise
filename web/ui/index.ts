@@ -46,6 +46,8 @@ export {DictionaryTag} from '../app/components/DictionaryTag';
 
 export {ReferenceSelect} from './ReferenceSelect';
 export type {ReferenceSelectProps} from './ReferenceSelect';
+export {RemoteRecordSelect} from './RemoteRecordSelect';
+export type {RemoteRecordSelectProps,RemoteRecordOption,RemoteRecordPage} from './RemoteRecordSelect';
 
 export {EditorForm,EditorDialog,EditorPage} from './EditorTemplate';
 export type {EditorFormProps} from './EditorTemplate';

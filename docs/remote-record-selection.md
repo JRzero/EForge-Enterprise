@@ -1,0 +1,33 @@
+# H06 远程记录选择
+
+状态：实现与验收中。沿用 framework-hardening 规格，不新增数据权限或后端实体。
+
+## 契约与实际消费者
+
+`RemoteRecordSelect` 是独立组合组件，使用现有 Native 控件、FormField 和主题 token；不修改固定 EForge Selector，不引用私有组件。调用方提供稳定的 `load({query,page,pageSize,signal})`、`{items,total}` 和受控 `{value,label}`，所有 ID 始终为字符串。组件不缓存跨用户数据、不把整个已选记录列表存入浏览器。
+
+搜索防抖250ms；关闭、查询/页码改变、卸载和不可用状态清理定时器并中止请求。即使加载函数忽略取消，过期响应也先检查signal。换查询回第一页；分页不会改变选择。未出现在当前页的旧值仍显示调用方标签，未知值可由调用方使用原ID标签表示。加载/空/错误分开呈现；错误固定安全文案，不显示异常原文。
+
+弹层使用非模态dialog，内部有搜索框/listbox/分页；触发器关联label、hint、required、fieldError、readonly/disabled。打开聚焦搜索，Down进入首个可用选项，Up/Down/Home/End导航，Enter选择，Escape只关闭当前层并回焦；焦点移出或外部点击关闭。分页/重试前回到搜索框，避免禁用或移除原按钮造成丢焦。只读保留复制与原值，禁用不可选，停用选项不可选择。
+
+实际业务是 `WorkflowAssigneePicker`：仅有原 `system:user:list` 权限时显示，用生成客户端现有用户分页接口、原数据范围和 `status=0` 查询。没有用户列表权限的流程设计者仍可手填原编号或 `${approver}`，不扩大授权。查询结果仅写入节点草稿；点击应用属性才更新BPMN，保存仍走原流程包接口。role/candidateUsers原能力不变。
+
+showcase 表单模板新增异步分页负责人示例，明确使用26条本地模拟记录；不冒充真实请求。
+
+## 证据与待验收
+
+新增4项组件浏览器和2项设计器场景：搜索防抖、跨页精确长ID、旧值、键盘、禁用选项、重试、320布局、实际网络取消及过期响应、权限无请求、动态表达式与显式应用。初次测试错误地把fixture的output状态也计入加载状态，h06-remote-first.log保留；定位器改为弹层内状态，未降低产品断言。h06-remote-targeted.log/appearance-final.log与h06-workflow-targeted.log通过。
+
+本地 h06-final-lint/types/client/unit/build/browser/dist.log 通过：131单元、319模拟接口浏览器、5正式产物。此后仅细调组件边框、间距和focus样式，4项320浏览器通过并人工查看remote-record-mobile.png；正式产物需以最终CSS重新构建验证。
+
+真实环境新增用例位于live/workflow-leaves.spec.ts：使用本次创建的实际审批用户查询、读取真实200、选择后精确ID回填，然后恢复原role:2继续审批全流程；没有把该用例声称为“持久化指定人审批”验收。当前隔离运行session23104，日志h06-enabled-runtime.log，端口13426/16426/18091/4176，正在执行完整API及目标真实浏览器。未终态不报成功，不在app运行时重打包。默认/启用完整CI和最终组件审查仍待完成，H06不标done。
+
+最终样式产物：h06-appearance-build.log及h06-appearance-dist.log终态成功，5项dist通过；窄屏截图已人工复核触发框、搜索框与分页边界。完整浏览器319项来自同一行为源码（样式边框修改前），样式后4项组件浏览器再验通过。当前修改尚未提交，等待上述同一真实环境进程终态，不重复启动。既有H05最终精确云端已完成，其状态记录在字段契约文档。
+
+真实环境session23104已终态0：h06-enabled-runtime.log记录目标真实浏览器1项通过（实际创建审批人、真实分页查询200、精确回填以及原批准/拒绝/撤回/权限/持久数据流程），随后完整API、SQL/Redis故障、40个诊断记录、验证码与导航通过。此为工作流启用配置的目标浏览器，不冒充两配置各68全量浏览器。本片未改Java源码，使用现有已验证jar；实时OpenAPI文件的字节格式不同，但JSON全对象assert.deepEqual与主契约一致。
+
+状态切换补测h06-lifecycle.log实际1失败7通过：只读切换移除弹层后再判断DOM是否包含焦点，已无法发现原搜索框，焦点丢失。改为记录本字段焦点归属，外部焦点离开清除记录；只读转换只为原内部焦点回到触发框，禁用不强行聚焦。h06-lifecycle-fixed.log全部8项通过，包含readonly/disabled/unmount真实请求取消、加载器忽略signal时过期响应不覆盖当前结果。完整最终前端回归h06-accepted-*正在运行；上述真实环境发生在这一局部焦点修复前，最终精确CI承担完整两配置验收。
+
+审查：load只能在打开且可编辑时调用；查询/页码/重试/卸载的清理同时控制定时器与请求，结果提交检查原signal。不会清空父组件的旧选中值，也不会将label/查询结果写入审批XML；实际消费者仅写入原字符串ID。文本均用React转义，无HTML插入。读权限使用原PermissionGate及后端用户接口，前端显隐不作为授权依据。没有新增依赖或公开接口变更。
+
+最终本地验收：顺序session72515终态0，h06-accepted-lint/types/unit/build/browser/dist.log分别通过，131单元、323模拟API浏览器、5正式产物；其中8项远程组件、2项实际设计器模拟权限用例。生成客户端复现已由h06-final-client.log通过，之后没有接口/客户端改动。真实启用配置的目标浏览器和完整API已通过，最终小范围只读焦点修复由浏览器覆盖，仍须精确提交CI完成两配置全套。本片可提交推送，H06保持in_progress至云端终态及验收核对完成。

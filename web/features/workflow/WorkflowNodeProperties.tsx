@@ -4,6 +4,8 @@ import type Modeling from 'bpmn-js/lib/features/modeling/Modeling';
 import type {Element} from 'bpmn-js/lib/model/Types';
 import {Button,Input} from '../../ui/controls';
 import {Select,NativeInput} from '../../ui/native';
+import {PermissionGate} from '../../ui/patterns';
+import {WorkflowAssigneePicker} from './WorkflowAssigneePicker';
 
 export interface NodePropertyDraft {id:string;name:string;binding:string;candidate:string;async:boolean;condition:string}
 export function WorkflowNodeProperties({modeler,element,onError,onPending,initialDraft,onDraft}:{modeler:Modeler;element:Element;onError:(error:string)=>void;onPending:(pending:boolean)=>void;initialDraft?:NodePropertyDraft;onDraft:(draft:NodePropertyDraft)=>void}){
@@ -24,6 +26,7 @@ export function WorkflowNodeProperties({modeler,element,onError,onPending,initia
   return <div className="workflow-node-form" onChange={()=>onPending(true)}>
     <Input label="节点标识" value={id} onChange={setId}/><Input label="节点名称" value={name} onChange={setName}/>
     {task?<><label>审批方式<Select value={binding} onChange={event=>{setBinding(event.target.value);setCandidate('');}}><option value="candidateGroups">按角色审批</option><option value="candidateUsers">候选人员审批</option><option value="assignee">指定一人审批</option></Select></label><Input label="审批对象" value={candidate} onChange={setCandidate}/><small>{binding==='candidateGroups'?'填写角色编号，例如 role:2；多个角色用英文逗号分隔。':binding==='assignee'?'填写一个账号编号，或使用 ${approver} 表示发起时指定的审批人。':'填写账号编号，例如 2,3。任一符合资格的候选人可处理任务。'}</small><details className="workflow-node-advanced"><summary>高级执行设置</summary><label className="workflow-inline-check"><NativeInput type="checkbox" checked={async} onChange={event=>setAsync(event.target.checked)}/>后台创建首个人工任务</label><small>需要环境已启用异步执行；普通审批可保持关闭。</small></details></>:null}
+    {task&&binding==='assignee'?<PermissionGate permission="system:user:list"><WorkflowAssigneePicker value={candidate} onChange={next=>{setCandidate(next);onPending(true);}}/></PermissionGate>:null}
     {flow?<label>分支条件<Select value={condition} onChange={event=>setCondition(event.target.value)}><option value="">无条件</option><option value="true">批准</option><option value="false">拒绝</option></Select></label>:null}
     <Button label="应用属性" variant="primary" onClick={apply}/><small>填写后点击应用，再切换节点或保存草稿。</small>
   </div>;
