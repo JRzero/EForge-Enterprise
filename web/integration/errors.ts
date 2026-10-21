@@ -4,6 +4,16 @@ export class ApiError extends Error {
   }
 }
 function messageFor(status: number, code: string): string {
+  if(code==='PURCHASE_NOT_ACTIVATED')return '尚未启用采购审批流程，请联系流程管理员发布并激活采购流程。';
+  if(code==='PURCHASE_APPROVER_UNAVAILABLE')return '指定审批人已停用或无采购审批权限，请重新选择。';
+  if(code==='PURCHASE_CONFLICT')return '申请版本或命令内容已变化，请重新读取后操作。';
+  if(code==='PURCHASE_NOT_FOUND')return '采购申请不存在或当前账号无权查看。';
+  if(code==='PURCHASE_STORAGE_UNAVAILABLE')return '采购服务暂不可用，请保留当前内容后重试。';
+  if(code==='PURCHASE_BINDING_INVALID')return '采购流程必须采用单级指定审批人，请联系流程管理员检查模板。';
+  if(code==='PURCHASE_ATTACHMENT_LIMIT')return '每张采购申请最多 5 个附件。';
+  if(code==='PURCHASE_ATTACHMENT_INVALID')return '附件格式或大小无效，请选择不超过 5 MiB 的 PDF、PNG 或 JPEG。';
+  if(code==='PURCHASE_INVALID'||code==='PURCHASE_AMOUNT_INVALID')return '请检查采购标题、事由、明细和金额范围。';
+  if(code==='PURCHASE_ACTION_FAILED')return '采购操作未完成，请重新读取状态后重试。';
   if(code==='WORKFLOW_DISABLED')return '工作流尚未启用，请联系管理员。';
   if(code==='WORKFLOW_ASYNC_DISABLED')return '当前环境尚未启用异步任务创建或恢复。';
   if(code==='WORKFLOW_JOB_CONFLICT')return '作业或申请状态已变化，请刷新后重新核对。';

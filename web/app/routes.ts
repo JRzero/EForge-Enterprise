@@ -4,6 +4,9 @@ import contracts from './route-contract.json';
 import internalContracts from './internal-route-contract.json';
 import {DashboardPage} from '../features/dashboard/DashboardPage';
 import {lazy} from 'react';
+const PurchasesPage=lazy(()=>import('../features/purchases/PurchasesPage').then(module=>({default:module.PurchasesPage})));
+const purchases=contracts.find(route=>route.id==='sample-purchases');
+if(!purchases)throw new Error('Missing purchase route contract.');
 const WorkflowPackagesPage = lazy(() => import('../features/workflow/WorkflowPackagesPage').then(module => ({default: module.WorkflowPackagesPage})));
 const WorkflowPackageCreatePage = lazy(() => import('../features/workflow/WorkflowPackageCreatePage').then(module => ({default: module.WorkflowPackageCreatePage})));
 const workflowPackageCreate=internalContracts.find(route=>route.id==='workflow-package-create');
@@ -136,6 +139,8 @@ const baseRoutes: readonly AppRoute[] = defineAppRoutes([{
   id: workflowRequests.id, path: workflowRequests.path, title: '我发起的审批', access: {permission: workflowRequests.permission}, component: WorkflowRequestsPage
 }, {
   id: workflowTasks.id, path: workflowTasks.path, title: '审批任务', access: {permission: workflowTasks.permission}, component: WorkflowTasksPage
+}, {
+  id:purchases.id,path:purchases.path,title:'采购审批',access:{permission:purchases.permission},component:PurchasesPage
 }, {
   id: profile.id, path: profile.path, title: '个人中心', component: ProfilePage
 }, {

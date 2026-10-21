@@ -92,7 +92,7 @@ public final class WorkflowPackageStore implements WorkflowPackages {
             if (serialized.length() > 1048576) throw invalid();
             Edit edit = json.readValue(serialized, Edit.class);
             if (edit == null || edit.name() == null || edit.name().isBlank() || edit.name().length() > 128
-                || !"leave".equals(edit.businessType()) || edit.source() == null || edit.source().bpmnXml() == null
+                || !("leave".equals(edit.businessType()) || "purchase".equals(edit.businessType())) || edit.source() == null || edit.source().bpmnXml() == null
                 || edit.source().bpmnXml().isBlank() || edit.source().bpmnXml().length() > 262144 || edit.source().scenarios() == null
                 || edit.source().scenarios().size() > 20) throw invalid();
             for (var scenario : edit.source().scenarios()) {

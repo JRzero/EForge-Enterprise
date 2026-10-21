@@ -344,6 +344,89 @@ export type ServerMonitorResponse = {
     memory: MemoryMetrics;
     sampledAt: string;
 };
+export type PurchaseResponse = {
+    approverId: string;
+    createdAt: string;
+    id: string;
+    initiatorId: string;
+    processId?: string;
+    reason: string;
+    releaseId?: string;
+    revision: string;
+    status: string;
+    title: string;
+    total: string;
+};
+export type PageResponsePurchaseResponse = {
+    items: PurchaseResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type PurchaseItemRequest = {
+    id: string;
+    name: string;
+    quantity: string;
+    unit: string;
+    unitPrice: string;
+};
+export type PurchaseEditRequest = {
+    approverId: string;
+    items: PurchaseItemRequest[];
+    reason: string;
+    title: string;
+};
+export type PurchaseCreateRequest = {
+    commandId: string;
+    content: PurchaseEditRequest;
+};
+export type PurchaseApproverResponse = {
+    id: string;
+    name: string;
+};
+export type PageResponsePurchaseApproverResponse = {
+    items: PurchaseApproverResponse[];
+    page: number;
+    pageSize: number;
+    total: number;
+};
+export type PurchaseEventResponse = {
+    action: string;
+    actorId: string;
+    comment: string;
+    createdAt: string;
+};
+export type PurchaseItemResponse = {
+    amount: string;
+    id: string;
+    name: string;
+    quantity: string;
+    unit: string;
+    unitPrice: string;
+};
+export type PurchaseDetailResponse = {
+    history: PurchaseEventResponse[];
+    items: PurchaseItemResponse[];
+    purchase: PurchaseResponse;
+};
+export type PurchaseCommandRequest = {
+    commandId: string;
+    comment: string;
+    expectedRevision: string;
+};
+export type PurchaseUpdateRequest = {
+    command: PurchaseCommandRequest;
+    content: PurchaseEditRequest;
+};
+export type PurchaseAttachmentResponse = {
+    id: string;
+    name: string;
+    size: number;
+};
+export type PurchaseDecisionRequest = {
+    approved: boolean;
+    command: PurchaseCommandRequest;
+};
 export type DeleteConfigurationsRequest = {
     ids: string[];
 };
@@ -1762,6 +1845,139 @@ export function getServerMonitor(opts?: Oazapfts.RequestOpts) {
     }>("/api/v1/monitor/server", {
         ...opts
     });
+}
+export function listPurchases({ view, status, page, pageSize }: {
+    view?: string;
+    status?: string;
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponsePurchaseResponse;
+    }>(`/api/v1/samples/purchases${QS.query(QS.explode({
+        view,
+        status,
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function createPurchaseDraft(purchaseCreateRequest: PurchaseCreateRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 201;
+        data: PurchaseResponse;
+    }>("/api/v1/samples/purchases", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: purchaseCreateRequest
+    }));
+}
+export function listPurchaseApprovers({ query, page, pageSize }: {
+    query?: string;
+    page?: number;
+    pageSize?: number;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PageResponsePurchaseApproverResponse;
+    }>(`/api/v1/samples/purchases/approvers${QS.query(QS.explode({
+        query,
+        page,
+        pageSize
+    }))}`, {
+        ...opts
+    });
+}
+export function getPurchase(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseDetailResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function updatePurchaseDraft(id: string, purchaseUpdateRequest: PurchaseUpdateRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: purchaseUpdateRequest
+    }));
+}
+export function listPurchaseAttachments(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseAttachmentResponse[];
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/attachments`, {
+        ...opts
+    });
+}
+export function uploadPurchaseAttachment(id: string, commandId: string, expectedRevision: string, body?: {
+    file: Blob;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/attachments${QS.query(QS.explode({
+        commandId,
+        expectedRevision
+    }))}`, oazapfts.multipart({
+        ...opts,
+        method: "POST",
+        body
+    }));
+}
+export function downloadPurchaseAttachment(id: string, attachmentId: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: string;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}`, {
+        ...opts
+    });
+}
+export function removePurchaseAttachment(id: string, attachmentId: string, purchaseCommandRequest: PurchaseCommandRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}/removal`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: purchaseCommandRequest
+    }));
+}
+export function decidePurchase(id: string, purchaseDecisionRequest: PurchaseDecisionRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/decision`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: purchaseDecisionRequest
+    }));
+}
+export function submitPurchase(id: string, purchaseCommandRequest: PurchaseCommandRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/submission`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: purchaseCommandRequest
+    }));
+}
+export function withdrawPurchase(id: string, purchaseCommandRequest: PurchaseCommandRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: PurchaseResponse;
+    }>(`/api/v1/samples/purchases/${encodeURIComponent(id)}/withdrawal`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: purchaseCommandRequest
+    }));
 }
 export function deleteConfigurations(deleteConfigurationsRequest: DeleteConfigurationsRequest, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchText("/api/v1/system/configurations", oazapfts.json({

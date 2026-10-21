@@ -26,7 +26,7 @@ public class WorkflowPackageController {
     private final ObjectProvider<WorkflowPackages> packages;
     public WorkflowPackageController(ObjectProvider<WorkflowPackages> packages) { this.packages = packages; }
     public record WorkflowPackageRequest(@NotBlank @Size(max=128) String name,
-        @NotNull @Pattern(regexp="leave") String businessType, @NotNull @Valid WorkflowValidationRequest source) { }
+        @NotNull @Pattern(regexp="leave|purchase") String businessType, @NotNull @Valid WorkflowValidationRequest source) { }
     public record WorkflowPackageUpdateRequest(@NotNull @Pattern(regexp="[1-9][0-9]{0,18}") String expectedRevision,
         @NotNull @Valid WorkflowPackageRequest content) { }
     public record WorkflowRevisionRequest(@NotNull @Pattern(regexp="[1-9][0-9]{0,18}") String expectedRevision) { }
