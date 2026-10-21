@@ -1,5 +1,7 @@
 # 迭代任务索引
 
+2026-10-21：已将验收工作分支以快进方式合并到 main 并推送（11e9c6f），下文“未合并”均为阶段历史记录。统一 Windows 本地服务管理已实现并实测启动/重复启动/停止/重启、端口冲突与 PID 身份保护，见 [本地开发指南](../docs/local-development.md)。真实业务示例、生产部署与升级演练仍为后续建议，未标记完成。
+
 已完成：[框架可靠性与组件契约](framework-hardening.md)（done，2026-10-19），[规格](../spec/framework-hardening.md)、[最终验收](../docs/framework-hardening-final-audit.md)。H01–H13全部验收，最终后端9f6ae55的server39152321902四作业及技能检查成功；前端保持已验收c76c1cb源码。已推送工作分支，尚未合并main；表单构建器仍暂缓。
 
 已完成：[公共组件与页面模板抽象](shared-ui-abstraction.md)（done，2026-10-13），[规格](../spec/shared-ui-abstraction.md)、[验收](../docs/shared-ui-completion-audit.md)。完整组件及五类模板已接入实际消费者和示例；精确46da40a云端全绿，本地两配置各68真实浏览器及完整API通过，尚未合并main。

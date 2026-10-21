@@ -1,5 +1,7 @@
 # EForge Enterprise
 
+Windows 本地开发服务统一启动、停止与状态检查见 [本地开发指南](docs/local-development.md)。
+
 The React application is implemented under `web/`: login, captcha, session
 restore, bootstrap navigation, dashboard, 403/404 and confirmed logout. See
 [web setup and verification](web/README.md). EForge is consumed as pinned package
