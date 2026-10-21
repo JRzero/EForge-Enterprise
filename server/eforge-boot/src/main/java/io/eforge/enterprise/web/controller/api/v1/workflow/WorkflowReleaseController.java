@@ -42,11 +42,11 @@ public class WorkflowReleaseController {
     public WorkflowReleaseResponse get(@PathVariable @Pattern(regexp=UUID_PATTERN) String id){return response(service().get(id));}
     @GetMapping("/activations/{businessType}") @PreAuthorize("@ss.hasPermi('workflow:definition:list')")
     @Operation(operationId="getWorkflowActivation")
-    public WorkflowActivationResponse activation(@PathVariable @Pattern(regexp="leave") String businessType){return response(service().activation(businessType));}
+    public WorkflowActivationResponse activation(@PathVariable @Pattern(regexp="leave|purchase") String businessType){return response(service().activation(businessType));}
     @PutMapping("/activations/{businessType}") @PreAuthorize("@ss.hasPermi('workflow:definition:activate')")
     @Operation(operationId="activateWorkflowRelease")
     @Log(title="流程激活",businessType=BusinessType.UPDATE,isSaveRequestData=false,isSaveResponseData=false)
-    public WorkflowActivationResponse activate(@PathVariable @Pattern(regexp="leave") String businessType,
+    public WorkflowActivationResponse activate(@PathVariable @Pattern(regexp="leave|purchase") String businessType,
         @RequestBody @Valid WorkflowActivationRequest request){return response(service().activate(businessType,request.releaseId(),revision(request.expectedRevision()),actor()));}
     private WorkflowReleases service(){var result=releases.getIfAvailable();if(result==null)throw new ApiFailure(503,"WORKFLOW_DISABLED","工作流功能尚未启用。");return result;}
     private static String actor(){return Long.toString(SecurityUtils.getUserId());}

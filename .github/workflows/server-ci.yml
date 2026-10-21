@@ -123,6 +123,8 @@ jobs:
           ./server/scripts/verify-workflow-engine.ps1 -Releases -LowerCaseTableNames 1
           ./server/scripts/verify-workflow-engine.ps1 -Leaves -LowerCaseTableNames 0
           ./server/scripts/verify-workflow-engine.ps1 -Leaves -LowerCaseTableNames 1
+          ./server/scripts/verify-workflow-engine.ps1 -Purchases -LowerCaseTableNames 0
+          ./server/scripts/verify-workflow-engine.ps1 -Purchases -LowerCaseTableNames 1
           ./server/scripts/verify-workflow-engine.ps1 -Jobs -LowerCaseTableNames 0
           ./server/scripts/verify-workflow-engine.ps1 -Jobs -LowerCaseTableNames 1
 

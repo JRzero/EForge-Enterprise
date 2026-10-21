@@ -44,12 +44,14 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
                 if(draft.validatedRevision()==null||draft.validatedRevision()!=expectedRevision)
                     throw new ApiFailure(409,"WORKFLOW_PROOF_REQUIRED","请先校验当前流程包版本。");
                 var checked=WorkflowBpmnPolicy.validate(draft.source().bpmnXml());
-                candidates(checked.xml());
+                if(draft.businessType().equals("purchase"))io.eforge.enterprise.workflow.purchase.PurchaseProcessBinding.requireProof(draft.source());
+                candidates(checked.xml(),draft.businessType());
                 var stored=jdbc.queryForMap("select source_json,validation_json from ef_workflow_package where id=?",packageId);
                 var deployment=engine.getRepositoryService().createDeployment().name(draft.name()).addString(resource,checked.xml()).deploy();
                 var definition=engine.getRepositoryService().createProcessDefinitionQuery().deploymentId(deployment.getId()).singleResult();
-                // The only registered business binding is leave; reject unusable outcome mapping before publication commits.
-                WorkflowLeaveService.requireLeaveBinding(engine,definition.getId());
+                if(draft.businessType().equals("purchase"))
+                    io.eforge.enterprise.workflow.purchase.PurchaseProcessBinding.require(engine,definition.getId());
+                else WorkflowLeaveService.requireLeaveBinding(engine,definition.getId());
                 String id=UUID.randomUUID().toString();var now=Timestamp.from(Instant.now());
                 jdbc.update("insert into ef_workflow_release (id,package_id,package_revision,name,business_type,content_digest,source_json,validation_json,definition_id,deployment_id,published_by,published_at) values (?,?,?,?,?,?,?,?,?,?,?,?)",
                     id,packageId,expectedRevision,draft.name(),draft.businessType(),draft.contentDigest(),stored.get("source_json"),stored.get("validation_json"),definition.getId(),deployment.getId(),actor,now);
@@ -78,7 +80,8 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
             WorkflowValidation.Request request;
             try {request=json.readValue(source,WorkflowValidation.Request.class);}
             catch(Exception failure){throw new ApiFailure(500,"WORKFLOW_RELEASE_STORAGE","已发布流程内容不可读取。");}
-            candidates(WorkflowBpmnPolicy.validate(request.bpmnXml()).xml());
+            candidates(WorkflowBpmnPolicy.validate(request.bpmnXml()).xml(),businessType);
+            if(businessType.equals("purchase"))io.eforge.enterprise.workflow.purchase.PurchaseProcessBinding.require(engine,release.processDefinitionId());
             int changed=jdbc.update("update ef_workflow_activation set release_id=?,revision=revision+1,updated_by=?,updated_at=? where business_type=? and revision=?",
                 releaseId,actor,Timestamp.from(Instant.now()),businessType,expectedRevision);
             if(changed!=1)throw conflict();
@@ -104,7 +107,7 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
         jdbc.update("insert into ef_workflow_release_audit (id,release_id,action,actor_id,activation_revision,created_at) values (?,?,?,?,?,?)",
             UUID.randomUUID().toString(),release,action,actor,revision,Timestamp.from(Instant.now()));
     }
-    private void candidates(String xml) {
+    private void candidates(String xml,String businessType) {
         try {
             var factory=DocumentBuilderFactory.newInstance();factory.setNamespaceAware(true);
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
@@ -114,7 +117,10 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
             for(int i=0;i<tasks.getLength();i++) {
                 var task=(Element)tasks.item(i);String ns="http://flowable.org/bpmn";
                 String assignee=task.getAttributeNS(ns,"assignee"),users=task.getAttributeNS(ns,"candidateUsers"),groups=task.getAttributeNS(ns,"candidateGroups");
-                if(assignee.equals("${approver}"))throw new ApiFailure(409,"WORKFLOW_BINDING_REQUIRED","请先配置已注册的审批人绑定。");
+                if(assignee.equals("${approver}")){
+                    if(businessType.equals("purchase"))continue;
+                    throw new ApiFailure(409,"WORKFLOW_BINDING_REQUIRED","请先配置已注册的审批人绑定。");
+                }
                 if(!assignee.isEmpty())users=assignee;
                 if(!users.isEmpty())for(String user:users.split(",")) {
                     if(jdbc.queryForObject("select count(*) from sys_user where user_id=? and status='0' and del_flag='0'",Long.class,user)!=1)throw unavailable();
@@ -146,7 +152,7 @@ public final class WorkflowReleaseStore implements WorkflowReleases {
     }
     private static void identity(String id){if(id==null||!id.matches("[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}"))throw invalid();}
     private static void actor(String actor){if(actor==null||!actor.matches("[1-9][0-9]{0,18}"))throw invalid();}
-    private static void business(String business){if(!"leave".equals(business))throw invalid();}
+    private static void business(String business){if(!"leave".equals(business)&&!"purchase".equals(business))throw invalid();}
     private static ApiFailure invalid(){return new ApiFailure(400,"WORKFLOW_RELEASE_INVALID","流程发布参数无效。");}
     private static ApiFailure missing(){return new ApiFailure(404,"WORKFLOW_RELEASE_NOT_FOUND","流程包或发布记录不存在。");}
     private static ApiFailure conflict(){return new ApiFailure(409,"WORKFLOW_RELEASE_CONFLICT","流程版本已变化，请重新读取后重试。");}

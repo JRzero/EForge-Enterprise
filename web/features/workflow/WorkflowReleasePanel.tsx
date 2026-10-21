@@ -21,11 +21,11 @@ export function WorkflowReleasePanel({draft,onClose}:{draft:WorkflowPackageRespo
   useEffect(()=>{
     const controller=new AbortController();setLoading(true);setError('');setData(null);setActivation(null);setSelected(null);
     if(!draft.id){setError('流程标识缺失，请重新打开。');setLoading(false);return;}
-    Promise.all([api.listWorkflowReleases(draft.id,{page,pageSize},controller.signal),api.getWorkflowActivation(controller.signal)])
+    Promise.all([api.listWorkflowReleases(draft.id,{page,pageSize},controller.signal),api.getWorkflowActivation(controller.signal,draft.businessType)])
       .then(([rows,active])=>{if(!controller.signal.aborted){setData(rows);setActivation(active);setLoading(false);}})
       .catch(cause=>{if(!controller.signal.aborted){setError(errorMessage(cause));setLoading(false);}});
     return()=>controller.abort();
-  },[api,draft.id,page,pageSize,version]);
+  },[api,draft.id,draft.businessType,page,pageSize,version]);
   const columns=useMemo<ColumnDef<WorkflowReleaseResponse>[]>(()=>[
     {accessorKey:'packageRevision',header:'发布版本'},
     {accessorKey:'name',header:'流程名称'},
@@ -40,7 +40,7 @@ export function WorkflowReleasePanel({draft,onClose}:{draft:WorkflowPackageRespo
   ],[activation,baseline,busy,loading]);
   async function activate(){
     if(busy||!selected?.id||!activation?.revision)return;setBusy(true);setError('');
-    try{await api.activateWorkflowRelease({releaseId:selected.id,expectedRevision:activation.revision});setSelected(null);setFeedback('已激活，新申请将使用所选版本。');setVersion(value=>value+1);}
+    try{await api.activateWorkflowRelease({releaseId:selected.id,expectedRevision:activation.revision},draft.businessType);setSelected(null);setFeedback('已激活，新申请将使用所选版本。');setVersion(value=>value+1);}
     catch(cause){setError(errorMessage(cause));}finally{setBusy(false);}
   }
   return <ResourceDialog titleId="workflow-releases-title" busy={busy} onCancel={onClose}>

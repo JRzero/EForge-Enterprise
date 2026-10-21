@@ -1,4 +1,5 @@
 import {unlockScreen,type UnlockScreenRequestWrite} from '../generated/api';
+import {purchaseApi} from './purchases';
 import {submitWorkflowLeave,listMyWorkflowLeaves,listHandledWorkflowLeaves,listPendingWorkflowLeaves,getWorkflowLeave,
   claimWorkflowLeaveTask,decideWorkflowLeaveTask,withdrawWorkflowLeave,type LeaveSubmitRequest,type LeaveCommandRequest,type LeaveDecisionRequest,
   getWorkflowStatus,listWorkflowPackages,getWorkflowPackage,createWorkflowPackage,updateWorkflowPackage,
@@ -66,6 +67,7 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     };
   }
   return {
+    ...purchaseApi(()=>transport(true)),
     async getWorkflowStatus(signal?:AbortSignal){return (await getWorkflowStatus({baseUrl:'',fetch:transport(true),signal})).data;},
     async submitWorkflowLeave(body:LeaveSubmitRequest){return (await submitWorkflowLeave(body,{baseUrl:'',fetch:transport(true)})).data;},
     async listMyWorkflowLeaves(query:Parameters<typeof listMyWorkflowLeaves>[0],signal?:AbortSignal){return (await listMyWorkflowLeaves(query,{baseUrl:'',fetch:transport(true),signal})).data;},
@@ -82,8 +84,8 @@ export function createApi(auth: AuthStore<UserSummary>, fetcher: typeof fetch = 
     async validateWorkflowPackage(id:string,expectedRevision:string){return (await validateWorkflowPackage(id,{expectedRevision},{baseUrl:'',fetch:transport(true,60000)})).data;},
     async listWorkflowReleases(id:string,query:Parameters<typeof listWorkflowReleases>[1],signal?:AbortSignal){return (await listWorkflowReleases(id,query,{baseUrl:'',fetch:transport(true),signal})).data;},
     async publishWorkflowPackage(id:string,expectedRevision:string){return (await publishWorkflowPackage(id,{expectedRevision},{baseUrl:'',fetch:transport(true,60000)})).data;},
-    async getWorkflowActivation(signal?:AbortSignal){return (await getWorkflowActivation('leave',{baseUrl:'',fetch:transport(true),signal})).data;},
-    async activateWorkflowRelease(body:WorkflowActivationRequest){return (await activateWorkflowRelease('leave',body,{baseUrl:'',fetch:transport(true)})).data;},
+    async getWorkflowActivation(signal?:AbortSignal,businessType='leave'){return (await getWorkflowActivation(businessType,{baseUrl:'',fetch:transport(true),signal})).data;},
+    async activateWorkflowRelease(body:WorkflowActivationRequest,businessType='leave'){return (await activateWorkflowRelease(businessType,body,{baseUrl:'',fetch:transport(true)})).data;},
     async compareWorkflowPackage(id:string,baselineId:string,query:Parameters<typeof compareWorkflowPackage>[2],signal?:AbortSignal){return (await compareWorkflowPackage(id,baselineId,query,{baseUrl:'',fetch:transport(true),signal})).data;},
     async listFailedWorkflowJobs(id:string,query:Parameters<typeof listFailedWorkflowJobs>[1],signal?:AbortSignal){return (await listFailedWorkflowJobs(id,query,{baseUrl:'',fetch:transport(true),signal})).data;},
     async retryWorkflowJob(id:string,request:WorkflowJobRetryRequest){return (await retryWorkflowJob(id,request,{baseUrl:'',fetch:transport(true)})).data;},

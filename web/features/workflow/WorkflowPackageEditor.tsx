@@ -9,9 +9,10 @@ import {ResourceDialog} from '../../app/components/ResourceDialog';
 import {useDiscardChanges,usePageDraft} from '../../app/useDraftProtection';
 import {PageForm,FormSection} from '../../ui/FormPage';
 import {Input,Button} from '../../ui/controls';
-import {TextareaControl,NativeInput} from '../../ui/native';
+import {TextareaControl,NativeInput,Select} from '../../ui/native';
 import {errorMessage} from '../../integration/errors';
 import exampleXml from '../../../workflows/leave-approval/process.bpmn20.xml?raw';
+import purchaseXml from '../../../workflows/purchase-approval/process.bpmn20.xml?raw';
 
 const exampleScenarios:WorkflowScenarioRequest[]=[
   {name:'批准',decisions:[{taskKey:'review',approved:true}],expectedEnd:'approvedEnd'},
@@ -20,7 +21,7 @@ const exampleScenarios:WorkflowScenarioRequest[]=[
 const Designer=lazy(()=>import('./WorkflowDesigner').then(module=>({default:module.WorkflowDesigner})));
 export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draft:WorkflowPackageResponse|null;onClose:()=>void;onSaved:()=>void;asPage?:boolean}){
   const api=useApi();
-  const [initial]=useState(()=>({name:draft?.name??'请假审批',xml:draft?.source?.bpmnXml??exampleXml,
+  const [initial]=useState(()=>({name:draft?.name??'请假审批',businessType:draft?.businessType??'leave',xml:draft?.source?.bpmnXml??exampleXml,
     scenarios:JSON.stringify(draft?.source?.scenarios??exampleScenarios,null,2)}));
   const [form,setForm]=useState(initial),[busy,setBusy]=useState(false),[error,setError]=useState('');
   const [fieldErrors,setFieldErrors]=useState<FormErrorItem[]>([]),summary=useRef<HTMLElement>(null),advanced=useRef<HTMLDetailsElement>(null),scenarioInput=useRef<HTMLTextAreaElement>(null),scenarioId=useId();
@@ -54,7 +55,7 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
     try{
       const xml=visual?await designer.current!.save():form.xml;
       if(visual)setForm(current=>({...current,xml}));
-      const content={name:form.name,businessType:'leave',source:{bpmnXml:xml,scenarios}};
+      const content={name:form.name,businessType:form.businessType,source:{bpmnXml:xml,scenarios}};
       if(draft){if(!draft.id||!draft.revision)throw new Error('流程版本缺失，请重新打开。');await api.updateWorkflowPackage(draft.id,{expectedRevision:draft.revision,content});}
       else await api.createWorkflowPackage(content);
       pageDraft.setDirty(false);finishSave();onSaved();
@@ -68,11 +69,16 @@ export function WorkflowPackageEditor({draft,onClose,onSaved,asPage=false}:{draf
         if(target.scope!=='advanced'||target.field!=='scenarios'||busy||!advanced.current||!scenarioInput.current)return;
         advanced.current.open=true;scenarioInput.current.focus();
       }}/>
-      <FormSection title="基本信息"><Input label="流程名称" value={form.name} isDisabled={busy} aria-required="true" onChange={name=>setForm({...form,name})}/><p>业务：请假审批{draft?.revision?` · 当前草稿版本 ${draft.revision}`:''}</p></FormSection>
+      <FormSection title="基本信息"><Input label="流程名称" value={form.name} isDisabled={busy} aria-required="true" onChange={name=>setForm({...form,name})}/>
+        <FormField label="审批业务" hint="选择业务会载入对应模板；开始编辑后不可切换，请重新新增流程包。">{control=><Select {...control} value={form.businessType} disabled={busy||!!draft||diagramDirty||form.name!==initial.name||form.xml!==initial.xml||form.scenarios!==initial.scenarios} onChange={event=>{
+          const businessType=event.target.value;setReady(false);setForm(current=>({...current,businessType,name:businessType==='purchase'?'采购审批':'请假审批',xml:businessType==='purchase'?purchaseXml:exampleXml}));
+        }}><option value="leave">请假审批</option><option value="purchase">采购审批 · 单级指定审批人</option></Select>}</FormField>
+        {form.businessType==='purchase'&&<p>采购采用一个同步人工任务，审批对象保持 {'${approver}'}，批准和拒绝分别进入 approvedEnd、rejectedEnd。</p>}
+      </FormSection>
       <FormSection title="流程设计">
         <p className="workflow-editor-intro">添加节点 → 选择节点配置审批 → 连接下一步</p>
         <div className="workflow-designer-toolbar"><Button label={visual?'返回 XML 源码':'可视化设计'} variant="primary" isDisabled={busy} onClick={()=>{void toggle();}}/><Button label="导出 BPMN" variant="secondary" isDisabled={busy||visual&&!ready} onClick={()=>{void exportXml();}}/></div>
-        {visual?<Suspense fallback={<p role="status">正在加载设计器…</p>}><Designer ref={designer} initialXml={form.xml} onDirty={markDiagramDirty} onReady={markReady} disabled={busy}/></Suspense>:<><label>流程文件<TextareaControl aria-label="流程文件" required maxLength={262144} rows={12} value={form.xml} disabled={busy} onChange={event=>setForm({...form,xml:event.target.value})}/></label><label>导入 BPMN 文件<NativeInput type="file" accept=".bpmn,.xml" disabled={busy} onChange={event=>{
+        {visual?<Suspense fallback={<p role="status">正在加载设计器…</p>}><Designer key={form.businessType} ref={designer} initialXml={form.xml} onDirty={markDiagramDirty} onReady={markReady} disabled={busy}/></Suspense>:<><label>流程文件<TextareaControl aria-label="流程文件" required maxLength={262144} rows={12} value={form.xml} disabled={busy} onChange={event=>setForm({...form,xml:event.target.value})}/></label><label>导入 BPMN 文件<NativeInput type="file" accept=".bpmn,.xml" disabled={busy} onChange={event=>{
           const file=event.target.files?.[0];event.target.value='';if(!file||busy)return;setError('');
           if(file.size>1048576){setError('文件过大。');return;}setBusy(true);
           void file.text().then(xml=>{prepareDiagram(xml);setForm(current=>({...current,xml}));}).catch(()=>setError('导入失败：请检查 BPMN 文件，原草稿内容已保留。')).finally(()=>setBusy(false));

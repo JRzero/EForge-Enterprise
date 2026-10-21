@@ -12,6 +12,11 @@ import org.springframework.core.io.Resource;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "flowable.process.enabled", havingValue = "true")
 public class WorkflowEngineConfiguration {
+    @Bean
+    io.eforge.enterprise.workflow.api.WorkflowPurchases workflowPurchases(javax.sql.DataSource source,
+        io.eforge.enterprise.workflow.api.WorkflowUnitOfWork transactions,org.flowable.engine.ProcessEngine engine) {
+        return new io.eforge.enterprise.workflow.purchase.PurchaseService(source,transactions,engine);
+    }
     @Bean @org.flowable.spring.boot.process.Process
     org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor workflowJobTaskExecutor() {
         var executor=new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();

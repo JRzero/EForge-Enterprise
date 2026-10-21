@@ -1,5 +1,7 @@
 # 迭代任务索引
 
+进行中：[采购审批示例](purchase-approval-sample.md)，[规格](../spec/purchase-approval-sample.md)。用户确认单级指定审批人，目标是完整申请/明细/附件/审批/审计闭环，非表单构建器。
+
 2026-10-21：已将验收工作分支以快进方式合并到 main 并推送（11e9c6f），下文“未合并”均为阶段历史记录。统一 Windows 本地服务管理已实现并实测启动/重复启动/停止/重启、端口冲突与 PID 身份保护，见 [本地开发指南](../docs/local-development.md)。真实业务示例、生产部署与升级演练仍为后续建议，未标记完成。
 
 已完成：[框架可靠性与组件契约](framework-hardening.md)（done，2026-10-19），[规格](../spec/framework-hardening.md)、[最终验收](../docs/framework-hardening-final-audit.md)。H01–H13全部验收，最终后端9f6ae55的server39152321902四作业及技能检查成功；前端保持已验收c76c1cb源码。已推送工作分支，尚未合并main；表单构建器仍暂缓。
